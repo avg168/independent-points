@@ -1,0 +1,58 @@
+
+name: IPT Contract Compile
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compile:
+    name: Compile Independent Points
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Check contract file
+        run: |
+          if [ ! -f contracts/IndependentPoints.sol ]; then
+            echo "ERROR: IndependentPoints.sol not found."
+            echo "Please upload the contract to contracts/ first."
+            exit 1
+          fi
+
+      - name: Install Solidity compiler
+        run: |
+          mkdir -p "$RUNNER_TEMP/ipt-compiler"
+          cd "$RUNNER_TEMP/ipt-compiler"
+          npm init -y
+          npm install --save-exact --no-audit --no-fund \
+            solc@0.8.24 \
+            @openzeppelin/contracts@5.2.0
+
+      - name: Compile IPT contract
+        run: |
+          mkdir -p "$RUNNER_TEMP/ipt-artifacts"
+
+          "$RUNNER_TEMP/ipt-compiler/node_modules/.bin/solcjs" \
+            --base-path . \
+            --include-path "$RUNNER_TEMP/ipt-compiler/node_modules" \
+            --bin \
+            --abi \
+            --output-dir "$RUNNER_TEMP/ipt-artifacts" \
+            contracts/IndependentPoints.sol
+
+      - name: Upload compiled contract
+        uses: actions/upload-artifact@v4
+        with:
+          name: IPT-Compiled-Contract
+          path: ${{ runner.temp }}/ipt-artifacts/
+          if-no-files-found: error
