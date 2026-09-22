@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>IPT Sepolia ETH 轉帳工具 V1.1</title>
+<style>
+:root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif}
+body{margin:0;background:#f5f7fb;color:#172033}
+.hero{background:#102238;color:#fff;padding:26px 22px;border-radius:0 0 28px 28px}
+.wrap{max-width:720px;margin:auto;padding:18px}
+h1{font-size:27px;margin:0 0 8px}.sub{opacity:.86;line-height:1.6}
+.card{background:#fff;margin-top:18px;padding:22px;border-radius:22px;box-shadow:0 4px 18px #00000010}
+.row{padding:12px 0;border-bottom:1px solid #e8ebf1}
+.label{font-size:14px;color:#6c7482;margin-bottom:5px}
+.value{font-size:16px;word-break:break-all;font-weight:650}
+.ok,.warn,.err{padding:14px;border-radius:12px;margin:14px 0}
+.ok{background:#e8f8ef;border-left:5px solid #1ca66a}
+.warn{background:#fff6df;border-left:5px solid #dc9700}
+.err{background:#ffeaea;border-left:5px solid #d23a3a}
+button{width:100%;border:0;border-radius:15px;padding:17px;font-size:18px;font-weight:700;margin-top:12px}
+.primary{background:#246bda;color:#fff}.send{background:#174fbb;color:#fff}.send:disabled{opacity:.45}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.small{font-size:13px;color:#707889;line-height:1.55;margin-top:14px}
+</style>
+</head>
+<body>
+<div class="hero">
+  <h1>IPT｜Sepolia ETH 轉帳 V1.1</h1>
+  <div class="sub">
+    從目前連接的 Test Wallet 轉 0.04 Sepolia ETH 到 IPT Sepolia Deployer。<br>
+    不修改 ABI／BIN，不部署合約。
+  </div>
+</div>
+
+<div class="wrap">
+<div class="card">
+  <div class="row">
+    <div class="label">目前來源錢包</div>
+    <div class="value" id="fromView">尚未連接</div>
+  </div>
+  <div class="row">
+    <div class="label">固定收款錢包</div>
+    <div class="value">0x09997702F8D33DFb538819E0520908b16B9A29d6</div>
+  </div>
+  <div class="row">
+    <div class="label">固定轉帳金額</div>
+    <div class="value">0.04 ETH</div>
+  </div>
+  <div class="row">
+    <div class="label">要求網路</div>
+    <div class="value">Ethereum Sepolia｜0xaa36a7</div>
+  </div>
+
+  <div id="status" class="warn">尚未連接 Trust Wallet。</div>
+
+  <button class="primary" id="connectBtn">1｜連接 Trust Wallet</button>
+  <button class="send" id="sendBtn" disabled>2｜送出 0.04 Sepolia ETH</button>
+
+  <div class="small">
+    安全檢查：必須在 Ethereum Sepolia；來源不能等於 Deployer；
+    來源餘額必須至少 0.04 ETH。送出前仍會由 Trust Wallet 顯示交易確認畫面。
+  </div>
+</div>
+</div>
+
+<script>
+const TO = '0x09997702F8D33DFb538819E0520908b16B9A29d6';
+const SEPOLIA = '0xaa36a7';
+const VALUE_WEI = 40000000000000000n;
+const VALUE_HEX = '0x8e1bc9bf040000';
+
+let provider = null;
+let activeAccount = null;
+
+const fromView = document.getElementById('fromView');
+const statusEl = document.getElementById('status');
+const sendBtn = document.getElementById('sendBtn');
+
+function setStatus(type, html){
+  statusEl.className = type;
+  statusEl.innerHTML = html;
+}
+
+function getProvider(){
+  return (window.trustwallet && window.trustwallet.ethereum) || window.ethereum || null;
+}
+
+async function refresh(){
+  provider = getProvider();
+
+  if(!provider){
+    fromView.textContent = '找不到錢包';
+    setStatus('err','找不到 Trust Wallet DApp Provider。請在 Trust Wallet 內建瀏覽器開啟。');
+    sendBtn.disabled = true;
+    return false;
+  }
+
+  const accounts = await provider.request({method:'eth_accounts'});
+  const chainId = await provider.request({method:'eth_chainId'});
+  activeAccount = accounts && accounts[0] ? accounts[0] : null;
+  fromView.textContent = activeAccount || '尚未授權';
+
+  if(!activeAccount){
+    setStatus('warn','尚未取得帳戶。請按「連接 Trust Wallet」。');
+    sendBtn.disabled = true;
+    return false;
+  }
+
+  if(chainId.toLowerCase() !== SEPOLIA){
+    setStatus('err',
+      '網路不正確。<br>目前 Chain ID：<code>'+chainId+'</code><br>'+
+      '必須是 Ethereum Sepolia：<code>'+SEPOLIA+'</code>');
+    sendBtn.disabled = true;
+    return false;
+  }
+
+  if(activeAccount.toLowerCase() === TO.toLowerCase()){
+    setStatus('err',
+      '目前連到的是 IPT Sepolia Deployer。<br>'+
+      '請切回有 0.05 ETH 的 Test Wallet，再重新連接。');
+    sendBtn.disabled = true;
+    return false;
+  }
+
+  const balanceHex = await provider.request({
+    method:'eth_getBalance',
+    params:[activeAccount,'latest']
+  });
+  const balanceWei = BigInt(balanceHex);
+  const balanceEth = Number(balanceWei) / 1e18;
+
+  if(balanceWei < VALUE_WEI){
+    setStatus('err',
+      '來源餘額不足。<br>目前約：<b>'+balanceEth.toFixed(6)+' ETH</b><br>'+
+      '需要至少 0.04 ETH，另外還要保留少量 Gas。');
+    sendBtn.disabled = true;
+    return false;
+  }
+
+  setStatus('ok',
+    '✓ 已連接來源錢包<br>'+
+    '✓ Ethereum Sepolia（<code>'+chainId+'</code>）<br>'+
+    '✓ 目前餘額：約 <b>'+balanceEth.toFixed(6)+' ETH</b><br>'+
+    '✓ 收款地址已固定為 IPT Sepolia Deployer');
+  sendBtn.disabled = false;
+  return true;
+}
+
+document.getElementById('connectBtn').onclick = async () => {
+  try{
+    provider = getProvider();
+    if(!provider) throw new Error('找不到 Trust Wallet DApp Provider');
+    await provider.request({method:'eth_requestAccounts'});
+    await refresh();
+  }catch(e){
+    setStatus('err','連接失敗：'+(e?.message || e));
+  }
+};
+
+sendBtn.onclick = async () => {
+  try{
+    const ok = await refresh();
+    if(!ok) return;
+
+    sendBtn.disabled = true;
+    setStatus('warn',
+      '正在開啟 Trust Wallet 交易確認畫面。<br>'+
+      '請確認：0.04 ETH、收款 0x099977...A29d6、Sepolia 後再核准。');
+
+    const txHash = await provider.request({
+      method:'eth_sendTransaction',
+      params:[{
+        from: activeAccount,
+        to: TO,
+        value: VALUE_HEX
+      }]
+    });
+
+    setStatus('ok',
+      '✓ 交易已送出。<br>交易雜湊：<code>'+txHash+'</code><br>'+
+      '請稍候，再到 Deployer 查詢 Sepolia 餘額。');
+  }catch(e){
+    sendBtn.disabled = false;
+    setStatus('err','交易未送出／被拒絕：'+(e?.message || e));
+  }
+};
+
+const p = getProvider();
+if(p && p.on){
+  p.on('accountsChanged', refresh);
+  p.on('chainChanged', refresh);
+}
+</script>
+</body>
+</html>
