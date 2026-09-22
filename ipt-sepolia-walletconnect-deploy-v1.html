@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>IPT Sepolia WalletConnect 部署 V1</title>
+<style>
+:root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;color:#172033}
+*{box-sizing:border-box} body{margin:0;background:#f5f7fb}
+header{background:#102238;color:#fff;padding:24px 20px;border-radius:0 0 26px 26px}
+main{max-width:760px;margin:auto;padding:18px 15px 80px}
+h1{font-size:1.5rem;margin:0 0 8px} h2{font-size:1.1rem;margin:0 0 12px}
+section{background:#fff;border:1px solid #dce2eb;border-radius:18px;padding:17px;margin:16px 0}
+.row{padding:10px 0;border-bottom:1px solid #edf0f4}
+.addr,code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;overflow-wrap:anywhere;word-break:break-word}
+.ok,.warn,.err{padding:13px;border-radius:11px;line-height:1.65;margin:12px 0}
+.ok{background:#e8faee;border-left:5px solid #19834f}
+.warn{background:#fff5d9;border-left:5px solid #d49a11}
+.err{background:#ffeaea;border-left:5px solid #c52d2d}
+button{width:100%;border:0;border-radius:13px;padding:16px;font:inherit;font-weight:750;margin:8px 0}
+.blue{background:#1763dc;color:#fff}.purple{background:#5d56d8;color:#fff}.green{background:#17856d;color:#fff}.red{background:#a43a21;color:#fff}
+button:disabled{opacity:.45}
+label{display:block;line-height:1.6;margin:12px 0}
+input[type=checkbox]{width:21px;height:21px;vertical-align:middle;margin-right:8px}
+.small{font-size:.84rem;color:#687386;line-height:1.6}
+#log{white-space:pre-wrap;overflow-wrap:anywhere;background:#eef2f7;padding:12px;border-radius:10px;min-height:70px;font:.85rem ui-monospace,monospace}
+a{color:#0a56bd}
+</style>
+</head>
+<body>
+<header>
+<h1>IPT｜Sepolia WalletConnect 部署 V1</h1>
+<div>Trust Wallet × WalletConnect｜原 BIN 不重編譯｜Ethereum Sepolia</div>
+</header>
+<main>
+<section>
+<h2>固定部署資料</h2>
+<div class="row"><b>Deployer</b><div class="addr">0x09997702F8D33DFb538819E0520908b16B9A29d6</div></div>
+<div class="row"><b>initialOwner</b><div class="addr">0xfEDF5073E6664cb0a11Cc9954AE3d1CF6F554BC4</div></div>
+<div class="row"><b>Network</b><div>Ethereum Sepolia｜11155111｜0xaa36a7</div></div>
+<div class="row"><b>WalletConnect Project ID</b><div class="addr">80a61b62ea34b975d7d27a037fc55fa8</div></div>
+<div class="row"><b>原 BIN SHA-256 標記</b><div class="addr">9bc78eeeb7771e45bb44b00153c3b9608d2e5ded3ac42111b0d5525a91d90984</div></div>
+<div class="warn">本頁不編譯 Solidity。BYTECODE 直接從同站 <code>ipt-sepolia-deploy-v1.3.html</code> 讀取並核對既有 BIN 標記。</div>
+</section>
+
+<section>
+<h2>1｜WalletConnect 連 Trust Wallet</h2>
+<div id="wcState" class="warn">尚未連線。</div>
+<button id="connectBtn" class="blue">開啟 WalletConnect</button>
+<button id="disconnectBtn" class="purple" disabled>中斷 WalletConnect</button>
+<p class="small">請選 Trust Wallet，並確認帳戶一定是 IPT Sepolia Deployer。</p>
+</section>
+
+<section>
+<h2>2｜原 BIN＋PublicNode 預檢</h2>
+<button id="preflightBtn" class="green" disabled>讀取 V1.3 原 BIN並預估部署 Gas</button>
+<div id="preflightResult" class="warn">尚未預檢。</div>
+</section>
+
+<section>
+<h2>3｜正式建立合約</h2>
+<label><input type="checkbox" id="agree" disabled>我已逐字確認 Deployer、initialOwner、Sepolia、原 BIN 與預估 Gas；現在才同意由 Trust Wallet 核准建立合約。</label>
+<button id="deployBtn" class="red" disabled>由 Trust Wallet 核准建立合約</button>
+<div id="deployResult" class="warn">尚未送出部署交易。</div>
+<p class="small">Trust Wallet 正常應顯示：Sepolia、建立合約／Smart Contract Call、0 ETH，只收 Gas。若出現其他收款地址、主網、代幣授權或轉出真實資產，請拒絕。</p>
+</section>
+
+<section>
+<h2>紀錄</h2>
+<div id="log">尚未開始。</div>
+</section>
+</main>
+
+<script type="module">
+import { EthereumProvider } from "https://esm.sh/@walletconnect/ethereum-provider@2.25.0?bundle";
+
+const PROJECT_ID="80a61b62ea34b975d7d27a037fc55fa8";
+const EXPECTED_DEPLOYER="0x09997702F8D33DFb538819E0520908b16B9A29d6";
+const OWNER="0xfEDF5073E6664cb0a11Cc9954AE3d1CF6F554BC4";
+const CHAIN_ID=11155111;
+const RPC="https://ethereum-sepolia-rpc.publicnode.com";
+const EXPLORER="https://sepolia.etherscan.io";
+const BIN_HASH="9bc78eeeb7771e45bb44b00153c3b9608d2e5ded3ac42111b0d5525a91d90984";
+
+let wc=null, account="", bytecode="", deployData="", gasLimitHex="", preflightOK=false;
+const $=id=>document.getElementById(id);
+const same=(a,b)=>String(a||"").toLowerCase()===String(b||"").toLowerCase();
+const hex=n=>"0x"+BigInt(n).toString(16);
+const eth=n=>(Number(BigInt(n))/1e18).toFixed(8);
+const gwei=n=>(Number(BigInt(n))/1e9).toFixed(4);
+const log=s=>$("log").textContent=s+"\n"+$("log").textContent;
+
+async function publicRpc(method,params=[]){
+  const ctl=new AbortController(), timer=setTimeout(()=>ctl.abort(),15000);
+  try{
+    const r=await fetch(RPC,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({jsonrpc:"2.0",id:1,method,params}),signal:ctl.signal});
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    const j=await r.json();
+    if(j.error) throw new Error(j.error.message||JSON.stringify(j.error));
+    return j.result;
+  } finally { clearTimeout(timer); }
+}
+
+async function loadOriginalBytecode(){
+  const r=await fetch("./ipt-sepolia-deploy-v1.3.html?wc_source="+Date.now(),{cache:"no-store"});
+  if(!r.ok) throw new Error("讀取 V1.3 失敗：HTTP "+r.status);
+  const t=await r.text();
+  const mb=t.match(/const\s+BYTECODE\s*=\s*'([^']+)'/);
+  const mh=t.match(/const\s+BIN_SHA256\s*=\s*'([^']+)'/);
+  const md=t.match(/const\s+EXPECTED_DEPLOYER\s*=\s*'([^']+)'/);
+  if(!mb||!mh||!md) throw new Error("無法解析 V1.3 BYTECODE／HASH／Deployer");
+  if(mh[1]!==BIN_HASH) throw new Error("BIN SHA-256 標記不符，停止");
+  if(!same(md[1],EXPECTED_DEPLOYER)) throw new Error("V1.3 Deployer 不符，停止");
+  if(!/^0x[0-9a-fA-F]+$/.test(mb[1])) throw new Error("BYTECODE 格式不正確");
+  bytecode=mb[1];
+}
+
+function buildDeployData(){
+  if(!bytecode) throw new Error("尚未載入 BYTECODE");
+  if(!/^0x[0-9a-fA-F]{40}$/.test(OWNER)) throw new Error("OWNER 格式不正確");
+  return bytecode+OWNER.slice(2).toLowerCase().padStart(64,"0");
+}
+
+async function initProvider(){
+  if(wc) return wc;
+  wc=await EthereumProvider.init({
+    projectId:PROJECT_ID,
+    chains:[CHAIN_ID],
+    showQrModal:true,
+    methods:["eth_sendTransaction","personal_sign"],
+    events:["chainChanged","accountsChanged"],
+    optionalMethods:["eth_accounts","eth_requestAccounts","eth_chainId","wallet_switchEthereumChain"],
+    optionalEvents:["connect","disconnect","message"],
+    rpcMap:{[CHAIN_ID]:RPC},
+    metadata:{name:"IPT Sepolia Deploy",description:"Deploy Independent Points to Ethereum Sepolia",url:"https://avg168.github.io",icons:[]},
+    qrModalOptions:{themeMode:"light"}
+  });
+  wc.on("accountsChanged",a=>{account=a?.[0]||"";preflightOK=false;updateState();});
+  wc.on("chainChanged",()=>{preflightOK=false;updateState();});
+  wc.on("disconnect",()=>{account="";preflightOK=false;updateState();});
+  return wc;
+}
+
+async function updateState(){
+  if(!wc||!wc.session){
+    $("wcState").className="warn"; $("wcState").textContent="尚未建立 WalletConnect Session。";
+    $("preflightBtn").disabled=true; $("disconnectBtn").disabled=true; return;
+  }
+  account=(wc.accounts||[])[0]||"";
+  let cid=Number(wc.chainId||0);
+  if(!cid){try{cid=Number(BigInt(await wc.request({method:"eth_chainId"})));}catch(_){}}
+  const okA=same(account,EXPECTED_DEPLOYER), okC=cid===CHAIN_ID;
+  $("wcState").className=(okA&&okC)?"ok":"err";
+  $("wcState").innerHTML=
+    "WalletConnect Session：<b>已建立</b><br>"+
+    "帳戶：<span class='addr'>"+(account||"未知")+"</span><br>"+
+    "Chain：<b>"+cid+" / "+(cid?hex(cid):"未知")+"</b><br>"+
+    (okA?"✓ Deployer 正確":"✗ 不是指定 Deployer")+"<br>"+
+    (okC?"✓ Ethereum Sepolia":"✗ 不是 Ethereum Sepolia");
+  $("preflightBtn").disabled=!(okA&&okC);
+  $("disconnectBtn").disabled=false;
+}
+
+$("connectBtn").onclick=async()=>{
+  try{
+    $("wcState").className="warn"; $("wcState").textContent="正在初始化 WalletConnect…";
+    const p=await initProvider();
+    if(p.session) await p.disconnect();
+    await p.connect({chains:[CHAIN_ID],rpcMap:{[CHAIN_ID]:RPC}});
+    await updateState();
+    if(!same(account,EXPECTED_DEPLOYER)) throw new Error("連到的不是 IPT Sepolia Deployer，請切到正確帳戶後重連。");
+    log("WalletConnect 已連線。");
+  }catch(e){
+    $("wcState").className="err"; $("wcState").textContent="WalletConnect 失敗："+(e?.message||String(e));
+    log("WalletConnect 失敗："+(e?.message||String(e)));
+  }
+};
+
+$("disconnectBtn").onclick=async()=>{
+  try{if(wc?.session) await wc.disconnect();}catch(_){}
+  account=""; preflightOK=false;
+  $("preflightBtn").disabled=true; $("agree").disabled=true; $("deployBtn").disabled=true;
+  await updateState(); log("WalletConnect 已中斷。");
+};
+
+$("preflightBtn").onclick=async()=>{
+  preflightOK=false; $("agree").checked=false; $("agree").disabled=true; $("deployBtn").disabled=true;
+  try{
+    await updateState();
+    if(!same(account,EXPECTED_DEPLOYER)) throw new Error("Deployer 不正確");
+    $("preflightResult").className="warn"; $("preflightResult").textContent="正在讀取原 BIN 與 PublicNode 資料…";
+    await loadOriginalBytecode();
+    deployData=buildDeployData();
+    const rpcChain=BigInt(await publicRpc("eth_chainId"));
+    if(rpcChain!==BigInt(CHAIN_ID)) throw new Error("PublicNode Chain ID 不正確");
+    const est=BigInt(await publicRpc("eth_estimateGas",[{from:account,data:deployData,value:"0x0"}]));
+    const gasLimit=(est*120n+99n)/100n; gasLimitHex=hex(gasLimit);
+    const gasPrice=BigInt(await publicRpc("eth_gasPrice"));
+    const nonce=BigInt(await publicRpc("eth_getTransactionCount",[account,"pending"]));
+    const bal=BigInt(await publicRpc("eth_getBalance",[account,"latest"]));
+    const maxCost=gasLimit*gasPrice;
+    if(bal<maxCost) throw new Error("Sepolia ETH 不足支付部署 Gas");
+    $("preflightResult").className="ok";
+    $("preflightResult").innerHTML=
+      "✓ 原 V1.3 BYTECODE 已讀取<br>"+
+      "✓ BIN SHA-256：<span class='addr'>"+BIN_HASH+"</span><br>"+
+      "✓ Deployer：<span class='addr'>"+account+"</span><br>"+
+      "✓ initialOwner：<span class='addr'>"+OWNER+"</span><br>"+
+      "✓ PublicNode：Ethereum Sepolia<br>"+
+      "✓ Gas Estimate：<b>"+est+"</b><br>"+
+      "✓ Gas Limit（+20%）：<b>"+gasLimit+"</b><br>"+
+      "✓ 參考 Gas Price：<b>"+gwei(gasPrice)+" Gwei</b><br>"+
+      "✓ Pending Nonce：<b>"+nonce+"</b><br>"+
+      "✓ 餘額：<b>"+eth(bal)+" ETH</b><br>"+
+      "✓ Gas 上限估算：約 <b>"+eth(maxCost)+" ETH</b>";
+    preflightOK=true; $("agree").disabled=false; log("預檢通過；尚未送出部署交易。");
+  }catch(e){
+    $("preflightResult").className="err"; $("preflightResult").textContent="預檢失敗："+(e?.message||String(e));
+    log("預檢失敗："+(e?.message||String(e)));
+  }
+};
+
+$("agree").onchange=()=>{$("deployBtn").disabled=!(preflightOK&&$("agree").checked);};
+
+async function waitReceipt(hash){
+  for(let i=0;i<50;i++){await new Promise(r=>setTimeout(r,4000));const rec=await publicRpc("eth_getTransactionReceipt",[hash]);if(rec)return rec;}
+  return null;
+}
+
+$("deployBtn").onclick=async()=>{
+  try{
+    if(!preflightOK||!$("agree").checked) throw new Error("請先完成預檢並確認");
+    await updateState();
+    if(!same(account,EXPECTED_DEPLOYER)) throw new Error("WalletConnect 帳戶已變更");
+    $("deployBtn").disabled=true;
+    $("deployResult").className="warn";
+    $("deployResult").innerHTML="正在要求 Trust Wallet 核准建立合約…<br>請確認：<b>Sepolia、0 ETH、建立合約，只支付 Gas。</b>";
+    const hash=await wc.request({method:"eth_sendTransaction",params:[{from:account,data:deployData,value:"0x0",gas:gasLimitHex}]});
+    if(!/^0x[0-9a-fA-F]{64}$/.test(hash)) throw new Error("Trust Wallet 未回傳有效 Tx Hash");
+    $("deployResult").className="ok";
+    $("deployResult").innerHTML="✓ 部署交易已送出<br>Tx Hash：<a target='_blank' href='"+EXPLORER+"/tx/"+hash+"'>"+hash+"</a><br>正在等待交易收據…";
+    log("部署交易已送出："+hash);
+    const rec=await waitReceipt(hash);
+    if(!rec){$("deployResult").innerHTML+="<br>尚未在等待時間內取得收據；請用 Etherscan 查詢，不要重複部署。";return;}
+    const success=BigInt(rec.status||"0x0")===1n;
+    const contract=rec.contractAddress||"";
+    $("deployResult").className=success?"ok":"err";
+    $("deployResult").innerHTML=
+      (success?"✓ IPT 合約部署成功":"✗ 交易已上鏈但執行失敗")+
+      "<br>Tx Hash：<a target='_blank' href='"+EXPLORER+"/tx/"+hash+"'>"+hash+"</a>"+
+      (contract?"<br>Contract Address：<a target='_blank' href='"+EXPLORER+"/address/"+contract+"'>"+contract+"</a>":"")+
+      "<br>Status："+(rec.status||"未知");
+    log(success?("部署成功："+contract):"部署交易失敗");
+  }catch(e){
+    $("deployBtn").disabled=false;
+    $("deployResult").className="err";
+    $("deployResult").innerHTML="部署未完成："+(e?.message||String(e))+"<br><b>若沒有 Tx Hash，請不要重複按部署。</b>";
+    log("部署未完成："+(e?.message||String(e)));
+  }
+};
+</script>
+</body>
+</html>
