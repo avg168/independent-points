@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="獨立區塊鏈點數錢包V1.0 測試版（Sepolia）">
-  <title>Independent Points V1.0｜鏈上點數錢包</title>
+  <meta name="description" content="獨立區塊鏈點數錢包V1.1 WalletConnect 測試版（Sepolia）">
+  <title>Independent Points V1.1｜WalletConnect 鏈上點數錢包</title>
   <link rel="stylesheet" href="./styles.css">
   <script defer src="https://cdn.jsdelivr.net/npm/ethers@6.15.0/dist/ethers.umd.min.js"></script>
+  <script defer src="./walletconnect-bridge.js"></script>
   <script defer src="./receipt-core.js"></script>
   <script defer src="./tx-core.js"></script>
   <script defer src="./confirmation-core.js"></script>
@@ -16,14 +17,14 @@
 </head>
 <body>
   <main class="shell">
-    <header class="header"><div class="mark">◇</div><div><p class="eyebrow">SEPOLIA TESTNET · TEST POINTS</p><h1>Independent Points</h1><p class="muted">獨立區塊鏈數位點數錢包</p></div></header>
+    <header class="header"><div class="mark">◇</div><div><p class="eyebrow">SEPOLIA TESTNET · WALLETCONNECT · TEST POINTS</p><h1>Independent Points</h1><p class="muted">獨立區塊鏈數位點數錢包</p></div></header>
     <div class="alert">這是測試網版。交易需至少 3 次區塊確認且匹配預期合約事件後才達到本頁顯示門檻；此門檻不能保證絕對不可逆。IPT 沒有現金價值，也沒有法幣儲值、現金提領或收益功能。轉帳到外部錢包不會換得現金；銷毀則會永久減少點數。鏈上操作需錢包確認並支付測試網 Gas。</div>
     <div class="actions"><a class="button-link secondary" href="./demo.html">先開啟操作示範（不需錢包、無鏈上資產）</a></div>
     <section class="panel">
       <h2>① 連線設定</h2>
-      <label for="contractAddress">IPT 智慧合約地址（部署後貼上）</label>
-      <input id="contractAddress" placeholder="0x..." autocomplete="off" spellcheck="false" maxlength="42">
-      <div class="actions"><button id="connectBtn" type="button">連接錢包並讀取合約</button><button id="refreshBtn" type="button" class="secondary" disabled>更新資料</button></div>
+      <label for="contractAddress">IPT 智慧合約地址（已部署）</label>
+      <input id="contractAddress" value="0xd3fb2480aadb8b168ec7e88a0e5c847d9750cb87" autocomplete="off" spellcheck="false" maxlength="42">
+      <div class="actions"><button id="connectBtn" type="button">WalletConnect 連接 Trust Wallet 並讀取合約</button><button id="refreshBtn" type="button" class="secondary" disabled>更新資料</button></div>
       <div class="kv"><span>目前網路</span><strong id="chainLabel">未連線</strong></div>
       <div class="kv"><span>我的錢包</span><code id="walletLabel">未連線</code></div>
       <div class="actions"><button id="copyWalletBtn" class="secondary" type="button" disabled>複製我的錢包地址</button><button id="copyContractBtn" class="secondary" type="button" disabled>複製合約地址</button></div>
@@ -55,15 +56,16 @@
       <button type="button" id="acceptOwnerBtn" class="secondary" disabled>我是候任管理者，確認接任</button>
       <p class="hint">提出交接或接任後，請保留交易雜湊值並確認鏈上事件，再按「更新資料」查詢最新 owner / pendingOwner。若候任地址填錯，請先不要讓該地址確認接任；現任管理者可重新提出正確地址的交接。</p>
     </section>
-    <section class="panel"><h2>④ 自行銷毀點數（不可復原）</h2><p class="hint">銷毀會減少自己的 IPT 與總供給量。這不是轉帳、外部錢包提領或兌換現金。</p><form id="burnForm"><label for="burnAmount">銷毀數量（IPT）</label><input id="burnAmount" type="text" inputmode="decimal" placeholder="例如 1.00" required><button id="burnBtn" class="danger" type="submit" disabled>確認永久銷毀</button></form></section><section class="panel"><h2>⑤ 我的交易紀錄</h2><p class="hint">查詢最新 1,000 個區塊內、與本錢包有關的 IPT Transfer 事件。這不是全部歷史紀錄。</p><div id="history" class="history">連線後顯示交易紀錄。</div><button id="exportBtn" class="secondary" type="button" disabled>匯出目前顯示的交易 CSV</button><p class="hint">CSV 僅包含畫面列出的最近最多 20 筆交易，不代表完整歷史。</p></section>
+    <section class="panel"><h2>④ 自行銷毀點數（不可復原）</h2><p class="hint">銷毀會減少自己的 IPT 與總供給量。這不是轉帳、外部錢包提領或兌換現金。</p><form id="burnForm"><label for="burnAmount">銷毀數量（IPT）</label><input id="burnAmount" type="text" inputmode="decimal" placeholder="例如 1.00" required><button id="burnBtn" class="danger" type="submit" disabled>確認永久銷毀</button></form></section>
+    <section class="panel"><h2>⑤ 我的交易紀錄</h2><p class="hint">查詢最新 1,000 個區塊內、與本錢包有關的 IPT Transfer 事件。這不是全部歷史紀錄。</p><div id="history" class="history">連線後顯示交易紀錄。</div><button id="exportBtn" class="secondary" type="button" disabled>匯出目前顯示的交易 CSV</button><p class="hint">CSV 僅包含畫面列出的最近最多 20 筆交易，不代表完整歷史。</p></section>
     <section class="panel"><h2>⑥ 依交易雜湊值核對單筆鏈上交易</h2>
       <p class="hint">可查詢超過最近 1,000 個區塊的舊交易。先連接錢包，貼上 Sepolia 交易雜湊值，系統會檢查鏈上執行狀態與「指定 IPT 合約、目前錢包」相關的 Transfer 事件。額外顯示區塊確認數（本頁門檻 3 次），但不代表絕對終局；僅顯示單筆交易，不代表完整交易史或目前餘額。</p>
       <form id="lookupForm"><label for="lookupHash">交易雜湊值（Tx Hash）</label><input id="lookupHash" type="text" placeholder="0x..." spellcheck="false" autocomplete="off" maxlength="66" required><button type="submit" id="lookupBtn" disabled>查詢並核對交易</button></form>
       <div id="lookupResult" class="history" role="status" aria-live="polite">連線後可以查詢指定交易。</div><p id="lookupLink"></p>
     </section>
     <section class="panel"><h2>⑦ 待確認交易追蹤</h2><p class="hint">送出交易後，瀏覽器會嘗試保留該錢包與合約的交易雜湊值。重新整理並用相同錢包及合約連線，可按下方按鈕核對；若清除瀏覽器資料、換裝置、交易遭替換或錢包拒絕保存，仍須自行保留雜湊值並到區塊瀏覽器查詢。本機追蹤並非鏈上資產帳本。交易事件符合預期但未滿 3 次區塊確認時，仍保留在待核對清單中。</p><button type="button" id="pendingBtn" class="secondary" disabled>重新核對待確認交易</button><div class="actions"><button type="button" id="exportPendingBtn" class="secondary" disabled>下載待確認交易追蹤備份 JSON</button></div><label for="importPendingInput">匯入同一錢包與合約的追蹤備份 JSON（僅合併追蹤紀錄）</label><input id="importPendingInput" type="file" accept=".json,application/json" disabled><p class="hint">備份只包含公開地址和交易雜湊值，不是錢包或資產備份。匯入後仍要重新核對鏈上結果。相同內容的交易未完成核對前，本頁會阻止再次送出；其他分頁或外部錢包不受此保護。</p><div id="pendingList" class="history" role="status" aria-live="polite">連線後顯示本錢包待確認的交易。</div></section>
-    <section class="panel"><h2>操作結果</h2><p id="status" role="status" aria-live="polite">請先部署合約，然後填入合約地址並連接錢包。</p><p id="txLink"></p></section>
-    <footer>Independent Points V1.0 · 僅供獨立技術測試 · 請勿輸入私鑰或助記詞</footer>
+    <section class="panel"><h2>操作結果</h2><p id="status" role="status" aria-live="polite">合約已部署；請使用 WalletConnect 連線 Trust Wallet。</p><p id="txLink"></p></section>
+    <footer>Independent Points V1.1 · WalletConnect · Sepolia 測試網 · 請勿輸入私鑰或助記詞</footer>
   </main>
 </body>
 </html>
