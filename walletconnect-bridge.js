@@ -4,7 +4,7 @@
 "use strict";
 
 (() => {
-  const VERSION = "1.2.1";
+  const VERSION = "1.3";
   const PROJECT_ID = "80a61b62ea34b975d7d27a037fc55fa8";
   const CHAIN_ID = 11155111;
   const CHAIN_HEX = "0xaa36a7";
@@ -548,6 +548,73 @@
 
   window.IPTWalletConnectBridge = bridge;
 
+  function installWalletSwitchButton() {
+    const connectBtn = document.getElementById("connectBtn");
+    if (!connectBtn || document.getElementById("iptWalletSwitchBtn")) return;
+
+    const btn = document.createElement("button");
+    btn.id = "iptWalletSwitchBtn";
+    btn.type = "button";
+    btn.className = "secondary";
+    btn.textContent = "中斷 WalletConnect／切換錢包";
+    btn.style.marginTop = "10px";
+
+    btn.addEventListener("click", async () => {
+      const ok = window.confirm(
+        "要中斷目前的 WalletConnect 連線嗎？\n\n中斷後頁面會重新整理，接著可重新連接另一個 Trust Wallet 錢包。"
+      );
+      if (!ok) return;
+
+      btn.disabled = true;
+      btn.textContent = "正在中斷 WalletConnect…";
+
+      try {
+        const p = await initWalletConnect();
+
+        if (p && p.session) {
+          await p.disconnect();
+        }
+
+        // Best-effort cleanup for WalletConnect-related local state.
+        try {
+          const keys = [];
+          for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (k && (
+              k.startsWith("wc@") ||
+              k.startsWith("walletconnect") ||
+              k.startsWith("WALLETCONNECT")
+            )) {
+              keys.push(k);
+            }
+          }
+          keys.forEach(k => localStorage.removeItem(k));
+        } catch (_) {}
+
+        setSafetyStatus(
+          "WalletConnect 已中斷。頁面即將重新整理，之後可重新連接另一個錢包。",
+          "ok",
+          2500
+        );
+
+        setTimeout(() => {
+          location.reload();
+        }, 700);
+
+      } catch (e) {
+        btn.disabled = false;
+        btn.textContent = "中斷 WalletConnect／切換錢包";
+        setSafetyStatus(
+          "中斷失敗：" + (e?.message || String(e)),
+          "err",
+          8000
+        );
+      }
+    });
+
+    connectBtn.insertAdjacentElement("afterend", btn);
+  }
+
   document.addEventListener("DOMContentLoaded", () => {
     const connectBtn = document.getElementById("connectBtn");
     if (connectBtn) {
@@ -564,18 +631,19 @@
 
     const providerReady = replaced || patchedInjectedProvider;
 
+    installWalletSwitchButton();
+
     if (footer) {
-      footer.textContent = footer.textContent.replace(
-        "交易防重複 V1.2",
-        "交易防重複 V1.2.1"
-      );
+      footer.textContent = footer.textContent
+        .replace("V1.2", "V1.3")
+        .replace("交易防重複 V1.3 · 一鍵切換錢包", "交易防重複 V1.3 · 一鍵切換錢包");
     }
 
     if (!providerReady) {
       const status = document.getElementById("status");
       if (status) {
         status.textContent =
-          "WalletConnect Bridge V1.2.1 無法接管目前 Provider，已停用鏈上送出以避免錯誤交易。";
+          "WalletConnect Bridge V1.3 無法接管目前 Provider，已停用鏈上送出以避免錯誤交易。";
         status.style.color = "#bd2929";
       }
       if (connectBtn) connectBtn.disabled = true;
@@ -584,7 +652,7 @@
       const status = document.getElementById("status");
       if (status && status.textContent.includes("合約已部署")) {
         status.textContent =
-          "WalletConnect Bridge V1.2.1 已就緒；可連接 Trust Wallet 並讀取合約。";
+          "WalletConnect Bridge V1.3 已就緒；可連接 Trust Wallet 並讀取合約。";
       }
     }
   });
