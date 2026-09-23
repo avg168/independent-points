@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="獨立區塊鏈點數錢包V1.1 WalletConnect 測試版（Sepolia）">
-  <title>Independent Points V1.3｜WalletConnect 鏈上點數錢包</title>
+  <title>Independent Points V1.4｜角色分流管理版</title>
   <link rel="stylesheet" href="./styles.css">
   <script defer src="https://cdn.jsdelivr.net/npm/ethers@6.15.0/dist/ethers.umd.min.js"></script>
   <script defer src="./walletconnect-bridge-v1.3.js"></script>
@@ -14,12 +14,19 @@
   <script defer src="./pending-core.js"></script>
   <script defer src="./preflight-core.js"></script>
   <script defer src="./app.js"></script>
+  <script defer src="./role-ui-v1.4.js"></script>
 </head>
 <body>
   <main class="shell">
-    <header class="header"><div class="mark">◇</div><div><p class="eyebrow">SEPOLIA TESTNET · WALLETCONNECT · TEST POINTS</p><h1>Independent Points</h1><p class="muted">獨立區塊鏈數位點數錢包</p></div></header>
+    <header class="header"><div class="mark">◇</div><div><p class="eyebrow">SEPOLIA TESTNET · WALLETCONNECT · ROLE MANAGEMENT</p><h1>Independent Points</h1><p class="muted">獨立區塊鏈數位點數錢包</p></div></header>
     <div class="alert">這是測試網版。交易需至少 3 次區塊確認且匹配預期合約事件後才達到本頁顯示門檻；此門檻不能保證絕對不可逆。IPT 沒有現金價值，也沒有法幣儲值、現金提領或收益功能。轉帳到外部錢包不會換得現金；銷毀則會永久減少點數。鏈上操作需錢包確認並支付測試網 Gas。</div>
     <div class="actions"><a class="button-link secondary" href="./demo.html">先開啟操作示範（不需錢包、無鏈上資產）</a></div>
+    <section class="panel" id="rolePanel">
+      <h2>身分與權限</h2>
+      <div class="kv"><span>目前身分</span><strong id="roleLabel">尚未連線</strong></div>
+      <div class="kv"><span>權限模式</span><strong id="roleModeLabel">等待 WalletConnect</strong></div>
+      <p id="roleHint" class="hint">連線後會依鏈上 owner 與目前錢包自動切換「一般會員」或「管理者」介面。</p>
+    </section>
     <section class="panel">
       <h2>① 連線設定</h2>
       <label for="contractAddress">IPT 智慧合約地址（已部署）</label>
@@ -65,7 +72,7 @@
     </section>
     <section class="panel"><h2>⑦ 待確認交易追蹤</h2><p class="hint">送出交易後，瀏覽器會嘗試保留該錢包與合約的交易雜湊值。重新整理並用相同錢包及合約連線，可按下方按鈕核對；若清除瀏覽器資料、換裝置、交易遭替換或錢包拒絕保存，仍須自行保留雜湊值並到區塊瀏覽器查詢。本機追蹤並非鏈上資產帳本。交易事件符合預期但未滿 3 次區塊確認時，仍保留在待核對清單中。</p><button type="button" id="pendingBtn" class="secondary" disabled>重新核對待確認交易</button><div class="actions"><button type="button" id="exportPendingBtn" class="secondary" disabled>下載待確認交易追蹤備份 JSON</button></div><label for="importPendingInput">匯入同一錢包與合約的追蹤備份 JSON（僅合併追蹤紀錄）</label><input id="importPendingInput" type="file" accept=".json,application/json" disabled><p class="hint">備份只包含公開地址和交易雜湊值，不是錢包或資產備份。匯入後仍要重新核對鏈上結果。相同內容的交易未完成核對前，本頁會阻止再次送出；其他分頁或外部錢包不受此保護。</p><div id="pendingList" class="history" role="status" aria-live="polite">連線後顯示本錢包待確認的交易。</div></section>
     <section class="panel"><h2>操作結果</h2><p id="status" role="status" aria-live="polite">合約已部署；請使用 WalletConnect 連線 Trust Wallet。</p><p id="txLink"></p></section>
-    <footer>Independent Points V1.3 · WalletConnect · Sepolia 測試網 · 交易防重複 V1.3 · 一鍵切換錢包 · 請勿輸入私鑰或助記詞</footer>
+    <footer>Independent Points V1.4 · WalletConnect · Sepolia 測試網 · 角色分流管理版 · 防重複交易 · 一鍵切換錢包 · 請勿輸入私鑰或助記詞</footer>
   </main>
 </body>
 </html>
