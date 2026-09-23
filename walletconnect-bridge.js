@@ -4,7 +4,7 @@
 "use strict";
 
 (() => {
-  const VERSION = "1.2";
+  const VERSION = "1.2.1";
   const PROJECT_ID = "80a61b62ea34b975d7d27a037fc55fa8";
   const CHAIN_ID = 11155111;
   const CHAIN_HEX = "0xaa36a7";
@@ -493,7 +493,9 @@
   };
 
   let replaced = false;
+  let patchedInjectedProvider = false;
 
+  // First choice: replace window.ethereum entirely.
   try {
     Object.defineProperty(window, "ethereum", {
       value: bridge,
@@ -506,6 +508,42 @@
       window.ethereum = bridge;
       replaced = window.ethereum === bridge;
     } catch (_) {}
+  }
+
+  // Trust Wallet may expose a non-configurable window.ethereum.
+  // In that case, patch only the EIP-1193 methods the existing app.js uses.
+  if (!replaced && window.ethereum && typeof window.ethereum === "object") {
+    const injected = window.ethereum;
+
+    try {
+      injected.request = request;
+      patchedInjectedProvider =
+        typeof injected.request === "function" &&
+        injected.request === request;
+    } catch (_) {}
+
+    if (patchedInjectedProvider) {
+      try {
+        injected.isIPTWalletConnect = true;
+        injected.isWalletConnect = true;
+        injected.iptBridgeVersion = VERSION;
+      } catch (_) {}
+
+      // Best effort: route event registration through WalletConnect too.
+      try {
+        injected.on = function(event, handler) {
+          addListener(event, handler);
+          return injected;
+        };
+      } catch (_) {}
+
+      try {
+        injected.removeListener = function(event, handler) {
+          removeListener(event, handler);
+          return injected;
+        };
+      } catch (_) {}
+    }
   }
 
   window.IPTWalletConnectBridge = bridge;
@@ -524,14 +562,30 @@
         " · 交易防重複 V1.2";
     }
 
-    if (!replaced) {
+    const providerReady = replaced || patchedInjectedProvider;
+
+    if (footer) {
+      footer.textContent = footer.textContent.replace(
+        "交易防重複 V1.2",
+        "交易防重複 V1.2.1"
+      );
+    }
+
+    if (!providerReady) {
       const status = document.getElementById("status");
       if (status) {
         status.textContent =
-          "WalletConnect Bridge V1.2 無法接管目前 Provider，已停用鏈上送出以避免錯誤交易。";
+          "WalletConnect Bridge V1.2.1 無法接管目前 Provider，已停用鏈上送出以避免錯誤交易。";
         status.style.color = "#bd2929";
       }
       if (connectBtn) connectBtn.disabled = true;
+    } else {
+      if (connectBtn) connectBtn.disabled = false;
+      const status = document.getElementById("status");
+      if (status && status.textContent.includes("合約已部署")) {
+        status.textContent =
+          "WalletConnect Bridge V1.2.1 已就緒；可連接 Trust Wallet 並讀取合約。";
+      }
     }
   });
 })();
