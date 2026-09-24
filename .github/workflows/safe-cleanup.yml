@@ -1,0 +1,247 @@
+name: Safe IPT Repository Cleanup
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "先選 dry-run 預覽；確認後再選 clean 真正刪除"
+        required: true
+        default: "dry-run"
+        type: choice
+        options:
+          - dry-run
+          - clean
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify protected files
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          protected=(
+            "index.html"
+            "ipt-v311-member.html"
+            "ipt-v31-member.html"
+            "ipt-v30-member.html"
+            "ipt-v27-stable.html"
+            "README.md"
+          )
+
+          echo "Checking protected files..."
+          for f in "${protected[@]}"; do
+            if [[ ! -f "$f" ]]; then
+              echo "ERROR: protected file missing: $f"
+              exit 1
+            fi
+          done
+
+          if [[ ! -d "contracts" ]]; then
+            echo "ERROR: protected directory missing: contracts/"
+            exit 1
+          fi
+
+          echo "Protected files are present."
+
+      - name: Build cleanup list
+        id: plan
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+
+          # Only legacy / test files are targeted.
+          # Current production and backup files are NOT matched by these patterns.
+          patterns=(
+            "app-loader-v*.js"
+            "app.js"
+            "confirmation-core.js"
+            "demo-core.js"
+            "demo.html"
+            "demo.js"
+            "pending-core.js"
+            "preflight-core.js"
+            "receipt-core.js"
+            "role-ui-v*.js"
+            "styles.css"
+            "tx-core.js"
+            "wallet-connect.html"
+            "wallet-connect.js"
+            "walletconnect-bridge*.js"
+
+            "ipt-contract-check-*.html"
+            "ipt-sepolia-deploy*.html"
+            "ipt-sepolia-transfer*.html"
+            "ipt-sepolia-walletconnect*.html"
+            "ipt-sepolia-gas-topup*.html"
+
+            "ipt-v13-stable.html"
+            "ipt-v132-stable.html"
+            "ipt-v2-direct.html"
+            "ipt-v21-direct.html"
+            "ipt-v22-transfer.html"
+            "ipt-v221-transfer.html"
+            "ipt-v222-transfer.html"
+            "ipt-v23-burn.html"
+            "ipt-v24-mint.html"
+            "ipt-v25-pause.html"
+            "ipt-v26-ownership.html"
+            "ipt-v261-ownership.html"
+          )
+
+          protected=(
+            "index.html"
+            "ipt-v311-member.html"
+            "ipt-v31-member.html"
+            "ipt-v30-member.html"
+            "ipt-v27-stable.html"
+            "README.md"
+          )
+
+          is_protected() {
+            local candidate="$1"
+            for keep in "${protected[@]}"; do
+              [[ "$candidate" == "$keep" ]] && return 0
+            done
+            return 1
+          }
+
+          : > cleanup-files.txt
+
+          for pattern in "${patterns[@]}"; do
+            for file in $pattern; do
+              [[ -f "$file" ]] || continue
+              if is_protected "$file"; then
+                echo "SKIP protected: $file"
+                continue
+              fi
+              echo "$file" >> cleanup-files.txt
+            done
+          done
+
+          sort -u -o cleanup-files.txt cleanup-files.txt
+
+          echo "===== Files planned for deletion ====="
+          if [[ -s cleanup-files.txt ]]; then
+            cat cleanup-files.txt
+          else
+            echo "(No matching legacy files found)"
+          fi
+
+          count=$(wc -l < cleanup-files.txt | tr -d ' ')
+          echo "count=$count" >> "$GITHUB_OUTPUT"
+
+          {
+            echo "## Safe cleanup preview"
+            echo ""
+            echo "**Mode:** ${{ inputs.mode }}"
+            echo ""
+            echo "**Files matched:** $count"
+            echo ""
+            echo '```text'
+            if [[ -s cleanup-files.txt ]]; then
+              cat cleanup-files.txt
+            else
+              echo "(No matching legacy files found)"
+            fi
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Stop after dry-run preview
+        if: ${{ inputs.mode == 'dry-run' }}
+        shell: bash
+        run: |
+          echo "DRY RUN ONLY — no files were deleted."
+          echo "Review the file list above. Re-run this workflow with mode=clean only when ready."
+
+      - name: Delete legacy files
+        if: ${{ inputs.mode == 'clean' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ ! -s cleanup-files.txt ]]; then
+            echo "No legacy files to delete."
+            exit 0
+          fi
+
+          while IFS= read -r file; do
+            [[ -n "$file" ]] || continue
+            echo "Deleting: $file"
+            rm -f -- "$file"
+          done < cleanup-files.txt
+
+      - name: Verify protected files after cleanup
+        if: ${{ inputs.mode == 'clean' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          protected=(
+            "index.html"
+            "ipt-v311-member.html"
+            "ipt-v31-member.html"
+            "ipt-v30-member.html"
+            "ipt-v27-stable.html"
+            "README.md"
+          )
+
+          for f in "${protected[@]}"; do
+            [[ -f "$f" ]] || {
+              echo "ERROR: protected file disappeared: $f"
+              exit 1
+            }
+          done
+
+          [[ -d "contracts" ]] || {
+            echo "ERROR: protected contracts/ directory disappeared"
+            exit 1
+          }
+
+          echo "Protected files and contracts/ are safe."
+
+      - name: Commit cleanup
+        if: ${{ inputs.mode == 'clean' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if git diff --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add -A
+          git commit -m "chore: safely remove legacy IPT test files"
+          git push
+
+          {
+            echo ""
+            echo "## Cleanup completed"
+            echo ""
+            echo "Legacy files were removed and committed."
+            echo ""
+            echo "Protected files retained:"
+            echo "- index.html"
+            echo "- ipt-v311-member.html"
+            echo "- ipt-v31-member.html"
+            echo "- ipt-v30-member.html"
+            echo "- ipt-v27-stable.html"
+            echo "- README.md"
+            echo "- contracts/"
+            echo "- .github/workflows/"
+          } >> "$GITHUB_STEP_SUMMARY"
