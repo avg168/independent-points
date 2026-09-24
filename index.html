@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Independent Points V3.1｜簡化會員介面</title>
+<title>Independent Points V3.1.1｜RPC 自動備援</title>
 <style>
 :root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;color:#172033}
 *{box-sizing:border-box}
@@ -79,7 +79,6 @@ body.show-ownership .admin-hub-btn{display:block}
 </head>
 <body>
 <header>
-  <div id="versionBadge" style="display:inline-block;margin-bottom:10px;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.78rem;font-weight:800;letter-spacing:.04em">V3.1 FINAL</div>
   <h1>Independent Points</h1>
   <p>會員點數錢包｜Ethereum Sepolia</p>
 </header>
@@ -128,6 +127,7 @@ body.show-ownership .admin-hub-btn{display:block}
   <h2>② 我的帳戶</h2>
   <div class="row"><div class="label">目前身分</div><div id="role">尚未連線</div></div>
   <div class="row"><div class="label">合約狀態</div><div id="contractState">尚未讀取</div></div>
+  <div class="row"><div class="label">鏈上讀取</div><div id="rpcStatus">RPC 自動備援已啟用</div></div>
   <button id="readBtn" class="green" type="button" disabled>讀取 IPT 鏈上資料</button>
 </section>
 
@@ -351,9 +351,12 @@ let account = "";
 const READ_RPCS = [
   "https://ethereum-sepolia-rpc.publicnode.com",
   "https://ethereum-sepolia.publicnode.com",
-  "https://rpc.sepolia.org"
+  "https://rpc.sepolia.org",
+  "https://sepolia.drpc.org",
+  "https://1rpc.io/sepolia"
 ];
 let readProvider = null;
+let readProviderUrl = "";
 
 const $ = id => document.getElementById(id);
 const same = (a,b) => String(a||"").toLowerCase() === String(b||"").toLowerCase();
@@ -408,7 +411,7 @@ async function initWC() {
     events: ["chainChanged","accountsChanged"],
     optionalEvents: ["connect","disconnect","message"],
     metadata: {
-      name: "Independent Points V3.0",
+      name: "Independent Points V3.1.1",
       description: "Independent Points member wallet on Ethereum Sepolia",
       url: "https://avg168.github.io",
       icons: []
@@ -475,6 +478,7 @@ function resetDisconnected() {
   $("readBtn").disabled = true;
   $("role").textContent = "尚未連線";
   $("contractState").textContent = "尚未讀取";
+  if ($("rpcStatus")) $("rpcStatus").textContent = "RPC 自動備援已啟用";
   $("balance").textContent = "— IPT";
   $("supply").textContent = "—";
   $("remaining").textContent = "—";
@@ -501,14 +505,32 @@ async function withTimeout(promise, ms, label = "RPC") {
   }
 }
 
+async function providerPassesContractRead(p) {
+  const code = await withTimeout(
+    p.getCode(CONTRACT_ADDRESS),
+    7000,
+    "讀取合約程式碼"
+  );
+  if (!code || code === "0x") {
+    throw new Error("合約程式碼不存在");
+  }
+
+  const c = new Contract(CONTRACT_ADDRESS, ABI, p);
+  const name = await withTimeout(c.name(), 7000, "測試合約讀取");
+  if (name !== "Independent Points") {
+    throw new Error("合約讀取內容不符");
+  }
+}
+
 async function getWorkingReadProvider() {
   if (readProvider) {
     try {
-      await withTimeout(readProvider.getBlockNumber(), 7000, "Sepolia RPC");
+      await providerPassesContractRead(readProvider);
       return readProvider;
     } catch (_) {
       try { readProvider.destroy?.(); } catch (_) {}
       readProvider = null;
+      readProviderUrl = "";
     }
   }
 
@@ -516,11 +538,10 @@ async function getWorkingReadProvider() {
 
   for (const url of READ_RPCS) {
     try {
-      const p = new JsonRpcProvider(url, CHAIN_ID, {
-        staticNetwork: true
-      });
-      await withTimeout(p.getBlockNumber(), 7000, "Sepolia RPC");
+      const p = new JsonRpcProvider(url, CHAIN_ID, { staticNetwork: true });
+      await providerPassesContractRead(p);
       readProvider = p;
+      readProviderUrl = url;
       return p;
     } catch (e) {
       lastError = e;
@@ -528,8 +549,80 @@ async function getWorkingReadProvider() {
   }
 
   throw new Error(
-    "目前所有 Sepolia 讀取節點都沒有回應。" +
+    "目前所有 Sepolia 讀取節點都無法完成合約讀取。" +
     (lastError?.message ? " 最後錯誤：" + lastError.message : "")
+  );
+}
+
+async function readIptStateWithFallback(walletAddress) {
+  const errors = [];
+  const urls = [
+    ...(readProviderUrl ? [readProviderUrl] : []),
+    ...READ_RPCS.filter(url => url !== readProviderUrl)
+  ];
+
+  for (const url of urls) {
+    let p = null;
+    try {
+      $("rpcStatus").textContent =
+        "正在嘗試：" + new URL(url).hostname;
+
+      p = new JsonRpcProvider(url, CHAIN_ID, { staticNetwork: true });
+
+      const code = await withTimeout(
+        p.getCode(CONTRACT_ADDRESS),
+        8000,
+        "讀取合約程式碼"
+      );
+      if (!code || code === "0x") {
+        throw new Error("此節點查不到 IPT 合約");
+      }
+
+      const c = new Contract(CONTRACT_ADDRESS, ABI, p);
+
+      const result = await withTimeout(
+        Promise.all([
+          c.name(),
+          c.symbol(),
+          c.decimals(),
+          c.owner(),
+          c.pendingOwner(),
+          c.paused(),
+          c.totalSupply(),
+          c.cap(),
+          c.balanceOf(walletAddress)
+        ]),
+        12000,
+        "讀取 IPT 合約資料"
+      );
+
+      if (result[0] !== "Independent Points" || result[1] !== "IPT") {
+        throw new Error("回傳合約資料不符");
+      }
+
+      if (readProvider && readProvider !== p) {
+        try { readProvider.destroy?.(); } catch (_) {}
+      }
+      readProvider = p;
+      readProviderUrl = url;
+
+      $("rpcStatus").innerHTML =
+        "✓ 已自動連到：<b>" + new URL(url).hostname + "</b>";
+
+      return result;
+
+    } catch (e) {
+      errors.push(
+        new URL(url).hostname + "：" + (e?.message || String(e))
+      );
+      try { p?.destroy?.(); } catch (_) {}
+    }
+  }
+
+  $("rpcStatus").textContent = "所有備援 RPC 皆讀取失敗";
+  throw new Error(
+    "Sepolia RPC 自動備援仍無法讀取。" +
+    (errors.length ? " " + errors.slice(-2).join("；") : "")
   );
 }
 
@@ -581,39 +674,11 @@ $("readBtn").addEventListener("click", async () => {
       throw new Error("沒有取得目前錢包地址。");
     }
 
-    const rp = await getWorkingReadProvider();
-
-    const code = await withTimeout(
-      rp.getCode(CONTRACT_ADDRESS),
-      10000,
-      "讀取合約程式碼"
-    );
-
-    if (!code || code === "0x") {
-      throw new Error("此地址在 Sepolia 沒有合約程式碼。");
-    }
-
-    const c = new Contract(CONTRACT_ADDRESS, ABI, rp);
-
     const [
       name, symbol, decimals, owner,
       pendingOwner, paused, totalSupply,
       cap, bal
-    ] = await withTimeout(
-      Promise.all([
-        c.name(),
-        c.symbol(),
-        c.decimals(),
-        c.owner(),
-        c.pendingOwner(),
-        c.paused(),
-        c.totalSupply(),
-        c.cap(),
-        c.balanceOf(account)
-      ]),
-      15000,
-      "讀取 IPT 合約資料"
-    );
+    ] = await readIptStateWithFallback(account);
 
     const d = Number(decimals);
     const supplyText = formatUnits(totalSupply, d);
