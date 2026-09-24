@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>IPT Sepolia Gas 補充工具</title>
+<style>
+:root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;color:#172033}
+*{box-sizing:border-box}
+body{margin:0;background:#f4f7fb}
+header{background:#10243d;color:#fff;padding:26px 22px 30px;border-radius:0 0 28px 28px}
+header h1{margin:0 0 8px;font-size:1.55rem}
+header p{margin:0;line-height:1.6;opacity:.92}
+main{max-width:760px;margin:auto;padding:18px 15px 80px}
+section{background:#fff;border:1px solid #dbe2ec;border-radius:18px;padding:18px;margin:16px 0}
+h2{margin:0 0 14px;font-size:1.15rem}
+.row{padding:11px 0;border-bottom:1px solid #edf0f4}
+.row:last-child{border-bottom:0}
+.label{font-weight:800;margin-bottom:5px}
+.addr{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;overflow-wrap:anywhere;word-break:break-word}
+button{width:100%;border:0;border-radius:14px;padding:16px 14px;margin:7px 0;font:inherit;font-weight:800}
+.blue{background:#1765d8;color:#fff}
+.gray{background:#e8eef7;color:#17365d}
+.green{background:#18866d;color:#fff}
+button:disabled{opacity:.45}
+.box{padding:14px;border-radius:12px;line-height:1.7;margin:10px 0}
+.info{background:#eef4ff;border-left:5px solid #3777d6}
+.ok{background:#e9f8ef;border-left:5px solid #198555}
+.warn{background:#fff5da;border-left:5px solid #d59a0b}
+.err{background:#ffeaea;border-left:5px solid #c93030}
+.big{font-size:2rem;font-weight:850}
+.muted{color:#687486;font-size:.92rem;line-height:1.7}
+</style>
+</head>
+<body>
+<header>
+  <h1>Sepolia Gas 補充工具</h1>
+  <p>只做一件事：由 IPT Sepolia Deployer 轉 0.001 Sepolia ETH 給 Owner，供 V2.6 管理權交接支付測試網 Gas。</p>
+</header>
+
+<main>
+<section>
+  <h2>固定設定</h2>
+  <div class="row">
+    <div class="label">指定付款錢包（Deployer）</div>
+    <div class="addr">0x09997702F8D33DFb538819E0520908b16B9A29d6</div>
+  </div>
+  <div class="row">
+    <div class="label">固定收款錢包（Owner）</div>
+    <div class="addr">0xfEDF5073E6664cb0a11Cc9954AE3d1CF6F554BC4</div>
+  </div>
+  <div class="row">
+    <div class="label">固定轉帳金額</div>
+    <div class="big">0.001 ETH</div>
+  </div>
+  <div class="row">
+    <div class="label">網路</div>
+    <div>Ethereum Sepolia｜11155111｜0xaa36a7</div>
+  </div>
+</section>
+
+<section>
+  <h2>① 連接 Deployer</h2>
+  <div id="sessionState" class="box warn">尚未連線。</div>
+  <button id="connectBtn" class="blue">連接 Trust Wallet</button>
+  <button id="disconnectBtn" class="gray" disabled>中斷連線／切換錢包</button>
+</section>
+
+<section>
+  <h2>② 先檢查補 Gas</h2>
+  <div id="preflightBox" class="box info">
+    連線後按「先檢查 0.001 Sepolia ETH」。
+  </div>
+  <button id="preflightBtn" class="gray" disabled>先檢查 0.001 Sepolia ETH</button>
+  <button id="sendBtn" class="green" disabled>由 Trust Wallet 核准轉 0.001 ETH</button>
+</section>
+
+<section>
+  <h2>安全提醒</h2>
+  <div class="box warn">
+    這是 Sepolia 測試 ETH，不是 Ethereum 主網 ETH。<br>
+    收款地址已固定為 Owner，金額也固定為 0.001 ETH，避免貼錯地址或網路。<br>
+    若送出後畫面逾時，不要再按第二次；先重新讀取 Owner 餘額。
+  </div>
+</section>
+</main>
+
+<script type="module">
+import { EthereumProvider } from "https://esm.sh/@walletconnect/ethereum-provider@2.25.0?bundle";
+import { JsonRpcProvider, formatEther, parseEther } from "https://esm.sh/ethers@6.15.0?bundle";
+
+const PROJECT_ID = "80a61b62ea34b975d7d27a037fc55fa8";
+const CHAIN_ID = 11155111;
+const DEPLOYER = "0x09997702F8D33DFb538819E0520908b16B9A29d6";
+const OWNER = "0xfEDF5073E6664cb0a11Cc9954AE3d1CF6F554BC4";
+const AMOUNT = parseEther("0.001");
+
+const READ_RPCS = [
+  "https://ethereum-sepolia-rpc.publicnode.com",
+  "https://ethereum-sepolia.publicnode.com",
+  "https://rpc.sepolia.org"
+];
+
+let wc = null;
+let account = "";
+let readProvider = null;
+let checked = null;
+
+const $ = id => document.getElementById(id);
+const same = (a,b) => String(a||"").toLowerCase() === String(b||"").toLowerCase();
+
+async function withTimeout(promise, ms, label="RPC") {
+  let timer;
+  try {
+    return await Promise.race([
+      promise,
+      new Promise((_, reject) => {
+        timer = setTimeout(() => reject(new Error(label + " 逾時")), ms);
+      })
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
+async function directRpcJson(url, method, params, timeoutMs=6500) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({jsonrpc:"2.0", id:Date.now(), method, params}),
+      signal: ctrl.signal,
+      cache: "no-store"
+    });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const json = await res.json();
+    if (json.error) throw new Error(json.error.message || "RPC error");
+    return json.result;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function getWorkingProvider() {
+  if (readProvider) {
+    try {
+      await withTimeout(readProvider.getBlockNumber(), 7000, "Sepolia RPC");
+      return readProvider;
+    } catch (_) {
+      try { readProvider.destroy?.(); } catch (_) {}
+      readProvider = null;
+    }
+  }
+  let last = null;
+  for (const url of READ_RPCS) {
+    try {
+      const p = new JsonRpcProvider(url, CHAIN_ID, {staticNetwork:true});
+      await withTimeout(p.getBlockNumber(), 7000, "Sepolia RPC");
+      readProvider = p;
+      return p;
+    } catch (e) { last = e; }
+  }
+  throw new Error("目前所有 Sepolia RPC 都沒有回應。" + (last?.message ? " " + last.message : ""));
+}
+
+async function latestNonce(address) {
+  let last = null;
+  for (const url of READ_RPCS) {
+    try {
+      const hex = await directRpcJson(url, "eth_getTransactionCount", [address, "pending"]);
+      if (/^0x[0-9a-fA-F]+$/.test(hex || "")) return Number(BigInt(hex));
+    } catch (e) { last = e; }
+  }
+  throw new Error("Nonce 讀取失敗。" + (last?.message ? " " + last.message : ""));
+}
+
+async function latestGasPriceHex() {
+  let last = null;
+  for (const url of READ_RPCS) {
+    try {
+      const hex = await directRpcJson(url, "eth_gasPrice", []);
+      if (/^0x[0-9a-fA-F]+$/.test(hex || "")) return hex;
+    } catch (e) { last = e; }
+  }
+  throw new Error("Gas Price 讀取失敗。" + (last?.message ? " " + last.message : ""));
+}
+
+async function initWC() {
+  if (wc) return wc;
+  wc = await EthereumProvider.init({
+    projectId: PROJECT_ID,
+    chains: [CHAIN_ID],
+    showQrModal: true,
+    methods: ["eth_sendTransaction"],
+    optionalMethods: ["eth_accounts","eth_requestAccounts","eth_chainId"],
+    events: ["chainChanged","accountsChanged"],
+    optionalEvents: ["connect","disconnect","message"],
+    metadata: {
+      name: "IPT Sepolia Gas Topup",
+      description: "Sepolia ETH gas top-up for IPT Owner",
+      url: "https://avg168.github.io",
+      icons: []
+    },
+    qrModalOptions: {themeMode:"light"}
+  });
+  wc.on("accountsChanged", async (accounts) => {
+    account = accounts?.[0] || "";
+    await renderSession();
+  });
+  wc.on("chainChanged", renderSession);
+  wc.on("disconnect", reset);
+  return wc;
+}
+
+async function chainIdOf(p) {
+  try {
+    const v = await p.request({method:"eth_chainId"});
+    return Number(BigInt(v));
+  } catch (_) {
+    return Number(p.chainId || 0);
+  }
+}
+
+function reset() {
+  account = "";
+  checked = null;
+  $("sessionState").className = "box warn";
+  $("sessionState").textContent = "尚未連線。";
+  $("disconnectBtn").disabled = true;
+  $("preflightBtn").disabled = true;
+  $("sendBtn").disabled = true;
+  $("preflightBox").className = "box info";
+  $("preflightBox").textContent = "連線後按「先檢查 0.001 Sepolia ETH」。";
+}
+
+async function renderSession() {
+  if (!wc?.session) return reset();
+  account = wc.accounts?.[0] || account || "";
+  const cid = await chainIdOf(wc);
+  const chainOk = cid === CHAIN_ID;
+  const walletOk = same(account, DEPLOYER);
+
+  $("sessionState").className = "box " + (chainOk && walletOk ? "ok" : "err");
+  $("sessionState").innerHTML =
+    "錢包：<span class='addr'>" + (account || "未知") + "</span><br>" +
+    "網路：<b>" + cid + "</b><br>" +
+    (chainOk ? "✓ Sepolia<br>" : "✗ 不是 Sepolia<br>") +
+    (walletOk ? "✓ 正確的 IPT Sepolia Deployer" : "✗ 請切換到 Deployer ...9A29d6");
+
+  $("disconnectBtn").disabled = false;
+  $("preflightBtn").disabled = !(chainOk && walletOk);
+  $("sendBtn").disabled = true;
+  checked = null;
+}
+
+$("connectBtn").addEventListener("click", async () => {
+  try {
+    const p = await initWC();
+    if (!p.session) await p.connect({chains:[CHAIN_ID]});
+    await renderSession();
+  } catch (e) {
+    $("sessionState").className = "box err";
+    $("sessionState").textContent = "連線失敗：" + (e?.message || String(e));
+  }
+});
+
+$("disconnectBtn").addEventListener("click", async () => {
+  try { if (wc?.session) await wc.disconnect(); } catch (_) {}
+  reset();
+});
+
+$("preflightBtn").addEventListener("click", async () => {
+  const btn = $("preflightBtn");
+  try {
+    btn.disabled = true;
+    btn.textContent = "檢查中…";
+    checked = null;
+    $("sendBtn").disabled = true;
+
+    if (!wc?.session || !account) throw new Error("WalletConnect 尚未連線。");
+    if (!same(account, DEPLOYER)) throw new Error("目前不是 IPT Sepolia Deployer。");
+    const cid = await chainIdOf(wc);
+    if (cid !== CHAIN_ID) throw new Error("目前不是 Ethereum Sepolia。");
+
+    const rp = await getWorkingProvider();
+    const [senderBalance, ownerBalance, gasEstimate, gasPriceHex] = await withTimeout(
+      Promise.all([
+        rp.getBalance(DEPLOYER),
+        rp.getBalance(OWNER),
+        rp.estimateGas({from:DEPLOYER,to:OWNER,value:AMOUNT}),
+        latestGasPriceHex()
+      ]),
+      18000,
+      "補 Gas 前檢查"
+    );
+
+    const gasLimit = (gasEstimate * 120n + 99n) / 100n;
+    const gasPrice = BigInt(gasPriceHex);
+    const maxFee = gasLimit * gasPrice;
+    const required = AMOUNT + maxFee;
+
+    if (senderBalance < required) {
+      throw new Error(
+        "Deployer Sepolia ETH 不足。餘額：" + formatEther(senderBalance) +
+        " ETH；至少需要約 " + formatEther(required) + " ETH。"
+      );
+    }
+
+    const nonce = await latestNonce(DEPLOYER);
+
+    checked = {
+      nonce,
+      gasLimit,
+      gasPriceHex,
+      senderBalance,
+      ownerBalance,
+      fingerprint: DEPLOYER.toLowerCase() + "|" + OWNER.toLowerCase() + "|0.001"
+    };
+
+    const key = "ipt-sepolia-gas-topup-guard";
+    let guard = null;
+    try { guard = JSON.parse(localStorage.getItem(key) || "null"); } catch (_) {}
+    if (guard && Date.now() - Number(guard.time || 0) < 5*60*1000) {
+      throw new Error("防重複保護：5 分鐘內已嘗試過同一筆 0.001 ETH 補 Gas，請先確認 Owner 餘額。");
+    }
+
+    $("preflightBox").className = "box ok";
+    $("preflightBox").innerHTML =
+      "✓ 補 Gas 前檢查通過<br>" +
+      "付款：<span class='addr'>" + DEPLOYER + "</span><br>" +
+      "收款：<span class='addr'>" + OWNER + "</span><br>" +
+      "固定金額：<b>0.001 Sepolia ETH</b><br>" +
+      "Deployer 目前餘額：<b>" + formatEther(senderBalance) + " ETH</b><br>" +
+      "Owner 目前餘額：<b>" + formatEther(ownerBalance) + " ETH</b><br>" +
+      "Owner 收款後預期：<b>" + formatEther(ownerBalance + AMOUNT) + " ETH</b><br>" +
+      "預估 Gas：<b>" + gasEstimate.toString() + "</b><br>" +
+      "送出 Gas Limit：<b>" + gasLimit.toString() + "</b><br>" +
+      "Nonce：<b>" + nonce + "</b>";
+
+    $("sendBtn").disabled = false;
+
+  } catch (e) {
+    checked = null;
+    $("preflightBox").className = "box err";
+    $("preflightBox").textContent = "檢查失敗：" + (e?.message || String(e));
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "先檢查 0.001 Sepolia ETH";
+  }
+});
+
+$("sendBtn").addEventListener("click", async () => {
+  const btn = $("sendBtn");
+  const key = "ipt-sepolia-gas-topup-guard";
+
+  try {
+    if (!checked) throw new Error("請先完成前置檢查。");
+    if (!wc?.session || !same(account, DEPLOYER)) throw new Error("目前不是正確的 Deployer 連線。");
+    const cid = await chainIdOf(wc);
+    if (cid !== CHAIN_ID) throw new Error("目前不是 Sepolia。");
+
+    const nonceNow = await latestNonce(DEPLOYER);
+    if (nonceNow !== checked.nonce) {
+      checked = null;
+      $("sendBtn").disabled = true;
+      throw new Error("Nonce 已改變，請重新按「先檢查」。");
+    }
+
+    const ok = window.confirm(
+      "確認由 IPT Sepolia Deployer 轉 0.001 Sepolia ETH 給 Owner？\n\n" +
+      OWNER + "\n\n這不是主網 ETH。"
+    );
+    if (!ok) return;
+
+    btn.disabled = true;
+    btn.textContent = "等待 Trust Wallet…";
+
+    try {
+      localStorage.setItem(key, JSON.stringify({
+        time: Date.now(),
+        state: "requesting",
+        nonce: nonceNow
+      }));
+    } catch (_) {}
+
+    let hash = null;
+    try {
+      hash = await withTimeout(
+        wc.request({
+          method:"eth_sendTransaction",
+          params:[{
+            from: DEPLOYER,
+            to: OWNER,
+            value: "0x" + AMOUNT.toString(16),
+            chainId: "0xaa36a7",
+            nonce: "0x" + BigInt(nonceNow).toString(16),
+            gas: "0x" + checked.gasLimit.toString(16),
+            gasPrice: checked.gasPriceHex
+          }]
+        }),
+        90000,
+        "等待 Trust Wallet 回覆"
+      );
+    } catch (e) {
+      const msg = String(e?.message || e);
+      if (/user rejected|user denied|rejected by user|cancelled|canceled/i.test(msg)) {
+        try { localStorage.removeItem(key); } catch (_) {}
+        throw new Error("你已取消交易；沒有送出。");
+      }
+      $("preflightBox").className = "box warn";
+      $("preflightBox").textContent =
+        "交易結果不明，已啟用 5 分鐘防重複保護。不要重送；請先確認 Owner 的 Sepolia ETH 餘額。";
+      throw new Error("WalletConnect / RPC 回覆不明。");
+    }
+
+    if (!/^0x[a-fA-F0-9]{64}$/.test(String(hash || ""))) {
+      throw new Error("沒有取得有效 Tx Hash，請先確認鏈上餘額，不要立即重送。");
+    }
+
+    try {
+      localStorage.setItem(key, JSON.stringify({
+        time: Date.now(),
+        state: "sent",
+        hash,
+        nonce: nonceNow
+      }));
+    } catch (_) {}
+
+    $("preflightBox").className = "box ok";
+    $("preflightBox").innerHTML =
+      "✓ 0.001 Sepolia ETH 已送出<br>" +
+      "Tx Hash：<span class='addr'>" + hash + "</span><br>" +
+      "請等待區塊確認後，再回 V2.6 繼續管理權交接。";
+
+    checked = null;
+    $("sendBtn").disabled = true;
+
+  } catch (e) {
+    if (!$("preflightBox").textContent.includes("結果不明")) {
+      $("preflightBox").className = "box err";
+      $("preflightBox").textContent = "送出失敗：" + (e?.message || String(e));
+    }
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "由 Trust Wallet 核准轉 0.001 ETH";
+  }
+});
+</script>
+</body>
+</html>
