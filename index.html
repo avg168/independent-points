@@ -2,70 +2,45 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="獨立區塊鏈點數錢包V1.1 WalletConnect 測試版（Sepolia）">
-  <title>Independent Points V1.3｜WalletConnect 鏈上點數錢包</title>
-  <link rel="stylesheet" href="./styles.css">
-  <script defer src="https://cdn.jsdelivr.net/npm/ethers@6.15.0/dist/ethers.umd.min.js"></script>
-  <script defer src="./walletconnect-bridge-v1.3.js"></script>
-  <script defer src="./receipt-core.js"></script>
-  <script defer src="./tx-core.js"></script>
-  <script defer src="./confirmation-core.js"></script>
-  <script defer src="./pending-core.js"></script>
-  <script defer src="./preflight-core.js"></script>
-  <script defer src="./app.js"></script>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Independent Points</title>
+  <meta name="description" content="Independent Points｜Ethereum Sepolia 測試網">
+  <meta http-equiv="refresh" content="0; url=./ipt-v27-stable.html">
+  <style>
+    :root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif}
+    *{box-sizing:border-box}
+    body{
+      margin:0;min-height:100vh;display:grid;place-items:center;
+      background:#f4f7fb;color:#172033;padding:24px
+    }
+    main{
+      width:min(100%,560px);background:#fff;border:1px solid #dbe2ec;
+      border-radius:24px;padding:30px 24px;text-align:center;
+      box-shadow:0 8px 30px rgba(16,36,61,.07)
+    }
+    .logo{
+      width:72px;height:72px;margin:0 auto 18px;border-radius:22px;
+      background:#123f7d;color:#fff;display:grid;place-items:center;font-size:38px
+    }
+    h1{margin:0 0 10px;font-size:1.8rem}
+    p{margin:8px 0 22px;line-height:1.7;color:#647083}
+    a{
+      display:block;text-decoration:none;background:#1765d8;color:#fff;
+      padding:16px;border-radius:14px;font-weight:800
+    }
+    small{display:block;margin-top:18px;color:#8993a1;line-height:1.6}
+  </style>
+  <script>
+    window.location.replace("./ipt-v27-stable.html");
+  </script>
 </head>
 <body>
-  <main class="shell">
-    <header class="header"><div class="mark">◇</div><div><p class="eyebrow">SEPOLIA TESTNET · WALLETCONNECT · TEST POINTS</p><h1>Independent Points</h1><p class="muted">獨立區塊鏈數位點數錢包</p></div></header>
-    <div class="alert">這是測試網版。交易需至少 3 次區塊確認且匹配預期合約事件後才達到本頁顯示門檻；此門檻不能保證絕對不可逆。IPT 沒有現金價值，也沒有法幣儲值、現金提領或收益功能。轉帳到外部錢包不會換得現金；銷毀則會永久減少點數。鏈上操作需錢包確認並支付測試網 Gas。</div>
-    <div class="actions"><a class="button-link secondary" href="./demo.html">先開啟操作示範（不需錢包、無鏈上資產）</a></div>
-    <section class="panel">
-      <h2>① 連線設定</h2>
-      <label for="contractAddress">IPT 智慧合約地址（已部署）</label>
-      <input id="contractAddress" value="0xd3fb2480aadb8b168ec7e88a0e5c847d9750cb87" autocomplete="off" spellcheck="false" maxlength="42">
-      <div class="actions"><button id="connectBtn" type="button">WalletConnect 連接 Trust Wallet 並讀取合約</button><button id="refreshBtn" type="button" class="secondary" disabled>更新資料</button></div>
-      <div class="kv"><span>目前網路</span><strong id="chainLabel">未連線</strong></div>
-      <div class="kv"><span>我的錢包</span><code id="walletLabel">未連線</code></div>
-      <div class="actions"><button id="copyWalletBtn" class="secondary" type="button" disabled>複製我的錢包地址</button><button id="copyContractBtn" class="secondary" type="button" disabled>複製合約地址</button></div>
-      <div class="kv"><span>合約狀態</span><strong id="stateLabel">尚未載入</strong></div>
-      <p id="contractExplorerLink" class="hint"></p><p class="hint">代幣名稱與發行上限檢查不等於合約真偽驗證；使用前須自行核對鏈上合約原始碼。</p>
-    </section>
-    <section class="panel balance-panel">
-      <p class="muted">我的鏈上餘額</p>
-      <div class="balance"><span id="balanceLabel">—</span><small>IPT</small></div>
-      <div class="kv"><span>鏈上已發行總量</span><strong id="supplyLabel">—</strong></div>
-      <div class="kv"><span>剩餘可發行點數（上限 10 億 IPT）</span><strong id="remainingLabel">—</strong></div>
-      <p class="hint">本頁讀取合約餘額，不會自行修改會員點數。</p>
-    </section>
-    <div class="columns">
-      <section class="panel"><h2>② 點數轉移</h2><p class="hint">送出前將重新檢查餘額、合約狀態及收款地址，並執行讀取式交易模擬。模擬通過也不能保證交易成功，鏈上轉帳無法撤銷。</p>
-        <form id="sendForm"><label for="sendTo">收款錢包地址</label><input id="sendTo" placeholder="0x..." spellcheck="false" required maxlength="42"><button id="recipientCheckBtn" type="button" class="secondary" disabled>先檢查收款地址</button><p id="recipientCheckResult" class="hint" role="status">輸入收款地址後，可先檢查是否為智慧合約。</p><label for="sendAmount">轉移數量（IPT）</label><input id="sendAmount" type="text" inputmode="decimal" placeholder="例如 12.50" required><button id="sendBtn" type="submit" disabled>確認轉移</button></form>
-      </section>
-      <section class="panel"><h2>③ 管理者發行點數</h2><p class="hint">僅部署時指定的管理錢包可以發行；總量上限 10 億 IPT。</p>
-        <form id="mintForm"><label for="mintTo">領取錢包地址</label><input id="mintTo" placeholder="0x..." spellcheck="false" required maxlength="42"><label for="mintAmount">發行數量（IPT）</label><input id="mintAmount" type="text" inputmode="decimal" placeholder="例如 100.00" required><button id="mintBtn" type="submit" disabled>管理者發行</button></form>
-        <p id="ownerHint" class="hint">連線後檢查管理權限。</p>
-        <div class="actions"><button type="button" id="pauseBtn" class="danger" disabled>管理者暫停轉帳與發行</button><button type="button" id="unpauseBtn" class="secondary" disabled>管理者恢復交易</button></div>
-      </section>
-    </div>
-    <section class="panel"><h2>管理權交接（雙方各自簽署）</h2>
-      <p class="hint">僅在 Sepolia 測試網進行。現任管理者只能「提出交接」；指定的新管理者必須用自己的錢包另外執行「確認接任」，管理權才真正更換。交接未完成時，原管理者仍保有發行與暫停權限。請確認新管理者地址確實由你控制；不要將管理權交給交易所充值地址或無法操作的合約地址。</p>
-      <div class="kv"><span>目前管理者</span><code id="currentOwnerLabel">—</code></div>
-      <div class="kv"><span>候任管理者</span><code id="pendingOwnerLabel">—</code></div>
-      <form id="proposeOwnerForm"><label for="newOwnerAddress">候任管理者公開錢包地址</label><input id="newOwnerAddress" placeholder="0x..." spellcheck="false" maxlength="42" required><button type="submit" id="proposeOwnerBtn" class="danger" disabled>現任管理者提出交接</button></form>
-      <button type="button" id="acceptOwnerBtn" class="secondary" disabled>我是候任管理者，確認接任</button>
-      <p class="hint">提出交接或接任後，請保留交易雜湊值並確認鏈上事件，再按「更新資料」查詢最新 owner / pendingOwner。若候任地址填錯，請先不要讓該地址確認接任；現任管理者可重新提出正確地址的交接。</p>
-    </section>
-    <section class="panel"><h2>④ 自行銷毀點數（不可復原）</h2><p class="hint">銷毀會減少自己的 IPT 與總供給量。這不是轉帳、外部錢包提領或兌換現金。</p><form id="burnForm"><label for="burnAmount">銷毀數量（IPT）</label><input id="burnAmount" type="text" inputmode="decimal" placeholder="例如 1.00" required><button id="burnBtn" class="danger" type="submit" disabled>確認永久銷毀</button></form></section>
-    <section class="panel"><h2>⑤ 我的交易紀錄</h2><p class="hint">查詢最新 1,000 個區塊內、與本錢包有關的 IPT Transfer 事件。這不是全部歷史紀錄。</p><div id="history" class="history">連線後顯示交易紀錄。</div><button id="exportBtn" class="secondary" type="button" disabled>匯出目前顯示的交易 CSV</button><p class="hint">CSV 僅包含畫面列出的最近最多 20 筆交易，不代表完整歷史。</p></section>
-    <section class="panel"><h2>⑥ 依交易雜湊值核對單筆鏈上交易</h2>
-      <p class="hint">可查詢超過最近 1,000 個區塊的舊交易。先連接錢包，貼上 Sepolia 交易雜湊值，系統會檢查鏈上執行狀態與「指定 IPT 合約、目前錢包」相關的 Transfer 事件。額外顯示區塊確認數（本頁門檻 3 次），但不代表絕對終局；僅顯示單筆交易，不代表完整交易史或目前餘額。</p>
-      <form id="lookupForm"><label for="lookupHash">交易雜湊值（Tx Hash）</label><input id="lookupHash" type="text" placeholder="0x..." spellcheck="false" autocomplete="off" maxlength="66" required><button type="submit" id="lookupBtn" disabled>查詢並核對交易</button></form>
-      <div id="lookupResult" class="history" role="status" aria-live="polite">連線後可以查詢指定交易。</div><p id="lookupLink"></p>
-    </section>
-    <section class="panel"><h2>⑦ 待確認交易追蹤</h2><p class="hint">送出交易後，瀏覽器會嘗試保留該錢包與合約的交易雜湊值。重新整理並用相同錢包及合約連線，可按下方按鈕核對；若清除瀏覽器資料、換裝置、交易遭替換或錢包拒絕保存，仍須自行保留雜湊值並到區塊瀏覽器查詢。本機追蹤並非鏈上資產帳本。交易事件符合預期但未滿 3 次區塊確認時，仍保留在待核對清單中。</p><button type="button" id="pendingBtn" class="secondary" disabled>重新核對待確認交易</button><div class="actions"><button type="button" id="exportPendingBtn" class="secondary" disabled>下載待確認交易追蹤備份 JSON</button></div><label for="importPendingInput">匯入同一錢包與合約的追蹤備份 JSON（僅合併追蹤紀錄）</label><input id="importPendingInput" type="file" accept=".json,application/json" disabled><p class="hint">備份只包含公開地址和交易雜湊值，不是錢包或資產備份。匯入後仍要重新核對鏈上結果。相同內容的交易未完成核對前，本頁會阻止再次送出；其他分頁或外部錢包不受此保護。</p><div id="pendingList" class="history" role="status" aria-live="polite">連線後顯示本錢包待確認的交易。</div></section>
-    <section class="panel"><h2>操作結果</h2><p id="status" role="status" aria-live="polite">合約已部署；請使用 WalletConnect 連線 Trust Wallet。</p><p id="txLink"></p></section>
-    <footer>Independent Points V1.3 · WalletConnect · Sepolia 測試網 · 交易防重複 V1.3 · 一鍵切換錢包 · 請勿輸入私鑰或助記詞</footer>
+  <main>
+    <div class="logo">◇</div>
+    <h1>Independent Points</h1>
+    <p>正在進入 V2.7 Stable Integrated 穩定整合版。</p>
+    <a href="./ipt-v27-stable.html">進入 Independent Points</a>
+    <small>Ethereum Sepolia Testnet</small>
   </main>
 </body>
 </html>
