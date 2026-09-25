@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Independent Points V3.9.4.2｜資產中心</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
+  <style>
+    :root{
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;
+      color:#172033;background:#f4f7fb
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:#f4f7fb}
+    header{
+      background:#10243d;color:#fff;padding:26px 20px 32px;
+      border-radius:0 0 28px 28px
+    }
+    .version{
+      display:inline-block;margin-bottom:10px;padding:5px 10px;border-radius:999px;
+      background:rgba(255,255,255,.14);font-size:.78rem;font-weight:800
+    }
+    header h1{margin:0 0 8px;font-size:1.55rem}
+    header p{margin:0;line-height:1.65;opacity:.9}
+    main{max-width:760px;margin:auto;padding:18px 14px 70px}
+    .panel{
+      background:#fff;border:1px solid #dde5ef;border-radius:18px;padding:16px;
+      margin-bottom:14px;box-shadow:0 4px 18px rgba(24,42,68,.05)
+    }
+    .panel h2{margin:0 0 12px;color:#17365d;font-size:1.12rem}
+    .status{
+      border-radius:12px;padding:12px 14px;line-height:1.6;
+      background:#fff7df;color:#7e5a08;border:1px solid #efd996
+    }
+    .status.ok{background:#ebf8f2;color:#17694f;border-color:#bee5d6}
+    .status.err{background:#fff0f0;color:#922c2c;border-color:#efc8c8}
+    .profile{
+      border:1px solid #dde5ef;border-radius:16px;padding:14px;background:#f8fafc
+    }
+    .name{font-size:1.08rem;font-weight:900;color:#17365d}
+    .sub{color:#64748b;margin-top:6px;line-height:1.55;word-break:break-all}
+    .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+    .chip{padding:4px 9px;border-radius:999px;font-size:.76rem;font-weight:800;background:#eef2f7;color:#475569}
+    .chip.ok{background:#e8f7ef;color:#17694f}
+    .chip.admin{background:#e8efff;color:#284b88}
+    .grid{display:grid;grid-template-columns:1fr;gap:12px}
+    .entry{
+      border:1px solid #d8e1ec;border-radius:18px;padding:16px;background:#fff
+    }
+    .entry h3{margin:0 0 8px;color:#17365d}
+    .entry p{margin:0 0 14px;color:#64748b;line-height:1.65}
+    button{
+      width:100%;min-height:50px;border:0;border-radius:13px;padding:12px;
+      font:inherit;font-weight:900;cursor:pointer
+    }
+    button.member{background:#176c59;color:#fff}
+    button.admin{background:#2a5f91;color:#fff}
+    button.light{background:#fff;color:#29445f;border:1px solid #cbd5e1}
+    button:disabled{opacity:.45;cursor:not-allowed}
+    .actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .note{font-size:.82rem;color:#64748b;line-height:1.6}
+    @media(min-width:680px){
+      .grid{grid-template-columns:1fr 1fr}
+    }
+  
+/* V3.9.4.2 Android mobile viewport lock */
+html,body{
+  width:100%;
+  max-width:100%;
+  overflow-x:hidden!important;
+  overscroll-behavior-x:none;
+}
+body{
+  position:relative;
+  touch-action:pan-y;
+}
+header,main,.panel,.sheet,.top,.top-inner,
+.member-card,.profile,.entry,.card,.tx,
+.detail-hero,.report-member{
+  width:100%;
+  max-width:100%;
+  min-width:0;
+}
+*,*::before,*::after{
+  min-width:0;
+}
+img,svg,canvas,video{
+  max-width:100%;
+  height:auto;
+}
+input,select,textarea,button{
+  max-width:100%;
+  min-width:0;
+}
+.actions,.grid,.summary,.filters,.filter-grid,
+.member-grid,.detail-summary,.report-filters,
+.report-member-grid{
+  width:100%;
+  max-width:100%;
+}
+.actions>*,
+.grid>*,
+.summary>*,
+.filters>*,
+.filter-grid>*,
+.member-grid>*,
+.detail-summary>*,
+.report-filters>*,
+.report-member-grid>*{
+  min-width:0;
+}
+.wallet,.member-wallet,.addr,.sub,.meta,
+.tx-address,.member-email,.detail-wallet,
+.row .v,.mini .v,.card .value{
+  max-width:100%;
+  overflow-wrap:anywhere!important;
+  word-break:break-word!important;
+  white-space:normal!important;
+}
+table{
+  width:100%!important;
+  max-width:100%!important;
+  table-layout:fixed!important;
+}
+th,td{
+  max-width:1px;
+  overflow-wrap:anywhere!important;
+  word-break:break-word!important;
+  white-space:normal!important;
+}
+
+</style>
+</head>
+<body>
+<header>
+  <div class="version">V3.9.4.2</div>
+  <h1>Independent Points 資產中心</h1>
+  <p>會員資產報表與管理員彙總報表的統一入口</p>
+</header>
+
+<main>
+  <section class="panel">
+    <h2>登入狀態</h2>
+    <div id="statusBox" class="status">正在確認會員登入狀態…</div>
+    <div id="profileBox" class="profile" style="display:none;margin-top:12px">
+      <div id="profileName" class="name">—</div>
+      <div id="profileEmail" class="sub">—</div>
+      <div id="profileChips" class="chips"></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>選擇資產報表</h2>
+    <div class="grid">
+      <div class="entry">
+        <h3>我的資產報表</h3>
+        <p>查看自己的 IPT 餘額、累計轉入／轉出、交易紀錄、日期篩選，以及 CSV／PDF 報表。</p>
+        <button id="memberBtn" class="member" type="button" disabled>進入我的資產</button>
+      </div>
+
+      <div class="entry">
+        <h3>管理員資產彙總</h3>
+        <p>只有管理員可進入。查看全站會員資產、區間交易彙總、搜尋篩選，以及 CSV／PDF 報表。</p>
+        <button id="adminBtn" class="admin" type="button" disabled>進入管理員報表</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="actions">
+      <button id="refreshBtn" class="light" type="button">重新整理</button>
+      <button id="backBtn" class="light" type="button">返回會員頁</button>
+    </div>
+    <div class="note" style="margin-top:10px">
+      一般會員只會開放「我的資產報表」；管理員帳號會額外開放管理員彙總報表。
+    </div>
+  </section>
+</main>
+
+<script>
+(() => {
+  const SUPABASE_URL="https://uccexvgqmoxhgykkjdcy.supabase.co";
+  const SUPABASE_KEY="sb_publishable_FBsN1DYTQMv2_bWhpbXHAA_qdAq7ri7";
+  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{
+    auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
+  });
+  const $=id=>document.getElementById(id);
+
+  function setStatus(kind,text){
+    const el=$("statusBox");
+    el.className="status "+kind;
+    el.textContent=text;
+  }
+
+  async function load(){
+    $("memberBtn").disabled=true;
+    $("adminBtn").disabled=true;
+    $("profileBox").style.display="none";
+    setStatus("","正在確認會員登入狀態…");
+
+    try{
+      const {data:{session},error}=await sb.auth.getSession();
+      if(error) throw error;
+      if(!session?.user){
+        setStatus("err","尚未登入會員。請先返回會員頁登入。");
+        return;
+      }
+
+      const uid=session.user.id;
+      const [pRes,rRes]=await Promise.all([
+        sb.from("member_profiles")
+          .select("member_number,display_name,status")
+          .eq("id",uid).maybeSingle(),
+        sb.from("member_roles")
+          .select("role")
+          .eq("user_id",uid).maybeSingle()
+      ]);
+
+      if(pRes.error) throw pRes.error;
+      if(rRes.error) throw rRes.error;
+      if(!pRes.data) throw new Error("找不到會員資料。");
+
+      const p=pRes.data;
+      const role=rRes.data?.role||"member";
+
+      $("profileName").textContent=`${p.member_number||"—"}｜${p.display_name||"—"}`;
+      $("profileEmail").textContent=session.user.email||"—";
+      $("profileChips").innerHTML=
+        `<span class="chip ${role==="admin"?"admin":""}">${role==="admin"?"管理員":"會員"}</span>`+
+        `<span class="chip ${p.status==="active"?"ok":""}">${p.status==="active"?"正常":"已停權"}</span>`;
+      $("profileBox").style.display="block";
+
+      if(p.status!=="active"){
+        setStatus("err","會員目前為停權狀態，資產報表入口已停用。");
+        return;
+      }
+
+      $("memberBtn").disabled=false;
+      if(role==="admin") $("adminBtn").disabled=false;
+
+      setStatus("ok",
+        role==="admin"
+          ?"登入成功：已開放會員資產與管理員彙總報表。"
+          :"登入成功：已開放我的資產報表。"
+      );
+    }catch(err){
+      console.error(err);
+      setStatus("err","載入失敗："+(err?.message||String(err)));
+    }
+  }
+
+  $("memberBtn").addEventListener("click",()=>{
+    location.href="./member-assets-v3.9.4.2.html?v=3942";
+  });
+  $("adminBtn").addEventListener("click",()=>{
+    location.href="./admin-assets-v3.9.4.2.html?v=3942";
+  });
+  $("refreshBtn").addEventListener("click",load);
+  $("backBtn").addEventListener("click",()=>{
+    if(history.length>1) history.back();
+    else location.href="./index.html";
+  });
+
+  load();
+})();
+</script>
+</body>
+</html>
