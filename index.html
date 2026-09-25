@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Independent Points V3.6｜會員資產儀表板</title>
+<title>Independent Points V3.7｜IPT 資產歷程</title>
 <style>
 :root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;color:#172033}
 *{box-sizing:border-box}
@@ -314,6 +314,88 @@ body.show-cloud-admin .cloud-admin-only{display:block}
   align-items:center;
   margin-top:7px;
 }
+
+.chain-history-summary{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+  margin:12px 0;
+}
+.chain-history-stat{
+  border:1px solid #dbe2ec;
+  border-radius:14px;
+  background:#f8fafc;
+  padding:12px;
+  min-width:0;
+}
+.chain-history-stat span{
+  display:block;
+  color:#667085;
+  font-size:.88rem;
+  margin-bottom:4px;
+}
+.chain-history-stat strong{
+  display:block;
+  font-size:1.18rem;
+  overflow-wrap:anywhere;
+}
+.chain-history-list{
+  display:grid;
+  gap:10px;
+  margin-top:12px;
+}
+.chain-history-card{
+  border:1px solid #dbe2ec;
+  border-radius:15px;
+  background:#fff;
+  padding:13px;
+  line-height:1.55;
+  overflow-wrap:anywhere;
+}
+.chain-history-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-bottom:7px;
+}
+.chain-history-amount{
+  font-weight:900;
+  font-size:1.12rem;
+}
+.chain-history-meta{
+  color:#667085;
+  font-size:.9rem;
+  margin-top:5px;
+}
+.history-in,.history-mint{
+  display:inline-block;
+  padding:5px 9px;
+  border-radius:999px;
+  background:#eaf7ef;
+  color:#1f6848;
+  font-weight:800;
+}
+.history-out,.history-burn{
+  display:inline-block;
+  padding:5px 9px;
+  border-radius:999px;
+  background:#fff0f0;
+  color:#9b2727;
+  font-weight:800;
+}
+.history-internal{
+  display:inline-block;
+  padding:5px 9px;
+  border-radius:999px;
+  background:#eef4ff;
+  color:#274b7a;
+  font-weight:800;
+}
+@media (max-width:480px){
+  .chain-history-summary{grid-template-columns:1fr 1fr}
+}
 @media (max-width:480px){
   .asset-summary-grid{grid-template-columns:1fr 1fr}
 }
@@ -576,7 +658,7 @@ button {
   <h2>③ 會員資產總覽</h2>
 
   <div class="notice-cloud">
-    <b>V3.6 會員資產：</b>把雲端會員資料與 Ethereum Sepolia 上的 IPT 餘額整合在同一頁。
+    <b>V3.7 會員資產：</b>除了即時 IPT 餘額，也會直接讀取 Ethereum Sepolia 的 IPT 轉入／轉出歷程。
     IPT 餘額直接讀取區塊鏈，不會寫入 Supabase，也不會發送交易。
   </div>
 
@@ -596,6 +678,25 @@ button {
   <button id="refreshMemberAssetsBtn" class="green" type="button" disabled>重新讀取會員資產</button>
   <div id="memberAssetsMsg" class="box info">登入雲端會員後即可讀取資產。</div>
   <div id="memberAssetWalletList" class="asset-wallet-list"></div>
+
+  <hr style="margin:22px 0;border:0;border-top:1px solid #dbe2ec">
+
+  <h3>最近 IPT 鏈上歷程</h3>
+  <p class="muted-small">
+    直接從 Ethereum Sepolia 的 IPT Transfer 事件讀取最近 120,000 個區塊，
+    不寫入 Supabase、不需要 Gas。會員自己錢包之間的轉帳會標示為「內部轉帳」。
+  </p>
+
+  <div class="chain-history-summary">
+    <div class="chain-history-stat"><span>交易筆數</span><strong id="memberHistoryCount">—</strong></div>
+    <div class="chain-history-stat"><span>轉入合計</span><strong id="memberHistoryIn">— IPT</strong></div>
+    <div class="chain-history-stat"><span>轉出合計</span><strong id="memberHistoryOut">— IPT</strong></div>
+    <div class="chain-history-stat"><span>淨變動</span><strong id="memberHistoryNet">— IPT</strong></div>
+  </div>
+
+  <button id="refreshMemberHistoryBtn" class="blue" type="button" disabled>讀取 IPT 鏈上歷程</button>
+  <div id="memberHistoryMsg" class="box info">登入會員並綁定錢包後即可讀取。</div>
+  <div id="memberHistoryList" class="chain-history-list"></div>
 </section>
 
 <section id="receiveSection">
@@ -643,7 +744,7 @@ button {
   <h2>⑥ 會員管理中心</h2>
 
   <div class="notice-cloud">
-    <b>V3.6 雲端管理：</b>會員詳情除了雲端資料，也會直接讀取每個綁定錢包的 Sepolia IPT 鏈上餘額。
+    <b>V3.7 雲端管理：</b>會員詳情可讀取綁定錢包的 IPT 即時餘額與最近鏈上轉入／轉出歷程。
   </div>
 
   <div class="admin-summary-grid">
@@ -702,6 +803,17 @@ button {
 
     <div class="admin-detail-section-title">綁定錢包</div>
     <div id="adminDetailWallets" class="admin-detail-list"></div>
+
+    <div class="admin-detail-section-title">IPT 鏈上歷程</div>
+    <div class="chain-history-summary">
+      <div class="chain-history-stat"><span>交易筆數</span><strong id="adminHistoryCount">—</strong></div>
+      <div class="chain-history-stat"><span>轉入合計</span><strong id="adminHistoryIn">— IPT</strong></div>
+      <div class="chain-history-stat"><span>轉出合計</span><strong id="adminHistoryOut">— IPT</strong></div>
+      <div class="chain-history-stat"><span>淨變動</span><strong id="adminHistoryNet">— IPT</strong></div>
+    </div>
+    <button id="adminRefreshChainHistoryBtn" class="gray" type="button">重新讀取此會員 IPT 歷程</button>
+    <div id="adminChainHistoryMsg" class="box info">選擇會員後即可讀取鏈上歷程。</div>
+    <div id="adminChainHistoryList" class="chain-history-list"></div>
 
     <div class="admin-detail-section-title">常用收款人</div>
     <div id="adminDetailContacts" class="admin-detail-list"></div>
@@ -1010,8 +1122,13 @@ const ABI = [
   "function pause()",
   "function unpause()",
   "function transferOwnership(address newOwner)",
-  "function acceptOwnership()"
+  "function acceptOwnership()",
+  "event Transfer(address indexed from, address indexed to, uint256 value)"
 ];
+
+const HISTORY_LOOKBACK_BLOCKS = 120000;
+const HISTORY_MAX_EVENTS = 100;
+const HISTORY_MIN_SPLIT_BLOCKS = 1500;
 
 let wc = null;
 let ep = null;
@@ -1674,6 +1791,17 @@ function renderAdminDetail(data) {
   cloudAdminDetail = data;
   panel.hidden = false;
 
+  if ($("adminHistoryCount")) $("adminHistoryCount").textContent = "—";
+  if ($("adminHistoryIn")) $("adminHistoryIn").textContent = "— IPT";
+  if ($("adminHistoryOut")) $("adminHistoryOut").textContent = "— IPT";
+  if ($("adminHistoryNet")) $("adminHistoryNet").textContent = "— IPT";
+  if ($("adminChainHistoryList")) $("adminChainHistoryList").textContent = "";
+  setChainHistoryMessage(
+    "adminChainHistoryMsg",
+    "info",
+    "會員詳情載入後會自動讀取 IPT 鏈上歷程。"
+  );
+
   const m = data.member;
 
   if ($("adminDetailTitle")) {
@@ -1814,6 +1942,13 @@ function renderAdminDetail(data) {
   );
 
   hydrateAdminDetailWalletBalances().catch(() => {});
+  refreshAdminDetailChainHistory().catch(e => {
+    setChainHistoryMessage(
+      "adminChainHistoryMsg",
+      "warn",
+      "IPT 鏈上歷程暫時無法讀取：" + (e?.message || String(e))
+    );
+  });
 }
 
 async function loadAdminMemberDetail(targetUserId) {
@@ -2064,6 +2199,10 @@ function renderMemberAssetStatic() {
   if ($("refreshMemberAssetsBtn")) {
     $("refreshMemberAssetsBtn").disabled = !logged;
   }
+  if ($("refreshMemberHistoryBtn")) {
+    $("refreshMemberHistoryBtn").disabled =
+      !(logged && cloudWallets.length);
+  }
 
   const host = $("memberAssetWalletList");
   if (!host) return;
@@ -2071,7 +2210,13 @@ function renderMemberAssetStatic() {
 
   if (!logged) {
     if ($("assetTotalIpt")) $("assetTotalIpt").textContent = "— IPT";
+    if ($("memberHistoryCount")) $("memberHistoryCount").textContent = "—";
+    if ($("memberHistoryIn")) $("memberHistoryIn").textContent = "— IPT";
+    if ($("memberHistoryOut")) $("memberHistoryOut").textContent = "— IPT";
+    if ($("memberHistoryNet")) $("memberHistoryNet").textContent = "— IPT";
+    if ($("memberHistoryList")) $("memberHistoryList").textContent = "";
     setMemberAssetsMessage("info", "登入雲端會員後即可讀取資產。");
+    setChainHistoryMessage("memberHistoryMsg", "info", "登入會員並綁定錢包後即可讀取。");
     return;
   }
 
@@ -2200,6 +2345,537 @@ async function readIptBalanceForAddress(address) {
   );
 }
 
+function setChainHistoryMessage(targetId, kind, text) {
+  const el = $(targetId);
+  if (!el) return;
+  el.className = "box " + kind;
+  el.textContent = text;
+}
+
+function normalizeWalletList(addresses) {
+  const out = [];
+  const seen = new Set();
+
+  for (const address of addresses || []) {
+    const value = String(address || "").trim();
+    if (!isWalletAddress(value)) continue;
+
+    const key = value.toLowerCase();
+    if (seen.has(key)) continue;
+
+    seen.add(key);
+    out.push(value);
+  }
+
+  return out;
+}
+
+async function queryTransferLogsAdaptive(contract, filter, fromBlock, toBlock, depth = 0) {
+  try {
+    return await withTimeout(
+      contract.queryFilter(filter, fromBlock, toBlock),
+      14000,
+      "讀取 IPT Transfer 事件"
+    );
+  } catch (e) {
+    const span = Number(toBlock) - Number(fromBlock);
+
+    if (
+      span <= HISTORY_MIN_SPLIT_BLOCKS ||
+      depth >= 8
+    ) {
+      throw e;
+    }
+
+    const mid = Math.floor((Number(fromBlock) + Number(toBlock)) / 2);
+
+    const left = await queryTransferLogsAdaptive(
+      contract,
+      filter,
+      Number(fromBlock),
+      mid,
+      depth + 1
+    );
+
+    const right = await queryTransferLogsAdaptive(
+      contract,
+      filter,
+      mid + 1,
+      Number(toBlock),
+      depth + 1
+    );
+
+    return [...left, ...right];
+  }
+}
+
+function historyLogKey(log) {
+  return (
+    String(log.transactionHash || "") +
+    ":" +
+    String(log.index ?? log.logIndex ?? "")
+  );
+}
+
+function classifyHistoryEvent(from, to, ownedSet) {
+  const f = String(from || "").toLowerCase();
+  const t = String(to || "").toLowerCase();
+  const zero = ZERO_ADDRESS_UI.toLowerCase();
+
+  if (f === zero && ownedSet.has(t)) return "mint";
+  if (t === zero && ownedSet.has(f)) return "burn";
+  if (ownedSet.has(f) && ownedSet.has(t)) return "internal";
+  if (ownedSet.has(t)) return "in";
+  if (ownedSet.has(f)) return "out";
+  return "other";
+}
+
+function historyTypeLabel(type) {
+  if (type === "mint") return "Mint 轉入";
+  if (type === "burn") return "Burn 銷毀";
+  if (type === "in") return "轉入";
+  if (type === "out") return "轉出";
+  if (type === "internal") return "內部轉帳";
+  return "其他";
+}
+
+function historyTypeClass(type) {
+  if (type === "mint") return "history-mint";
+  if (type === "burn") return "history-burn";
+  if (type === "in") return "history-in";
+  if (type === "out") return "history-out";
+  return "history-internal";
+}
+
+function formatHistoryAmount(type, amount) {
+  if (type === "in" || type === "mint") return "+" + amount + " IPT";
+  if (type === "out" || type === "burn") return "-" + amount + " IPT";
+  if (type === "internal") return "↔ " + amount + " IPT";
+  return amount + " IPT";
+}
+
+async function loadHistoryBlockTimes(provider, events) {
+  const blocks = [...new Set(
+    events
+      .map(event => Number(event.blockNumber))
+      .filter(Number.isFinite)
+  )];
+
+  const timeMap = new Map();
+
+  for (const blockNumber of blocks) {
+    try {
+      const block = await withTimeout(
+        provider.getBlock(blockNumber),
+        7000,
+        "讀取區塊時間"
+      );
+
+      if (block?.timestamp) {
+        timeMap.set(blockNumber, Number(block.timestamp) * 1000);
+      }
+    } catch (_) {}
+  }
+
+  return timeMap;
+}
+
+async function readIptTransferHistory(addresses) {
+  const wallets = normalizeWalletList(addresses);
+
+  if (!wallets.length) {
+    return {
+      events: [],
+      decimals: 2,
+      latestBlock: null,
+      fromBlock: null,
+      rpc: ""
+    };
+  }
+
+  const urls = [
+    ...(readProviderUrl ? [readProviderUrl] : []),
+    ...READ_RPCS.filter(url => url !== readProviderUrl)
+  ];
+
+  let lastError = null;
+
+  for (const url of urls) {
+    let provider = null;
+
+    try {
+      provider = new JsonRpcProvider(url, CHAIN_ID, { staticNetwork: true });
+      await providerPassesContractRead(provider);
+
+      const latestBlock = await withTimeout(
+        provider.getBlockNumber(),
+        7000,
+        "讀取最新區塊"
+      );
+
+      const fromBlock = Math.max(
+        0,
+        Number(latestBlock) - HISTORY_LOOKBACK_BLOCKS
+      );
+
+      const contract = new Contract(CONTRACT_ADDRESS, ABI, provider);
+      const decimals = Number(
+        await withTimeout(contract.decimals(), 7000, "讀取 IPT decimals")
+      );
+
+      const allLogs = [];
+
+      for (const wallet of wallets) {
+        const outFilter = contract.filters.Transfer(wallet, null);
+        const inFilter = contract.filters.Transfer(null, wallet);
+
+        const [outLogs, inLogs] = await Promise.all([
+          queryTransferLogsAdaptive(
+            contract,
+            outFilter,
+            fromBlock,
+            latestBlock
+          ),
+          queryTransferLogsAdaptive(
+            contract,
+            inFilter,
+            fromBlock,
+            latestBlock
+          )
+        ]);
+
+        allLogs.push(...outLogs, ...inLogs);
+      }
+
+      const unique = new Map();
+
+      for (const log of allLogs) {
+        unique.set(historyLogKey(log), log);
+      }
+
+      const ownedSet = new Set(wallets.map(x => x.toLowerCase()));
+
+      let events = [...unique.values()]
+        .map(log => {
+          const from = String(log.args?.from || "");
+          const to = String(log.args?.to || "");
+          const value = BigInt(log.args?.value ?? 0n);
+          const type = classifyHistoryEvent(from, to, ownedSet);
+
+          return {
+            txHash: String(log.transactionHash || ""),
+            blockNumber: Number(log.blockNumber),
+            logIndex: Number(log.index ?? log.logIndex ?? 0),
+            from,
+            to,
+            value,
+            amount: formatUnits(value, decimals),
+            type
+          };
+        })
+        .filter(event => event.type !== "other")
+        .sort((a, b) => {
+          if (b.blockNumber !== a.blockNumber) {
+            return b.blockNumber - a.blockNumber;
+          }
+          return b.logIndex - a.logIndex;
+        })
+        .slice(0, HISTORY_MAX_EVENTS);
+
+      const timeMap = await loadHistoryBlockTimes(provider, events);
+
+      events = events.map(event => ({
+        ...event,
+        timestampMs: timeMap.get(event.blockNumber) || null
+      }));
+
+      if (readProvider && readProvider !== provider) {
+        try { readProvider.destroy?.(); } catch (_) {}
+      }
+
+      readProvider = provider;
+      readProviderUrl = url;
+
+      return {
+        events,
+        decimals,
+        latestBlock,
+        fromBlock,
+        rpc: new URL(url).hostname
+      };
+    } catch (e) {
+      lastError = e;
+      try { provider?.destroy?.(); } catch (_) {}
+    }
+  }
+
+  throw new Error(
+    "目前所有 Sepolia RPC 都無法讀取 IPT Transfer 歷程。" +
+    (lastError?.message ? " 最後錯誤：" + lastError.message : "")
+  );
+}
+
+function summarizeTransferHistory(history) {
+  const decimals = Number(history?.decimals ?? 2);
+
+  let incomingRaw = 0n;
+  let outgoingRaw = 0n;
+
+  const events = Array.isArray(history?.events) ? history.events : [];
+
+  for (const event of events) {
+    if (event.type === "in" || event.type === "mint") {
+      incomingRaw += BigInt(event.value);
+    } else if (event.type === "out" || event.type === "burn") {
+      outgoingRaw += BigInt(event.value);
+    }
+  }
+
+  return {
+    count: events.length,
+    incoming: formatUnits(incomingRaw, decimals),
+    outgoing: formatUnits(outgoingRaw, decimals),
+    net: formatUnits(incomingRaw - outgoingRaw, decimals)
+  };
+}
+
+function renderTransferHistory(options) {
+  const {
+    history,
+    listId,
+    countId,
+    inId,
+    outId,
+    netId
+  } = options;
+
+  const host = $(listId);
+  if (!host) return;
+
+  host.textContent = "";
+
+  const summary = summarizeTransferHistory(history);
+
+  if ($(countId)) $(countId).textContent = String(summary.count);
+  if ($(inId)) $(inId).textContent = summary.incoming + " IPT";
+  if ($(outId)) $(outId).textContent = summary.outgoing + " IPT";
+  if ($(netId)) $(netId).textContent = summary.net + " IPT";
+
+  const events = Array.isArray(history?.events) ? history.events : [];
+
+  if (!events.length) {
+    const empty = document.createElement("div");
+    empty.className = "box info";
+    empty.textContent =
+      "在最近 " +
+      HISTORY_LOOKBACK_BLOCKS.toLocaleString() +
+      " 個 Sepolia 區塊內沒有找到 IPT Transfer 紀錄。";
+    host.appendChild(empty);
+    return;
+  }
+
+  events.forEach(event => {
+    const card = document.createElement("div");
+    card.className = "chain-history-card";
+
+    const head = document.createElement("div");
+    head.className = "chain-history-head";
+
+    const badge = document.createElement("span");
+    badge.className = historyTypeClass(event.type);
+    badge.textContent = historyTypeLabel(event.type);
+
+    const amount = document.createElement("span");
+    amount.className = "chain-history-amount";
+    amount.textContent = formatHistoryAmount(event.type, event.amount);
+
+    head.append(badge, amount);
+
+    const direction = document.createElement("div");
+    direction.className = "addr";
+
+    if (event.type === "in" || event.type === "mint") {
+      direction.textContent =
+        "來源：" +
+        (same(event.from, ZERO_ADDRESS_UI) ? "Mint / Zero Address" : event.from);
+    } else if (event.type === "out" || event.type === "burn") {
+      direction.textContent =
+        "去向：" +
+        (same(event.to, ZERO_ADDRESS_UI) ? "Burn / Zero Address" : event.to);
+    } else {
+      direction.textContent =
+        "會員錢包間：" + event.from + " → " + event.to;
+    }
+
+    const meta = document.createElement("div");
+    meta.className = "chain-history-meta";
+
+    const dateText = event.timestampMs
+      ? new Date(event.timestampMs).toLocaleString()
+      : "時間讀取不到";
+
+    meta.textContent =
+      dateText +
+      "｜Block " +
+      event.blockNumber +
+      "｜Tx " +
+      event.txHash.slice(0, 10) +
+      "…" +
+      event.txHash.slice(-8);
+
+    const openBtn = document.createElement("button");
+    openBtn.type = "button";
+    openBtn.className = "gray";
+    openBtn.textContent = "在 Sepolia Etherscan 查看這筆交易";
+    openBtn.addEventListener("click", () => {
+      window.open(
+        "https://sepolia.etherscan.io/tx/" +
+          encodeURIComponent(event.txHash),
+        "_blank",
+        "noopener,noreferrer"
+      );
+    });
+
+    card.append(head, direction, meta, openBtn);
+    host.appendChild(card);
+  });
+}
+
+async function refreshMemberChainHistory() {
+  if (!cloudLoggedIn()) {
+    setChainHistoryMessage(
+      "memberHistoryMsg",
+      "info",
+      "請先登入雲端會員。"
+    );
+    return;
+  }
+
+  const wallets = cloudWallets.map(w => w.wallet_address);
+
+  if (!wallets.length) {
+    renderTransferHistory({
+      history: { events: [], decimals: 2 },
+      listId: "memberHistoryList",
+      countId: "memberHistoryCount",
+      inId: "memberHistoryIn",
+      outId: "memberHistoryOut",
+      netId: "memberHistoryNet"
+    });
+
+    setChainHistoryMessage(
+      "memberHistoryMsg",
+      "info",
+      "目前尚未綁定任何 Sepolia 錢包。"
+    );
+    return;
+  }
+
+  const btn = $("refreshMemberHistoryBtn");
+
+  try {
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = "正在讀取鏈上歷程…";
+    }
+
+    setChainHistoryMessage(
+      "memberHistoryMsg",
+      "info",
+      "正在從 Sepolia RPC 掃描 IPT Transfer 事件…"
+    );
+
+    const history = await readIptTransferHistory(wallets);
+
+    renderTransferHistory({
+      history,
+      listId: "memberHistoryList",
+      countId: "memberHistoryCount",
+      inId: "memberHistoryIn",
+      outId: "memberHistoryOut",
+      netId: "memberHistoryNet"
+    });
+
+    setChainHistoryMessage(
+      "memberHistoryMsg",
+      "ok",
+      "✓ IPT 鏈上歷程已讀取完成｜RPC：" +
+        history.rpc +
+        "｜Block " +
+        history.fromBlock +
+        " → " +
+        history.latestBlock
+    );
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = "讀取 IPT 鏈上歷程";
+    }
+  }
+}
+
+async function refreshAdminDetailChainHistory() {
+  if (!cloudIsAdmin() || !cloudAdminDetail) return;
+
+  const wallets = (cloudAdminDetail.wallets || [])
+    .map(w => w.wallet_address);
+
+  if (!wallets.length) {
+    renderTransferHistory({
+      history: { events: [], decimals: 2 },
+      listId: "adminChainHistoryList",
+      countId: "adminHistoryCount",
+      inId: "adminHistoryIn",
+      outId: "adminHistoryOut",
+      netId: "adminHistoryNet"
+    });
+
+    setChainHistoryMessage(
+      "adminChainHistoryMsg",
+      "info",
+      "此會員目前沒有綁定錢包。"
+    );
+    return;
+  }
+
+  const btn = $("adminRefreshChainHistoryBtn");
+
+  try {
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = "正在讀取…";
+    }
+
+    setChainHistoryMessage(
+      "adminChainHistoryMsg",
+      "info",
+      "正在從 Sepolia RPC 讀取此會員 IPT Transfer 歷程…"
+    );
+
+    const history = await readIptTransferHistory(wallets);
+
+    renderTransferHistory({
+      history,
+      listId: "adminChainHistoryList",
+      countId: "adminHistoryCount",
+      inId: "adminHistoryIn",
+      outId: "adminHistoryOut",
+      netId: "adminHistoryNet"
+    });
+
+    setChainHistoryMessage(
+      "adminChainHistoryMsg",
+      "ok",
+      "✓ 此會員 IPT 鏈上歷程已讀取完成｜RPC：" + history.rpc
+    );
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = "重新讀取此會員 IPT 歷程";
+    }
+  }
+}
+
 async function refreshMemberAssetDashboard() {
   if (!cloudLoggedIn()) {
     renderMemberAssetStatic();
@@ -2325,7 +3001,6 @@ async function refreshCloudMemberData(message = "") {
     renderCloudAuthUI();
     renderCloudAdminAccess();
     syncMemberTools();
-    renderMemberAssetStatic();
     renderMemberAssetStatic();
 
     if (cloudIsAdmin()) {
@@ -2840,8 +3515,8 @@ async function initWC() {
     events: ["chainChanged","accountsChanged"],
     optionalEvents: ["connect","disconnect","message"],
     metadata: {
-      name: "Independent Points V3.6",
-      description: "Independent Points V3.6 member asset dashboard with live Sepolia IPT balances",
+      name: "Independent Points V3.7",
+      description: "Independent Points V3.7 member asset timeline with Sepolia IPT transfer history",
       url: "https://avg168.github.io",
       icons: []
     },
@@ -5540,6 +6215,26 @@ $("goAssetsBtn")?.addEventListener("click", () => {
 $("refreshMemberAssetsBtn")?.addEventListener("click", () => {
   refreshMemberAssetDashboard().catch(e => {
     setMemberAssetsMessage("err", e?.message || String(e));
+  });
+});
+
+$("refreshMemberHistoryBtn")?.addEventListener("click", () => {
+  refreshMemberChainHistory().catch(e => {
+    setChainHistoryMessage(
+      "memberHistoryMsg",
+      "err",
+      e?.message || String(e)
+    );
+  });
+});
+
+$("adminRefreshChainHistoryBtn")?.addEventListener("click", () => {
+  refreshAdminDetailChainHistory().catch(e => {
+    setChainHistoryMessage(
+      "adminChainHistoryMsg",
+      "err",
+      e?.message || String(e)
+    );
   });
 });
 
