@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Independent Points V3.5｜會員詳細資料</title>
+<title>Independent Points V3.6｜會員資產儀表板</title>
 <style>
 :root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;color:#172033}
 *{box-sizing:border-box}
@@ -264,6 +264,59 @@ body.show-cloud-admin .cloud-admin-only{display:block}
   font-weight:850;
   font-size:1.04rem;
 }
+
+.asset-summary-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+  margin:12px 0 16px;
+}
+.asset-stat{
+  border:1px solid #dbe2ec;
+  border-radius:14px;
+  padding:14px;
+  background:#f8fafc;
+  min-width:0;
+}
+.asset-stat span{
+  display:block;
+  color:#667085;
+  font-size:.9rem;
+  margin-bottom:5px;
+}
+.asset-stat strong{
+  display:block;
+  font-size:1.45rem;
+  overflow-wrap:anywhere;
+}
+.asset-wallet-list{
+  display:grid;
+  gap:12px;
+  margin-top:12px;
+}
+.asset-wallet-card{
+  border:1px solid #dbe2ec;
+  border-radius:16px;
+  padding:14px;
+  background:#fff;
+  line-height:1.6;
+  overflow-wrap:anywhere;
+}
+.asset-wallet-balance{
+  font-size:1.35rem;
+  font-weight:850;
+  margin:8px 0;
+}
+.asset-status-line{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  align-items:center;
+  margin-top:7px;
+}
+@media (max-width:480px){
+  .asset-summary-grid{grid-template-columns:1fr 1fr}
+}
 .admin-detail-actions{
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -400,6 +453,7 @@ button {
   <div class="quick-grid">
     <button id="goAuthBtn" class="green" type="button">會員登入</button>
     <button id="goMemberBtn" class="soft" type="button">會員中心</button>
+    <button id="goAssetsBtn" class="soft" type="button">資產總覽</button>
     <button id="goBalanceBtn" class="soft" type="button">查看點數</button>
     <button id="goTransferBtn" class="blue" type="button">IPT 轉帳</button>
     <button id="goReceiveBtn" class="soft" type="button">收款</button>
@@ -518,8 +572,34 @@ button {
   </p>
 </section>
 
+<section id="memberAssetsSection">
+  <h2>③ 會員資產總覽</h2>
+
+  <div class="notice-cloud">
+    <b>V3.6 會員資產：</b>把雲端會員資料與 Ethereum Sepolia 上的 IPT 餘額整合在同一頁。
+    IPT 餘額直接讀取區塊鏈，不會寫入 Supabase，也不會發送交易。
+  </div>
+
+  <div class="asset-summary-grid">
+    <div class="asset-stat"><span>永久會員編號</span><strong id="assetMemberNumber">—</strong></div>
+    <div class="asset-stat"><span>會員角色</span><strong id="assetMemberRole">—</strong></div>
+    <div class="asset-stat"><span>會員狀態</span><strong id="assetMemberStatus">—</strong></div>
+    <div class="asset-stat"><span>雲端錢包</span><strong id="assetWalletCount">0</strong></div>
+    <div class="asset-stat"><span>已驗證錢包</span><strong id="assetVerifiedWalletCount">0</strong></div>
+    <div class="asset-stat"><span>常用收款人</span><strong id="assetContactsCount">0</strong></div>
+    <div class="asset-stat" style="grid-column:1/-1">
+      <span>鏈上 IPT 合計</span>
+      <strong id="assetTotalIpt">— IPT</strong>
+    </div>
+  </div>
+
+  <button id="refreshMemberAssetsBtn" class="green" type="button" disabled>重新讀取會員資產</button>
+  <div id="memberAssetsMsg" class="box info">登入雲端會員後即可讀取資產。</div>
+  <div id="memberAssetWalletList" class="asset-wallet-list"></div>
+</section>
+
 <section id="receiveSection">
-  <h2>③ IPT 收款</h2>
+  <h2>④ IPT 收款</h2>
   <div class="box info">
     把下方錢包地址提供給對方，即可接收 <b>Ethereum Sepolia</b> 上的 IPT。
     目前是測試網，請勿把主網資產或其他鏈的代幣轉到這個用途。
@@ -536,7 +616,7 @@ button {
 </section>
 
 <section id="contactsSection">
-  <h2>④ 常用收款人</h2>
+  <h2>⑤ 常用收款人</h2>
   <div class="simple-card-note">
     登入會員時使用雲端常用收款人；未登入時仍使用本機資料。
     你也可以把這支手機原本的 V3.2.1 常用收款人一次同步到雲端。
@@ -560,10 +640,10 @@ button {
 </section>
 
 <section id="cloudAdminSection" class="cloud-admin-only">
-  <h2>⑤ 會員管理中心</h2>
+  <h2>⑥ 會員管理中心</h2>
 
   <div class="notice-cloud">
-    <b>V3.5 雲端管理：</b>除了會員狀態與角色管理，現在可以進一步查看單一會員的完整資料、錢包、常用收款人與管理歷程。
+    <b>V3.6 雲端管理：</b>會員詳情除了雲端資料，也會直接讀取每個綁定錢包的 Sepolia IPT 鏈上餘額。
   </div>
 
   <div class="admin-summary-grid">
@@ -655,7 +735,7 @@ button {
 </section>
 
 <section id="connectSection">
-  <h2>⑥ 連接錢包</h2>
+  <h2>⑦ 連接錢包</h2>
   <div id="sessionState" class="box warn">尚未連線。</div>
   <button id="connectBtn" class="blue" type="button">連接 Trust Wallet</button>
   <button id="disconnectBtn" class="gray" type="button" disabled>中斷連線／切換錢包</button>
@@ -663,7 +743,7 @@ button {
 </section>
 
 <section id="identitySection">
-  <h2>⑦ 我的帳戶</h2>
+  <h2>⑧ 我的帳戶</h2>
   <div class="row"><div class="label">目前身分</div><div id="role">尚未連線</div></div>
   <div class="row"><div class="label">合約狀態</div><div id="contractState">尚未讀取</div></div>
   <div class="row"><div class="label">鏈上讀取</div><div id="rpcStatus">RPC 自動備援已啟用</div></div>
@@ -671,7 +751,7 @@ button {
 </section>
 
 <section id="balanceSection">
-  <h2>⑧ 我的 IPT</h2>
+  <h2>⑨ 我的 IPT</h2>
   <div id="balance" class="balance">— IPT</div>
   <div class="row"><div class="label">鏈上總供給量</div><div id="supply">—</div></div>
   <div class="row"><div class="label">剩餘可發行</div><div id="remaining">—</div></div>
@@ -712,7 +792,7 @@ button {
 </section>
 
 <section id="transferSection">
-  <h2>⑨ IPT 轉帳</h2>
+  <h2>⑩ IPT 轉帳</h2>
   <div class="box info">
     請確認收款地址與數量。系統會先檢查鏈上餘額與交易狀態，再交由 Trust Wallet 核准。
     若畫面逾時，先重新讀取鏈上資料，不要立即重送。
@@ -1175,7 +1255,7 @@ async function loadCloudProfile() {
 
   let { data, error } = await supabase
     .from("member_profiles")
-    .select("id, member_number, display_name, avatar_url, created_at, updated_at")
+    .select("id, member_number, display_name, avatar_url, status, created_at, updated_at")
     .eq("id", cloudUser.id)
     .maybeSingle();
 
@@ -1192,7 +1272,7 @@ async function loadCloudProfile() {
         id: cloudUser.id,
         display_name: fallbackName
       })
-      .select("id, member_number, display_name, avatar_url, created_at, updated_at")
+      .select("id, member_number, display_name, avatar_url, status, created_at, updated_at")
       .single();
 
     if (inserted.error) throw inserted.error;
@@ -1628,17 +1708,31 @@ function renderAdminDetail(data) {
         const row = document.createElement("div");
         row.className = "admin-detail-row";
 
-        const lines = [
-          (wallet.label || "錢包") + (wallet.is_primary ? "｜主要錢包" : ""),
-          "地址：" + (wallet.wallet_address || "—"),
-          "Chain ID：" + String(wallet.chain_id ?? "—"),
+        const title = document.createElement("div");
+        title.style.fontWeight = "850";
+        title.textContent =
+          (wallet.label || "錢包") + (wallet.is_primary ? "｜主要錢包" : "");
+
+        const addressLine = document.createElement("div");
+        addressLine.className = "addr";
+        addressLine.textContent = "地址：" + (wallet.wallet_address || "—");
+
+        const chainLine = document.createElement("div");
+        chainLine.textContent = "Chain ID：" + String(wallet.chain_id ?? "—");
+
+        const verifyLine = document.createElement("div");
+        verifyLine.textContent =
           wallet.verified_at
             ? "驗證：已驗證｜" + formatAdminDate(wallet.verified_at)
-            : "驗證：尚未驗證"
-        ];
+            : "驗證：尚未驗證";
 
-        row.textContent = lines.join("\n");
-        row.style.whiteSpace = "pre-line";
+        const balanceLine = document.createElement("div");
+        balanceLine.style.fontWeight = "800";
+        balanceLine.textContent = "IPT 餘額：等待讀取";
+        balanceLine.dataset.adminWalletBalance = "1";
+        balanceLine.dataset.address = wallet.wallet_address || "";
+
+        row.append(title, addressLine, chainLine, verifyLine, balanceLine);
         walletsHost.appendChild(row);
       });
     }
@@ -1716,8 +1810,10 @@ function renderAdminDetail(data) {
 
   setAdminDetailMessage(
     "ok",
-    "✓ 會員完整資料已載入。錢包、常用收款人與管理歷程皆為雲端即時資料。"
+    "✓ 會員完整資料已載入；錢包 IPT 餘額會直接從 Ethereum Sepolia 即時讀取。"
   );
+
+  hydrateAdminDetailWalletBalances().catch(() => {});
 }
 
 async function loadAdminMemberDetail(targetUserId) {
@@ -1928,6 +2024,286 @@ async function loadAdminMembers(query = "") {
   return data;
 }
 
+function setMemberAssetsMessage(kind, text) {
+  const el = $("memberAssetsMsg");
+  if (!el) return;
+  el.className = "box " + kind;
+  el.textContent = text;
+}
+
+function renderMemberAssetStatic() {
+  const logged = cloudLoggedIn();
+
+  if ($("assetMemberNumber")) {
+    $("assetMemberNumber").textContent =
+      logged ? (cloudProfile?.member_number || "—") : "—";
+  }
+  if ($("assetMemberRole")) {
+    $("assetMemberRole").textContent =
+      logged ? (cloudRole === "admin" ? "管理員" : "會員") : "—";
+  }
+  if ($("assetMemberStatus")) {
+    $("assetMemberStatus").textContent =
+      logged
+        ? (cloudProfile?.status === "suspended" ? "已停權" : "正常")
+        : "—";
+  }
+  if ($("assetWalletCount")) {
+    $("assetWalletCount").textContent = logged ? String(cloudWallets.length) : "0";
+  }
+  if ($("assetVerifiedWalletCount")) {
+    $("assetVerifiedWalletCount").textContent =
+      logged
+        ? String(cloudWallets.filter(w => !!w.verified_at).length)
+        : "0";
+  }
+  if ($("assetContactsCount")) {
+    $("assetContactsCount").textContent =
+      logged ? String(cloudContacts.length) : "0";
+  }
+  if ($("refreshMemberAssetsBtn")) {
+    $("refreshMemberAssetsBtn").disabled = !logged;
+  }
+
+  const host = $("memberAssetWalletList");
+  if (!host) return;
+  host.textContent = "";
+
+  if (!logged) {
+    if ($("assetTotalIpt")) $("assetTotalIpt").textContent = "— IPT";
+    setMemberAssetsMessage("info", "登入雲端會員後即可讀取資產。");
+    return;
+  }
+
+  if (!cloudWallets.length) {
+    if ($("assetTotalIpt")) $("assetTotalIpt").textContent = "0 IPT";
+    const empty = document.createElement("div");
+    empty.className = "box info";
+    empty.textContent = "目前尚未綁定任何 Sepolia 錢包。";
+    host.appendChild(empty);
+    setMemberAssetsMessage("info", "先到會員中心綁定錢包，再回來讀取鏈上 IPT。");
+    return;
+  }
+
+  cloudWallets.forEach((wallet, index) => {
+    const card = document.createElement("div");
+    card.className = "asset-wallet-card";
+    card.dataset.wallet = wallet.wallet_address || "";
+
+    const title = document.createElement("div");
+    title.style.fontWeight = "850";
+    title.textContent =
+      (wallet.label || "Sepolia 錢包") +
+      (wallet.is_primary ? "｜主要錢包" : "");
+
+    const addr = document.createElement("div");
+    addr.className = "addr";
+    addr.textContent = wallet.wallet_address || "—";
+
+    const balance = document.createElement("div");
+    balance.className = "asset-wallet-balance";
+    balance.textContent = "— IPT";
+    balance.dataset.assetBalance = "1";
+
+    const status = document.createElement("div");
+    status.className = "asset-status-line";
+
+    const verify = document.createElement("span");
+    verify.className = wallet.verified_at ? "verify-ok" : "verify-no";
+    verify.textContent = wallet.verified_at ? "已驗證" : "未驗證";
+
+    const chain = document.createElement("span");
+    chain.className = "member-id";
+    chain.textContent = "Sepolia｜" + String(wallet.chain_id || CHAIN_ID);
+
+    status.append(verify, chain);
+
+    const openBtn = document.createElement("button");
+    openBtn.type = "button";
+    openBtn.className = "gray";
+    openBtn.textContent = "在 Etherscan 查看錢包";
+    openBtn.addEventListener("click", () => {
+      window.open(
+        "https://sepolia.etherscan.io/address/" +
+          encodeURIComponent(wallet.wallet_address),
+        "_blank",
+        "noopener,noreferrer"
+      );
+    });
+
+    card.append(title, addr, balance, status, openBtn);
+    host.appendChild(card);
+  });
+}
+
+async function readIptBalanceForAddress(address) {
+  if (!isWalletAddress(address)) {
+    throw new Error("錢包地址格式不正確。");
+  }
+
+  const urls = [
+    ...(readProviderUrl ? [readProviderUrl] : []),
+    ...READ_RPCS.filter(url => url !== readProviderUrl)
+  ];
+
+  const errors = [];
+
+  for (const url of urls) {
+    let p = null;
+    try {
+      p = new JsonRpcProvider(url, CHAIN_ID, { staticNetwork: true });
+
+      const code = await withTimeout(
+        p.getCode(CONTRACT_ADDRESS),
+        7000,
+        "讀取 IPT 合約程式碼"
+      );
+      if (!code || code === "0x") {
+        throw new Error("此節點查不到 IPT 合約");
+      }
+
+      const c = new Contract(CONTRACT_ADDRESS, ABI, p);
+
+      const [symbol, decimals, rawBalance] = await withTimeout(
+        Promise.all([
+          c.symbol(),
+          c.decimals(),
+          c.balanceOf(address)
+        ]),
+        9000,
+        "讀取 IPT 餘額"
+      );
+
+      if (symbol !== "IPT") throw new Error("合約 symbol 不符");
+
+      if (readProvider && readProvider !== p) {
+        try { readProvider.destroy?.(); } catch (_) {}
+      }
+      readProvider = p;
+      readProviderUrl = url;
+
+      return {
+        raw: BigInt(rawBalance),
+        decimals: Number(decimals),
+        formatted: formatUnits(rawBalance, decimals),
+        rpc: new URL(url).hostname
+      };
+    } catch (e) {
+      errors.push(new URL(url).hostname + "：" + (e?.message || String(e)));
+      try { p?.destroy?.(); } catch (_) {}
+    }
+  }
+
+  throw new Error(
+    "目前所有 Sepolia RPC 都無法讀取此錢包 IPT。" +
+    (errors.length ? " " + errors.slice(-2).join("；") : "")
+  );
+}
+
+async function refreshMemberAssetDashboard() {
+  if (!cloudLoggedIn()) {
+    renderMemberAssetStatic();
+    return;
+  }
+
+  renderMemberAssetStatic();
+
+  if (!cloudWallets.length) return;
+
+  const btn = $("refreshMemberAssetsBtn");
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = "正在讀取 Sepolia…";
+  }
+
+  try {
+    setMemberAssetsMessage("info", "正在逐一讀取雲端綁定錢包的 IPT 鏈上餘額…");
+
+    let totalRaw = 0n;
+    let commonDecimals = null;
+    let successCount = 0;
+
+    const cards = Array.from(
+      $("memberAssetWalletList")?.querySelectorAll(".asset-wallet-card") || []
+    );
+
+    for (const card of cards) {
+      const address = String(card.dataset.wallet || "");
+      const balanceEl = card.querySelector("[data-asset-balance]");
+
+      try {
+        if (balanceEl) balanceEl.textContent = "讀取中…";
+
+        const result = await readIptBalanceForAddress(address);
+
+        if (commonDecimals == null) commonDecimals = result.decimals;
+        if (result.decimals !== commonDecimals) {
+          throw new Error("IPT decimals 不一致");
+        }
+
+        totalRaw += result.raw;
+        successCount += 1;
+
+        if (balanceEl) {
+          balanceEl.textContent = result.formatted + " IPT";
+          balanceEl.title = "RPC：" + result.rpc;
+        }
+      } catch (e) {
+        if (balanceEl) {
+          balanceEl.textContent = "讀取失敗";
+          balanceEl.title = e?.message || String(e);
+        }
+      }
+    }
+
+    if ($("assetTotalIpt")) {
+      $("assetTotalIpt").textContent =
+        commonDecimals == null
+          ? "— IPT"
+          : formatUnits(totalRaw, commonDecimals) + " IPT";
+    }
+
+    if (successCount === cloudWallets.length) {
+      setMemberAssetsMessage(
+        "ok",
+        "✓ 會員資產已從 Ethereum Sepolia 即時讀取完成。"
+      );
+    } else {
+      setMemberAssetsMessage(
+        "warn",
+        "部分錢包暫時無法讀取；已顯示成功讀取的鏈上資產。"
+      );
+    }
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = "重新讀取會員資產";
+    }
+  }
+}
+
+async function hydrateAdminDetailWalletBalances() {
+  const host = $("adminDetailWallets");
+  if (!host) return;
+
+  const targets = Array.from(
+    host.querySelectorAll("[data-admin-wallet-balance]")
+  );
+
+  for (const el of targets) {
+    const address = String(el.dataset.address || "");
+    try {
+      el.textContent = "IPT 餘額：讀取中…";
+      const result = await readIptBalanceForAddress(address);
+      el.textContent = "IPT 餘額：" + result.formatted + " IPT";
+      el.title = "RPC：" + result.rpc;
+    } catch (e) {
+      el.textContent = "IPT 餘額：讀取失敗";
+      el.title = e?.message || String(e);
+    }
+  }
+}
+
 async function refreshCloudMemberData(message = "") {
   if (!cloudLoggedIn()) {
     cloudProfile = null;
@@ -1949,6 +2325,8 @@ async function refreshCloudMemberData(message = "") {
     renderCloudAuthUI();
     renderCloudAdminAccess();
     syncMemberTools();
+    renderMemberAssetStatic();
+    renderMemberAssetStatic();
 
     if (cloudIsAdmin()) {
       Promise.all([
@@ -1984,6 +2362,7 @@ async function syncCloudSession(session, message = "") {
     renderCloudAuthUI();
     renderCloudAdminAccess();
     syncMemberTools();
+    renderMemberAssetStatic();
     if (message) setCloudAuthMessage("info", message);
     return;
   }
@@ -2000,7 +2379,7 @@ async function saveCloudProfileNickname(nickname) {
     .from("member_profiles")
     .update({ display_name: nickname })
     .eq("id", cloudUser.id)
-    .select("id, member_number, display_name, avatar_url, created_at, updated_at")
+    .select("id, member_number, display_name, avatar_url, status, created_at, updated_at")
     .single();
 
   if (error) throw error;
@@ -2461,8 +2840,8 @@ async function initWC() {
     events: ["chainChanged","accountsChanged"],
     optionalEvents: ["connect","disconnect","message"],
     metadata: {
-      name: "Independent Points V3.5",
-      description: "Independent Points V3.5 member detail administration and audit history",
+      name: "Independent Points V3.6",
+      description: "Independent Points V3.6 member asset dashboard with live Sepolia IPT balances",
       url: "https://avg168.github.io",
       icons: []
     },
@@ -5151,6 +5530,19 @@ $("goMemberBtn")?.addEventListener("click", () => {
   $("memberCenterSection")?.scrollIntoView({ behavior: "smooth", block: "start" });
 });
 
+$("goAssetsBtn")?.addEventListener("click", () => {
+  $("memberAssetsSection")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  refreshMemberAssetDashboard().catch(e => {
+    setMemberAssetsMessage("err", e?.message || String(e));
+  });
+});
+
+$("refreshMemberAssetsBtn")?.addEventListener("click", () => {
+  refreshMemberAssetDashboard().catch(e => {
+    setMemberAssetsMessage("err", e?.message || String(e));
+  });
+});
+
 $("goReceiveBtn")?.addEventListener("click", () => {
   $("receiveSection")?.scrollIntoView({ behavior: "smooth", block: "start" });
 });
@@ -5610,6 +6002,7 @@ async function initCloudMember() {
 
 // Initial UI state.
 syncMemberTools();
+renderMemberAssetStatic();
 initCloudMember();
 
 </script>
