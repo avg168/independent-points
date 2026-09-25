@@ -90,7 +90,7 @@ button.light{background:#fff;color:#29445f}
 </head>
 <body>
 <header>
-  <div class="version">V4.0.1</div>
+  <div class="version">V4.0.2</div>
   <h1>Independent Points</h1>
   <p>會員 × 錢包 × IPT 資產 × 交易 × 管理，一個入口完成。</p>
 </header>
@@ -218,9 +218,10 @@ button.light{background:#fff;color:#29445f}
   </section>
 
   <section class="panel">
-    <h2>V4.0.1 正式整合</h2>
+    <h2>V4.0.2 正式定版</h2>
+    <div class="status ok" style="margin-bottom:12px">正式首頁已啟用，會員與管理員入口均已整合完成。</div>
     <div class="note">
-      V4.0.1 目前先作為新的統一首頁，不覆蓋既有 index.html。所有已通過的 V3.9.4.2 報表與原本 IPT 錢包功能都保留。等這個入口驗收通過後，再進行正式首頁替換。
+      V4.0.2 已作為正式統一首頁。原本通過驗證的錢包核心保留在 wallet-core-v3.8.2.html；會員與管理員資產報表沿用 V3.9.4.2 穩定版。
     </div>
   </section>
 </main>
@@ -324,8 +325,8 @@ button.light{background:#fff;color:#29445f}
 
       setStatus("ok",
         role==="admin"
-          ?"V4.0 已登入：會員功能與管理中心均已開放。"
-          :"V4.0 已登入：會員功能已開放。"
+          ?"V4.0.2 已登入：會員功能與管理中心均已開放。"
+          :"V4.0.2 已登入：會員功能已開放。"
       );
 
       try{
