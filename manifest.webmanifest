@@ -1,0 +1,19 @@
+{
+  "name": "Independent Points",
+  "short_name": "IPT",
+  "description": "Independent Points 會員點數錢包與 IPT 資產管理系統",
+  "start_url": "./?v=440",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f7fb",
+  "theme_color": "#10243d",
+  "lang": "zh-Hant-TW",
+  "icons": [
+    {
+      "src": "./ipt-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

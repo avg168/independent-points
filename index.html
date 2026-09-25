@@ -180,7 +180,7 @@ body{
 }
 
 
-/* ===== V4.3.2 Android bottom-navigation fix ===== */
+/* ===== V4.4.0 Android bottom-navigation fix ===== */
 .v43-bottom-nav{
   position:fixed!important;
   left:50%!important;
@@ -247,7 +247,7 @@ body{
 }
 
 
-/* ===== V4.3.2 reliable in-page navigation ===== */
+/* ===== V4.4.0 reliable in-page navigation ===== */
 .v43-bottom-nav{
   display:none!important;
 }
@@ -307,11 +307,47 @@ body{
   .v432-nav-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
 }
 
+
+/* ===== V4.4 production polish ===== */
+:root{
+  color-scheme:light;
+}
+html{
+  scroll-behavior:smooth;
+}
+body{
+  -webkit-text-size-adjust:100%;
+  text-rendering:optimizeLegibility;
+}
+button,input,select,textarea{
+  font:inherit;
+}
+button{
+  cursor:pointer;
+}
+@media(display-mode:standalone){
+  body::before{
+    content:"";
+    display:block;
+    height:env(safe-area-inset-top);
+  }
+}
+
 </style>
+
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="theme-color" content="#10243d">
+<meta name="application-name" content="Independent Points">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Independent Points">
+<meta name="description" content="Independent Points 會員點數錢包與 IPT 資產管理系統。">
+<link rel="icon" type="image/svg+xml" href="./ipt-icon.svg">
+
 </head>
 <body>
 <header>
-  <div class="version">V4.3.2</div>
+  <div class="version">V4.4.0</div>
   <h1>Independent Points</h1>
   <p>會員、錢包、IPT 資產、交易與管理，一個正式入口完成。</p>
 </header>
@@ -464,12 +500,20 @@ body{
   </section>
 
   <section class="panel">
-    <h2>V4.3.2 操作體驗整合</h2>
-    <div class="status ok" style="margin-bottom:12px">V4.3.2 防卡版：首頁會員資料先完成，完整鏈上統計改為需要時才更新。</div>
+    <h2>V4.4.0 操作體驗整合</h2>
+    <div class="status ok" style="margin-bottom:12px">V4.4.0 防卡版：首頁會員資料先完成，完整鏈上統計改為需要時才更新。</div>
     <div class="note">
-      V4.3.2 已作為正式統一首頁。原本通過驗證的錢包核心保留在 wallet-core-v4.3.2.html；會員與管理員資產報表已統一為 V4.3 模組。
+      V4.4.0 已作為正式統一首頁。原本通過驗證的錢包核心保留在 wallet-core-v4.4.html；會員與管理員資產報表已統一為 V4.3 模組。
     </div>
   </section>
+
+  <section class="panel">
+    <h2>安裝 Independent Points</h2>
+    <div class="note">可將系統安裝到 Android 主畫面，之後像一般 App 一樣開啟。</div>
+    <button id="installAppBtn" class="secondary" type="button" style="width:100%;margin-top:10px">安裝到主畫面</button>
+    <div id="installAppNote" class="note">若按鈕顯示不可安裝，可使用瀏覽器選單的「加到主畫面」。</div>
+  </section>
+
 </main>
 
 <script>
@@ -642,8 +686,8 @@ body{
 
       setStatus("ok",
         role==="admin"
-          ?"V4.3.2 已登入：會員功能與管理中心均已開放。"
-          :"V4.3.2 已登入：會員功能已開放。"
+          ?"V4.4.0 已登入：會員功能與管理中心均已開放。"
+          :"V4.4.0 已登入：會員功能已開放。"
       );
 
       $("assetSummarySection").style.display="block";
@@ -662,23 +706,23 @@ body{
 
   $("refreshBtn").addEventListener("click",load);
   $("assetSummaryRefreshBtn").addEventListener("click",refreshAssetSummary);
-  $("loginBtn").addEventListener("click",()=>go("./wallet-core-v4.3.2.html"));
+  $("loginBtn").addEventListener("click",()=>go("./wallet-core-v4.4.html"));
 
-  $("myAssetBtn").addEventListener("click",()=>go("./member-assets-v4.3.2.html?v=432"));
-  $("historyBtn").addEventListener("click",()=>go("./wallet-core-v4.3.2.html?go=history"));
-  $("assetCenterBtn").addEventListener("click",()=>go("./asset-center-v4.3.2.html?v=432"));
-  $("systemInfoBtn").addEventListener("click",()=>go("./system-info-v4.2.html?v=432"));
+  $("myAssetBtn").addEventListener("click",()=>go("./member-assets-v4.4.html?v=440"));
+  $("historyBtn").addEventListener("click",()=>go("./wallet-core-v4.4.html?go=history"));
+  $("assetCenterBtn").addEventListener("click",()=>go("./asset-center-v4.4.html?v=440"));
+  $("systemInfoBtn").addEventListener("click",()=>go("./system-info-v4.2.html?v=440"));
 
-  $("balanceBtn").addEventListener("click",()=>go("./wallet-core-v4.3.2.html?go=balance"));
-  $("transferBtn").addEventListener("click",()=>go("./wallet-core-v4.3.2.html?go=transfer"));
-  $("receiveBtn").addEventListener("click",()=>go("./wallet-core-v4.3.2.html?go=receive"));
+  $("balanceBtn").addEventListener("click",()=>go("./wallet-core-v4.4.html?go=balance"));
+  $("transferBtn").addEventListener("click",()=>go("./wallet-core-v4.4.html?go=transfer"));
+  $("receiveBtn").addEventListener("click",()=>go("./wallet-core-v4.4.html?go=receive"));
 
-  $("adminAssetBtn").addEventListener("click",()=>go("./admin-assets-v4.3.2.html?v=432"));
+  $("adminAssetBtn").addEventListener("click",()=>go("./admin-assets-v4.4.html?v=440"));
   $("adminMemberBtn").addEventListener("click",()=>go("./admin-members-v4.1.1.html?v=412"));
-  $("mintBtn").addEventListener("click",()=>go("./wallet-core-v4.3.2.html?go=mint"));
-  $("pauseBtn").addEventListener("click",()=>go("./wallet-core-v4.3.2.html?go=pause"));
-  $("ownershipBtn").addEventListener("click",()=>go("./wallet-core-v4.3.2.html?go=ownership"));
-  $("advancedBtn").addEventListener("click",()=>go("./wallet-core-v4.3.2.html"));
+  $("mintBtn").addEventListener("click",()=>go("./wallet-core-v4.4.html?go=mint"));
+  $("pauseBtn").addEventListener("click",()=>go("./wallet-core-v4.4.html?go=pause"));
+  $("ownershipBtn").addEventListener("click",()=>go("./wallet-core-v4.4.html?go=ownership"));
+  $("advancedBtn").addEventListener("click",()=>go("./wallet-core-v4.4.html"));
   $("v43NavAssets")?.addEventListener("click",()=>{
     if(!$("myAssetBtn").disabled) $("myAssetBtn").click();
   });
@@ -699,6 +743,47 @@ body{
   });
 
   load();
+})();
+</script>
+
+
+<script>
+(() => {
+  let deferredInstallPrompt = null;
+  const installBtn = document.getElementById("installAppBtn");
+  const installNote = document.getElementById("installAppNote");
+
+  window.addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
+    deferredInstallPrompt = event;
+    if (installBtn) {
+      installBtn.disabled = false;
+      installBtn.textContent = "安裝到主畫面";
+    }
+    if (installNote) installNote.textContent = "此裝置可直接安裝 Independent Points。";
+  });
+
+  installBtn?.addEventListener("click", async () => {
+    if (!deferredInstallPrompt) {
+      if (installNote) installNote.textContent = "請使用瀏覽器選單的「加到主畫面／安裝應用程式」。";
+      return;
+    }
+    deferredInstallPrompt.prompt();
+    const choice = await deferredInstallPrompt.userChoice;
+    if (installNote) installNote.textContent =
+      choice.outcome === "accepted" ? "已接受安裝。" : "已取消安裝。";
+    deferredInstallPrompt = null;
+  });
+
+  window.addEventListener("appinstalled", () => {
+    if (installNote) installNote.textContent = "Independent Points 已安裝完成。";
+  });
+
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+    });
+  }
 })();
 </script>
 
