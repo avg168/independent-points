@@ -2,6 +2,17 @@
   "product": "Independent Points",
   "releases": [
     {
+      "version": "V4.6.2",
+      "date": "2026-09-26",
+      "channel": "production",
+      "title": "IPT 六位小數顯示版",
+      "notes": [
+        "IPT 金額統一顯示小數點 6 位",
+        "例如 0.8 顯示為 0.800000 IPT",
+        "鏈上合約 decimals 仍維持 2，不重新部署合約"
+      ]
+    },
+    {
       "version": "V4.6.1",
       "date": "2026-09-26",
       "channel": "production",
