@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Independent Points V3.9.0｜管理員資產彙總</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
+  <style>
+    :root{
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;
+      color:#172033;
+      background:#f4f7fb;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:#f4f7fb}
+    header{
+      background:#10243d;color:#fff;padding:24px 18px 28px;
+      border-radius:0 0 26px 26px;
+    }
+    header h1{margin:0 0 8px;font-size:1.5rem}
+    header p{margin:0;opacity:.9;line-height:1.6}
+    .version{
+      display:inline-block;margin-bottom:10px;padding:5px 10px;border-radius:999px;
+      background:rgba(255,255,255,.14);font-size:.78rem;font-weight:800
+    }
+    main{max-width:980px;margin:auto;padding:16px 14px 70px}
+    .panel{
+      background:#fff;border:1px solid #dde5ef;border-radius:18px;
+      padding:16px;margin-bottom:14px;box-shadow:0 4px 18px rgba(24,42,68,.05)
+    }
+    .panel h2{margin:0 0 12px;font-size:1.08rem;color:#17365d}
+    .status{
+      border-radius:12px;padding:12px 14px;line-height:1.55;
+      background:#edf4ff;color:#27456f;border:1px solid #ccddf5
+    }
+    .status.ok{background:#ebf8f2;color:#17694f;border-color:#bee5d6}
+    .status.warn{background:#fff7df;color:#7e5a08;border-color:#efd996}
+    .status.err{background:#fff0f0;color:#922c2c;border-color:#efc8c8}
+    .actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+    button,select,input{
+      min-height:46px;border-radius:12px;border:1px solid #cbd5e1;
+      padding:10px 12px;font:inherit
+    }
+    button{font-weight:800;cursor:pointer}
+    button.primary{background:#176c59;color:#fff;border-color:#176c59}
+    button.secondary{background:#234d7a;color:#fff;border-color:#234d7a}
+    button.light{background:#fff;color:#29445f}
+    button:disabled{opacity:.55;cursor:not-allowed}
+    .summary{
+      display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px
+    }
+    .card{
+      background:#f8fafc;border:1px solid #e1e7ef;border-radius:15px;padding:14px
+    }
+    .card .label{font-size:.82rem;color:#64748b;margin-bottom:6px}
+    .card .value{font-size:1.2rem;font-weight:900;color:#17365d;word-break:break-word}
+    .filters{display:grid;grid-template-columns:1fr;gap:10px}
+    .filter-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .member-list{display:grid;gap:12px}
+    .member{
+      border:1px solid #dde5ef;border-radius:16px;padding:14px;background:#fff
+    }
+    .member-head{
+      display:flex;gap:8px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap
+    }
+    .member-title{font-weight:900;color:#17365d;line-height:1.5}
+    .chips{display:flex;gap:6px;flex-wrap:wrap}
+    .chip{
+      display:inline-block;padding:4px 8px;border-radius:999px;
+      font-size:.75rem;font-weight:800;background:#eef2f7;color:#475569
+    }
+    .chip.ok{background:#e8f7ef;color:#17694f}
+    .chip.admin{background:#e8efff;color:#284b88}
+    .chip.off{background:#fdecec;color:#9b2b2b}
+    .member-grid{
+      display:grid;grid-template-columns:1fr;gap:8px;margin-top:12px
+    }
+    .row{
+      border-top:1px solid #edf1f5;padding-top:8px
+    }
+    .row .k{font-size:.78rem;color:#6b7280;margin-bottom:3px}
+    .row .v{font-weight:700;word-break:break-all}
+    .balance{
+      font-size:1.22rem;font-weight:900;color:#176c59
+    }
+    .empty{
+      text-align:center;color:#6b7280;padding:24px 10px
+    }
+    .footer-note{
+      font-size:.8rem;color:#6b7280;line-height:1.55;margin-top:10px
+    }
+    @media(min-width:720px){
+      .summary{grid-template-columns:repeat(3,minmax(0,1fr))}
+      .filters{grid-template-columns:2fr 1fr}
+      .filter-grid{grid-template-columns:repeat(4,1fr)}
+      .member-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .actions{grid-template-columns:repeat(4,auto);justify-content:start}
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="version">V3.9.0</div>
+  <h1>管理員資產彙總</h1>
+  <p>Supabase 會員資料 × Ethereum Sepolia IPT 鏈上餘額</p>
+</header>
+
+<main>
+  <section class="panel">
+    <h2>系統狀態</h2>
+    <div id="statusBox" class="status warn">正在檢查管理員登入狀態…</div>
+    <div class="actions">
+      <button id="refreshBtn" class="primary" type="button" disabled>重新整理資產</button>
+      <button id="backBtn" class="light" type="button">返回上一頁</button>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>全站資產摘要</h2>
+    <div class="summary">
+      <div class="card"><div class="label">會員總數</div><div id="sumMembers" class="value">—</div></div>
+      <div class="card"><div class="label">已綁定錢包</div><div id="sumBound" class="value">—</div></div>
+      <div class="card"><div class="label">已驗證錢包</div><div id="sumVerified" class="value">—</div></div>
+      <div class="card"><div class="label">會員 IPT 總餘額</div><div id="sumBalance" class="value">—</div></div>
+      <div class="card"><div class="label">IPT 鏈上總發行量</div><div id="sumSupply" class="value">—</div></div>
+      <div class="card"><div class="label">尚未綁定錢包</div><div id="sumUnbound" class="value">—</div></div>
+    </div>
+    <div class="footer-note">
+      此頁只讀取資料，不執行 Mint、Transfer、Burn 或管理權交易。
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>會員資產篩選</h2>
+    <div class="filters">
+      <input id="searchInput" type="search" placeholder="會員編號／暱稱／Email／錢包地址">
+      <div class="filter-grid">
+        <select id="statusFilter">
+          <option value="all">全部狀態</option>
+          <option value="active">正常</option>
+          <option value="suspended">停權</option>
+        </select>
+        <select id="roleFilter">
+          <option value="all">全部角色</option>
+          <option value="admin">管理員</option>
+          <option value="member">會員</option>
+        </select>
+        <select id="walletFilter">
+          <option value="all">全部錢包</option>
+          <option value="bound">已綁定</option>
+          <option value="unbound">未綁定</option>
+        </select>
+        <select id="verifyFilter">
+          <option value="all">全部驗證</option>
+          <option value="verified">已驗證</option>
+          <option value="unverified">未驗證</option>
+        </select>
+      </div>
+    </div>
+    <div class="actions">
+      <button id="applyFilterBtn" class="secondary" type="button">套用篩選</button>
+      <button id="resetFilterBtn" class="light" type="button">清除篩選</button>
+    </div>
+    <div id="resultCount" class="footer-note">尚未載入。</div>
+  </section>
+
+  <section class="panel">
+    <h2>會員資產列表</h2>
+    <div id="memberList" class="member-list">
+      <div class="empty">尚未載入。</div>
+    </div>
+  </section>
+</main>
+
+<script>
+(() => {
+  const SUPABASE_URL = "https://uccexvgqmoxhgykkjdcy.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_FBsN1DYTQMv2_bWhpbXHAA_qdAq7ri7";
+  const ETHERSCAN = "https://sepolia.etherscan.io/address/";
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true
+    }
+  });
+
+  const $ = (id) => document.getElementById(id);
+  let allMembers = [];
+
+  function esc(v) {
+    return String(v ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function setStatus(kind, text) {
+    const el = $("statusBox");
+    el.className = "status " + kind;
+    el.textContent = text;
+  }
+
+  function fmtNumber(v) {
+    const s = String(v ?? "0");
+    const n = Number(s);
+    if (!Number.isFinite(n)) return s;
+    return n.toLocaleString("zh-TW", { maximumFractionDigits: 8 });
+  }
+
+  function setSummary(s) {
+    $("sumMembers").textContent = s.total_members ?? 0;
+    $("sumBound").textContent = s.bound_wallet_members ?? 0;
+    $("sumVerified").textContent = s.verified_wallet_members ?? 0;
+    $("sumBalance").textContent = fmtNumber(s.total_member_ipt_balance ?? 0) + " IPT";
+    $("sumSupply").textContent = fmtNumber(s.contract_total_supply ?? 0) + " IPT";
+    $("sumUnbound").textContent = s.unbound_wallet_members ?? 0;
+  }
+
+  function filteredMembers() {
+    const q = $("searchInput").value.trim().toLowerCase();
+    const status = $("statusFilter").value;
+    const role = $("roleFilter").value;
+    const wallet = $("walletFilter").value;
+    const verify = $("verifyFilter").value;
+
+    return allMembers.filter((m) => {
+      if (status !== "all" && m.status !== status) return false;
+      if (role !== "all" && m.role !== role) return false;
+      if (wallet === "bound" && !m.wallet_bound) return false;
+      if (wallet === "unbound" && m.wallet_bound) return false;
+      if (verify === "verified" && !m.wallet_verified) return false;
+      if (verify === "unverified" && m.wallet_verified) return false;
+
+      if (q) {
+        const haystack = [
+          m.member_number, m.display_name, m.email,
+          m.wallet_address, m.role, m.status
+        ].join(" ").toLowerCase();
+        if (!haystack.includes(q)) return false;
+      }
+      return true;
+    });
+  }
+
+  function renderMembers(list) {
+    $("resultCount").textContent = `顯示 ${list.length} / ${allMembers.length} 位會員。`;
+
+    if (!list.length) {
+      $("memberList").innerHTML = '<div class="empty">沒有符合條件的會員。</div>';
+      return;
+    }
+
+    $("memberList").innerHTML = list.map((m) => {
+      const wallet = m.wallet_address || "尚未綁定";
+      const roleChip = m.role === "admin"
+        ? '<span class="chip admin">管理員</span>'
+        : '<span class="chip">會員</span>';
+      const statusChip = m.status === "suspended"
+        ? '<span class="chip off">已停權</span>'
+        : '<span class="chip ok">正常</span>';
+      const verifyChip = m.wallet_verified
+        ? '<span class="chip ok">錢包已驗證</span>'
+        : '<span class="chip">錢包未驗證</span>';
+
+      const walletLink = m.wallet_address
+        ? `<button class="light openWalletBtn" type="button" data-address="${esc(m.wallet_address)}">查看鏈上地址</button>`
+        : "";
+
+      return `
+        <article class="member">
+          <div class="member-head">
+            <div class="member-title">${esc(m.member_number)}｜${esc(m.display_name)}</div>
+            <div class="chips">${roleChip}${statusChip}${verifyChip}</div>
+          </div>
+
+          <div class="member-grid">
+            <div class="row">
+              <div class="k">Email</div>
+              <div class="v">${esc(m.email || "—")}</div>
+            </div>
+            <div class="row">
+              <div class="k">IPT 餘額</div>
+              <div class="v balance">${esc(fmtNumber(m.ipt_balance))} IPT</div>
+            </div>
+            <div class="row">
+              <div class="k">主錢包地址</div>
+              <div class="v">${esc(wallet)}</div>
+            </div>
+            <div class="row">
+              <div class="k">錢包驗證</div>
+              <div class="v">${m.wallet_verified ? "已驗證" : "未驗證"}</div>
+            </div>
+          </div>
+
+          ${walletLink ? `<div class="actions">${walletLink}</div>` : ""}
+        </article>
+      `;
+    }).join("");
+
+    document.querySelectorAll(".openWalletBtn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const a = btn.dataset.address;
+        if (a) window.open(ETHERSCAN + encodeURIComponent(a), "_blank", "noopener");
+      });
+    });
+  }
+
+  function applyFilters() {
+    renderMembers(filteredMembers());
+  }
+
+  function resetFilters() {
+    $("searchInput").value = "";
+    $("statusFilter").value = "all";
+    $("roleFilter").value = "all";
+    $("walletFilter").value = "all";
+    $("verifyFilter").value = "all";
+    renderMembers(allMembers);
+  }
+
+  async function loadAssets() {
+    $("refreshBtn").disabled = true;
+    setStatus("warn", "正在讀取會員資料與 Sepolia IPT 鏈上餘額…");
+
+    try {
+      const { data: sessionData, error: sessionError } = await sb.auth.getSession();
+      if (sessionError) throw sessionError;
+
+      const session = sessionData?.session;
+      if (!session) {
+        setStatus("err", "尚未登入雲端會員。請先回會員頁登入管理員帳號。");
+        $("memberList").innerHTML = '<div class="empty">需要管理員登入。</div>';
+        return;
+      }
+
+      const { data, error } = await sb.functions.invoke("admin-assets", {
+        body: { query: "" }
+      });
+
+      if (error) throw error;
+      if (!data?.ok) throw new Error(data?.error || "資產報表載入失敗");
+
+      allMembers = Array.isArray(data.members) ? data.members : [];
+      setSummary(data.summary || {});
+      resetFilters();
+
+      setStatus(
+        "ok",
+        `V3.9.0 已載入。管理員：${data.admin?.email || "已登入"}｜共 ${allMembers.length} 位會員。`
+      );
+      $("refreshBtn").disabled = false;
+    } catch (err) {
+      console.error(err);
+      setStatus("err", "載入失敗：" + (err?.message || String(err)));
+      $("refreshBtn").disabled = false;
+    }
+  }
+
+  $("refreshBtn").addEventListener("click", loadAssets);
+  $("applyFilterBtn").addEventListener("click", (e) => {
+    e.preventDefault();
+    applyFilters();
+  });
+  $("resetFilterBtn").addEventListener("click", (e) => {
+    e.preventDefault();
+    resetFilters();
+  });
+  $("searchInput").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      applyFilters();
+    }
+  });
+  $("backBtn").addEventListener("click", () => {
+    if (history.length > 1) history.back();
+    else location.href = "./index.html";
+  });
+
+  loadAssets();
+})();
+</script>
+</body>
+</html>
