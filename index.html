@@ -73,7 +73,7 @@ main{max-width:780px;margin:auto;padding:18px 14px 76px}
 .admin-panel{display:none}
 body.is-admin .admin-panel{display:block}
 .actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-button{
+button{touch-action:manipulation;-webkit-tap-highlight-color:transparent;
   min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding:10px 12px;
   font:inherit;font-weight:900;cursor:pointer
 }
@@ -90,7 +90,7 @@ button.light{background:#fff;color:#29445f}
 </head>
 <body>
 <header>
-  <div class="version">V4.1.0</div>
+  <div class="version">V4.1.1</div>
   <h1>Independent Points</h1>
   <p>會員 × 錢包 × IPT 資產 × 交易 × 管理，一個入口完成。</p>
 </header>
@@ -133,6 +133,12 @@ button.light{background:#fff;color:#29445f}
         <div id="iptTxCount" class="value">—</div>
       </div>
     </div>
+    <div id="assetSummaryNote" class="note">
+      為避免手機首頁卡住，完整鏈上統計改為手動更新。
+    </div>
+    <button id="assetSummaryRefreshBtn" class="secondary" type="button" style="width:100%;margin-top:10px">
+      更新完整資產摘要
+    </button>
   </section>
 
   <section class="panel">
@@ -218,10 +224,10 @@ button.light{background:#fff;color:#29445f}
   </section>
 
   <section class="panel">
-    <h2>V4.1.0 操作體驗整合</h2>
-    <div class="status ok" style="margin-bottom:12px">V4.1 已啟用：鏈上操作改為單一功能頁，會員管理也已整合到同一套介面。</div>
+    <h2>V4.1.1 操作體驗整合</h2>
+    <div class="status ok" style="margin-bottom:12px">V4.1.1 防卡版：首頁會員資料先完成，完整鏈上統計改為需要時才更新。</div>
     <div class="note">
-      V4.1.0 已作為正式統一首頁。原本通過驗證的錢包核心保留在 wallet-core-v4.1.html；會員與管理員資產報表沿用 V3.9.4.2 穩定版。
+      V4.1.1 已作為正式統一首頁。原本通過驗證的錢包核心保留在 wallet-core-v4.1.1.html；會員與管理員資產報表沿用 V3.9.4.2 穩定版。
     </div>
   </section>
 </main>
@@ -235,7 +241,7 @@ button.light{background:#fff;color:#29445f}
     auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
   });
 
-  const $=id=>document.getElementById(id);
+  const $=id=>document.getElementById(id);\n  let currentUserId="";\n  let assetSummaryLoading=false;
 
   function go(url){ location.href=url; }
 
@@ -251,8 +257,67 @@ button.light{background:#fff;color:#29445f}
     return n.toLocaleString("zh-TW",{maximumFractionDigits:8});
   }
 
+
+  function assetCacheKey(uid){
+    return "ipt_v411_asset_summary_" + String(uid||"");
+  }
+
+  function renderAssetSummary(asset, fromCache=false){
+    $("iptBalance").textContent=fmtNumber(asset?.member?.ipt_balance||0)+" IPT";
+    $("iptIncoming").textContent=fmtNumber(asset?.asset?.total_incoming||0)+" IPT";
+    $("iptOutgoing").textContent=fmtNumber(asset?.asset?.total_outgoing||0)+" IPT";
+    $("iptTxCount").textContent=asset?.asset?.total_transactions??0;
+    $("assetSummarySection").style.display="block";
+    $("assetSummaryNote").textContent=fromCache
+      ? "目前先顯示上次成功讀取的資產摘要；需要最新資料時再按下方更新。"
+      : "資產摘要已更新。首頁其餘功能不會等待鏈上交易掃描。";
+  }
+
+  function loadCachedAssetSummary(uid){
+    try{
+      const raw=localStorage.getItem(assetCacheKey(uid));
+      if(!raw) return false;
+      const parsed=JSON.parse(raw);
+      if(!parsed?.data) return false;
+      renderAssetSummary(parsed.data,true);
+      return true;
+    }catch(_){
+      return false;
+    }
+  }
+
+  async function refreshAssetSummary(){
+    if(assetSummaryLoading || !currentUserId) return;
+    assetSummaryLoading=true;
+    const btn=$("assetSummaryRefreshBtn");
+    btn.disabled=true;
+    btn.textContent="正在更新資產摘要…";
+    $("assetSummaryNote").textContent="正在讀取 Sepolia IPT 餘額與交易統計；其他按鈕仍可使用。";
+
+    try{
+      const {data:asset,error:assetError}=await sb.functions.invoke("member-asset-detail",{body:{}});
+      if(assetError) throw assetError;
+      if(!asset?.ok) throw new Error(asset?.error||"資產摘要讀取失敗");
+      renderAssetSummary(asset,false);
+      try{
+        localStorage.setItem(assetCacheKey(currentUserId),JSON.stringify({
+          saved_at:Date.now(),
+          data:asset
+        }));
+      }catch(_){}
+    }catch(err){
+      console.error(err);
+      $("assetSummaryNote").textContent="資產摘要暫時無法更新，可直接使用下方功能或進入「我的資產」查看。";
+    }finally{
+      assetSummaryLoading=false;
+      btn.disabled=false;
+      btn.textContent="更新完整資產摘要";
+    }
+  }
+
+
   async function load(){
-    document.body.classList.remove("is-admin");
+    document.body.classList.remove("is-admin");\n    currentUserId="";
     $("profileBox").style.display="none";
     $("assetSummarySection").style.display="none";
     $("myAssetBtn").disabled=true;
@@ -269,7 +334,7 @@ button.light{background:#fff;color:#29445f}
         return;
       }
 
-      const uid=session.user.id;
+      const uid=session.user.id;\n      currentUserId=uid;
       const [pRes,rRes,wRes,vRes]=await Promise.all([
         sb.from("member_profiles")
           .select("member_number,display_name,status")
@@ -325,43 +390,41 @@ button.light{background:#fff;color:#29445f}
 
       setStatus("ok",
         role==="admin"
-          ?"V4.1.0 已登入：會員功能與管理中心均已開放。"
-          :"V4.1.0 已登入：會員功能已開放。"
+          ?"V4.1.1 已登入：會員功能與管理中心均已開放。"
+          :"V4.1.1 已登入：會員功能已開放。"
       );
 
-      try{
-        const {data:asset,error:assetError}=await sb.functions.invoke("member-asset-detail",{body:{}});
-        if(!assetError && asset?.ok){
-          $("iptBalance").textContent=fmtNumber(asset.member?.ipt_balance||0)+" IPT";
-          $("iptIncoming").textContent=fmtNumber(asset.asset?.total_incoming||0)+" IPT";
-          $("iptOutgoing").textContent=fmtNumber(asset.asset?.total_outgoing||0)+" IPT";
-          $("iptTxCount").textContent=asset.asset?.total_transactions??0;
-          $("assetSummarySection").style.display="block";
-        }
-      }catch(_){}
+      $("assetSummarySection").style.display="block";
+      if(!loadCachedAssetSummary(uid)){
+        $("iptBalance").textContent="按下更新";
+        $("iptIncoming").textContent="按下更新";
+        $("iptOutgoing").textContent="按下更新";
+        $("iptTxCount").textContent="按下更新";
+        $("assetSummaryNote").textContent="首頁已就緒。需要完整鏈上統計時，再按「更新完整資產摘要」。";
+      }
     }catch(err){
       console.error(err);
       setStatus("err","載入失敗："+(err?.message||String(err)));
     }
   }
 
-  $("refreshBtn").addEventListener("click",load);
-  $("loginBtn").addEventListener("click",()=>go("./wallet-core-v4.1.html"));
+  $("refreshBtn").addEventListener("click",load);\n  $("assetSummaryRefreshBtn").addEventListener("click",refreshAssetSummary);
+  $("loginBtn").addEventListener("click",()=>go("./wallet-core-v4.1.1.html"));
 
   $("myAssetBtn").addEventListener("click",()=>go("./member-assets-v3.9.4.2.html?v=3942"));
-  $("historyBtn").addEventListener("click",()=>go("./wallet-core-v4.1.html?go=history"));
+  $("historyBtn").addEventListener("click",()=>go("./wallet-core-v4.1.1.html?go=history"));
   $("assetCenterBtn").addEventListener("click",()=>go("./asset-center-v3.9.4.2.html?v=3942"));
 
-  $("balanceBtn").addEventListener("click",()=>go("./wallet-core-v4.1.html?go=balance"));
-  $("transferBtn").addEventListener("click",()=>go("./wallet-core-v4.1.html?go=transfer"));
-  $("receiveBtn").addEventListener("click",()=>go("./wallet-core-v4.1.html?go=receive"));
+  $("balanceBtn").addEventListener("click",()=>go("./wallet-core-v4.1.1.html?go=balance"));
+  $("transferBtn").addEventListener("click",()=>go("./wallet-core-v4.1.1.html?go=transfer"));
+  $("receiveBtn").addEventListener("click",()=>go("./wallet-core-v4.1.1.html?go=receive"));
 
   $("adminAssetBtn").addEventListener("click",()=>go("./admin-assets-v3.9.4.2.html?v=3942"));
-  $("adminMemberBtn").addEventListener("click",()=>go("./admin-members-v4.1.html?v=410"));
-  $("mintBtn").addEventListener("click",()=>go("./wallet-core-v4.1.html?go=mint"));
-  $("pauseBtn").addEventListener("click",()=>go("./wallet-core-v4.1.html?go=pause"));
-  $("ownershipBtn").addEventListener("click",()=>go("./wallet-core-v4.1.html?go=ownership"));
-  $("advancedBtn").addEventListener("click",()=>go("./wallet-core-v4.1.html"));
+  $("adminMemberBtn").addEventListener("click",()=>go("./admin-members-v4.1.1.html?v=411"));
+  $("mintBtn").addEventListener("click",()=>go("./wallet-core-v4.1.1.html?go=mint"));
+  $("pauseBtn").addEventListener("click",()=>go("./wallet-core-v4.1.1.html?go=pause"));
+  $("ownershipBtn").addEventListener("click",()=>go("./wallet-core-v4.1.1.html?go=ownership"));
+  $("advancedBtn").addEventListener("click",()=>go("./wallet-core-v4.1.1.html"));
 
   load();
 })();
