@@ -180,7 +180,7 @@ body{
 }
 
 
-/* ===== V4.3.1 Android bottom-navigation fix ===== */
+/* ===== V4.3.2 Android bottom-navigation fix ===== */
 .v43-bottom-nav{
   position:fixed!important;
   left:50%!important;
@@ -246,16 +246,89 @@ body{
   body{padding-bottom:0!important}
 }
 
+
+/* ===== V4.3.2 reliable in-page navigation ===== */
+.v43-bottom-nav{
+  display:none!important;
+}
+body{
+  padding-bottom:24px!important;
+}
+.v432-nav-panel{
+  margin:14px 0;
+  padding:14px;
+  border:1px solid #dbe4ee;
+  border-radius:18px;
+  background:#ffffff;
+  box-shadow:0 4px 18px rgba(24,42,68,.05);
+}
+.v432-nav-title{
+  font-size:1.05rem;
+  font-weight:900;
+  color:#17365d;
+  margin-bottom:10px;
+}
+.v432-nav-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+.v432-nav-grid button{
+  min-height:76px!important;
+  padding:12px 8px!important;
+  border:1px solid #cbd7e5!important;
+  border-radius:14px!important;
+  background:#f6f8fb!important;
+  color:#17365d!important;
+  font:inherit!important;
+  font-weight:900!important;
+  font-size:.96rem!important;
+  line-height:1.35!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+  -webkit-tap-highlight-color:rgba(42,95,145,.14)!important;
+}
+.v432-nav-grid button.primary{
+  background:#e2edf9!important;
+  border-color:#b9cde4!important;
+}
+.v432-nav-grid button:active{
+  transform:scale(.98);
+  background:#d7e5f5!important;
+}
+.v432-nav-note{
+  margin-top:9px;
+  color:#64748b;
+  font-size:.8rem;
+  line-height:1.5;
+}
+@media(min-width:760px){
+  .v432-nav-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+
 </style>
 </head>
 <body>
 <header>
-  <div class="version">V4.3.1</div>
+  <div class="version">V4.3.2</div>
   <h1>Independent Points</h1>
   <p>會員、錢包、IPT 資產、交易與管理，一個正式入口完成。</p>
 </header>
 
 <main>
+
+  <section class="v432-nav-panel">
+    <div class="v432-nav-title">快速導覽</div>
+    <div class="v432-nav-grid">
+      <button id="v432HomeBtn" class="primary" type="button">🏠<br>首頁</button>
+      <button id="v432AssetsBtn" type="button">📊<br>我的資產</button>
+      <button id="v432TransferBtn" type="button">↗️<br>IPT 轉帳</button>
+      <button id="v432ManageBtn" type="button">⚙️<br>管理中心</button>
+    </div>
+    <div class="v432-nav-note">這組導覽是一般頁面內容，不會被 Android 瀏覽器底部工具列蓋住。</div>
+  </section>
+
   <section class="panel">
     <h2>我的帳戶</h2>
     <div id="statusBox" class="status">正在確認登入狀態…</div>
@@ -391,10 +464,10 @@ body{
   </section>
 
   <section class="panel">
-    <h2>V4.3.1 操作體驗整合</h2>
-    <div class="status ok" style="margin-bottom:12px">V4.3.1 防卡版：首頁會員資料先完成，完整鏈上統計改為需要時才更新。</div>
+    <h2>V4.3.2 操作體驗整合</h2>
+    <div class="status ok" style="margin-bottom:12px">V4.3.2 防卡版：首頁會員資料先完成，完整鏈上統計改為需要時才更新。</div>
     <div class="note">
-      V4.3.1 已作為正式統一首頁。原本通過驗證的錢包核心保留在 wallet-core-v4.3.1.html；會員與管理員資產報表已統一為 V4.3 模組。
+      V4.3.2 已作為正式統一首頁。原本通過驗證的錢包核心保留在 wallet-core-v4.3.2.html；會員與管理員資產報表已統一為 V4.3 模組。
     </div>
   </section>
 </main>
@@ -569,8 +642,8 @@ body{
 
       setStatus("ok",
         role==="admin"
-          ?"V4.3.1 已登入：會員功能與管理中心均已開放。"
-          :"V4.3.1 已登入：會員功能已開放。"
+          ?"V4.3.2 已登入：會員功能與管理中心均已開放。"
+          :"V4.3.2 已登入：會員功能已開放。"
       );
 
       $("assetSummarySection").style.display="block";
@@ -589,31 +662,34 @@ body{
 
   $("refreshBtn").addEventListener("click",load);
   $("assetSummaryRefreshBtn").addEventListener("click",refreshAssetSummary);
-  $("loginBtn").addEventListener("click",()=>go("./wallet-core-v4.3.1.html"));
+  $("loginBtn").addEventListener("click",()=>go("./wallet-core-v4.3.2.html"));
 
-  $("myAssetBtn").addEventListener("click",()=>go("./member-assets-v4.3.1.html?v=431"));
-  $("historyBtn").addEventListener("click",()=>go("./wallet-core-v4.3.1.html?go=history"));
-  $("assetCenterBtn").addEventListener("click",()=>go("./asset-center-v4.3.1.html?v=431"));
-  $("systemInfoBtn").addEventListener("click",()=>go("./system-info-v4.2.html?v=431"));
+  $("myAssetBtn").addEventListener("click",()=>go("./member-assets-v4.3.2.html?v=432"));
+  $("historyBtn").addEventListener("click",()=>go("./wallet-core-v4.3.2.html?go=history"));
+  $("assetCenterBtn").addEventListener("click",()=>go("./asset-center-v4.3.2.html?v=432"));
+  $("systemInfoBtn").addEventListener("click",()=>go("./system-info-v4.2.html?v=432"));
 
-  $("balanceBtn").addEventListener("click",()=>go("./wallet-core-v4.3.1.html?go=balance"));
-  $("transferBtn").addEventListener("click",()=>go("./wallet-core-v4.3.1.html?go=transfer"));
-  $("receiveBtn").addEventListener("click",()=>go("./wallet-core-v4.3.1.html?go=receive"));
+  $("balanceBtn").addEventListener("click",()=>go("./wallet-core-v4.3.2.html?go=balance"));
+  $("transferBtn").addEventListener("click",()=>go("./wallet-core-v4.3.2.html?go=transfer"));
+  $("receiveBtn").addEventListener("click",()=>go("./wallet-core-v4.3.2.html?go=receive"));
 
-  $("adminAssetBtn").addEventListener("click",()=>go("./admin-assets-v4.3.1.html?v=431"));
+  $("adminAssetBtn").addEventListener("click",()=>go("./admin-assets-v4.3.2.html?v=432"));
   $("adminMemberBtn").addEventListener("click",()=>go("./admin-members-v4.1.1.html?v=412"));
-  $("mintBtn").addEventListener("click",()=>go("./wallet-core-v4.3.1.html?go=mint"));
-  $("pauseBtn").addEventListener("click",()=>go("./wallet-core-v4.3.1.html?go=pause"));
-  $("ownershipBtn").addEventListener("click",()=>go("./wallet-core-v4.3.1.html?go=ownership"));
-  $("advancedBtn").addEventListener("click",()=>go("./wallet-core-v4.3.1.html"));
-
-
-  $("v43NavHome")?.addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
+  $("mintBtn").addEventListener("click",()=>go("./wallet-core-v4.3.2.html?go=mint"));
+  $("pauseBtn").addEventListener("click",()=>go("./wallet-core-v4.3.2.html?go=pause"));
+  $("ownershipBtn").addEventListener("click",()=>go("./wallet-core-v4.3.2.html?go=ownership"));
+  $("advancedBtn").addEventListener("click",()=>go("./wallet-core-v4.3.2.html"));
   $("v43NavAssets")?.addEventListener("click",()=>{
     if(!$("myAssetBtn").disabled) $("myAssetBtn").click();
   });
-  $("v43NavTransfer")?.addEventListener("click",()=>$("transferBtn")?.click());
-  $("v43NavManage")?.addEventListener("click",()=>{
+
+
+  $("v432HomeBtn")?.addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
+  $("v432AssetsBtn")?.addEventListener("click",()=>{
+    if(!$("myAssetBtn")?.disabled) $("myAssetBtn").click();
+  });
+  $("v432TransferBtn")?.addEventListener("click",()=>$("transferBtn")?.click());
+  $("v432ManageBtn")?.addEventListener("click",()=>{
     const section=document.querySelector(".admin-panel");
     if(section && document.body.classList.contains("is-admin")){
       section.scrollIntoView({behavior:"smooth",block:"start"});
@@ -625,13 +701,6 @@ body{
   load();
 })();
 </script>
-
-<div class="v43-bottom-nav" aria-label="主要導覽">
-  <button id="v43NavHome" class="active" type="button">🏠<br>首頁</button>
-  <button id="v43NavAssets" type="button">📊<br>資產</button>
-  <button id="v43NavTransfer" type="button">↗️<br>轉帳</button>
-  <button id="v43NavManage" type="button">⚙️<br>管理</button>
-</div>
 
 </body>
 </html>
