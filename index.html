@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Independent Points V3.4.3｜角色管理</title>
+<title>Independent Points V3.5｜會員詳細資料</title>
 <style>
 :root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;color:#172033}
 *{box-sizing:border-box}
@@ -220,6 +220,59 @@ body.show-cloud-admin .cloud-admin-only{display:block}
   padding:13px;
   background:#f8fafc;
   line-height:1.6;
+}
+
+.admin-detail{
+  border:1px solid #cfd8e6;
+  border-radius:18px;
+  padding:16px;
+  background:#fbfcfe;
+  margin-top:16px;
+}
+.admin-detail-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:12px;
+}
+.admin-detail-item{
+  border:1px solid #dbe2ec;
+  border-radius:13px;
+  padding:12px;
+  background:#fff;
+  min-width:0;
+}
+.admin-detail-item b{
+  display:block;
+  margin-bottom:5px;
+}
+.admin-detail-list{
+  display:grid;
+  gap:8px;
+  margin-top:10px;
+}
+.admin-detail-row{
+  border:1px solid #e1e6ef;
+  border-radius:12px;
+  padding:11px;
+  background:#fff;
+  line-height:1.55;
+  overflow-wrap:anywhere;
+}
+.admin-detail-section-title{
+  margin-top:18px;
+  font-weight:850;
+  font-size:1.04rem;
+}
+.admin-detail-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:12px;
+}
+@media (max-width:480px){
+  .admin-detail-grid{grid-template-columns:1fr}
+  .admin-detail-actions{grid-template-columns:1fr}
 }
 @media (max-width:480px){
   .admin-summary-grid{grid-template-columns:1fr 1fr}
@@ -510,8 +563,7 @@ button {
   <h2>⑤ 會員管理中心</h2>
 
   <div class="notice-cloud">
-    <b>V3.4.3 雲端管理：</b>管理員可以管理一般會員的「正常／停權」與「會員／管理員」角色。
-    不允許修改自己的管理員角色；降級其他管理員時，系統也會確保至少保留一位管理員。
+    <b>V3.5 雲端管理：</b>除了會員狀態與角色管理，現在可以進一步查看單一會員的完整資料、錢包、常用收款人與管理歷程。
   </div>
 
   <div class="admin-summary-grid">
@@ -548,6 +600,35 @@ button {
   </p>
 
   <div id="adminMemberList" class="admin-member-list"></div>
+
+  <div id="adminMemberDetail" class="admin-detail" hidden>
+    <div class="admin-member-title">
+      <b id="adminDetailTitle">會員詳細資料</b>
+      <button id="adminCloseDetailBtn" class="gray" type="button">關閉詳情</button>
+    </div>
+
+    <div id="adminDetailMsg" class="box info">選擇會員後顯示完整資料。</div>
+
+    <div class="admin-detail-grid">
+      <div class="admin-detail-item"><b>會員編號</b><span id="adminDetailMemberNumber">—</span></div>
+      <div class="admin-detail-item"><b>暱稱</b><span id="adminDetailDisplayName">—</span></div>
+      <div class="admin-detail-item"><b>Email</b><span id="adminDetailEmail">—</span></div>
+      <div class="admin-detail-item"><b>會員狀態</b><span id="adminDetailStatus">—</span></div>
+      <div class="admin-detail-item"><b>角色</b><span id="adminDetailRole">—</span></div>
+      <div class="admin-detail-item"><b>Email 已確認</b><span id="adminDetailEmailConfirmed">—</span></div>
+      <div class="admin-detail-item"><b>加入時間</b><span id="adminDetailCreatedAt">—</span></div>
+      <div class="admin-detail-item"><b>最近登入</b><span id="adminDetailLastSignIn">—</span></div>
+    </div>
+
+    <div class="admin-detail-section-title">綁定錢包</div>
+    <div id="adminDetailWallets" class="admin-detail-list"></div>
+
+    <div class="admin-detail-section-title">常用收款人</div>
+    <div id="adminDetailContacts" class="admin-detail-list"></div>
+
+    <div class="admin-detail-section-title">此會員管理歷程</div>
+    <div id="adminDetailAudit" class="admin-detail-list"></div>
+  </div>
 
   <hr style="margin:22px 0;border:0;border-top:1px solid #dbe2ec">
 
@@ -831,6 +912,7 @@ let cloudRole = "member";
 let cloudAdminMembers = [];
 let cloudAdminSelfId = "";
 let cloudAdminAudit = [];
+let cloudAdminDetail = null;
 
 const ABI = [
   "function name() view returns (string)",
@@ -1290,8 +1372,10 @@ function renderCloudAdminAccess() {
     if ($("adminVerifiedWallets")) $("adminVerifiedWallets").textContent = "—";
     if ($("adminTotalContacts")) $("adminTotalContacts").textContent = "—";
     if ($("adminAuditList")) $("adminAuditList").textContent = "";
+    if ($("adminMemberDetail")) $("adminMemberDetail").hidden = true;
     cloudAdminSelfId = "";
     cloudAdminAudit = [];
+    cloudAdminDetail = null;
   }
 }
 
@@ -1370,12 +1454,32 @@ function renderAdminMembers(members) {
     meta.append(statusRow, email, wallet, verified, contacts, created);
     card.append(title, meta);
 
+    const detailBtn = document.createElement("button");
+    detailBtn.type = "button";
+    detailBtn.className = "soft";
+    detailBtn.textContent = "查看詳情";
+    detailBtn.addEventListener("click", async () => {
+      try {
+        detailBtn.disabled = true;
+        detailBtn.textContent = "讀取中…";
+        await loadAdminMemberDetail(member.user_id);
+        $("adminMemberDetail")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      } catch (e) {
+        setAdminMembersMessage("err", friendlyCloudError(e));
+      } finally {
+        detailBtn.disabled = false;
+        detailBtn.textContent = "查看詳情";
+      }
+    });
+
     const canChangeStatus =
       member.role !== "admin" &&
       member.user_id !== cloudAdminSelfId;
 
     const actions = document.createElement("div");
     actions.className = "admin-action-row";
+
+    actions.appendChild(detailBtn);
 
     if (canChangeStatus) {
       const statusBtn = document.createElement("button");
@@ -1469,6 +1573,183 @@ function renderAdminMembers(members) {
 
     host.appendChild(card);
   });
+}
+
+function setAdminDetailMessage(kind, text) {
+  const el = $("adminDetailMsg");
+  if (!el) return;
+  el.className = "box " + kind;
+  el.textContent = text;
+}
+
+function textOrDash(value) {
+  const v = String(value ?? "").trim();
+  return v || "—";
+}
+
+function renderAdminDetail(data) {
+  const panel = $("adminMemberDetail");
+  if (!panel || !data?.member) return;
+
+  cloudAdminDetail = data;
+  panel.hidden = false;
+
+  const m = data.member;
+
+  if ($("adminDetailTitle")) {
+    $("adminDetailTitle").textContent =
+      (m.member_number || "未編號") + "｜" + (m.display_name || "未命名");
+  }
+
+  if ($("adminDetailMemberNumber")) $("adminDetailMemberNumber").textContent = textOrDash(m.member_number);
+  if ($("adminDetailDisplayName")) $("adminDetailDisplayName").textContent = textOrDash(m.display_name);
+  if ($("adminDetailEmail")) $("adminDetailEmail").textContent = textOrDash(m.email);
+  if ($("adminDetailStatus")) $("adminDetailStatus").textContent = m.status === "suspended" ? "已停權" : "正常";
+  if ($("adminDetailRole")) $("adminDetailRole").textContent = m.role === "admin" ? "管理員" : "會員";
+  if ($("adminDetailEmailConfirmed")) {
+    $("adminDetailEmailConfirmed").textContent =
+      m.email_confirmed_at ? "已確認｜" + formatAdminDate(m.email_confirmed_at) : "尚未確認";
+  }
+  if ($("adminDetailCreatedAt")) $("adminDetailCreatedAt").textContent = formatAdminDate(m.created_at);
+  if ($("adminDetailLastSignIn")) $("adminDetailLastSignIn").textContent = formatAdminDate(m.last_sign_in_at);
+
+  const walletsHost = $("adminDetailWallets");
+  if (walletsHost) {
+    walletsHost.textContent = "";
+
+    const wallets = Array.isArray(data.wallets) ? data.wallets : [];
+    if (!wallets.length) {
+      const empty = document.createElement("div");
+      empty.className = "admin-detail-row";
+      empty.textContent = "尚未綁定任何錢包。";
+      walletsHost.appendChild(empty);
+    } else {
+      wallets.forEach(wallet => {
+        const row = document.createElement("div");
+        row.className = "admin-detail-row";
+
+        const lines = [
+          (wallet.label || "錢包") + (wallet.is_primary ? "｜主要錢包" : ""),
+          "地址：" + (wallet.wallet_address || "—"),
+          "Chain ID：" + String(wallet.chain_id ?? "—"),
+          wallet.verified_at
+            ? "驗證：已驗證｜" + formatAdminDate(wallet.verified_at)
+            : "驗證：尚未驗證"
+        ];
+
+        row.textContent = lines.join("\n");
+        row.style.whiteSpace = "pre-line";
+        walletsHost.appendChild(row);
+      });
+    }
+  }
+
+  const contactsHost = $("adminDetailContacts");
+  if (contactsHost) {
+    contactsHost.textContent = "";
+
+    const contacts = Array.isArray(data.contacts) ? data.contacts : [];
+    if (!contacts.length) {
+      const empty = document.createElement("div");
+      empty.className = "admin-detail-row";
+      empty.textContent = "目前沒有常用收款人。";
+      contactsHost.appendChild(empty);
+    } else {
+      contacts.forEach(contact => {
+        const row = document.createElement("div");
+        row.className = "admin-detail-row";
+        row.textContent =
+          (contact.contact_name || "未命名") +
+          "\n" +
+          (contact.wallet_address || "—") +
+          (contact.note ? "\n備註：" + contact.note : "");
+        row.style.whiteSpace = "pre-line";
+        contactsHost.appendChild(row);
+      });
+    }
+  }
+
+  const auditHost = $("adminDetailAudit");
+  if (auditHost) {
+    auditHost.textContent = "";
+
+    const logs = Array.isArray(data.audit) ? data.audit : [];
+    if (!logs.length) {
+      const empty = document.createElement("div");
+      empty.className = "admin-detail-row";
+      empty.textContent = "目前沒有針對此會員的管理操作紀錄。";
+      auditHost.appendChild(empty);
+    } else {
+      logs.forEach(log => {
+        const row = document.createElement("div");
+        row.className = "admin-detail-row";
+
+        const adminName =
+          log.admin_member?.member_number ||
+          log.admin_user_id ||
+          "—";
+
+        let changeText = "";
+        if (log.action === "set_role") {
+          changeText =
+            "角色 " +
+            (log.old_value?.role || "—") +
+            " → " +
+            (log.new_value?.role || "—");
+        } else {
+          changeText =
+            "狀態 " +
+            (log.old_value?.status || "—") +
+            " → " +
+            (log.new_value?.status || "—");
+        }
+
+        row.textContent =
+          formatAdminDate(log.created_at) +
+          "\n管理員：" + adminName +
+          "\n" + changeText;
+        row.style.whiteSpace = "pre-line";
+        auditHost.appendChild(row);
+      });
+    }
+  }
+
+  setAdminDetailMessage(
+    "ok",
+    "✓ 會員完整資料已載入。錢包、常用收款人與管理歷程皆為雲端即時資料。"
+  );
+}
+
+async function loadAdminMemberDetail(targetUserId) {
+  if (!cloudIsAdmin()) {
+    throw new Error("目前登入帳號不是管理員。");
+  }
+
+  const { data, error } = await supabase.functions.invoke("admin-member-detail", {
+    body: {
+      target_user_id: String(targetUserId || "").trim()
+    }
+  });
+
+  if (error) {
+    let detail = "";
+    try {
+      const context = error?.context;
+      if (context && typeof context.json === "function") {
+        const payload = await context.json();
+        detail = String(payload?.error || "");
+      }
+    } catch (_) {}
+
+    throw new Error(detail || error?.message || "會員詳細資料服務呼叫失敗。");
+  }
+
+  if (!data?.ok) {
+    throw new Error(String(data?.error || "會員詳細資料沒有成功載入。"));
+  }
+
+  renderAdminDetail(data);
+  return data;
 }
 
 function setAdminAuditMessage(kind, text) {
@@ -2180,8 +2461,8 @@ async function initWC() {
     events: ["chainChanged","accountsChanged"],
     optionalEvents: ["connect","disconnect","message"],
     metadata: {
-      name: "Independent Points V3.4.3",
-      description: "Independent Points V3.4.3 admin role management with audit log",
+      name: "Independent Points V3.5",
+      description: "Independent Points V3.5 member detail administration and audit history",
       url: "https://avg168.github.io",
       icons: []
     },
@@ -5078,6 +5359,11 @@ $("adminMemberSearch")?.addEventListener("keydown", (event) => {
     event.preventDefault();
     $("adminSearchMembersBtn")?.click();
   }
+});
+
+$("adminCloseDetailBtn")?.addEventListener("click", () => {
+  cloudAdminDetail = null;
+  if ($("adminMemberDetail")) $("adminMemberDetail").hidden = true;
 });
 
 $("adminRefreshAuditBtn")?.addEventListener("click", async () => {
