@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Independent Points V3.3.3｜驗證狀態修正版</title>
+<title>Independent Points V3.4｜會員管理中心</title>
 <style>
 :root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;color:#172033}
 *{box-sizing:border-box}
@@ -71,6 +71,9 @@ body.show-advanced .advanced-feature{display:block}
 .admin-hub-btn{display:none}
 body.show-owner .admin-hub-btn{display:block}
 body.show-ownership .admin-hub-btn{display:block}
+body.show-cloud-admin .admin-hub-btn{display:block}
+.cloud-admin-only{display:none}
+body.show-cloud-admin .cloud-admin-only{display:block}
 .compact-warning{
   background:#fff7df;border-left:5px solid #d59a0b;
   padding:12px 14px;border-radius:12px;line-height:1.6
@@ -104,6 +107,87 @@ body.show-ownership .admin-hub-btn{display:block}
 .notice-cloud{
   background:#eefaf5;border-left:5px solid #23825a;
   padding:12px 14px;border-radius:12px;line-height:1.6
+}
+
+.admin-summary-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+  margin:12px 0 18px;
+}
+.admin-stat{
+  border:1px solid #dbe2ec;
+  border-radius:14px;
+  padding:14px;
+  background:#f8fafc;
+}
+.admin-stat strong{
+  display:block;
+  font-size:1.6rem;
+  margin-top:4px;
+}
+.admin-member-list{
+  display:grid;
+  gap:12px;
+  margin-top:14px;
+}
+.admin-member-card{
+  border:1px solid #dbe2ec;
+  border-radius:16px;
+  padding:15px;
+  background:#fff;
+}
+.admin-member-title{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  margin-bottom:10px;
+}
+.admin-member-title b{
+  font-size:1.08rem;
+}
+.admin-member-meta{
+  display:grid;
+  gap:7px;
+  line-height:1.55;
+  font-size:.95rem;
+}
+.role-admin{
+  display:inline-block;
+  padding:5px 9px;
+  border-radius:999px;
+  background:#fff0d7;
+  color:#8a5a00;
+  font-weight:800;
+}
+.role-member{
+  display:inline-block;
+  padding:5px 9px;
+  border-radius:999px;
+  background:#eef4ff;
+  color:#274b7a;
+  font-weight:800;
+}
+.verify-ok{
+  display:inline-block;
+  padding:5px 9px;
+  border-radius:999px;
+  background:#eaf7ef;
+  color:#1f6848;
+  font-weight:800;
+}
+.verify-no{
+  display:inline-block;
+  padding:5px 9px;
+  border-radius:999px;
+  background:#f3f4f6;
+  color:#667085;
+  font-weight:800;
+}
+@media (max-width:480px){
+  .admin-summary-grid{grid-template-columns:1fr 1fr}
 }
 .auth-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .auth-grid button{margin:0}
@@ -384,6 +468,43 @@ button {
   <div id="contactList" class="contact-list"></div>
 </section>
 
+<section id="cloudAdminSection" class="cloud-admin-only">
+  <h2>⑤ 會員管理中心</h2>
+
+  <div class="notice-cloud">
+    <b>V3.4 雲端管理：</b>只有 Supabase 會員角色為 <b>admin</b> 的帳號可以讀取會員清單。
+    本版先提供安全的「查詢／檢視」功能，不直接修改其他會員資料。
+  </div>
+
+  <div class="admin-summary-grid">
+    <div class="admin-stat">會員總數<strong id="adminTotalMembers">—</strong></div>
+    <div class="admin-stat">管理員<strong id="adminTotalAdmins">—</strong></div>
+    <div class="admin-stat">已驗證錢包<strong id="adminVerifiedWallets">—</strong></div>
+    <div class="admin-stat">常用收款人<strong id="adminTotalContacts">—</strong></div>
+  </div>
+
+  <div class="member-field">
+    <label for="adminMemberSearch">搜尋會員</label>
+    <input
+      id="adminMemberSearch"
+      placeholder="會員編號／暱稱／Email／錢包地址"
+      autocomplete="off"
+      spellcheck="false"
+    >
+  </div>
+
+  <div class="member-actions">
+    <button id="adminSearchMembersBtn" class="green" type="button">搜尋</button>
+    <button id="adminRefreshMembersBtn" class="blue" type="button">重新整理</button>
+  </div>
+
+  <div id="adminMembersMsg" class="box info">
+    登入管理員帳號後即可讀取會員資料。
+  </div>
+
+  <div id="adminMemberList" class="admin-member-list"></div>
+</section>
+
 <section class="tech-only advanced-feature">
   <h2>鏈上技術資料</h2>
   <div class="row">
@@ -401,7 +522,7 @@ button {
 </section>
 
 <section id="connectSection">
-  <h2>⑤ 連接錢包</h2>
+  <h2>⑥ 連接錢包</h2>
   <div id="sessionState" class="box warn">尚未連線。</div>
   <button id="connectBtn" class="blue" type="button">連接 Trust Wallet</button>
   <button id="disconnectBtn" class="gray" type="button" disabled>中斷連線／切換錢包</button>
@@ -409,7 +530,7 @@ button {
 </section>
 
 <section id="identitySection">
-  <h2>⑥ 我的帳戶</h2>
+  <h2>⑦ 我的帳戶</h2>
   <div class="row"><div class="label">目前身分</div><div id="role">尚未連線</div></div>
   <div class="row"><div class="label">合約狀態</div><div id="contractState">尚未讀取</div></div>
   <div class="row"><div class="label">鏈上讀取</div><div id="rpcStatus">RPC 自動備援已啟用</div></div>
@@ -417,7 +538,7 @@ button {
 </section>
 
 <section id="balanceSection">
-  <h2>⑦ 我的 IPT</h2>
+  <h2>⑧ 我的 IPT</h2>
   <div id="balance" class="balance">— IPT</div>
   <div class="row"><div class="label">鏈上總供給量</div><div id="supply">—</div></div>
   <div class="row"><div class="label">剩餘可發行</div><div id="remaining">—</div></div>
@@ -458,7 +579,7 @@ button {
 </section>
 
 <section id="transferSection">
-  <h2>⑧ IPT 轉帳</h2>
+  <h2>⑨ IPT 轉帳</h2>
   <div class="box info">
     請確認收款地址與數量。系統會先檢查鏈上餘額與交易狀態，再交由 Trust Wallet 核准。
     若畫面逾時，先重新讀取鏈上資料，不要立即重送。
@@ -654,6 +775,8 @@ let cloudUser = null;
 let cloudProfile = null;
 let cloudContacts = [];
 let cloudWallets = [];
+let cloudRole = "member";
+let cloudAdminMembers = [];
 
 const ABI = [
   "function name() view returns (string)",
@@ -886,6 +1009,28 @@ function currentCloudWalletMatchesConnected() {
   return same(primary.wallet_address, account) && Number(primary.chain_id) === CHAIN_ID;
 }
 
+async function loadCloudRole() {
+  if (!cloudLoggedIn()) {
+    cloudRole = "member";
+    return cloudRole;
+  }
+
+  const { data, error } = await supabase
+    .from("member_roles")
+    .select("role")
+    .eq("user_id", cloudUser.id)
+    .maybeSingle();
+
+  if (error) throw error;
+
+  cloudRole = data?.role === "admin" ? "admin" : "member";
+  return cloudRole;
+}
+
+function cloudIsAdmin() {
+  return cloudLoggedIn() && cloudRole === "admin";
+}
+
 async function loadCloudProfile() {
   if (!cloudLoggedIn()) {
     cloudProfile = null;
@@ -1046,6 +1191,151 @@ function renderCloudAuthUI() {
   }
 }
 
+function setAdminMembersMessage(kind, text) {
+  const el = $("adminMembersMsg");
+  if (!el) return;
+  el.className = "box " + kind;
+  el.textContent = text;
+}
+
+function renderCloudAdminAccess() {
+  document.body.classList.toggle("show-cloud-admin", cloudIsAdmin());
+
+  if (!cloudIsAdmin()) {
+    cloudAdminMembers = [];
+    if ($("adminMemberList")) $("adminMemberList").textContent = "";
+    if ($("adminTotalMembers")) $("adminTotalMembers").textContent = "—";
+    if ($("adminTotalAdmins")) $("adminTotalAdmins").textContent = "—";
+    if ($("adminVerifiedWallets")) $("adminVerifiedWallets").textContent = "—";
+    if ($("adminTotalContacts")) $("adminTotalContacts").textContent = "—";
+  }
+}
+
+function formatAdminDate(value) {
+  if (!value) return "—";
+  try {
+    return new Date(value).toLocaleString();
+  } catch (_) {
+    return String(value);
+  }
+}
+
+function renderAdminMembers(members) {
+  const host = $("adminMemberList");
+  if (!host) return;
+  host.textContent = "";
+
+  if (!Array.isArray(members) || !members.length) {
+    const empty = document.createElement("div");
+    empty.className = "box info";
+    empty.textContent = "沒有符合條件的會員。";
+    host.appendChild(empty);
+    return;
+  }
+
+  members.forEach(member => {
+    const card = document.createElement("div");
+    card.className = "admin-member-card";
+
+    const title = document.createElement("div");
+    title.className = "admin-member-title";
+
+    const name = document.createElement("b");
+    name.textContent =
+      (member.member_number || "未編號") +
+      "｜" +
+      (member.display_name || "未命名");
+
+    const role = document.createElement("span");
+    role.className = member.role === "admin" ? "role-admin" : "role-member";
+    role.textContent = member.role === "admin" ? "管理員" : "會員";
+
+    title.append(name, role);
+
+    const meta = document.createElement("div");
+    meta.className = "admin-member-meta";
+
+    const email = document.createElement("div");
+    email.textContent = "Email：" + (member.email || "—");
+
+    const wallet = document.createElement("div");
+    wallet.className = "addr";
+    wallet.textContent = "錢包：" + (member.wallet_address || "尚未綁定");
+
+    const verified = document.createElement("div");
+    const badge = document.createElement("span");
+    badge.className = member.wallet_verified ? "verify-ok" : "verify-no";
+    badge.textContent = member.wallet_verified ? "錢包已驗證" : "錢包未驗證";
+    verified.appendChild(badge);
+
+    const contacts = document.createElement("div");
+    contacts.textContent =
+      "常用收款人：" + String(member.contacts_count ?? 0) + " 筆";
+
+    const created = document.createElement("div");
+    created.textContent = "加入時間：" + formatAdminDate(member.created_at);
+
+    meta.append(email, wallet, verified, contacts, created);
+    card.append(title, meta);
+    host.appendChild(card);
+  });
+}
+
+async function loadAdminMembers(query = "") {
+  if (!cloudIsAdmin()) {
+    throw new Error("目前登入帳號不是管理員。");
+  }
+
+  const { data, error } = await supabase.functions.invoke("admin-members", {
+    body: {
+      query: String(query || "").trim()
+    }
+  });
+
+  if (error) {
+    let detail = "";
+    try {
+      const context = error?.context;
+      if (context && typeof context.json === "function") {
+        const body = await context.json();
+        detail = String(body?.error || "");
+      }
+    } catch (_) {}
+
+    throw new Error(detail || error?.message || "會員管理服務呼叫失敗。");
+  }
+
+  if (!data?.ok) {
+    throw new Error(String(data?.error || "會員管理服務沒有回傳成功結果。"));
+  }
+
+  cloudAdminMembers = Array.isArray(data.members) ? data.members : [];
+
+  if ($("adminTotalMembers")) {
+    $("adminTotalMembers").textContent = String(data.summary?.total_members ?? 0);
+  }
+  if ($("adminTotalAdmins")) {
+    $("adminTotalAdmins").textContent = String(data.summary?.admin_members ?? 0);
+  }
+  if ($("adminVerifiedWallets")) {
+    $("adminVerifiedWallets").textContent = String(data.summary?.verified_wallets ?? 0);
+  }
+  if ($("adminTotalContacts")) {
+    $("adminTotalContacts").textContent = String(data.summary?.total_contacts ?? 0);
+  }
+
+  renderAdminMembers(cloudAdminMembers);
+
+  setAdminMembersMessage(
+    "ok",
+    query
+      ? "✓ 搜尋完成，共 " + cloudAdminMembers.length + " 筆符合結果。"
+      : "✓ 會員資料已載入，共 " + cloudAdminMembers.length + " 筆。"
+  );
+
+  return data;
+}
+
 async function refreshCloudMemberData(message = "") {
   if (!cloudLoggedIn()) {
     cloudProfile = null;
@@ -1060,11 +1350,19 @@ async function refreshCloudMemberData(message = "") {
     await Promise.all([
       loadCloudProfile(),
       loadCloudContacts(),
-      loadCloudWallets()
+      loadCloudWallets(),
+      loadCloudRole()
     ]);
 
     renderCloudAuthUI();
+    renderCloudAdminAccess();
     syncMemberTools();
+
+    if (cloudIsAdmin()) {
+      loadAdminMembers().catch(e => {
+        setAdminMembersMessage("err", "管理中心讀取失敗：" + friendlyCloudError(e));
+      });
+    }
 
     if (message) setCloudAuthMessage("ok", message);
   } catch (e) {
@@ -1082,7 +1380,9 @@ async function syncCloudSession(session, message = "") {
     cloudProfile = null;
     cloudContacts = [];
     cloudWallets = [];
+    cloudRole = "member";
     renderCloudAuthUI();
+    renderCloudAdminAccess();
     syncMemberTools();
     if (message) setCloudAuthMessage("info", message);
     return;
@@ -1561,8 +1861,8 @@ async function initWC() {
     events: ["chainChanged","accountsChanged"],
     optionalEvents: ["connect","disconnect","message"],
     metadata: {
-      name: "Independent Points V3.3.3",
-      description: "Independent Points V3.3.3 cloud member center with durable wallet verification status",
+      name: "Independent Points V3.4",
+      description: "Independent Points V3.4 cloud member administration center on Ethereum Sepolia",
       url: "https://avg168.github.io",
       icons: []
     },
@@ -4174,6 +4474,11 @@ $("goHistoryBtn")?.addEventListener("click", () => {
 });
 
 $("goAdminBtn")?.addEventListener("click", () => {
+  if (cloudIsAdmin() && $("cloudAdminSection")) {
+    $("cloudAdminSection").scrollIntoView({ behavior: "smooth", block: "start" });
+    return;
+  }
+
   const target = document.querySelector(".owner-only, .ownership-only");
   target?.scrollIntoView({ behavior: "smooth", block: "start" });
 });
@@ -4415,7 +4720,48 @@ $("saveContactBtn")?.addEventListener("click", async () => {
 });
 
 
-// V3.3 cloud registration / login.
+// V3.4 cloud member administration.
+$("adminSearchMembersBtn")?.addEventListener("click", async () => {
+  const btn = $("adminSearchMembersBtn");
+  const query = String($("adminMemberSearch")?.value || "").trim();
+
+  try {
+    btn.disabled = true;
+    btn.textContent = "搜尋中…";
+    await loadAdminMembers(query);
+  } catch (e) {
+    setAdminMembersMessage("err", friendlyCloudError(e));
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "搜尋";
+  }
+});
+
+$("adminRefreshMembersBtn")?.addEventListener("click", async () => {
+  const btn = $("adminRefreshMembersBtn");
+
+  try {
+    btn.disabled = true;
+    btn.textContent = "讀取中…";
+
+    if ($("adminMemberSearch")) $("adminMemberSearch").value = "";
+    await loadAdminMembers("");
+  } catch (e) {
+    setAdminMembersMessage("err", friendlyCloudError(e));
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "重新整理";
+  }
+});
+
+$("adminMemberSearch")?.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    $("adminSearchMembersBtn")?.click();
+  }
+});
+
+// V3.4 cloud registration / login.
 $("cloudSignUpBtn")?.addEventListener("click", async () => {
   const btn = $("cloudSignUpBtn");
   const displayName = String($("cloudSignupName")?.value || "").trim().slice(0, 80);
