@@ -1,19 +1,19 @@
 {
   "product": "Independent Points",
-  "version": "V4.5.0",
-  "build": "20260925-450",
-  "release_date": "2026-09-25",
+  "version": "V4.6.0",
+  "build": "20260926-460",
+  "release_date": "2026-09-26",
   "channel": "production",
+  "rollback_version": "V4.5.0",
+  "fallback_version": "V4.4.1",
   "network": "Ethereum Sepolia",
-  "chain_id": 11155111,
+  "chain_id": "11155111 / 0xaa36a7",
   "contract": "0xd3fb2480aadb8b168ec7e88a0e5c847d9750cb87",
-  "minimum_supported_version": "V4.4.1",
-  "notes": [
-    "新增維運中心",
-    "新增版本檢查",
-    "新增 Service Worker 更新",
-    "新增舊快取清除",
-    "新增 Supabase / Sepolia / IPT 合約健康檢查",
-    "保留 V4.4.1 為回復版本"
+  "rollback_steps": [
+    "先進版本更新中心執行『重設舊版 Service Worker』。",
+    "重新載入 V4.6 首頁並再做一次健康驗證。",
+    "若仍異常，重新上傳 V4.5.0 備份包。",
+    "若 V4.5.0 也異常，再回復 V4.4.1。",
+    "回復網頁版本時不要修改 Supabase 資料、Owner、pendingOwner 或 paused 狀態。"
   ]
 }
