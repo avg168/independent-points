@@ -1,19 +1,73 @@
 {
+  "id": "./",
   "name": "Independent Points",
   "short_name": "IPT",
   "description": "Independent Points 會員點數錢包與 IPT 資產管理系統",
-  "start_url": "./?v=440",
+  "start_url": "./?source=pwa&v=441",
   "scope": "./",
   "display": "standalone",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
   "background_color": "#f4f7fb",
   "theme_color": "#10243d",
   "lang": "zh-Hant-TW",
+  "orientation": "portrait-primary",
+  "categories": [
+    "finance",
+    "utilities"
+  ],
   "icons": [
+    {
+      "src": "./ipt-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./ipt-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./ipt-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
     {
       "src": "./ipt-icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "我的資產",
+      "short_name": "資產",
+      "url": "./member-assets-v4.4.1.html?v=441",
+      "icons": [
+        {
+          "src": "./ipt-icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "IPT 轉帳",
+      "short_name": "轉帳",
+      "url": "./wallet-core-v4.4.1.html?go=transfer",
+      "icons": [
+        {
+          "src": "./ipt-icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
     }
   ]
 }

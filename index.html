@@ -180,7 +180,7 @@ body{
 }
 
 
-/* ===== V4.4.0 Android bottom-navigation fix ===== */
+/* ===== V4.4.1 Android bottom-navigation fix ===== */
 .v43-bottom-nav{
   position:fixed!important;
   left:50%!important;
@@ -247,7 +247,7 @@ body{
 }
 
 
-/* ===== V4.4.0 reliable in-page navigation ===== */
+/* ===== V4.4.1 reliable in-page navigation ===== */
 .v43-bottom-nav{
   display:none!important;
 }
@@ -335,19 +335,20 @@ button{
 
 </style>
 
-<link rel="manifest" href="./manifest.webmanifest">
+<link rel="manifest" href="./manifest.webmanifest?v=441">
 <meta name="theme-color" content="#10243d">
 <meta name="application-name" content="Independent Points">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Independent Points">
 <meta name="description" content="Independent Points 會員點數錢包與 IPT 資產管理系統。">
-<link rel="icon" type="image/svg+xml" href="./ipt-icon.svg">
+<link rel="icon" type="image/svg+xml" href="./ipt-icon-192.png">
 
+<link rel="apple-touch-icon" href="./ipt-apple-touch-180.png">
 </head>
 <body>
 <header>
-  <div class="version">V4.4.0</div>
+  <div class="version">V4.4.1</div>
   <h1>Independent Points</h1>
   <p>會員、錢包、IPT 資產、交易與管理，一個正式入口完成。</p>
 </header>
@@ -500,18 +501,22 @@ button{
   </section>
 
   <section class="panel">
-    <h2>V4.4.0 操作體驗整合</h2>
-    <div class="status ok" style="margin-bottom:12px">V4.4.0 防卡版：首頁會員資料先完成，完整鏈上統計改為需要時才更新。</div>
+    <h2>V4.4.1 操作體驗整合</h2>
+    <div class="status ok" style="margin-bottom:12px">V4.4.1 防卡版：首頁會員資料先完成，完整鏈上統計改為需要時才更新。</div>
     <div class="note">
-      V4.4.0 已作為正式統一首頁。原本通過驗證的錢包核心保留在 wallet-core-v4.4.html；會員與管理員資產報表已統一為 V4.3 模組。
+      V4.4.1 已作為正式統一首頁。原本通過驗證的錢包核心保留在 wallet-core-v4.4.1.html；會員與管理員資產報表已統一為 V4.3 模組。
     </div>
   </section>
 
   <section class="panel">
     <h2>安裝 Independent Points</h2>
-    <div class="note">可將系統安裝到 Android 主畫面，之後像一般 App 一樣開啟。</div>
-    <button id="installAppBtn" class="secondary" type="button" style="width:100%;margin-top:10px">安裝到主畫面</button>
-    <div id="installAppNote" class="note">若按鈕顯示不可安裝，可使用瀏覽器選單的「加到主畫面」。</div>
+    <div class="note">若目前瀏覽器支援 PWA，可直接安裝；Trust Wallet／WebView 不支援時，可一鍵改用 Chrome 開啟正式安裝頁。</div>
+    <div class="actions" style="margin-top:10px">
+      <button id="installAppBtn" class="secondary" type="button">直接安裝 App</button>
+      <button id="openChromeInstallBtn" class="light" type="button">用 Chrome 開啟安裝</button>
+    </div>
+    <button id="copyInstallUrlBtn" class="light" type="button" style="width:100%;margin-top:10px">複製正式網址</button>
+    <div id="installAppNote" class="note">正在檢查此瀏覽器的安裝能力…</div>
   </section>
 
 </main>
@@ -686,8 +691,8 @@ button{
 
       setStatus("ok",
         role==="admin"
-          ?"V4.4.0 已登入：會員功能與管理中心均已開放。"
-          :"V4.4.0 已登入：會員功能已開放。"
+          ?"V4.4.1 已登入：會員功能與管理中心均已開放。"
+          :"V4.4.1 已登入：會員功能已開放。"
       );
 
       $("assetSummarySection").style.display="block";
@@ -706,23 +711,23 @@ button{
 
   $("refreshBtn").addEventListener("click",load);
   $("assetSummaryRefreshBtn").addEventListener("click",refreshAssetSummary);
-  $("loginBtn").addEventListener("click",()=>go("./wallet-core-v4.4.html"));
+  $("loginBtn").addEventListener("click",()=>go("./wallet-core-v4.4.1.html"));
 
-  $("myAssetBtn").addEventListener("click",()=>go("./member-assets-v4.4.html?v=440"));
-  $("historyBtn").addEventListener("click",()=>go("./wallet-core-v4.4.html?go=history"));
-  $("assetCenterBtn").addEventListener("click",()=>go("./asset-center-v4.4.html?v=440"));
-  $("systemInfoBtn").addEventListener("click",()=>go("./system-info-v4.2.html?v=440"));
+  $("myAssetBtn").addEventListener("click",()=>go("./member-assets-v4.4.1.html?v=441"));
+  $("historyBtn").addEventListener("click",()=>go("./wallet-core-v4.4.1.html?go=history"));
+  $("assetCenterBtn").addEventListener("click",()=>go("./asset-center-v4.4.1.html?v=441"));
+  $("systemInfoBtn").addEventListener("click",()=>go("./system-info-v4.2.html?v=441"));
 
-  $("balanceBtn").addEventListener("click",()=>go("./wallet-core-v4.4.html?go=balance"));
-  $("transferBtn").addEventListener("click",()=>go("./wallet-core-v4.4.html?go=transfer"));
-  $("receiveBtn").addEventListener("click",()=>go("./wallet-core-v4.4.html?go=receive"));
+  $("balanceBtn").addEventListener("click",()=>go("./wallet-core-v4.4.1.html?go=balance"));
+  $("transferBtn").addEventListener("click",()=>go("./wallet-core-v4.4.1.html?go=transfer"));
+  $("receiveBtn").addEventListener("click",()=>go("./wallet-core-v4.4.1.html?go=receive"));
 
-  $("adminAssetBtn").addEventListener("click",()=>go("./admin-assets-v4.4.html?v=440"));
+  $("adminAssetBtn").addEventListener("click",()=>go("./admin-assets-v4.4.1.html?v=441"));
   $("adminMemberBtn").addEventListener("click",()=>go("./admin-members-v4.1.1.html?v=412"));
-  $("mintBtn").addEventListener("click",()=>go("./wallet-core-v4.4.html?go=mint"));
-  $("pauseBtn").addEventListener("click",()=>go("./wallet-core-v4.4.html?go=pause"));
-  $("ownershipBtn").addEventListener("click",()=>go("./wallet-core-v4.4.html?go=ownership"));
-  $("advancedBtn").addEventListener("click",()=>go("./wallet-core-v4.4.html"));
+  $("mintBtn").addEventListener("click",()=>go("./wallet-core-v4.4.1.html?go=mint"));
+  $("pauseBtn").addEventListener("click",()=>go("./wallet-core-v4.4.1.html?go=pause"));
+  $("ownershipBtn").addEventListener("click",()=>go("./wallet-core-v4.4.1.html?go=ownership"));
+  $("advancedBtn").addEventListener("click",()=>go("./wallet-core-v4.4.1.html"));
   $("v43NavAssets")?.addEventListener("click",()=>{
     if(!$("myAssetBtn").disabled) $("myAssetBtn").click();
   });
@@ -747,42 +752,113 @@ button{
 </script>
 
 
+
+
+
 <script>
 (() => {
+  const OFFICIAL_URL = "https://avg168.github.io/independent-points/?v=441";
+  const CHROME_INTENT = "intent://avg168.github.io/independent-points/?v=441#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=https%3A%2F%2Favg168.github.io%2Findependent-points%2F%3Fv%3D441;end";
   let deferredInstallPrompt = null;
+
   const installBtn = document.getElementById("installAppBtn");
-  const installNote = document.getElementById("installAppNote");
+  const chromeBtn = document.getElementById("openChromeInstallBtn");
+  const copyBtn = document.getElementById("copyInstallUrlBtn");
+  const note = document.getElementById("installAppNote");
+
+  function standalone() {
+    return window.matchMedia?.("(display-mode: standalone)")?.matches ||
+           window.navigator.standalone === true;
+  }
+
+  function setNote(text) {
+    if (note) note.textContent = text;
+  }
+
+  if (standalone()) {
+    if (installBtn) {
+      installBtn.disabled = true;
+      installBtn.textContent = "已安裝";
+    }
+    if (chromeBtn) chromeBtn.style.display = "none";
+    setNote("Independent Points 已以 App 模式開啟。");
+  } else {
+    if (installBtn) installBtn.textContent = "檢查直接安裝";
+    setNote("若目前是 Trust Wallet／內建瀏覽器，請使用「用 Chrome 開啟安裝」。");
+  }
 
   window.addEventListener("beforeinstallprompt", (event) => {
     event.preventDefault();
     deferredInstallPrompt = event;
     if (installBtn) {
       installBtn.disabled = false;
-      installBtn.textContent = "安裝到主畫面";
+      installBtn.textContent = "直接安裝 App";
     }
-    if (installNote) installNote.textContent = "此裝置可直接安裝 Independent Points。";
+    setNote("此瀏覽器已符合 PWA 安裝條件，可以直接安裝。");
   });
 
   installBtn?.addEventListener("click", async () => {
-    if (!deferredInstallPrompt) {
-      if (installNote) installNote.textContent = "請使用瀏覽器選單的「加到主畫面／安裝應用程式」。";
+    if (standalone()) {
+      setNote("目前已經是 App 模式。");
       return;
     }
-    deferredInstallPrompt.prompt();
-    const choice = await deferredInstallPrompt.userChoice;
-    if (installNote) installNote.textContent =
-      choice.outcome === "accepted" ? "已接受安裝。" : "已取消安裝。";
-    deferredInstallPrompt = null;
+
+    if (deferredInstallPrompt) {
+      deferredInstallPrompt.prompt();
+      const choice = await deferredInstallPrompt.userChoice;
+      setNote(choice.outcome === "accepted" ? "已接受安裝。" : "已取消安裝。");
+      deferredInstallPrompt = null;
+      return;
+    }
+
+    setNote("目前瀏覽器不提供直接安裝視窗。請按「用 Chrome 開啟安裝」，或使用瀏覽器選單的「加到主畫面／安裝應用程式」。");
+  });
+
+  chromeBtn?.addEventListener("click", () => {
+    setNote("正在嘗試用 Chrome 開啟正式安裝頁…");
+    location.href = CHROME_INTENT;
+  });
+
+  copyBtn?.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(OFFICIAL_URL);
+      setNote("正式網址已複製。可貼到 Chrome 開啟，再選「安裝應用程式／加到主畫面」。");
+    } catch (_) {
+      const ta=document.createElement("textarea");
+      ta.value=OFFICIAL_URL;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      ta.remove();
+      setNote("正式網址已複製。");
+    }
   });
 
   window.addEventListener("appinstalled", () => {
-    if (installNote) installNote.textContent = "Independent Points 已安裝完成。";
+    if (installBtn) {
+      installBtn.disabled = true;
+      installBtn.textContent = "已安裝";
+    }
+    setNote("Independent Points 已安裝完成。");
   });
 
   if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+    window.addEventListener("load", async () => {
+      try {
+        const reg = await navigator.serviceWorker.register("./service-worker.js?v=441", {
+          updateViaCache: "none"
+        });
+        await reg.update().catch(()=>{});
+        await navigator.serviceWorker.ready;
+        if (!deferredInstallPrompt && !standalone()) {
+          setNote("PWA 基礎已就緒。若沒有直接安裝視窗，請使用「用 Chrome 開啟安裝」。");
+        }
+      } catch (err) {
+        setNote("目前瀏覽器不支援完整 PWA 安裝。請使用 Chrome 開啟正式網址。");
+      }
     });
+  } else {
+    setNote("目前瀏覽器不支援 Service Worker。請使用 Chrome 開啟正式網址。");
   }
 })();
 </script>
