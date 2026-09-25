@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Independent Points V3.4｜會員管理中心</title>
+<title>Independent Points V3.4.2｜帳號切換同步修正版</title>
 <style>
 :root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;color:#172033}
 *{box-sizing:border-box}
@@ -186,6 +186,41 @@ body.show-cloud-admin .cloud-admin-only{display:block}
   color:#667085;
   font-weight:800;
 }
+
+.status-active{
+  display:inline-block;
+  padding:5px 9px;
+  border-radius:999px;
+  background:#eaf7ef;
+  color:#1f6848;
+  font-weight:800;
+}
+.status-suspended{
+  display:inline-block;
+  padding:5px 9px;
+  border-radius:999px;
+  background:#fff0f0;
+  color:#9b2727;
+  font-weight:800;
+}
+.admin-action-row{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:8px;
+  margin-top:12px;
+}
+.admin-audit-list{
+  display:grid;
+  gap:10px;
+  margin-top:12px;
+}
+.admin-audit-item{
+  border:1px solid #dbe2ec;
+  border-radius:14px;
+  padding:13px;
+  background:#f8fafc;
+  line-height:1.6;
+}
 @media (max-width:480px){
   .admin-summary-grid{grid-template-columns:1fr 1fr}
 }
@@ -346,7 +381,7 @@ button {
   </div>
 
   <div class="member-field">
-    <label for="cloudSignupName">註冊暱稱</label>
+    <label id="cloudSignupNameLabel" for="cloudSignupName">註冊暱稱</label>
     <input id="cloudSignupName" maxlength="80" placeholder="例如：奕勝" autocomplete="nickname">
   </div>
 
@@ -370,6 +405,9 @@ button {
   <div id="cloudAuthMsg" class="box info">
     第一次註冊若沒有自動登入，請先到 Email 信箱完成確認，再回到這一頁登入。
   </div>
+  <p class="muted-small">
+    已登入時，這裡會自動顯示目前會員的暱稱與 Email；真正會員資料以 Supabase 的 member_profiles 為準。
+  </p>
 </section>
 
 <section id="memberCenterSection">
@@ -472,12 +510,14 @@ button {
   <h2>⑤ 會員管理中心</h2>
 
   <div class="notice-cloud">
-    <b>V3.4 雲端管理：</b>只有 Supabase 會員角色為 <b>admin</b> 的帳號可以讀取會員清單。
-    本版先提供安全的「查詢／檢視」功能，不直接修改其他會員資料。
+    <b>V3.4.1 雲端管理：</b>只有 Supabase 會員角色為 <b>admin</b> 的帳號可以管理會員狀態。
+    本版先開放「正常／停權」與操作紀錄；不允許停權自己，也不允許停權其他管理員。
   </div>
 
   <div class="admin-summary-grid">
     <div class="admin-stat">會員總數<strong id="adminTotalMembers">—</strong></div>
+    <div class="admin-stat">正常會員<strong id="adminActiveMembers">—</strong></div>
+    <div class="admin-stat">停權會員<strong id="adminSuspendedMembers">—</strong></div>
     <div class="admin-stat">管理員<strong id="adminTotalAdmins">—</strong></div>
     <div class="admin-stat">已驗證錢包<strong id="adminVerifiedWallets">—</strong></div>
     <div class="admin-stat">常用收款人<strong id="adminTotalContacts">—</strong></div>
@@ -503,6 +543,13 @@ button {
   </div>
 
   <div id="adminMemberList" class="admin-member-list"></div>
+
+  <hr style="margin:22px 0;border:0;border-top:1px solid #dbe2ec">
+
+  <h3>管理操作紀錄</h3>
+  <button id="adminRefreshAuditBtn" class="gray" type="button">重新整理操作紀錄</button>
+  <div id="adminAuditMsg" class="box info">顯示最近 50 筆管理操作。</div>
+  <div id="adminAuditList" class="admin-audit-list"></div>
 </section>
 
 <section class="tech-only advanced-feature">
@@ -777,6 +824,8 @@ let cloudContacts = [];
 let cloudWallets = [];
 let cloudRole = "member";
 let cloudAdminMembers = [];
+let cloudAdminSelfId = "";
+let cloudAdminAudit = [];
 
 const ABI = [
   "function name() view returns (string)",
@@ -1143,6 +1192,31 @@ function renderCloudAuthUI() {
     $("cloudMemberEmail").textContent = logged ? (cloudUser.email || "—") : "—";
   }
 
+  // V3.4.2: account-switch UI synchronization.
+  // These fields are registration/login inputs, not the source of truth.
+  // When signed in, mirror the current cloud member so stale values from the
+  // previously registered account cannot remain on screen.
+  if ($("cloudSignupNameLabel")) {
+    $("cloudSignupNameLabel").textContent = logged ? "目前會員暱稱" : "註冊暱稱";
+  }
+
+  if ($("cloudSignupName")) {
+    $("cloudSignupName").value = logged
+      ? String(cloudProfile?.display_name || "")
+      : "";
+    $("cloudSignupName").disabled = logged;
+  }
+
+  if ($("cloudEmail")) {
+    $("cloudEmail").value = logged ? String(cloudUser.email || "") : "";
+    $("cloudEmail").disabled = logged;
+  }
+
+  if ($("cloudPassword")) {
+    if (logged) $("cloudPassword").value = "";
+    $("cloudPassword").disabled = logged;
+  }
+
   if ($("cloudSignUpBtn")) $("cloudSignUpBtn").disabled = logged;
   if ($("cloudSignInBtn")) $("cloudSignInBtn").disabled = logged;
   if ($("cloudSignOutBtn")) $("cloudSignOutBtn").disabled = !logged;
@@ -1205,9 +1279,14 @@ function renderCloudAdminAccess() {
     cloudAdminMembers = [];
     if ($("adminMemberList")) $("adminMemberList").textContent = "";
     if ($("adminTotalMembers")) $("adminTotalMembers").textContent = "—";
+    if ($("adminActiveMembers")) $("adminActiveMembers").textContent = "—";
+    if ($("adminSuspendedMembers")) $("adminSuspendedMembers").textContent = "—";
     if ($("adminTotalAdmins")) $("adminTotalAdmins").textContent = "—";
     if ($("adminVerifiedWallets")) $("adminVerifiedWallets").textContent = "—";
     if ($("adminTotalContacts")) $("adminTotalContacts").textContent = "—";
+    if ($("adminAuditList")) $("adminAuditList").textContent = "";
+    cloudAdminSelfId = "";
+    cloudAdminAudit = [];
   }
 }
 
@@ -1255,6 +1334,14 @@ function renderAdminMembers(members) {
     const meta = document.createElement("div");
     meta.className = "admin-member-meta";
 
+    const statusRow = document.createElement("div");
+    const statusBadge = document.createElement("span");
+    statusBadge.className =
+      member.status === "suspended" ? "status-suspended" : "status-active";
+    statusBadge.textContent =
+      member.status === "suspended" ? "已停權" : "正常";
+    statusRow.appendChild(statusBadge);
+
     const email = document.createElement("div");
     email.textContent = "Email：" + (member.email || "—");
 
@@ -1275,10 +1362,154 @@ function renderAdminMembers(members) {
     const created = document.createElement("div");
     created.textContent = "加入時間：" + formatAdminDate(member.created_at);
 
-    meta.append(email, wallet, verified, contacts, created);
+    meta.append(statusRow, email, wallet, verified, contacts, created);
     card.append(title, meta);
+
+    const canChangeStatus =
+      member.role !== "admin" &&
+      member.user_id !== cloudAdminSelfId;
+
+    if (canChangeStatus) {
+      const actions = document.createElement("div");
+      actions.className = "admin-action-row";
+
+      const statusBtn = document.createElement("button");
+      statusBtn.type = "button";
+      statusBtn.className =
+        member.status === "suspended" ? "green" : "danger-soft";
+      statusBtn.textContent =
+        member.status === "suspended" ? "恢復會員" : "停權會員";
+
+      statusBtn.addEventListener("click", async () => {
+        const nextStatus =
+          member.status === "suspended" ? "active" : "suspended";
+
+        const confirmText =
+          nextStatus === "suspended"
+            ? "確定要停權 " + member.member_number + "｜" + member.display_name + "？"
+            : "確定要恢復 " + member.member_number + "｜" + member.display_name + "？";
+
+        if (!window.confirm(confirmText)) return;
+
+        try {
+          statusBtn.disabled = true;
+          statusBtn.textContent =
+            nextStatus === "suspended" ? "停權中…" : "恢復中…";
+
+          await setAdminMemberStatus(member.user_id, nextStatus);
+
+          await Promise.all([
+            loadAdminMembers(String($("adminMemberSearch")?.value || "").trim()),
+            loadAdminAudit()
+          ]);
+        } catch (e) {
+          setAdminMembersMessage("err", friendlyCloudError(e));
+        }
+      });
+
+      actions.appendChild(statusBtn);
+      card.appendChild(actions);
+    }
+
     host.appendChild(card);
   });
+}
+
+function setAdminAuditMessage(kind, text) {
+  const el = $("adminAuditMsg");
+  if (!el) return;
+  el.className = "box " + kind;
+  el.textContent = text;
+}
+
+function renderAdminAudit(logs) {
+  const host = $("adminAuditList");
+  if (!host) return;
+  host.textContent = "";
+
+  if (!Array.isArray(logs) || !logs.length) {
+    const empty = document.createElement("div");
+    empty.className = "box info";
+    empty.textContent = "目前沒有管理操作紀錄。";
+    host.appendChild(empty);
+    return;
+  }
+
+  logs.forEach(log => {
+    const item = document.createElement("div");
+    item.className = "admin-audit-item";
+
+    const target =
+      log.target_member?.member_number ||
+      log.target_user_id ||
+      "—";
+
+    const admin =
+      log.admin_member?.member_number ||
+      log.admin_user_id ||
+      "—";
+
+    const oldStatus = log.old_value?.status || "—";
+    const newStatus = log.new_value?.status || "—";
+
+    item.textContent =
+      formatAdminDate(log.created_at) +
+      "｜管理員 " + admin +
+      "｜會員 " + target +
+      "｜狀態 " + oldStatus + " → " + newStatus;
+
+    host.appendChild(item);
+  });
+}
+
+async function invokeAdminMemberAction(body) {
+  const { data, error } = await supabase.functions.invoke("admin-member-actions", {
+    body
+  });
+
+  if (error) {
+    let detail = "";
+    try {
+      const context = error?.context;
+      if (context && typeof context.json === "function") {
+        const payload = await context.json();
+        detail = String(payload?.error || "");
+      }
+    } catch (_) {}
+
+    throw new Error(detail || error?.message || "會員管理操作失敗。");
+  }
+
+  if (!data?.ok) {
+    throw new Error(String(data?.error || "會員管理操作沒有成功。"));
+  }
+
+  return data;
+}
+
+async function setAdminMemberStatus(targetUserId, status) {
+  return await invokeAdminMemberAction({
+    action: "set_status",
+    target_user_id: targetUserId,
+    status
+  });
+}
+
+async function loadAdminAudit() {
+  if (!cloudIsAdmin()) return [];
+
+  const data = await invokeAdminMemberAction({
+    action: "list_audit"
+  });
+
+  cloudAdminAudit = Array.isArray(data.logs) ? data.logs : [];
+  renderAdminAudit(cloudAdminAudit);
+  setAdminAuditMessage(
+    "ok",
+    "✓ 已載入最近 " + cloudAdminAudit.length + " 筆管理操作。"
+  );
+
+  return cloudAdminAudit;
 }
 
 async function loadAdminMembers(query = "") {
@@ -1310,9 +1541,16 @@ async function loadAdminMembers(query = "") {
   }
 
   cloudAdminMembers = Array.isArray(data.members) ? data.members : [];
+  cloudAdminSelfId = String(data.admin?.user_id || "");
 
   if ($("adminTotalMembers")) {
     $("adminTotalMembers").textContent = String(data.summary?.total_members ?? 0);
+  }
+  if ($("adminActiveMembers")) {
+    $("adminActiveMembers").textContent = String(data.summary?.active_members ?? 0);
+  }
+  if ($("adminSuspendedMembers")) {
+    $("adminSuspendedMembers").textContent = String(data.summary?.suspended_members ?? 0);
   }
   if ($("adminTotalAdmins")) {
     $("adminTotalAdmins").textContent = String(data.summary?.admin_members ?? 0);
@@ -1359,7 +1597,10 @@ async function refreshCloudMemberData(message = "") {
     syncMemberTools();
 
     if (cloudIsAdmin()) {
-      loadAdminMembers().catch(e => {
+      Promise.all([
+        loadAdminMembers(),
+        loadAdminAudit()
+      ]).catch(e => {
         setAdminMembersMessage("err", "管理中心讀取失敗：" + friendlyCloudError(e));
       });
     }
@@ -1381,6 +1622,11 @@ async function syncCloudSession(session, message = "") {
     cloudContacts = [];
     cloudWallets = [];
     cloudRole = "member";
+
+    if ($("cloudSignupName")) $("cloudSignupName").value = "";
+    if ($("cloudEmail")) $("cloudEmail").value = "";
+    if ($("cloudPassword")) $("cloudPassword").value = "";
+
     renderCloudAuthUI();
     renderCloudAdminAccess();
     syncMemberTools();
@@ -1861,8 +2107,8 @@ async function initWC() {
     events: ["chainChanged","accountsChanged"],
     optionalEvents: ["connect","disconnect","message"],
     metadata: {
-      name: "Independent Points V3.4",
-      description: "Independent Points V3.4 cloud member administration center on Ethereum Sepolia",
+      name: "Independent Points V3.4.2",
+      description: "Independent Points V3.4.2 cloud member account-switch synchronization fix",
       url: "https://avg168.github.io",
       icons: []
     },
@@ -4761,7 +5007,22 @@ $("adminMemberSearch")?.addEventListener("keydown", (event) => {
   }
 });
 
-// V3.4 cloud registration / login.
+$("adminRefreshAuditBtn")?.addEventListener("click", async () => {
+  const btn = $("adminRefreshAuditBtn");
+
+  try {
+    btn.disabled = true;
+    btn.textContent = "讀取中…";
+    await loadAdminAudit();
+  } catch (e) {
+    setAdminAuditMessage("err", friendlyCloudError(e));
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "重新整理操作紀錄";
+  }
+});
+
+// V3.4.1 cloud registration / login.
 $("cloudSignUpBtn")?.addEventListener("click", async () => {
   const btn = $("cloudSignUpBtn");
   const displayName = String($("cloudSignupName")?.value || "").trim().slice(0, 80);
