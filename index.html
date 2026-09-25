@@ -90,7 +90,7 @@ button.light{background:#fff;color:#29445f}
 </head>
 <body>
 <header>
-  <div class="version">V4.1.2</div>
+  <div class="version">V4.2.0</div>
   <h1>Independent Points</h1>
   <p>會員 × 錢包 × IPT 資產 × 交易 × 管理，一個入口完成。</p>
 </header>
@@ -139,6 +139,7 @@ button.light{background:#fff;color:#29445f}
     <button id="assetSummaryRefreshBtn" class="secondary" type="button" style="width:100%;margin-top:10px">
       更新完整資產摘要
     </button>
+    <div id="assetUpdatedAt" class="note" style="margin-top:8px">尚未更新完整資產摘要。</div>
   </section>
 
   <section class="panel">
@@ -178,6 +179,12 @@ button.light{background:#fff;color:#29445f}
         <div class="icon">🗂️</div>
         <div class="title">資產中心</div>
         <div class="desc">會員／管理員報表統一入口</div>
+      </button>
+
+      <button id="systemInfoBtn" class="menu" type="button">
+        <div class="icon">ℹ️</div>
+        <div class="title">系統資訊</div>
+        <div class="desc">版本、網路、合約與更新資訊</div>
       </button>
     </div>
   </section>
@@ -224,10 +231,10 @@ button.light{background:#fff;color:#29445f}
   </section>
 
   <section class="panel">
-    <h2>V4.1.2 操作體驗整合</h2>
-    <div class="status ok" style="margin-bottom:12px">V4.1.2 防卡版：首頁會員資料先完成，完整鏈上統計改為需要時才更新。</div>
+    <h2>V4.2.0 操作體驗整合</h2>
+    <div class="status ok" style="margin-bottom:12px">V4.2.0 防卡版：首頁會員資料先完成，完整鏈上統計改為需要時才更新。</div>
     <div class="note">
-      V4.1.2 已作為正式統一首頁。原本通過驗證的錢包核心保留在 wallet-core-v4.1.2.html；會員與管理員資產報表沿用 V3.9.4.2 穩定版。
+      V4.2.0 已作為正式統一首頁。原本通過驗證的錢包核心保留在 wallet-core-v4.2.html；會員與管理員資產報表沿用 V3.9.4.2 穩定版。
     </div>
   </section>
 </main>
@@ -273,6 +280,12 @@ button.light{background:#fff;color:#29445f}
     $("assetSummaryNote").textContent=fromCache
       ? "目前先顯示上次成功讀取的資產摘要；需要最新資料時再按下方更新。"
       : "資產摘要已更新。首頁其餘功能不會等待鏈上交易掃描。";
+    const saved = fromCache ? localStorage.getItem(assetCacheKey(currentUserId)) : null;
+    let ts = Date.now();
+    try{
+      if(fromCache && saved) ts = JSON.parse(saved)?.saved_at || ts;
+    }catch(_){}
+    $("assetUpdatedAt").textContent = "最後更新：" + new Date(ts).toLocaleString("zh-TW",{hour12:false});
   }
 
   function loadCachedAssetSummary(uid){
@@ -302,10 +315,12 @@ button.light{background:#fff;color:#29445f}
       if(!asset?.ok) throw new Error(asset?.error||"資產摘要讀取失敗");
       renderAssetSummary(asset,false);
       try{
+        const savedAt=Date.now();
         localStorage.setItem(assetCacheKey(currentUserId),JSON.stringify({
-          saved_at:Date.now(),
+          saved_at:savedAt,
           data:asset
         }));
+        $("assetUpdatedAt").textContent="最後更新："+new Date(savedAt).toLocaleString("zh-TW",{hour12:false});
       }catch(_){}
     }catch(err){
       console.error(err);
@@ -394,8 +409,8 @@ button.light{background:#fff;color:#29445f}
 
       setStatus("ok",
         role==="admin"
-          ?"V4.1.2 已登入：會員功能與管理中心均已開放。"
-          :"V4.1.2 已登入：會員功能已開放。"
+          ?"V4.2.0 已登入：會員功能與管理中心均已開放。"
+          :"V4.2.0 已登入：會員功能已開放。"
       );
 
       $("assetSummarySection").style.display="block";
@@ -414,22 +429,23 @@ button.light{background:#fff;color:#29445f}
 
   $("refreshBtn").addEventListener("click",load);
   $("assetSummaryRefreshBtn").addEventListener("click",refreshAssetSummary);
-  $("loginBtn").addEventListener("click",()=>go("./wallet-core-v4.1.2.html"));
+  $("loginBtn").addEventListener("click",()=>go("./wallet-core-v4.2.html"));
 
   $("myAssetBtn").addEventListener("click",()=>go("./member-assets-v3.9.4.2.html?v=3942"));
-  $("historyBtn").addEventListener("click",()=>go("./wallet-core-v4.1.2.html?go=history"));
+  $("historyBtn").addEventListener("click",()=>go("./wallet-core-v4.2.html?go=history"));
   $("assetCenterBtn").addEventListener("click",()=>go("./asset-center-v3.9.4.2.html?v=3942"));
+  $("systemInfoBtn").addEventListener("click",()=>go("./system-info-v4.2.html?v=420"));
 
-  $("balanceBtn").addEventListener("click",()=>go("./wallet-core-v4.1.2.html?go=balance"));
-  $("transferBtn").addEventListener("click",()=>go("./wallet-core-v4.1.2.html?go=transfer"));
-  $("receiveBtn").addEventListener("click",()=>go("./wallet-core-v4.1.2.html?go=receive"));
+  $("balanceBtn").addEventListener("click",()=>go("./wallet-core-v4.2.html?go=balance"));
+  $("transferBtn").addEventListener("click",()=>go("./wallet-core-v4.2.html?go=transfer"));
+  $("receiveBtn").addEventListener("click",()=>go("./wallet-core-v4.2.html?go=receive"));
 
   $("adminAssetBtn").addEventListener("click",()=>go("./admin-assets-v3.9.4.2.html?v=3942"));
   $("adminMemberBtn").addEventListener("click",()=>go("./admin-members-v4.1.1.html?v=412"));
-  $("mintBtn").addEventListener("click",()=>go("./wallet-core-v4.1.2.html?go=mint"));
-  $("pauseBtn").addEventListener("click",()=>go("./wallet-core-v4.1.2.html?go=pause"));
-  $("ownershipBtn").addEventListener("click",()=>go("./wallet-core-v4.1.2.html?go=ownership"));
-  $("advancedBtn").addEventListener("click",()=>go("./wallet-core-v4.1.2.html"));
+  $("mintBtn").addEventListener("click",()=>go("./wallet-core-v4.2.html?go=mint"));
+  $("pauseBtn").addEventListener("click",()=>go("./wallet-core-v4.2.html?go=pause"));
+  $("ownershipBtn").addEventListener("click",()=>go("./wallet-core-v4.2.html?go=ownership"));
+  $("advancedBtn").addEventListener("click",()=>go("./wallet-core-v4.2.html"));
 
   load();
 })();
