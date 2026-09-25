@@ -90,7 +90,7 @@ button.light{background:#fff;color:#29445f}
 </head>
 <body>
 <header>
-  <div class="version">V4.1.1</div>
+  <div class="version">V4.1.2</div>
   <h1>Independent Points</h1>
   <p>會員 × 錢包 × IPT 資產 × 交易 × 管理，一個入口完成。</p>
 </header>
@@ -224,10 +224,10 @@ button.light{background:#fff;color:#29445f}
   </section>
 
   <section class="panel">
-    <h2>V4.1.1 操作體驗整合</h2>
-    <div class="status ok" style="margin-bottom:12px">V4.1.1 防卡版：首頁會員資料先完成，完整鏈上統計改為需要時才更新。</div>
+    <h2>V4.1.2 操作體驗整合</h2>
+    <div class="status ok" style="margin-bottom:12px">V4.1.2 防卡版：首頁會員資料先完成，完整鏈上統計改為需要時才更新。</div>
     <div class="note">
-      V4.1.1 已作為正式統一首頁。原本通過驗證的錢包核心保留在 wallet-core-v4.1.1.html；會員與管理員資產報表沿用 V3.9.4.2 穩定版。
+      V4.1.2 已作為正式統一首頁。原本通過驗證的錢包核心保留在 wallet-core-v4.1.2.html；會員與管理員資產報表沿用 V3.9.4.2 穩定版。
     </div>
   </section>
 </main>
@@ -241,7 +241,9 @@ button.light{background:#fff;color:#29445f}
     auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
   });
 
-  const $=id=>document.getElementById(id);\n  let currentUserId="";\n  let assetSummaryLoading=false;
+  const $=id=>document.getElementById(id);
+  let currentUserId="";
+  let assetSummaryLoading=false;
 
   function go(url){ location.href=url; }
 
@@ -317,7 +319,8 @@ button.light{background:#fff;color:#29445f}
 
 
   async function load(){
-    document.body.classList.remove("is-admin");\n    currentUserId="";
+    document.body.classList.remove("is-admin");
+    currentUserId="";
     $("profileBox").style.display="none";
     $("assetSummarySection").style.display="none";
     $("myAssetBtn").disabled=true;
@@ -334,7 +337,8 @@ button.light{background:#fff;color:#29445f}
         return;
       }
 
-      const uid=session.user.id;\n      currentUserId=uid;
+      const uid=session.user.id;
+      currentUserId=uid;
       const [pRes,rRes,wRes,vRes]=await Promise.all([
         sb.from("member_profiles")
           .select("member_number,display_name,status")
@@ -390,8 +394,8 @@ button.light{background:#fff;color:#29445f}
 
       setStatus("ok",
         role==="admin"
-          ?"V4.1.1 已登入：會員功能與管理中心均已開放。"
-          :"V4.1.1 已登入：會員功能已開放。"
+          ?"V4.1.2 已登入：會員功能與管理中心均已開放。"
+          :"V4.1.2 已登入：會員功能已開放。"
       );
 
       $("assetSummarySection").style.display="block";
@@ -408,23 +412,24 @@ button.light{background:#fff;color:#29445f}
     }
   }
 
-  $("refreshBtn").addEventListener("click",load);\n  $("assetSummaryRefreshBtn").addEventListener("click",refreshAssetSummary);
-  $("loginBtn").addEventListener("click",()=>go("./wallet-core-v4.1.1.html"));
+  $("refreshBtn").addEventListener("click",load);
+  $("assetSummaryRefreshBtn").addEventListener("click",refreshAssetSummary);
+  $("loginBtn").addEventListener("click",()=>go("./wallet-core-v4.1.2.html"));
 
   $("myAssetBtn").addEventListener("click",()=>go("./member-assets-v3.9.4.2.html?v=3942"));
-  $("historyBtn").addEventListener("click",()=>go("./wallet-core-v4.1.1.html?go=history"));
+  $("historyBtn").addEventListener("click",()=>go("./wallet-core-v4.1.2.html?go=history"));
   $("assetCenterBtn").addEventListener("click",()=>go("./asset-center-v3.9.4.2.html?v=3942"));
 
-  $("balanceBtn").addEventListener("click",()=>go("./wallet-core-v4.1.1.html?go=balance"));
-  $("transferBtn").addEventListener("click",()=>go("./wallet-core-v4.1.1.html?go=transfer"));
-  $("receiveBtn").addEventListener("click",()=>go("./wallet-core-v4.1.1.html?go=receive"));
+  $("balanceBtn").addEventListener("click",()=>go("./wallet-core-v4.1.2.html?go=balance"));
+  $("transferBtn").addEventListener("click",()=>go("./wallet-core-v4.1.2.html?go=transfer"));
+  $("receiveBtn").addEventListener("click",()=>go("./wallet-core-v4.1.2.html?go=receive"));
 
   $("adminAssetBtn").addEventListener("click",()=>go("./admin-assets-v3.9.4.2.html?v=3942"));
-  $("adminMemberBtn").addEventListener("click",()=>go("./admin-members-v4.1.1.html?v=411"));
-  $("mintBtn").addEventListener("click",()=>go("./wallet-core-v4.1.1.html?go=mint"));
-  $("pauseBtn").addEventListener("click",()=>go("./wallet-core-v4.1.1.html?go=pause"));
-  $("ownershipBtn").addEventListener("click",()=>go("./wallet-core-v4.1.1.html?go=ownership"));
-  $("advancedBtn").addEventListener("click",()=>go("./wallet-core-v4.1.1.html"));
+  $("adminMemberBtn").addEventListener("click",()=>go("./admin-members-v4.1.1.html?v=412"));
+  $("mintBtn").addEventListener("click",()=>go("./wallet-core-v4.1.2.html?go=mint"));
+  $("pauseBtn").addEventListener("click",()=>go("./wallet-core-v4.1.2.html?go=pause"));
+  $("ownershipBtn").addEventListener("click",()=>go("./wallet-core-v4.1.2.html?go=ownership"));
+  $("advancedBtn").addEventListener("click",()=>go("./wallet-core-v4.1.2.html"));
 
   load();
 })();
