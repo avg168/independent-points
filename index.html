@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Independent Points V3.1.1｜RPC 自動備援</title>
+<title>Independent Points V3.2.1｜交易確認修正版</title>
 <style>
 :root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;color:#172033}
 *{box-sizing:border-box}
@@ -75,6 +75,31 @@ body.show-ownership .admin-hub-btn{display:block}
   background:#fff7df;border-left:5px solid #d59a0b;
   padding:12px 14px;border-radius:12px;line-height:1.6
 }
+
+.member-field{margin:12px 0}
+.member-field label{display:block;font-weight:800;margin-bottom:7px}
+.member-field input{
+  width:100%;padding:14px;border:1px solid #ccd5e2;border-radius:12px;
+  font:inherit;background:#fff;color:#172033
+}
+.member-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.member-actions button{margin:0}
+.member-id{
+  display:inline-block;padding:6px 10px;border-radius:999px;
+  background:#eef4ff;color:#17365d;font-weight:800
+}
+.contact-list{display:grid;gap:10px;margin-top:12px}
+.contact-item{
+  border:1px solid #dbe2ec;border-radius:14px;padding:13px;background:#f8fafc
+}
+.contact-name{font-weight:850;margin-bottom:6px}
+.contact-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}
+.contact-actions button{margin:0;padding:11px 10px;border-radius:11px}
+.danger-soft{background:#fff0f0;color:#9b2727}
+.notice-local{
+  background:#f7f3ff;border-left:5px solid #7651c8;
+  padding:12px 14px;border-radius:12px;line-height:1.6
+}
 </style>
 </head>
 <body>
@@ -91,12 +116,85 @@ body.show-ownership .admin-hub-btn{display:block}
     連接錢包後即可查看點數、轉帳與交易紀錄。
   </p>
   <div class="quick-grid">
-    <button id="goBalanceBtn" class="green" type="button">查看點數</button>
-    <button id="goTransferBtn" class="blue" type="button">轉帳</button>
+    <button id="goMemberBtn" class="green" type="button">會員中心</button>
+    <button id="goBalanceBtn" class="soft" type="button">查看點數</button>
+    <button id="goTransferBtn" class="blue" type="button">IPT 轉帳</button>
+    <button id="goReceiveBtn" class="soft" type="button">收款</button>
     <button id="goHistoryBtn" class="soft" type="button">交易紀錄</button>
     <button id="goAdminBtn" class="soft admin-hub-btn" type="button">管理中心</button>
     <button id="toggleAdvancedBtn" class="soft" type="button">進階功能</button>
   </div>
+</section>
+
+<section id="memberCenterSection">
+  <h2>① 會員中心</h2>
+  <div class="notice-local">
+    <b>V3.2.1 會員功能：</b>會員暱稱與常用收款人只儲存在這支手機的瀏覽器，
+    不會寫入區塊鏈，也不會改動你的 IPT。未來要做到跨手機登入與正式會員資料同步，
+    再接後端會員資料庫。
+  </div>
+
+  <div class="row">
+    <div class="label">會員暱稱</div>
+    <div id="memberNicknameView">尚未設定</div>
+  </div>
+  <div class="member-field">
+    <label for="memberNickname">設定／修改暱稱</label>
+    <input id="memberNickname" maxlength="30" placeholder="例如：克群" autocomplete="off">
+  </div>
+  <button id="saveMemberProfileBtn" class="green" type="button" disabled>儲存會員暱稱</button>
+  <div id="memberProfileMsg" class="box info">連接錢包後即可設定。</div>
+
+  <div class="row">
+    <div class="label">錢包識別碼</div>
+    <div id="memberWalletId" class="member-id">尚未連線</div>
+  </div>
+  <div class="row">
+    <div class="label">會員錢包</div>
+    <div id="memberWalletAddress" class="member-wallet">尚未連線</div>
+  </div>
+  <div class="member-actions">
+    <button id="copyMemberWalletBtn" class="gray" type="button" disabled>複製地址</button>
+    <button id="shareMemberWalletBtn" class="gray" type="button" disabled>分享地址</button>
+  </div>
+</section>
+
+<section id="receiveSection">
+  <h2>② IPT 收款</h2>
+  <div class="box info">
+    把下方錢包地址提供給對方，即可接收 <b>Ethereum Sepolia</b> 上的 IPT。
+    目前是測試網，請勿把主網資產或其他鏈的代幣轉到這個用途。
+  </div>
+  <div class="row">
+    <div class="label">我的收款地址</div>
+    <div id="receiveWalletAddress" class="member-wallet">尚未連線</div>
+  </div>
+  <div class="member-actions">
+    <button id="copyReceiveBtn" class="green" type="button" disabled>複製收款地址</button>
+    <button id="shareReceiveBtn" class="blue" type="button" disabled>分享收款地址</button>
+  </div>
+  <div id="receiveMsg" class="box info">連接錢包後即可使用。</div>
+</section>
+
+<section id="contactsSection">
+  <h2>③ 常用收款人</h2>
+  <div class="simple-card-note">
+    儲存常用的 Sepolia 錢包地址，下次轉帳可以直接帶入。資料只存在這支手機。
+  </div>
+
+  <div class="member-field">
+    <label for="contactName">收款人名稱</label>
+    <input id="contactName" maxlength="30" placeholder="例如：測試錢包 1" autocomplete="off">
+  </div>
+
+  <div class="member-field">
+    <label for="contactAddress">收款錢包地址</label>
+    <input id="contactAddress" placeholder="0x..." autocomplete="off" spellcheck="false">
+  </div>
+
+  <button id="saveContactBtn" class="green" type="button" disabled>儲存常用收款人</button>
+  <div id="contactMsg" class="box info">連接錢包後即可新增。</div>
+  <div id="contactList" class="contact-list"></div>
 </section>
 
 <section class="tech-only advanced-feature">
@@ -116,7 +214,7 @@ body.show-ownership .admin-hub-btn{display:block}
 </section>
 
 <section id="connectSection">
-  <h2>① 連接錢包</h2>
+  <h2>④ 連接錢包</h2>
   <div id="sessionState" class="box warn">尚未連線。</div>
   <button id="connectBtn" class="blue" type="button">連接 Trust Wallet</button>
   <button id="disconnectBtn" class="gray" type="button" disabled>中斷連線／切換錢包</button>
@@ -124,7 +222,7 @@ body.show-ownership .admin-hub-btn{display:block}
 </section>
 
 <section id="identitySection">
-  <h2>② 我的帳戶</h2>
+  <h2>⑤ 我的帳戶</h2>
   <div class="row"><div class="label">目前身分</div><div id="role">尚未連線</div></div>
   <div class="row"><div class="label">合約狀態</div><div id="contractState">尚未讀取</div></div>
   <div class="row"><div class="label">鏈上讀取</div><div id="rpcStatus">RPC 自動備援已啟用</div></div>
@@ -132,7 +230,7 @@ body.show-ownership .admin-hub-btn{display:block}
 </section>
 
 <section id="balanceSection">
-  <h2>③ 我的 IPT</h2>
+  <h2>⑥ 我的 IPT</h2>
   <div id="balance" class="balance">— IPT</div>
   <div class="row"><div class="label">鏈上總供給量</div><div id="supply">—</div></div>
   <div class="row"><div class="label">剩餘可發行</div><div id="remaining">—</div></div>
@@ -144,14 +242,36 @@ body.show-ownership .admin-hub-btn{display:block}
     <div class="label">目前錢包</div>
     <div id="historyWallet" class="member-wallet">尚未連線</div>
   </div>
-  <button id="openHistoryBtn" class="gray" type="button" disabled>在 Sepolia Etherscan 查看交易紀錄</button>
+
+  <button id="openHistoryBtn" class="blue" type="button" disabled>開啟我的 Sepolia Etherscan 交易紀錄</button>
+
+  <div class="member-field">
+    <label for="txHashInput">查詢單筆 Tx Hash</label>
+    <input
+      id="txHashInput"
+      placeholder="0x...（64 位交易雜湊）"
+      autocomplete="off"
+      spellcheck="false"
+    >
+  </div>
+
+  <div class="member-actions">
+    <button id="checkTxBtn" class="green" type="button" disabled>查詢交易狀態</button>
+    <button id="openTxBtn" class="blue" type="button" disabled>開啟這筆 Etherscan</button>
+  </div>
+
+  <div id="txStatusBox" class="box info">
+    貼上 Tx Hash 後，可直接用多個 Sepolia RPC 查詢「已確認／等待中／尚未找到／失敗」。
+  </div>
+
   <p class="section-note">
-    交易紀錄由 Sepolia 區塊鏈瀏覽器顯示。若剛送出的交易尚未出現，稍候片刻再重新開啟即可。
+    V3.2.1 不再把「錢包回傳 Tx Hash」直接當成交易成功。
+    只有 Sepolia 回傳交易 receipt 且 status = 1，才會顯示「區塊已確認」。
   </p>
 </section>
 
 <section id="transferSection">
-  <h2>④ IPT 轉帳</h2>
+  <h2>⑦ IPT 轉帳</h2>
   <div class="box info">
     請確認收款地址與數量。系統會先檢查鏈上餘額與交易狀態，再交由 Trust Wallet 核准。
     若畫面逾時，先重新讀取鏈上資料，不要立即重送。
@@ -362,6 +482,286 @@ const $ = id => document.getElementById(id);
 const same = (a,b) => String(a||"").toLowerCase() === String(b||"").toLowerCase();
 const ZERO_ADDRESS_UI = "0x0000000000000000000000000000000000000000";
 
+const MEMBER_STORAGE_PREFIX = "ipt-v32-member:";
+const CONTACT_STORAGE_PREFIX = "ipt-v32-contacts:";
+const LAST_TX_STORAGE_PREFIX = "ipt-v321-last-tx:";
+
+function lastTxStorageKey() {
+  return LAST_TX_STORAGE_PREFIX + normalizedAccount();
+}
+
+function isTxHash(v) {
+  return /^0x[a-fA-F0-9]{64}$/.test(String(v || "").trim());
+}
+
+function saveLastTx(hash, extra = {}) {
+  if (!account || !isTxHash(hash)) return;
+  storageSet(lastTxStorageKey(), {
+    hash: String(hash),
+    time: Date.now(),
+    ...extra
+  });
+}
+
+function loadLastTx() {
+  if (!account) return null;
+  const row = storageGet(lastTxStorageKey(), null);
+  if (!row || !isTxHash(row.hash)) return null;
+  return row;
+}
+
+function syncTxHashButtons() {
+  const hash = String($("txHashInput")?.value || "").trim();
+  const valid = isTxHash(hash);
+
+  if ($("checkTxBtn")) $("checkTxBtn").disabled = !valid;
+  if ($("openTxBtn")) $("openTxBtn").disabled = !valid;
+}
+
+function hydrateLastTxUI() {
+  if (!$("txHashInput")) return;
+
+  const saved = loadLastTx();
+  if (saved?.hash && !$("txHashInput").value) {
+    $("txHashInput").value = saved.hash;
+  }
+
+  syncTxHashButtons();
+}
+
+function normalizedAccount() {
+  return String(account || "").toLowerCase();
+}
+
+function storageGet(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw == null ? fallback : JSON.parse(raw);
+  } catch (_) {
+    return fallback;
+  }
+}
+
+function storageSet(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+
+function profileStorageKey() {
+  return MEMBER_STORAGE_PREFIX + normalizedAccount();
+}
+
+function contactsStorageKey() {
+  return CONTACT_STORAGE_PREFIX + normalizedAccount();
+}
+
+function walletIdentifier(addr) {
+  const a = String(addr || "");
+  if (!/^0x[a-fA-F0-9]{40}$/.test(a)) return "尚未連線";
+  return "IPT-" + a.slice(2, 8).toUpperCase() + "-" + a.slice(-6).toUpperCase();
+}
+
+function isWalletAddress(addr) {
+  return /^0x[a-fA-F0-9]{40}$/.test(String(addr || "").trim());
+}
+
+async function copyText(text) {
+  const value = String(text || "");
+  if (!value) throw new Error("沒有可複製的內容");
+
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(value);
+    return;
+  }
+
+  const ta = document.createElement("textarea");
+  ta.value = value;
+  ta.style.position = "fixed";
+  ta.style.opacity = "0";
+  document.body.appendChild(ta);
+  ta.select();
+  const ok = document.execCommand("copy");
+  ta.remove();
+  if (!ok) throw new Error("瀏覽器沒有允許複製");
+}
+
+async function shareWalletAddress(title, address) {
+  if (!address) throw new Error("尚未連接錢包");
+
+  const shareText =
+    title + "\n" +
+    "Ethereum Sepolia\n" +
+    address + "\n" +
+    "用途：Independent Points (IPT) 測試網收款";
+
+  if (navigator.share) {
+    await navigator.share({ title, text: shareText });
+    return "shared";
+  }
+
+  await copyText(address);
+  return "copied";
+}
+
+function setMemberLocalMessage(id, kind, text) {
+  const el = $(id);
+  if (!el) return;
+  el.className = "box " + kind;
+  el.textContent = text;
+}
+
+function loadMemberProfile() {
+  if (!account) return { nickname: "" };
+  const saved = storageGet(profileStorageKey(), { nickname: "" });
+  return {
+    nickname: String(saved?.nickname || "").slice(0, 30)
+  };
+}
+
+function loadContacts() {
+  if (!account) return [];
+  const rows = storageGet(contactsStorageKey(), []);
+  if (!Array.isArray(rows)) return [];
+  return rows
+    .filter(x => x && isWalletAddress(x.address))
+    .slice(0, 30)
+    .map(x => ({
+      name: String(x.name || "未命名").slice(0, 30),
+      address: String(x.address)
+    }));
+}
+
+function renderContacts() {
+  const host = $("contactList");
+  if (!host) return;
+  host.textContent = "";
+
+  if (!account) {
+    const div = document.createElement("div");
+    div.className = "box info";
+    div.textContent = "連接錢包後顯示常用收款人。";
+    host.appendChild(div);
+    return;
+  }
+
+  const contacts = loadContacts();
+  if (!contacts.length) {
+    const div = document.createElement("div");
+    div.className = "box info";
+    div.textContent = "目前沒有常用收款人。";
+    host.appendChild(div);
+    return;
+  }
+
+  contacts.forEach((item, index) => {
+    const card = document.createElement("div");
+    card.className = "contact-item";
+
+    const name = document.createElement("div");
+    name.className = "contact-name";
+    name.textContent = item.name;
+
+    const addr = document.createElement("div");
+    addr.className = "addr";
+    addr.textContent = item.address;
+
+    const actions = document.createElement("div");
+    actions.className = "contact-actions";
+
+    const useBtn = document.createElement("button");
+    useBtn.type = "button";
+    useBtn.className = "blue";
+    useBtn.textContent = "填入轉帳";
+    useBtn.addEventListener("click", () => {
+      $("transferTo").value = item.address;
+      resetTransferCheck?.("已帶入常用收款人，請輸入數量後重新檢查轉帳。");
+      $("transferSection")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    const delBtn = document.createElement("button");
+    delBtn.type = "button";
+    delBtn.className = "danger-soft";
+    delBtn.textContent = "刪除";
+    delBtn.addEventListener("click", () => {
+      const now = loadContacts();
+      now.splice(index, 1);
+      storageSet(contactsStorageKey(), now);
+      renderContacts();
+      setMemberLocalMessage("contactMsg", "ok", "已從這支手機刪除常用收款人。");
+    });
+
+    actions.append(useBtn, delBtn);
+    card.append(name, addr, actions);
+    host.appendChild(card);
+  });
+}
+
+function syncMemberTools() {
+  const connected = !!account && isWalletAddress(account);
+  const profile = connected ? loadMemberProfile() : { nickname: "" };
+
+  if ($("memberNickname")) {
+    $("memberNickname").disabled = !connected;
+    $("memberNickname").value = profile.nickname || "";
+  }
+  if ($("memberNicknameView")) {
+    $("memberNicknameView").textContent = connected
+      ? (profile.nickname || "尚未設定")
+      : "尚未連線";
+  }
+  if ($("memberWalletId")) {
+    $("memberWalletId").textContent = connected ? walletIdentifier(account) : "尚未連線";
+  }
+  if ($("memberWalletAddress")) {
+    $("memberWalletAddress").textContent = connected ? account : "尚未連線";
+  }
+  if ($("receiveWalletAddress")) {
+    $("receiveWalletAddress").textContent = connected ? account : "尚未連線";
+  }
+
+  [
+    "saveMemberProfileBtn",
+    "copyMemberWalletBtn",
+    "shareMemberWalletBtn",
+    "copyReceiveBtn",
+    "shareReceiveBtn",
+    "saveContactBtn"
+  ].forEach(id => {
+    if ($(id)) $(id).disabled = !connected;
+  });
+
+  if ($("contactName")) $("contactName").disabled = !connected;
+  if ($("contactAddress")) $("contactAddress").disabled = !connected;
+
+  if (connected) {
+    setMemberLocalMessage(
+      "memberProfileMsg",
+      "info",
+      "會員資料會依目前錢包分開儲存在這支手機。"
+    );
+    setMemberLocalMessage(
+      "receiveMsg",
+      "info",
+      "可直接複製或分享目前連線錢包地址。"
+    );
+    setMemberLocalMessage(
+      "contactMsg",
+      "info",
+      "可以儲存最多 30 個常用收款人。"
+    );
+  } else {
+    setMemberLocalMessage("memberProfileMsg", "info", "連接錢包後即可設定。");
+    setMemberLocalMessage("receiveMsg", "info", "連接錢包後即可使用。");
+    setMemberLocalMessage("contactMsg", "info", "連接錢包後即可新增。");
+  }
+
+  renderContacts();
+}
+
 function setMemberRoleUI(owner = "", pendingOwner = "") {
   const isOwner = !!account && same(account, owner);
   const isPending =
@@ -377,7 +777,11 @@ function setMemberRoleUI(owner = "", pendingOwner = "") {
   const historyWallet = $("historyWallet");
   if (historyWallet) historyWallet.textContent = account || "尚未連線";
   const historyBtn = $("openHistoryBtn");
-  if (historyBtn) historyBtn.disabled = !account;
+  if (historyBtn) {
+    historyBtn.disabled = !account;
+    historyBtn.className = account ? "blue" : "gray";
+  }
+  hydrateLastTxUI();
 }
 
 function resetMemberRoleUI() {
@@ -385,7 +789,12 @@ function resetMemberRoleUI() {
   const historyWallet = $("historyWallet");
   if (historyWallet) historyWallet.textContent = "尚未連線";
   const historyBtn = $("openHistoryBtn");
-  if (historyBtn) historyBtn.disabled = true;
+  if (historyBtn) {
+    historyBtn.disabled = true;
+    historyBtn.className = "gray";
+  }
+  if ($("txHashInput")) $("txHashInput").value = "";
+  syncTxHashButtons();
 }
 
 function setSessionBox(kind, html) {
@@ -411,8 +820,8 @@ async function initWC() {
     events: ["chainChanged","accountsChanged"],
     optionalEvents: ["connect","disconnect","message"],
     metadata: {
-      name: "Independent Points V3.1.1",
-      description: "Independent Points member wallet on Ethereum Sepolia",
+      name: "Independent Points V3.2.1",
+      description: "Independent Points V3.2.1 member center with Sepolia transaction confirmation",
       url: "https://avg168.github.io",
       icons: []
     },
@@ -467,7 +876,12 @@ async function renderSession() {
   $("role").innerHTML =
     "<span class='pill'>待讀取鏈上 Owner</span>";
   if ($("historyWallet")) $("historyWallet").textContent = account || "尚未連線";
-  if ($("openHistoryBtn")) $("openHistoryBtn").disabled = !ok || !account;
+  if ($("openHistoryBtn")) {
+    $("openHistoryBtn").disabled = !ok || !account;
+    $("openHistoryBtn").className = (ok && account) ? "blue" : "gray";
+  }
+  syncMemberTools();
+  hydrateLastTxUI();
 }
 
 function resetDisconnected() {
@@ -485,6 +899,7 @@ function resetDisconnected() {
   $("contractData").className = "box info";
   $("contractData").textContent = "連線後按「讀取 IPT 鏈上資料」。";
   resetMemberRoleUI();
+  syncMemberTools();
 }
 
 
@@ -840,6 +1255,151 @@ async function directRpcJson(url, method, params, timeoutMs = 6000) {
   }
 }
 
+
+async function queryTransactionOnce(hash) {
+  if (!isTxHash(hash)) {
+    throw new Error("Tx Hash 格式不正確。");
+  }
+
+  const urls = [
+    ...(readProviderUrl ? [readProviderUrl] : []),
+    ...READ_RPCS.filter(url => url !== readProviderUrl)
+  ];
+
+  const errors = [];
+  let sawPending = null;
+
+  for (const url of urls) {
+    try {
+      const receipt = await directRpcJson(
+        url,
+        "eth_getTransactionReceipt",
+        [hash],
+        6500
+      );
+
+      if (receipt) {
+        const ok = String(receipt.status || "").toLowerCase() === "0x1";
+        return {
+          state: ok ? "confirmed" : "reverted",
+          hash,
+          blockNumber: receipt.blockNumber || "",
+          transactionIndex: receipt.transactionIndex || "",
+          rpc: new URL(url).hostname
+        };
+      }
+
+      const tx = await directRpcJson(
+        url,
+        "eth_getTransactionByHash",
+        [hash],
+        6500
+      );
+
+      if (tx) {
+        sawPending = {
+          state: "pending",
+          hash,
+          blockNumber: tx.blockNumber || "",
+          rpc: new URL(url).hostname
+        };
+      }
+    } catch (e) {
+      errors.push(
+        new URL(url).hostname + "：" + (e?.message || String(e))
+      );
+    }
+  }
+
+  if (sawPending) return sawPending;
+
+  return {
+    state: "not_found",
+    hash,
+    errors
+  };
+}
+
+function txBlockText(hex) {
+  if (!hex || !/^0x[0-9a-fA-F]+$/.test(String(hex))) return "";
+  try {
+    return String(BigInt(hex));
+  } catch (_) {
+    return "";
+  }
+}
+
+function showTxQueryResult(result, options = {}) {
+  const box = $("txStatusBox");
+  if (!box || !result) return;
+
+  const auto = !!options.auto;
+  const block = txBlockText(result.blockNumber);
+
+  if (result.state === "confirmed") {
+    box.className = "box ok";
+    box.innerHTML =
+      "✓ Sepolia 區塊已確認<br>" +
+      "Tx Hash：<span class='addr'>" + result.hash + "</span><br>" +
+      (block ? "Block：<b>" + block + "</b><br>" : "") +
+      (result.rpc ? "RPC：<b>" + result.rpc + "</b><br>" : "") +
+      "狀態：<b>Success / status = 1</b>";
+    return;
+  }
+
+  if (result.state === "reverted") {
+    box.className = "box err";
+    box.innerHTML =
+      "✗ 交易已上鏈，但執行失敗（Reverted）<br>" +
+      "Tx Hash：<span class='addr'>" + result.hash + "</span><br>" +
+      (block ? "Block：<b>" + block + "</b><br>" : "") +
+      (result.rpc ? "RPC：<b>" + result.rpc + "</b><br>" : "") +
+      "狀態：<b>Failed / status = 0</b>";
+    return;
+  }
+
+  if (result.state === "pending") {
+    box.className = "box warn";
+    box.innerHTML =
+      "交易已被 Sepolia RPC 找到，但尚未取得確認 receipt。<br>" +
+      "Tx Hash：<span class='addr'>" + result.hash + "</span><br>" +
+      (result.rpc ? "RPC：<b>" + result.rpc + "</b><br>" : "") +
+      "狀態：<b>Pending</b>" +
+      (auto ? "<br>系統會繼續自動檢查。" : "");
+    return;
+  }
+
+  box.className = "box warn";
+  box.innerHTML =
+    "目前多個 Sepolia RPC 都找不到這個 Tx Hash。<br>" +
+    "Tx Hash：<span class='addr'>" + result.hash + "</span><br>" +
+    "<b>這不代表可以安全重送。</b><br>" +
+    "請先等待、重新查詢，或確認錢包 nonce／鏈上餘額後再決定。";
+}
+
+function sleepMs(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function pollTransactionStatus(hash, rounds = 8, intervalMs = 4000) {
+  let last = null;
+
+  for (let i = 0; i < rounds; i++) {
+    last = await queryTransactionOnce(hash);
+    showTxQueryResult(last, { auto: true });
+
+    if (last.state === "confirmed" || last.state === "reverted") {
+      return last;
+    }
+
+    if (i < rounds - 1) {
+      await sleepMs(intervalMs);
+    }
+  }
+
+  return last || { state: "not_found", hash };
+}
+
 async function latestNonce(address) {
   const nonceRpcs = [
     "https://ethereum-sepolia-rpc.publicnode.com",
@@ -1128,7 +1688,7 @@ $("sendTransferBtn").addEventListener("click", async () => {
 
     writeGuard(transferState.fingerprint, {
       time: Date.now(),
-      state: "sent",
+      state: "hash_returned",
       hash,
       from: account,
       to: transferState.to,
@@ -1136,14 +1696,70 @@ $("sendTransferBtn").addEventListener("click", async () => {
       nonce: nonceNow
     });
 
-    $("transferCheck").className = "box ok";
-    $("transferCheck").innerHTML =
-      "✓ 交易已送出<br>" +
-      "Tx Hash：<span class='addr'>" + hash + "</span><br>" +
-      "請等待區塊確認後，再重新讀取 IPT 餘額。";
+    saveLastTx(hash, {
+      type: "transfer",
+      to: transferState.to,
+      amountRaw: transferState.amountRaw.toString(),
+      nonce: nonceNow
+    });
 
-    transferState.checked = false;
-    $("sendTransferBtn").disabled = true;
+    if ($("txHashInput")) {
+      $("txHashInput").value = hash;
+      syncTxHashButtons();
+    }
+
+    $("transferCheck").className = "box warn";
+    $("transferCheck").innerHTML =
+      "已取得 Tx Hash，但<b>尚未視為交易成功</b>。<br>" +
+      "Tx Hash：<span class='addr'>" + hash + "</span><br>" +
+      "正在用多個 Sepolia RPC 查詢是否真的廣播並取得區塊確認…";
+
+    $("historySection")?.scrollIntoView({ behavior: "smooth", block: "start" });
+
+    const txResult = await pollTransactionStatus(hash, 8, 4000);
+
+    if (txResult.state === "confirmed") {
+      clearGuard(transferState.fingerprint);
+
+      $("transferCheck").className = "box ok";
+      $("transferCheck").innerHTML =
+        "✓ Sepolia 區塊已確認，轉帳成功<br>" +
+        "Tx Hash：<span class='addr'>" + hash + "</span><br>" +
+        "狀態：<b>Success / status = 1</b><br>" +
+        "系統將重新讀取 IPT 餘額。";
+
+      transferState.checked = false;
+      $("sendTransferBtn").disabled = true;
+
+      if (wc?.session && account) {
+        setTimeout(() => $("readBtn")?.click(), 500);
+      }
+
+    } else if (txResult.state === "reverted") {
+      clearGuard(transferState.fingerprint);
+
+      $("transferCheck").className = "box err";
+      $("transferCheck").innerHTML =
+        "✗ 交易已上鏈，但合約執行失敗（Reverted）<br>" +
+        "Tx Hash：<span class='addr'>" + hash + "</span><br>" +
+        "本次沒有完成 IPT 轉帳。請重新讀取鏈上資料後再檢查原因。";
+
+      transferState.checked = false;
+      $("sendTransferBtn").disabled = true;
+
+    } else {
+      // Pending / not_found: keep duplicate guard.
+      $("transferCheck").className = "box warn";
+      $("transferCheck").innerHTML =
+        (txResult.state === "pending"
+          ? "交易已被 Sepolia RPC 找到，但尚未區塊確認。"
+          : "目前備援 Sepolia RPC 都還找不到此 Tx Hash。") +
+        "<br>Tx Hash：<span class='addr'>" + hash + "</span><br>" +
+        "<b>請勿立即重送。</b> 已保留防重複保護；可到「我的交易紀錄」再次查詢。";
+
+      transferState.checked = false;
+      $("sendTransferBtn").disabled = true;
+    }
 
   } catch (e) {
     if (!$("transferCheck").textContent.includes("結果不明")) {
@@ -1152,7 +1768,7 @@ $("sendTransferBtn").addEventListener("click", async () => {
         "送出失敗：" + (e?.message || String(e));
     }
   } finally {
-    btn.disabled = false;
+    btn.disabled = !transferState.checked;
     btn.textContent = "由 Trust Wallet 核准轉帳";
   }
 });
@@ -2835,6 +3451,190 @@ $("openHistoryBtn")?.addEventListener("click", () => {
     "#tokentxns";
   window.open(url, "_blank", "noopener,noreferrer");
 });
+
+$("txHashInput")?.addEventListener("input", () => {
+  syncTxHashButtons();
+});
+
+$("checkTxBtn")?.addEventListener("click", async () => {
+  const btn = $("checkTxBtn");
+  const hash = String($("txHashInput")?.value || "").trim();
+
+  if (!isTxHash(hash)) {
+    showTxQueryResult({ state: "not_found", hash: hash || "格式錯誤" });
+    return;
+  }
+
+  try {
+    btn.disabled = true;
+    btn.textContent = "正在查詢 Sepolia…";
+
+    const result = await queryTransactionOnce(hash);
+    showTxQueryResult(result);
+
+    if (account) {
+      saveLastTx(hash, { type: "manual_check" });
+    }
+  } catch (e) {
+    $("txStatusBox").className = "box err";
+    $("txStatusBox").textContent =
+      "查詢失敗：" + (e?.message || String(e));
+  } finally {
+    btn.textContent = "查詢交易狀態";
+    syncTxHashButtons();
+  }
+});
+
+$("openTxBtn")?.addEventListener("click", () => {
+  const hash = String($("txHashInput")?.value || "").trim();
+  if (!isTxHash(hash)) return;
+
+  window.open(
+    "https://sepolia.etherscan.io/tx/" + encodeURIComponent(hash),
+    "_blank",
+    "noopener,noreferrer"
+  );
+});
+
+// V3.2.1 member center navigation.
+$("goMemberBtn")?.addEventListener("click", () => {
+  $("memberCenterSection")?.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+$("goReceiveBtn")?.addEventListener("click", () => {
+  $("receiveSection")?.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+// V3.2 local member profile.
+$("saveMemberProfileBtn")?.addEventListener("click", () => {
+  if (!account) return;
+
+  const nickname = String($("memberNickname")?.value || "").trim().slice(0, 30);
+  if (!nickname) {
+    setMemberLocalMessage("memberProfileMsg", "warn", "請先輸入會員暱稱。");
+    return;
+  }
+
+  const ok = storageSet(profileStorageKey(), { nickname });
+  if (!ok) {
+    setMemberLocalMessage(
+      "memberProfileMsg",
+      "err",
+      "這個瀏覽器目前無法儲存本機會員資料。"
+    );
+    return;
+  }
+
+  $("memberNicknameView").textContent = nickname;
+  setMemberLocalMessage(
+    "memberProfileMsg",
+    "ok",
+    "✓ 會員暱稱已儲存在這支手機。"
+  );
+});
+
+$("copyMemberWalletBtn")?.addEventListener("click", async () => {
+  try {
+    await copyText(account);
+    setMemberLocalMessage("memberProfileMsg", "ok", "✓ 錢包地址已複製。");
+  } catch (e) {
+    setMemberLocalMessage("memberProfileMsg", "err", e?.message || String(e));
+  }
+});
+
+$("shareMemberWalletBtn")?.addEventListener("click", async () => {
+  try {
+    const result = await shareWalletAddress("Independent Points 會員錢包", account);
+    setMemberLocalMessage(
+      "memberProfileMsg",
+      "ok",
+      result === "copied"
+        ? "✓ 此瀏覽器不支援分享，已改為複製錢包地址。"
+        : "✓ 已開啟手機分享功能。"
+    );
+  } catch (e) {
+    if (!/AbortError/i.test(String(e?.name || ""))) {
+      setMemberLocalMessage("memberProfileMsg", "err", e?.message || String(e));
+    }
+  }
+});
+
+$("copyReceiveBtn")?.addEventListener("click", async () => {
+  try {
+    await copyText(account);
+    setMemberLocalMessage("receiveMsg", "ok", "✓ IPT 收款地址已複製。");
+  } catch (e) {
+    setMemberLocalMessage("receiveMsg", "err", e?.message || String(e));
+  }
+});
+
+$("shareReceiveBtn")?.addEventListener("click", async () => {
+  try {
+    const result = await shareWalletAddress("IPT Sepolia 收款地址", account);
+    setMemberLocalMessage(
+      "receiveMsg",
+      "ok",
+      result === "copied"
+        ? "✓ 此瀏覽器不支援分享，已改為複製收款地址。"
+        : "✓ 已開啟手機分享功能。"
+    );
+  } catch (e) {
+    if (!/AbortError/i.test(String(e?.name || ""))) {
+      setMemberLocalMessage("receiveMsg", "err", e?.message || String(e));
+    }
+  }
+});
+
+$("saveContactBtn")?.addEventListener("click", () => {
+  if (!account) return;
+
+  const name = String($("contactName")?.value || "").trim().slice(0, 30);
+  const address = String($("contactAddress")?.value || "").trim();
+
+  if (!name) {
+    setMemberLocalMessage("contactMsg", "warn", "請輸入收款人名稱。");
+    return;
+  }
+  if (!isWalletAddress(address)) {
+    setMemberLocalMessage("contactMsg", "warn", "收款地址格式不正確，請檢查 0x 錢包地址。");
+    return;
+  }
+  if (same(address, CONTRACT_ADDRESS)) {
+    setMemberLocalMessage("contactMsg", "warn", "不能把 IPT 合約地址存成一般收款人。");
+    return;
+  }
+
+  const contacts = loadContacts();
+  const duplicate = contacts.findIndex(x => same(x.address, address));
+
+  if (duplicate >= 0) {
+    contacts[duplicate] = { name, address };
+  } else {
+    if (contacts.length >= 30) {
+      setMemberLocalMessage("contactMsg", "warn", "常用收款人最多 30 個，請先刪除不用的項目。");
+      return;
+    }
+    contacts.push({ name, address });
+  }
+
+  const ok = storageSet(contactsStorageKey(), contacts);
+  if (!ok) {
+    setMemberLocalMessage("contactMsg", "err", "這個瀏覽器目前無法儲存本機資料。");
+    return;
+  }
+
+  $("contactName").value = "";
+  $("contactAddress").value = "";
+  renderContacts();
+  setMemberLocalMessage(
+    "contactMsg",
+    "ok",
+    duplicate >= 0 ? "✓ 已更新常用收款人。" : "✓ 已新增常用收款人。"
+  );
+});
+
+// Initial local UI state.
+syncMemberTools();
 
 </script>
 </body>
