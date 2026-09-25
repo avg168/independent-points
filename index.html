@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Independent Points V3.4.2｜帳號切換同步修正版</title>
+<title>Independent Points V3.4.3｜角色管理</title>
 <style>
 :root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;color:#172033}
 *{box-sizing:border-box}
@@ -510,8 +510,8 @@ button {
   <h2>⑤ 會員管理中心</h2>
 
   <div class="notice-cloud">
-    <b>V3.4.1 雲端管理：</b>只有 Supabase 會員角色為 <b>admin</b> 的帳號可以管理會員狀態。
-    本版先開放「正常／停權」與操作紀錄；不允許停權自己，也不允許停權其他管理員。
+    <b>V3.4.3 雲端管理：</b>管理員可以管理一般會員的「正常／停權」與「會員／管理員」角色。
+    不允許修改自己的管理員角色；降級其他管理員時，系統也會確保至少保留一位管理員。
   </div>
 
   <div class="admin-summary-grid">
@@ -541,6 +541,11 @@ button {
   <div id="adminMembersMsg" class="box info">
     登入管理員帳號後即可讀取會員資料。
   </div>
+
+  <p class="muted-small">
+    角色管理安全規則：不能修改自己的管理員角色；停權會員不能升級為管理員；
+    系統會確保至少保留一位管理員。
+  </p>
 
   <div id="adminMemberList" class="admin-member-list"></div>
 
@@ -1369,10 +1374,10 @@ function renderAdminMembers(members) {
       member.role !== "admin" &&
       member.user_id !== cloudAdminSelfId;
 
-    if (canChangeStatus) {
-      const actions = document.createElement("div");
-      actions.className = "admin-action-row";
+    const actions = document.createElement("div");
+    actions.className = "admin-action-row";
 
+    if (canChangeStatus) {
       const statusBtn = document.createElement("button");
       statusBtn.type = "button";
       statusBtn.className =
@@ -1408,6 +1413,57 @@ function renderAdminMembers(members) {
       });
 
       actions.appendChild(statusBtn);
+    }
+
+    const canChangeRole = member.user_id !== cloudAdminSelfId;
+
+    if (canChangeRole) {
+      const roleBtn = document.createElement("button");
+      roleBtn.type = "button";
+
+      if (member.role === "admin") {
+        roleBtn.className = "gray";
+        roleBtn.textContent = "取消管理員";
+      } else {
+        roleBtn.className = "blue";
+        roleBtn.textContent = "升級為管理員";
+      }
+
+      if (member.status === "suspended" && member.role !== "admin") {
+        roleBtn.disabled = true;
+        roleBtn.textContent = "停權中不可升級管理員";
+      }
+
+      roleBtn.addEventListener("click", async () => {
+        const nextRole = member.role === "admin" ? "member" : "admin";
+
+        const confirmText =
+          nextRole === "admin"
+            ? "確定要把 " + member.member_number + "｜" + member.display_name + " 升級為管理員？"
+            : "確定要取消 " + member.member_number + "｜" + member.display_name + " 的管理員權限？";
+
+        if (!window.confirm(confirmText)) return;
+
+        try {
+          roleBtn.disabled = true;
+          roleBtn.textContent =
+            nextRole === "admin" ? "升級中…" : "降級中…";
+
+          await setAdminMemberRole(member.user_id, nextRole);
+
+          await Promise.all([
+            loadAdminMembers(String($("adminMemberSearch")?.value || "").trim()),
+            loadAdminAudit()
+          ]);
+        } catch (e) {
+          setAdminMembersMessage("err", friendlyCloudError(e));
+        }
+      });
+
+      actions.appendChild(roleBtn);
+    }
+
+    if (actions.children.length) {
       card.appendChild(actions);
     }
 
@@ -1449,14 +1505,23 @@ function renderAdminAudit(logs) {
       log.admin_user_id ||
       "—";
 
-    const oldStatus = log.old_value?.status || "—";
-    const newStatus = log.new_value?.status || "—";
+    let changeText = "";
+
+    if (log.action === "set_role") {
+      const oldRole = log.old_value?.role || "—";
+      const newRole = log.new_value?.role || "—";
+      changeText = "角色 " + oldRole + " → " + newRole;
+    } else {
+      const oldStatus = log.old_value?.status || "—";
+      const newStatus = log.new_value?.status || "—";
+      changeText = "狀態 " + oldStatus + " → " + newStatus;
+    }
 
     item.textContent =
       formatAdminDate(log.created_at) +
       "｜管理員 " + admin +
       "｜會員 " + target +
-      "｜狀態 " + oldStatus + " → " + newStatus;
+      "｜" + changeText;
 
     host.appendChild(item);
   });
@@ -1492,6 +1557,14 @@ async function setAdminMemberStatus(targetUserId, status) {
     action: "set_status",
     target_user_id: targetUserId,
     status
+  });
+}
+
+async function setAdminMemberRole(targetUserId, role) {
+  return await invokeAdminMemberAction({
+    action: "set_role",
+    target_user_id: targetUserId,
+    role
   });
 }
 
@@ -2107,8 +2180,8 @@ async function initWC() {
     events: ["chainChanged","accountsChanged"],
     optionalEvents: ["connect","disconnect","message"],
     metadata: {
-      name: "Independent Points V3.4.2",
-      description: "Independent Points V3.4.2 cloud member account-switch synchronization fix",
+      name: "Independent Points V3.4.3",
+      description: "Independent Points V3.4.3 admin role management with audit log",
       url: "https://avg168.github.io",
       icons: []
     },
