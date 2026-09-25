@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Independent Points V3.7｜IPT 資產歷程</title>
+<title>Independent Points V3.8.2｜Android CSV 匯出修正版</title>
 <style>
 :root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;color:#172033}
 *{box-sizing:border-box}
@@ -393,6 +393,74 @@ body.show-cloud-admin .cloud-admin-only{display:block}
   color:#274b7a;
   font-weight:800;
 }
+
+.history-filter-panel{
+  border:1px solid #dbe2ec;
+  border-radius:16px;
+  padding:14px;
+  background:#fbfcfe;
+  margin:12px 0;
+}
+.history-filter-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+.history-filter-panel label{
+  display:block;
+  font-weight:800;
+  margin-bottom:6px;
+}
+.history-filter-panel input,
+.history-filter-panel select{
+  width:100%;
+  min-width:0;
+}
+.history-filter-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:10px;
+}
+.history-filter-actions .full{
+  grid-column:1/-1;
+}
+.history-result-note{
+  margin-top:8px;
+  color:#667085;
+  font-size:.9rem;
+  line-height:1.5;
+}
+
+.csv-export-panel{
+  border:1px solid #dbe2ec;
+  border-radius:16px;
+  padding:14px;
+  background:#f8fafc;
+  margin-top:12px;
+}
+.csv-export-panel textarea{
+  width:100%;
+  min-height:180px;
+  resize:vertical;
+  font-family:monospace;
+  font-size:.82rem;
+  line-height:1.45;
+}
+.csv-export-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:10px;
+}
+@media (max-width:480px){
+  .csv-export-actions{grid-template-columns:1fr}
+}
+@media (max-width:480px){
+  .history-filter-grid{grid-template-columns:1fr}
+  .history-filter-actions{grid-template-columns:1fr}
+  .history-filter-actions .full{grid-column:auto}
+}
 @media (max-width:480px){
   .chain-history-summary{grid-template-columns:1fr 1fr}
 }
@@ -658,7 +726,7 @@ button {
   <h2>③ 會員資產總覽</h2>
 
   <div class="notice-cloud">
-    <b>V3.7 會員資產：</b>除了即時 IPT 餘額，也會直接讀取 Ethereum Sepolia 的 IPT 轉入／轉出歷程。
+    <b>V3.8.2 會員資產：</b>修正 Android／內建瀏覽器可能無法觸發 CSV 下載；現在提供下載、分享與複製三層備援。
     IPT 餘額直接讀取區塊鏈，不會寫入 Supabase，也不會發送交易。
   </div>
 
@@ -696,6 +764,64 @@ button {
 
   <button id="refreshMemberHistoryBtn" class="blue" type="button" disabled>讀取 IPT 鏈上歷程</button>
   <div id="memberHistoryMsg" class="box info">登入會員並綁定錢包後即可讀取。</div>
+
+  <div class="history-filter-panel">
+    <h3 style="margin-top:0">歷程搜尋／篩選</h3>
+
+    <div class="history-filter-grid">
+      <div>
+        <label for="memberHistoryTypeFilter">交易類型</label>
+        <select id="memberHistoryTypeFilter">
+          <option value="all">全部</option>
+          <option value="in">轉入</option>
+          <option value="out">轉出</option>
+          <option value="mint">Mint 轉入</option>
+          <option value="burn">Burn 銷毀</option>
+          <option value="internal">內部轉帳</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="memberHistoryQuery">關鍵字</label>
+        <input id="memberHistoryQuery" placeholder="Tx Hash／地址／Block" autocomplete="off" spellcheck="false">
+      </div>
+
+      <div>
+        <label for="memberHistoryFromDate">開始日期</label>
+        <input id="memberHistoryFromDate" type="date">
+      </div>
+
+      <div>
+        <label for="memberHistoryToDate">結束日期</label>
+        <input id="memberHistoryToDate" type="date">
+      </div>
+    </div>
+
+    <div class="history-filter-actions">
+      <button id="applyMemberHistoryFilterBtn" class="green" type="button">套用篩選</button>
+      <button id="clearMemberHistoryFilterBtn" class="gray" type="button">清除篩選</button>
+      <button id="exportMemberHistoryCsvBtn" class="blue full" type="button" disabled>匯出目前結果 CSV</button>
+    </div>
+
+    <div id="memberHistoryFilterNote" class="history-result-note">
+      先讀取鏈上歷程，再使用搜尋、日期與交易類型篩選。
+    </div>
+
+    <div id="memberCsvExportStatus" class="history-result-note">
+      Android 若封鎖直接下載，系統會自動改用分享或顯示可複製 CSV。
+    </div>
+  </div>
+
+  <div id="memberCsvFallbackPanel" class="csv-export-panel" hidden>
+    <b>CSV 匯出備援</b>
+    <p class="muted-small">若瀏覽器沒有自動下載，可複製以下 CSV 內容，或再按一次下載。</p>
+    <textarea id="memberCsvFallbackText" readonly></textarea>
+    <div class="csv-export-actions">
+      <button id="copyMemberCsvBtn" class="green" type="button">複製 CSV 內容</button>
+      <button id="retryMemberCsvBtn" class="blue" type="button">再次下載 CSV</button>
+    </div>
+  </div>
+
   <div id="memberHistoryList" class="chain-history-list"></div>
 </section>
 
@@ -744,7 +870,7 @@ button {
   <h2>⑥ 會員管理中心</h2>
 
   <div class="notice-cloud">
-    <b>V3.7 雲端管理：</b>會員詳情可讀取綁定錢包的 IPT 即時餘額與最近鏈上轉入／轉出歷程。
+    <b>V3.8.2 雲端管理：</b>管理員會員詳情的 CSV 匯出也使用相同 Android 備援機制。
   </div>
 
   <div class="admin-summary-grid">
@@ -813,6 +939,61 @@ button {
     </div>
     <button id="adminRefreshChainHistoryBtn" class="gray" type="button">重新讀取此會員 IPT 歷程</button>
     <div id="adminChainHistoryMsg" class="box info">選擇會員後即可讀取鏈上歷程。</div>
+
+    <div class="history-filter-panel">
+      <div class="history-filter-grid">
+        <div>
+          <label for="adminHistoryTypeFilter">交易類型</label>
+          <select id="adminHistoryTypeFilter">
+            <option value="all">全部</option>
+            <option value="in">轉入</option>
+            <option value="out">轉出</option>
+            <option value="mint">Mint 轉入</option>
+            <option value="burn">Burn 銷毀</option>
+            <option value="internal">內部轉帳</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="adminHistoryQuery">關鍵字</label>
+          <input id="adminHistoryQuery" placeholder="Tx Hash／地址／Block" autocomplete="off" spellcheck="false">
+        </div>
+
+        <div>
+          <label for="adminHistoryFromDate">開始日期</label>
+          <input id="adminHistoryFromDate" type="date">
+        </div>
+
+        <div>
+          <label for="adminHistoryToDate">結束日期</label>
+          <input id="adminHistoryToDate" type="date">
+        </div>
+      </div>
+
+      <div class="history-filter-actions">
+        <button id="applyAdminHistoryFilterBtn" class="green" type="button">套用篩選</button>
+        <button id="clearAdminHistoryFilterBtn" class="gray" type="button">清除篩選</button>
+        <button id="exportAdminHistoryCsvBtn" class="blue full" type="button" disabled>匯出目前結果 CSV</button>
+      </div>
+
+      <div id="adminHistoryFilterNote" class="history-result-note">
+        可篩選目前會員的鏈上 IPT 歷程。
+      </div>
+
+      <div id="adminCsvExportStatus" class="history-result-note">
+        Android 若封鎖直接下載，系統會自動改用分享或顯示可複製 CSV。
+      </div>
+    </div>
+
+    <div id="adminCsvFallbackPanel" class="csv-export-panel" hidden>
+      <b>CSV 匯出備援</b>
+      <textarea id="adminCsvFallbackText" readonly></textarea>
+      <div class="csv-export-actions">
+        <button id="copyAdminCsvBtn" class="green" type="button">複製 CSV 內容</button>
+        <button id="retryAdminCsvBtn" class="blue" type="button">再次下載 CSV</button>
+      </div>
+    </div>
+
     <div id="adminChainHistoryList" class="chain-history-list"></div>
 
     <div class="admin-detail-section-title">常用收款人</div>
@@ -1105,6 +1286,10 @@ let cloudAdminMembers = [];
 let cloudAdminSelfId = "";
 let cloudAdminAudit = [];
 let cloudAdminDetail = null;
+let memberChainHistoryFull = null;
+let memberChainHistoryFiltered = null;
+let adminChainHistoryFull = null;
+let adminChainHistoryFiltered = null;
 
 const ABI = [
   "function name() view returns (string)",
@@ -1790,6 +1975,7 @@ function renderAdminDetail(data) {
 
   cloudAdminDetail = data;
   panel.hidden = false;
+  resetAdminHistoryState();
 
   if ($("adminHistoryCount")) $("adminHistoryCount").textContent = "—";
   if ($("adminHistoryIn")) $("adminHistoryIn").textContent = "— IPT";
@@ -2204,6 +2390,8 @@ function renderMemberAssetStatic() {
       !(logged && cloudWallets.length);
   }
 
+  syncMemberHistoryFilterButtons();
+
   const host = $("memberAssetWalletList");
   if (!host) return;
   host.textContent = "";
@@ -2215,6 +2403,7 @@ function renderMemberAssetStatic() {
     if ($("memberHistoryOut")) $("memberHistoryOut").textContent = "— IPT";
     if ($("memberHistoryNet")) $("memberHistoryNet").textContent = "— IPT";
     if ($("memberHistoryList")) $("memberHistoryList").textContent = "";
+    resetMemberHistoryState();
     setMemberAssetsMessage("info", "登入雲端會員後即可讀取資產。");
     setChainHistoryMessage("memberHistoryMsg", "info", "登入會員並綁定錢包後即可讀取。");
     return;
@@ -2741,6 +2930,470 @@ function renderTransferHistory(options) {
   });
 }
 
+function localDateKey(timestampMs) {
+  if (!timestampMs) return "";
+  const d = new Date(timestampMs);
+  if (Number.isNaN(d.getTime())) return "";
+
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return y + "-" + m + "-" + day;
+}
+
+function getHistoryFilterValues(prefix) {
+  return {
+    type: String($(prefix + "HistoryTypeFilter")?.value || "all"),
+    query: String($(prefix + "HistoryQuery")?.value || "").trim().toLowerCase(),
+    fromDate: String($(prefix + "HistoryFromDate")?.value || "").trim(),
+    toDate: String($(prefix + "HistoryToDate")?.value || "").trim()
+  };
+}
+
+function clearHistoryFilterInputs(prefix) {
+  if ($(prefix + "HistoryTypeFilter")) $(prefix + "HistoryTypeFilter").value = "all";
+  if ($(prefix + "HistoryQuery")) $(prefix + "HistoryQuery").value = "";
+  if ($(prefix + "HistoryFromDate")) $(prefix + "HistoryFromDate").value = "";
+  if ($(prefix + "HistoryToDate")) $(prefix + "HistoryToDate").value = "";
+}
+
+function setHistoryFilterValues(prefix, filter) {
+  if (!filter) return;
+
+  if ($(prefix + "HistoryTypeFilter")) {
+    $(prefix + "HistoryTypeFilter").value = filter.type || "all";
+  }
+  if ($(prefix + "HistoryQuery")) {
+    $(prefix + "HistoryQuery").value = filter.query || "";
+  }
+  if ($(prefix + "HistoryFromDate")) {
+    $(prefix + "HistoryFromDate").value = filter.fromDate || "";
+  }
+  if ($(prefix + "HistoryToDate")) {
+    $(prefix + "HistoryToDate").value = filter.toDate || "";
+  }
+}
+
+function filterHistoryData(history, filter) {
+  if (!history) return null;
+
+  const events = Array.isArray(history.events) ? history.events : [];
+
+  const filtered = events.filter(event => {
+    if (filter.type !== "all" && event.type !== filter.type) {
+      return false;
+    }
+
+    const dateKey = localDateKey(event.timestampMs);
+
+    if (filter.fromDate && (!dateKey || dateKey < filter.fromDate)) {
+      return false;
+    }
+
+    if (filter.toDate && (!dateKey || dateKey > filter.toDate)) {
+      return false;
+    }
+
+    if (filter.query) {
+      const haystack = [
+        event.txHash,
+        event.from,
+        event.to,
+        event.blockNumber,
+        historyTypeLabel(event.type),
+        event.amount
+      ].join(" ").toLowerCase();
+
+      if (!haystack.includes(filter.query)) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+
+  return {
+    ...history,
+    events: filtered
+  };
+}
+
+function updateHistoryFilterNote(prefix, filteredCount, totalCount) {
+  const el = $(prefix + "HistoryFilterNote");
+  if (!el) return;
+
+  el.textContent =
+    "目前顯示 " +
+    String(filteredCount) +
+    " / " +
+    String(totalCount) +
+    " 筆鏈上歷程。";
+}
+
+function csvCell(value) {
+  const s = String(value ?? "");
+  return '"' + s.replace(/"/g, '""') + '"';
+}
+
+function buildHistoryCsv(history) {
+  const events = Array.isArray(history?.events) ? history.events : [];
+
+  const rows = [
+    [
+      "Time",
+      "Type",
+      "Amount IPT",
+      "From",
+      "To",
+      "Block",
+      "Tx Hash",
+      "Sepolia Etherscan"
+    ]
+  ];
+
+  for (const event of events) {
+    rows.push([
+      event.timestampMs ? new Date(event.timestampMs).toISOString() : "",
+      historyTypeLabel(event.type),
+      event.amount,
+      event.from,
+      event.to,
+      event.blockNumber,
+      event.txHash,
+      "https://sepolia.etherscan.io/tx/" + event.txHash
+    ]);
+  }
+
+  return rows
+    .map(row => row.map(csvCell).join(","))
+    .join("\r\n");
+}
+
+function setCsvStatus(prefix, text) {
+  const el = $(prefix + "CsvExportStatus");
+  if (el) el.textContent = text;
+}
+
+function showCsvFallback(prefix, content) {
+  const panel = $(prefix + "CsvFallbackPanel");
+  const textEl = $(prefix + "CsvFallbackText");
+
+  if (textEl) textEl.value = content;
+  if (panel) panel.hidden = false;
+}
+
+function hideCsvFallback(prefix) {
+  const panel = $(prefix + "CsvFallbackPanel");
+  if (panel) panel.hidden = true;
+}
+
+function tryAnchorDownload(filename, content, mimeType) {
+  const blob = new Blob(
+    ["\ufeff", content],
+    { type: mimeType || "text/csv;charset=utf-8" }
+  );
+
+  const url = URL.createObjectURL(blob);
+
+  try {
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.rel = "noopener";
+    a.style.display = "none";
+    document.body.appendChild(a);
+
+    // Android in-app browsers can ignore synthetic click unless it occurs
+    // directly within the user's tap handler, so keep this synchronous.
+    a.click();
+    a.remove();
+
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    return true;
+  } catch (e) {
+    try { URL.revokeObjectURL(url); } catch (_) {}
+    return false;
+  }
+}
+
+async function tryShareCsv(filename, content) {
+  try {
+    if (
+      !navigator.share ||
+      typeof File === "undefined"
+    ) {
+      return false;
+    }
+
+    const file = new File(
+      ["\ufeff", content],
+      filename,
+      { type: "text/csv;charset=utf-8" }
+    );
+
+    if (
+      navigator.canShare &&
+      !navigator.canShare({ files: [file] })
+    ) {
+      return false;
+    }
+
+    await navigator.share({
+      title: filename,
+      text: "Independent Points IPT CSV",
+      files: [file]
+    });
+
+    return true;
+  } catch (e) {
+    // User cancellation or unsupported file sharing falls through to copy UI.
+    return false;
+  }
+}
+
+async function copyCsvText(content) {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(content);
+    return true;
+  }
+
+  const ta = document.createElement("textarea");
+  ta.value = content;
+  ta.style.position = "fixed";
+  ta.style.opacity = "0";
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+
+  let ok = false;
+  try {
+    ok = document.execCommand("copy");
+  } catch (_) {}
+
+  ta.remove();
+  return ok;
+}
+
+async function exportCsvMobileFriendly(prefix, filename, content) {
+  if (!content) {
+    setCsvStatus(prefix, "沒有可匯出的 CSV 資料。");
+    return;
+  }
+
+  hideCsvFallback(prefix);
+  setCsvStatus(prefix, "正在準備 CSV…");
+
+  // First attempt direct download from the user's tap.
+  const attempted = tryAnchorDownload(
+    filename,
+    content,
+    "text/csv;charset=utf-8"
+  );
+
+  // Give the browser a moment; even if Android silently ignores it, we still
+  // expose a share/copy fallback instead of leaving the user with no feedback.
+  await new Promise(resolve => setTimeout(resolve, 350));
+
+  if (attempted) {
+    setCsvStatus(
+      prefix,
+      "已送出 CSV 下載要求。若手機沒有出現下載檔，請使用下方備援分享／複製。"
+    );
+  }
+
+  // On Android / in-app browsers, file share is often more reliable.
+  const shared = await tryShareCsv(filename, content);
+
+  if (shared) {
+    setCsvStatus(prefix, "✓ CSV 已交給手機分享／儲存功能。");
+    return;
+  }
+
+  showCsvFallback(prefix, content);
+  setCsvStatus(
+    prefix,
+    "瀏覽器可能封鎖直接下載；已顯示 CSV 備援，可複製內容或再次下載。"
+  );
+}
+
+function historyExportFilename(prefix) {
+  const now = new Date();
+  const stamp =
+    now.getFullYear() +
+    String(now.getMonth() + 1).padStart(2, "0") +
+    String(now.getDate()).padStart(2, "0") +
+    "-" +
+    String(now.getHours()).padStart(2, "0") +
+    String(now.getMinutes()).padStart(2, "0");
+
+  return "IPT-" + prefix + "-history-" + stamp + ".csv";
+}
+
+async function ensureMemberHistoryLoadedAndApplyFilter() {
+  if (!cloudLoggedIn()) {
+    setChainHistoryMessage("memberHistoryMsg", "warn", "請先登入雲端會員。");
+    return;
+  }
+
+  if (!cloudWallets.length) {
+    setChainHistoryMessage("memberHistoryMsg", "warn", "目前沒有綁定錢包可讀取。");
+    return;
+  }
+
+  // Keep whatever the user has already selected.
+  const requestedFilter = getHistoryFilterValues("member");
+
+  if (!memberChainHistoryFull) {
+    setChainHistoryMessage(
+      "memberHistoryMsg",
+      "info",
+      "尚未讀取鏈上歷程，正在先讀取資料後自動套用篩選…"
+    );
+
+    await refreshMemberChainHistory();
+
+    // refreshMemberChainHistory intentionally resets filters after a fresh load.
+    // Restore the user's original selection before applying.
+    setHistoryFilterValues("member", requestedFilter);
+  }
+
+  applyMemberHistoryFilter();
+}
+
+async function ensureAdminHistoryLoadedAndApplyFilter() {
+  if (!cloudIsAdmin() || !cloudAdminDetail) {
+    setChainHistoryMessage(
+      "adminChainHistoryMsg",
+      "warn",
+      "請先選擇一位會員並開啟會員詳情。"
+    );
+    return;
+  }
+
+  const requestedFilter = getHistoryFilterValues("admin");
+
+  if (!adminChainHistoryFull) {
+    setChainHistoryMessage(
+      "adminChainHistoryMsg",
+      "info",
+      "尚未讀取此會員歷程，正在先讀取資料後自動套用篩選…"
+    );
+
+    await refreshAdminDetailChainHistory();
+    setHistoryFilterValues("admin", requestedFilter);
+  }
+
+  applyAdminHistoryFilter();
+}
+
+function applyMemberHistoryFilter() {
+  if (!memberChainHistoryFull) return;
+
+  const filtered = filterHistoryData(
+    memberChainHistoryFull,
+    getHistoryFilterValues("member")
+  );
+
+  memberChainHistoryFiltered = filtered;
+
+  renderTransferHistory({
+    history: filtered,
+    listId: "memberHistoryList",
+    countId: "memberHistoryCount",
+    inId: "memberHistoryIn",
+    outId: "memberHistoryOut",
+    netId: "memberHistoryNet"
+  });
+
+  updateHistoryFilterNote(
+    "member",
+    filtered.events.length,
+    memberChainHistoryFull.events.length
+  );
+
+  if ($("exportMemberHistoryCsvBtn")) {
+    $("exportMemberHistoryCsvBtn").disabled = !filtered.events.length;
+  }
+}
+
+function applyAdminHistoryFilter() {
+  if (!adminChainHistoryFull) return;
+
+  const filtered = filterHistoryData(
+    adminChainHistoryFull,
+    getHistoryFilterValues("admin")
+  );
+
+  adminChainHistoryFiltered = filtered;
+
+  renderTransferHistory({
+    history: filtered,
+    listId: "adminChainHistoryList",
+    countId: "adminHistoryCount",
+    inId: "adminHistoryIn",
+    outId: "adminHistoryOut",
+    netId: "adminHistoryNet"
+  });
+
+  updateHistoryFilterNote(
+    "admin",
+    filtered.events.length,
+    adminChainHistoryFull.events.length
+  );
+
+  if ($("exportAdminHistoryCsvBtn")) {
+    $("exportAdminHistoryCsvBtn").disabled = !filtered.events.length;
+  }
+}
+
+function syncMemberHistoryFilterButtons() {
+  const canLoadAndFilter =
+    cloudLoggedIn() &&
+    Array.isArray(cloudWallets) &&
+    cloudWallets.length > 0;
+
+  [
+    "applyMemberHistoryFilterBtn",
+    "clearMemberHistoryFilterBtn"
+  ].forEach(id => {
+    if ($(id)) $(id).disabled = !canLoadAndFilter;
+  });
+
+  if ($("applyMemberHistoryFilterBtn")) {
+    $("applyMemberHistoryFilterBtn").textContent =
+      memberChainHistoryFull ? "套用篩選" : "讀取並套用篩選";
+  }
+
+  if ($("exportMemberHistoryCsvBtn")) {
+    $("exportMemberHistoryCsvBtn").disabled =
+      !(memberChainHistoryFiltered?.events?.length);
+  }
+}
+
+function resetMemberHistoryState() {
+  memberChainHistoryFull = null;
+  memberChainHistoryFiltered = null;
+  clearHistoryFilterInputs("member");
+  hideCsvFallback("member");
+  setCsvStatus("member", "先讀取並篩選歷程，再匯出目前結果。");
+  syncMemberHistoryFilterButtons();
+  updateHistoryFilterNote("member", 0, 0);
+}
+
+function resetAdminHistoryState() {
+  adminChainHistoryFull = null;
+  adminChainHistoryFiltered = null;
+  clearHistoryFilterInputs("admin");
+  hideCsvFallback("admin");
+  setCsvStatus("admin", "先讀取並篩選此會員歷程，再匯出目前結果。");
+
+  if ($("exportAdminHistoryCsvBtn")) {
+    $("exportAdminHistoryCsvBtn").disabled = true;
+  }
+
+  updateHistoryFilterNote("admin", 0, 0);
+}
+
 async function refreshMemberChainHistory() {
   if (!cloudLoggedIn()) {
     setChainHistoryMessage(
@@ -2754,6 +3407,7 @@ async function refreshMemberChainHistory() {
   const wallets = cloudWallets.map(w => w.wallet_address);
 
   if (!wallets.length) {
+    resetMemberHistoryState();
     renderTransferHistory({
       history: { events: [], decimals: 2 },
       listId: "memberHistoryList",
@@ -2787,6 +3441,10 @@ async function refreshMemberChainHistory() {
 
     const history = await readIptTransferHistory(wallets);
 
+    memberChainHistoryFull = history;
+    memberChainHistoryFiltered = history;
+    clearHistoryFilterInputs("member");
+
     renderTransferHistory({
       history,
       listId: "memberHistoryList",
@@ -2795,6 +3453,13 @@ async function refreshMemberChainHistory() {
       outId: "memberHistoryOut",
       netId: "memberHistoryNet"
     });
+
+    updateHistoryFilterNote(
+      "member",
+      history.events.length,
+      history.events.length
+    );
+    syncMemberHistoryFilterButtons();
 
     setChainHistoryMessage(
       "memberHistoryMsg",
@@ -2821,6 +3486,7 @@ async function refreshAdminDetailChainHistory() {
     .map(w => w.wallet_address);
 
   if (!wallets.length) {
+    resetAdminHistoryState();
     renderTransferHistory({
       history: { events: [], decimals: 2 },
       listId: "adminChainHistoryList",
@@ -2854,6 +3520,10 @@ async function refreshAdminDetailChainHistory() {
 
     const history = await readIptTransferHistory(wallets);
 
+    adminChainHistoryFull = history;
+    adminChainHistoryFiltered = history;
+    clearHistoryFilterInputs("admin");
+
     renderTransferHistory({
       history,
       listId: "adminChainHistoryList",
@@ -2862,6 +3532,16 @@ async function refreshAdminDetailChainHistory() {
       outId: "adminHistoryOut",
       netId: "adminHistoryNet"
     });
+
+    updateHistoryFilterNote(
+      "admin",
+      history.events.length,
+      history.events.length
+    );
+
+    if ($("exportAdminHistoryCsvBtn")) {
+      $("exportAdminHistoryCsvBtn").disabled = !history.events.length;
+    }
 
     setChainHistoryMessage(
       "adminChainHistoryMsg",
@@ -3515,8 +4195,8 @@ async function initWC() {
     events: ["chainChanged","accountsChanged"],
     optionalEvents: ["connect","disconnect","message"],
     metadata: {
-      name: "Independent Points V3.7",
-      description: "Independent Points V3.7 member asset timeline with Sepolia IPT transfer history",
+      name: "Independent Points V3.8.2",
+      description: "Independent Points V3.8.2 Android-friendly CSV export with download/share/copy fallback",
       url: "https://avg168.github.io",
       icons: []
     },
@@ -6228,6 +6908,127 @@ $("refreshMemberHistoryBtn")?.addEventListener("click", () => {
   });
 });
 
+$("applyMemberHistoryFilterBtn")?.addEventListener("click", async () => {
+  const btn = $("applyMemberHistoryFilterBtn");
+
+  try {
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = memberChainHistoryFull ? "套用中…" : "讀取並套用中…";
+    }
+
+    await ensureMemberHistoryLoadedAndApplyFilter();
+  } catch (e) {
+    setChainHistoryMessage(
+      "memberHistoryMsg",
+      "err",
+      "篩選失敗：" + (e?.message || String(e))
+    );
+  } finally {
+    syncMemberHistoryFilterButtons();
+  }
+});
+
+$("clearMemberHistoryFilterBtn")?.addEventListener("click", () => {
+  clearHistoryFilterInputs("member");
+
+  if (!memberChainHistoryFull) {
+    updateHistoryFilterNote("member", 0, 0);
+    syncMemberHistoryFilterButtons();
+    return;
+  }
+
+  memberChainHistoryFiltered = memberChainHistoryFull;
+
+  renderTransferHistory({
+    history: memberChainHistoryFull,
+    listId: "memberHistoryList",
+    countId: "memberHistoryCount",
+    inId: "memberHistoryIn",
+    outId: "memberHistoryOut",
+    netId: "memberHistoryNet"
+  });
+
+  updateHistoryFilterNote(
+    "member",
+    memberChainHistoryFull.events.length,
+    memberChainHistoryFull.events.length
+  );
+  syncMemberHistoryFilterButtons();
+});
+
+$("exportMemberHistoryCsvBtn")?.addEventListener("click", async () => {
+  const history = memberChainHistoryFiltered || memberChainHistoryFull;
+  if (!history?.events?.length) {
+    setCsvStatus("member", "目前沒有可匯出的歷程。");
+    return;
+  }
+
+  const btn = $("exportMemberHistoryCsvBtn");
+  const filename = historyExportFilename(
+    cloudProfile?.member_number || "member"
+  );
+  const csv = buildHistoryCsv(history);
+
+  try {
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = "正在匯出 CSV…";
+    }
+
+    await exportCsvMobileFriendly("member", filename, csv);
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = "匯出目前結果 CSV";
+    }
+  }
+});
+
+$("copyMemberCsvBtn")?.addEventListener("click", async () => {
+  const text = $("memberCsvFallbackText")?.value || "";
+  if (!text) return;
+
+  const ok = await copyCsvText(text).catch(() => false);
+  setCsvStatus(
+    "member",
+    ok ? "✓ CSV 內容已複製。" : "複製失敗，請長按文字框手動全選複製。"
+  );
+});
+
+$("retryMemberCsvBtn")?.addEventListener("click", () => {
+  const history = memberChainHistoryFiltered || memberChainHistoryFull;
+  if (!history?.events?.length) return;
+
+  const filename = historyExportFilename(
+    cloudProfile?.member_number || "member"
+  );
+  const csv = buildHistoryCsv(history);
+
+  tryAnchorDownload(filename, csv, "text/csv;charset=utf-8");
+  setCsvStatus(
+    "member",
+    "已再次送出下載要求；若仍沒有檔案，請使用「複製 CSV 內容」。"
+  );
+});
+
+$("memberHistoryQuery")?.addEventListener("keydown", async event => {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    try {
+      await ensureMemberHistoryLoadedAndApplyFilter();
+    } catch (e) {
+      setChainHistoryMessage(
+        "memberHistoryMsg",
+        "err",
+        "篩選失敗：" + (e?.message || String(e))
+      );
+    } finally {
+      syncMemberHistoryFilterButtons();
+    }
+  }
+});
+
 $("adminRefreshChainHistoryBtn")?.addEventListener("click", () => {
   refreshAdminDetailChainHistory().catch(e => {
     setChainHistoryMessage(
@@ -6236,6 +7037,131 @@ $("adminRefreshChainHistoryBtn")?.addEventListener("click", () => {
       e?.message || String(e)
     );
   });
+});
+
+$("applyAdminHistoryFilterBtn")?.addEventListener("click", async () => {
+  const btn = $("applyAdminHistoryFilterBtn");
+
+  try {
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = adminChainHistoryFull ? "套用中…" : "讀取並套用中…";
+    }
+
+    await ensureAdminHistoryLoadedAndApplyFilter();
+  } catch (e) {
+    setChainHistoryMessage(
+      "adminChainHistoryMsg",
+      "err",
+      "篩選失敗：" + (e?.message || String(e))
+    );
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = "套用篩選";
+    }
+  }
+});
+
+$("clearAdminHistoryFilterBtn")?.addEventListener("click", () => {
+  if (!adminChainHistoryFull) return;
+
+  clearHistoryFilterInputs("admin");
+  adminChainHistoryFiltered = adminChainHistoryFull;
+
+  renderTransferHistory({
+    history: adminChainHistoryFull,
+    listId: "adminChainHistoryList",
+    countId: "adminHistoryCount",
+    inId: "adminHistoryIn",
+    outId: "adminHistoryOut",
+    netId: "adminHistoryNet"
+  });
+
+  updateHistoryFilterNote(
+    "admin",
+    adminChainHistoryFull.events.length,
+    adminChainHistoryFull.events.length
+  );
+
+  if ($("exportAdminHistoryCsvBtn")) {
+    $("exportAdminHistoryCsvBtn").disabled =
+      !adminChainHistoryFull.events.length;
+  }
+});
+
+$("exportAdminHistoryCsvBtn")?.addEventListener("click", async () => {
+  const history = adminChainHistoryFiltered || adminChainHistoryFull;
+  if (!history?.events?.length) {
+    setCsvStatus("admin", "目前沒有可匯出的歷程。");
+    return;
+  }
+
+  const memberNumber =
+    cloudAdminDetail?.member?.member_number ||
+    "admin-member";
+
+  const filename = historyExportFilename(memberNumber);
+  const csv = buildHistoryCsv(history);
+  const btn = $("exportAdminHistoryCsvBtn");
+
+  try {
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = "正在匯出 CSV…";
+    }
+
+    await exportCsvMobileFriendly("admin", filename, csv);
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = "匯出目前結果 CSV";
+    }
+  }
+});
+
+$("copyAdminCsvBtn")?.addEventListener("click", async () => {
+  const text = $("adminCsvFallbackText")?.value || "";
+  if (!text) return;
+
+  const ok = await copyCsvText(text).catch(() => false);
+  setCsvStatus(
+    "admin",
+    ok ? "✓ CSV 內容已複製。" : "複製失敗，請長按文字框手動全選複製。"
+  );
+});
+
+$("retryAdminCsvBtn")?.addEventListener("click", () => {
+  const history = adminChainHistoryFiltered || adminChainHistoryFull;
+  if (!history?.events?.length) return;
+
+  const memberNumber =
+    cloudAdminDetail?.member?.member_number ||
+    "admin-member";
+
+  const filename = historyExportFilename(memberNumber);
+  const csv = buildHistoryCsv(history);
+
+  tryAnchorDownload(filename, csv, "text/csv;charset=utf-8");
+  setCsvStatus(
+    "admin",
+    "已再次送出下載要求；若仍沒有檔案，請使用「複製 CSV 內容」。"
+  );
+});
+
+$("adminHistoryQuery")?.addEventListener("keydown", async event => {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    try {
+      await ensureAdminHistoryLoadedAndApplyFilter();
+    } catch (e) {
+      setChainHistoryMessage(
+        "adminChainHistoryMsg",
+        "err",
+        "篩選失敗：" + (e?.message || String(e))
+      );
+    }
+  }
 });
 
 $("goReceiveBtn")?.addEventListener("click", () => {
@@ -6698,6 +7624,8 @@ async function initCloudMember() {
 // Initial UI state.
 syncMemberTools();
 renderMemberAssetStatic();
+resetMemberHistoryState();
+resetAdminHistoryState();
 initCloudMember();
 
 </script>
