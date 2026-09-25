@@ -180,7 +180,7 @@ body{
 }
 
 
-/* ===== V4.4.1 Android bottom-navigation fix ===== */
+/* ===== V4.5.0 Android bottom-navigation fix ===== */
 .v43-bottom-nav{
   position:fixed!important;
   left:50%!important;
@@ -247,7 +247,7 @@ body{
 }
 
 
-/* ===== V4.4.1 reliable in-page navigation ===== */
+/* ===== V4.5.0 reliable in-page navigation ===== */
 .v43-bottom-nav{
   display:none!important;
 }
@@ -335,7 +335,7 @@ button{
 
 </style>
 
-<link rel="manifest" href="./manifest.webmanifest?v=441">
+<link rel="manifest" href="./manifest.webmanifest?v=450">
 <meta name="theme-color" content="#10243d">
 <meta name="application-name" content="Independent Points">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -348,7 +348,7 @@ button{
 </head>
 <body>
 <header>
-  <div class="version">V4.4.1</div>
+  <div class="version">V4.5.0</div>
   <h1>Independent Points</h1>
   <p>會員、錢包、IPT 資產、交易與管理，一個正式入口完成。</p>
 </header>
@@ -456,6 +456,13 @@ button{
         <div class="title">系統資訊</div>
         <div class="desc">版本、網路、合約與更新資訊</div>
       </button>
+
+      <button id="maintenanceBtn" class="menu" type="button">
+        <div class="icon">🛠️</div>
+        <div class="title">維運中心</div>
+        <div class="desc">版本、快取、Supabase、Sepolia 與合約健康檢查</div>
+      </button>
+
     </div>
   </section>
 
@@ -501,10 +508,10 @@ button{
   </section>
 
   <section class="panel">
-    <h2>V4.4.1 操作體驗整合</h2>
-    <div class="status ok" style="margin-bottom:12px">V4.4.1 防卡版：首頁會員資料先完成，完整鏈上統計改為需要時才更新。</div>
+    <h2>V4.5.0 操作體驗整合</h2>
+    <div class="status ok" style="margin-bottom:12px">V4.5.0 防卡版：首頁會員資料先完成，完整鏈上統計改為需要時才更新。</div>
     <div class="note">
-      V4.4.1 已作為正式統一首頁。原本通過驗證的錢包核心保留在 wallet-core-v4.4.1.html；會員與管理員資產報表已統一為 V4.3 模組。
+      V4.5.0 已作為正式統一首頁。原本通過驗證的錢包核心保留在 wallet-core-v4.5.html；會員與管理員資產報表已統一為 V4.3 模組。
     </div>
   </section>
 
@@ -691,8 +698,8 @@ button{
 
       setStatus("ok",
         role==="admin"
-          ?"V4.4.1 已登入：會員功能與管理中心均已開放。"
-          :"V4.4.1 已登入：會員功能已開放。"
+          ?"V4.5.0 已登入：會員功能與管理中心均已開放。"
+          :"V4.5.0 已登入：會員功能已開放。"
       );
 
       $("assetSummarySection").style.display="block";
@@ -711,23 +718,23 @@ button{
 
   $("refreshBtn").addEventListener("click",load);
   $("assetSummaryRefreshBtn").addEventListener("click",refreshAssetSummary);
-  $("loginBtn").addEventListener("click",()=>go("./wallet-core-v4.4.1.html"));
+  $("loginBtn").addEventListener("click",()=>go("./wallet-core-v4.5.html"));
 
-  $("myAssetBtn").addEventListener("click",()=>go("./member-assets-v4.4.1.html?v=441"));
-  $("historyBtn").addEventListener("click",()=>go("./wallet-core-v4.4.1.html?go=history"));
-  $("assetCenterBtn").addEventListener("click",()=>go("./asset-center-v4.4.1.html?v=441"));
-  $("systemInfoBtn").addEventListener("click",()=>go("./system-info-v4.2.html?v=441"));
+  $("myAssetBtn").addEventListener("click",()=>go("./member-assets-v4.5.html?v=450"));
+  $("historyBtn").addEventListener("click",()=>go("./wallet-core-v4.5.html?go=history"));
+  $("assetCenterBtn").addEventListener("click",()=>go("./asset-center-v4.5.html?v=450"));
+  $("systemInfoBtn").addEventListener("click",()=>go("./system-info-v4.2.html?v=450"));
 
-  $("balanceBtn").addEventListener("click",()=>go("./wallet-core-v4.4.1.html?go=balance"));
-  $("transferBtn").addEventListener("click",()=>go("./wallet-core-v4.4.1.html?go=transfer"));
-  $("receiveBtn").addEventListener("click",()=>go("./wallet-core-v4.4.1.html?go=receive"));
+  $("balanceBtn").addEventListener("click",()=>go("./wallet-core-v4.5.html?go=balance"));
+  $("transferBtn").addEventListener("click",()=>go("./wallet-core-v4.5.html?go=transfer"));
+  $("receiveBtn").addEventListener("click",()=>go("./wallet-core-v4.5.html?go=receive"));
 
-  $("adminAssetBtn").addEventListener("click",()=>go("./admin-assets-v4.4.1.html?v=441"));
+  $("adminAssetBtn").addEventListener("click",()=>go("./admin-assets-v4.5.html?v=450"));
   $("adminMemberBtn").addEventListener("click",()=>go("./admin-members-v4.1.1.html?v=412"));
-  $("mintBtn").addEventListener("click",()=>go("./wallet-core-v4.4.1.html?go=mint"));
-  $("pauseBtn").addEventListener("click",()=>go("./wallet-core-v4.4.1.html?go=pause"));
-  $("ownershipBtn").addEventListener("click",()=>go("./wallet-core-v4.4.1.html?go=ownership"));
-  $("advancedBtn").addEventListener("click",()=>go("./wallet-core-v4.4.1.html"));
+  $("mintBtn").addEventListener("click",()=>go("./wallet-core-v4.5.html?go=mint"));
+  $("pauseBtn").addEventListener("click",()=>go("./wallet-core-v4.5.html?go=pause"));
+  $("ownershipBtn").addEventListener("click",()=>go("./wallet-core-v4.5.html?go=ownership"));
+  $("advancedBtn").addEventListener("click",()=>go("./wallet-core-v4.5.html"));
   $("v43NavAssets")?.addEventListener("click",()=>{
     if(!$("myAssetBtn").disabled) $("myAssetBtn").click();
   });
@@ -757,8 +764,8 @@ button{
 
 <script>
 (() => {
-  const OFFICIAL_URL = "https://avg168.github.io/independent-points/?v=441";
-  const CHROME_INTENT = "intent://avg168.github.io/independent-points/?v=441#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=https%3A%2F%2Favg168.github.io%2Findependent-points%2F%3Fv%3D441;end";
+  const OFFICIAL_URL = "https://avg168.github.io/independent-points/?v=450";
+  const CHROME_INTENT = "intent://avg168.github.io/independent-points/?v=450#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=https%3A%2F%2Favg168.github.io%2Findependent-points%2F%3Fv%3D441;end";
   let deferredInstallPrompt = null;
 
   const installBtn = document.getElementById("installAppBtn");
@@ -845,7 +852,7 @@ button{
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", async () => {
       try {
-        const reg = await navigator.serviceWorker.register("./service-worker.js?v=441", {
+        const reg = await navigator.serviceWorker.register("./service-worker.js?v=450", {
           updateViaCache: "none"
         });
         await reg.update().catch(()=>{});

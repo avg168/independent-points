@@ -1,0 +1,19 @@
+{
+  "product": "Independent Points",
+  "version": "V4.5.0",
+  "build": "20260925-450",
+  "release_date": "2026-09-25",
+  "channel": "production",
+  "network": "Ethereum Sepolia",
+  "chain_id": 11155111,
+  "contract": "0xd3fb2480aadb8b168ec7e88a0e5c847d9750cb87",
+  "minimum_supported_version": "V4.4.1",
+  "notes": [
+    "新增維運中心",
+    "新增版本檢查",
+    "新增 Service Worker 更新",
+    "新增舊快取清除",
+    "新增 Supabase / Sepolia / IPT 合約健康檢查",
+    "保留 V4.4.1 為回復版本"
+  ]
+}
