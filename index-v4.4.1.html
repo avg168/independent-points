@@ -1,0 +1,867 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Independent Points V4.0｜正式整合首頁</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
+<style>
+:root{
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;
+  color:#172033;background:#f4f7fb
+}
+*{box-sizing:border-box;min-width:0}
+html,body{width:100%;max-width:100%;overflow-x:hidden}
+body{margin:0;background:#f4f7fb;touch-action:pan-y}
+header{
+  background:#10243d;color:#fff;padding:26px 20px 32px;
+  border-radius:0 0 28px 28px
+}
+.version{
+  display:inline-block;margin-bottom:10px;padding:5px 10px;border-radius:999px;
+  background:rgba(255,255,255,.14);font-size:.78rem;font-weight:800
+}
+header h1{margin:0 0 8px;font-size:1.62rem}
+header p{margin:0;line-height:1.65;opacity:.9}
+main{max-width:780px;margin:auto;padding:18px 14px 76px}
+.panel{
+  background:#fff;border:1px solid #dde5ef;border-radius:18px;padding:16px;
+  margin-bottom:14px;box-shadow:0 4px 18px rgba(24,42,68,.05);
+  width:100%;max-width:100%
+}
+.panel h2{margin:0 0 12px;color:#17365d;font-size:1.13rem}
+.status{
+  border-radius:12px;padding:12px 14px;line-height:1.6;
+  background:#fff7df;color:#7e5a08;border:1px solid #efd996
+}
+.status.ok{background:#ebf8f2;color:#17694f;border-color:#bee5d6}
+.status.err{background:#fff0f0;color:#922c2c;border-color:#efc8c8}
+.profile{
+  margin-top:12px;border:1px solid #d9e2ed;border-radius:16px;
+  padding:14px;background:#f8fafc
+}
+.profile-title{font-size:1.08rem;font-weight:900;color:#17365d}
+.profile-sub{margin-top:5px;color:#64748b;line-height:1.55;word-break:break-all}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.chip{
+  display:inline-block;padding:4px 9px;border-radius:999px;font-size:.76rem;
+  font-weight:800;background:#eef2f7;color:#475569
+}
+.chip.ok{background:#e8f7ef;color:#17694f}
+.chip.admin{background:#e8efff;color:#284b88}
+.summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.card{
+  background:#f8fafc;border:1px solid #e1e7ef;border-radius:15px;padding:14px
+}
+.card .label{font-size:.8rem;color:#64748b;margin-bottom:5px}
+.card .value{font-size:1.14rem;font-weight:900;color:#17365d;word-break:break-word}
+.card.green .value{color:#176c59}
+.menu-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.menu{
+  border:1px solid #d9e2ed;border-radius:16px;padding:14px;background:#fff;
+  cursor:pointer;text-align:left;min-height:112px
+}
+.menu:active{transform:scale(.99)}
+.menu .icon{font-size:1.35rem;margin-bottom:8px}
+.menu .title{font-weight:900;color:#17365d;font-size:1rem}
+.menu .desc{font-size:.78rem;color:#64748b;line-height:1.45;margin-top:5px}
+.menu.primary{background:#176c59;border-color:#176c59}
+.menu.primary .title,.menu.primary .desc{color:#fff}
+.menu.blue{background:#2a5f91;border-color:#2a5f91}
+.menu.blue .title,.menu.blue .desc{color:#fff}
+.menu:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.admin-panel{display:none}
+body.is-admin .admin-panel{display:block}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button{touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+  min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding:10px 12px;
+  font:inherit;font-weight:900;cursor:pointer
+}
+button.primary{background:#176c59;color:#fff;border-color:#176c59}
+button.secondary{background:#2a5f91;color:#fff;border-color:#2a5f91}
+button.light{background:#fff;color:#29445f}
+.note{font-size:.82rem;color:#64748b;line-height:1.6;margin-top:10px}
+.wallet{overflow-wrap:anywhere;word-break:break-word}
+@media(min-width:680px){
+  .summary{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .menu-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+
+/* ===== V4.3 product shell ===== */
+:root{
+  --v43-navy:#10243d;
+  --v43-blue:#2a5f91;
+  --v43-green:#176c59;
+  --v43-bg:#f4f7fb;
+  --v43-border:#dde5ef;
+}
+html,body{
+  width:100%;
+  max-width:100%;
+  overflow-x:hidden!important;
+}
+body{
+  background:var(--v43-bg);
+  touch-action:pan-y;
+}
+.v43-product-tag{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:5px 10px;
+  border-radius:999px;
+  font-size:.76rem;
+  font-weight:850;
+  background:rgba(255,255,255,.14);
+}
+.v43-module-note{
+  margin-top:8px;
+  font-size:.78rem;
+  opacity:.82;
+}
+.v43-statusline{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:10px;
+}
+.v43-status-chip{
+  padding:5px 9px;
+  border-radius:999px;
+  font-size:.74rem;
+  font-weight:800;
+  background:#eef2f7;
+  color:#475569;
+}
+.v43-status-chip.ok{
+  background:#e8f7ef;
+  color:#17694f;
+}
+.v43-bottom-nav{
+  position:fixed;
+  left:50%;
+  transform:translateX(-50%);
+  bottom:calc(8px + env(safe-area-inset-bottom));
+  z-index:80;
+  width:min(94%,720px);
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:6px;
+  padding:7px;
+  border:1px solid rgba(210,220,232,.95);
+  border-radius:18px;
+  background:rgba(255,255,255,.94);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  box-shadow:0 8px 26px rgba(30,45,65,.14);
+}
+.v43-bottom-nav button{
+  min-height:48px;
+  border:0;
+  border-radius:12px;
+  background:transparent;
+  color:#29445f;
+  font:inherit;
+  font-size:.78rem;
+  font-weight:850;
+  padding:6px 4px;
+  touch-action:manipulation;
+}
+.v43-bottom-nav button.active{
+  background:#eaf2fb;
+  color:#17365d;
+}
+body{
+  padding-bottom:calc(82px + env(safe-area-inset-bottom));
+}
+@media(min-width:760px){
+  .v43-bottom-nav{display:none}
+  body{padding-bottom:0}
+}
+
+
+/* ===== V4.4.1 Android bottom-navigation fix ===== */
+.v43-bottom-nav{
+  position:fixed!important;
+  left:50%!important;
+  transform:translateX(-50%)!important;
+  bottom:calc(72px + env(safe-area-inset-bottom))!important;
+  z-index:9999!important;
+  width:calc(100% - 24px)!important;
+  max-width:680px!important;
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:6px!important;
+  padding:8px!important;
+  border:1px solid #cbd7e5!important;
+  border-radius:18px!important;
+  background:#ffffff!important;
+  opacity:1!important;
+  box-shadow:0 8px 28px rgba(20,38,60,.22)!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+}
+.v43-bottom-nav button{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  min-height:58px!important;
+  padding:7px 4px!important;
+  border:0!important;
+  border-radius:12px!important;
+  background:#f3f6fa!important;
+  color:#17365d!important;
+  font-size:.80rem!important;
+  line-height:1.25!important;
+  font-weight:900!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+  -webkit-tap-highlight-color:rgba(42,95,145,.12)!important;
+}
+.v43-bottom-nav button.active{
+  background:#dfeafa!important;
+  color:#10243d!important;
+}
+.v43-bottom-nav button:active{
+  background:#cfdff3!important;
+  transform:scale(.98);
+}
+body{
+  padding-bottom:calc(160px + env(safe-area-inset-bottom))!important;
+}
+@media(max-width:480px){
+  .v43-bottom-nav{
+    bottom:calc(78px + env(safe-area-inset-bottom))!important;
+    width:calc(100% - 18px)!important;
+  }
+  .v43-bottom-nav button{
+    min-height:60px!important;
+    font-size:.78rem!important;
+  }
+}
+@media(min-width:760px){
+  .v43-bottom-nav{display:none!important}
+  body{padding-bottom:0!important}
+}
+
+
+/* ===== V4.4.1 reliable in-page navigation ===== */
+.v43-bottom-nav{
+  display:none!important;
+}
+body{
+  padding-bottom:24px!important;
+}
+.v432-nav-panel{
+  margin:14px 0;
+  padding:14px;
+  border:1px solid #dbe4ee;
+  border-radius:18px;
+  background:#ffffff;
+  box-shadow:0 4px 18px rgba(24,42,68,.05);
+}
+.v432-nav-title{
+  font-size:1.05rem;
+  font-weight:900;
+  color:#17365d;
+  margin-bottom:10px;
+}
+.v432-nav-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+.v432-nav-grid button{
+  min-height:76px!important;
+  padding:12px 8px!important;
+  border:1px solid #cbd7e5!important;
+  border-radius:14px!important;
+  background:#f6f8fb!important;
+  color:#17365d!important;
+  font:inherit!important;
+  font-weight:900!important;
+  font-size:.96rem!important;
+  line-height:1.35!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+  -webkit-tap-highlight-color:rgba(42,95,145,.14)!important;
+}
+.v432-nav-grid button.primary{
+  background:#e2edf9!important;
+  border-color:#b9cde4!important;
+}
+.v432-nav-grid button:active{
+  transform:scale(.98);
+  background:#d7e5f5!important;
+}
+.v432-nav-note{
+  margin-top:9px;
+  color:#64748b;
+  font-size:.8rem;
+  line-height:1.5;
+}
+@media(min-width:760px){
+  .v432-nav-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+
+
+/* ===== V4.4 production polish ===== */
+:root{
+  color-scheme:light;
+}
+html{
+  scroll-behavior:smooth;
+}
+body{
+  -webkit-text-size-adjust:100%;
+  text-rendering:optimizeLegibility;
+}
+button,input,select,textarea{
+  font:inherit;
+}
+button{
+  cursor:pointer;
+}
+@media(display-mode:standalone){
+  body::before{
+    content:"";
+    display:block;
+    height:env(safe-area-inset-top);
+  }
+}
+
+</style>
+
+<link rel="manifest" href="./manifest.webmanifest?v=441">
+<meta name="theme-color" content="#10243d">
+<meta name="application-name" content="Independent Points">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Independent Points">
+<meta name="description" content="Independent Points 會員點數錢包與 IPT 資產管理系統。">
+<link rel="icon" type="image/svg+xml" href="./ipt-icon-192.png">
+
+<link rel="apple-touch-icon" href="./ipt-apple-touch-180.png">
+</head>
+<body>
+<header>
+  <div class="version">V4.4.1</div>
+  <h1>Independent Points</h1>
+  <p>會員、錢包、IPT 資產、交易與管理，一個正式入口完成。</p>
+</header>
+
+<main>
+
+  <section class="v432-nav-panel">
+    <div class="v432-nav-title">快速導覽</div>
+    <div class="v432-nav-grid">
+      <button id="v432HomeBtn" class="primary" type="button">🏠<br>首頁</button>
+      <button id="v432AssetsBtn" type="button">📊<br>我的資產</button>
+      <button id="v432TransferBtn" type="button">↗️<br>IPT 轉帳</button>
+      <button id="v432ManageBtn" type="button">⚙️<br>管理中心</button>
+    </div>
+    <div class="v432-nav-note">這組導覽是一般頁面內容，不會被 Android 瀏覽器底部工具列蓋住。</div>
+  </section>
+
+  <section class="panel">
+    <h2>我的帳戶</h2>
+    <div id="statusBox" class="status">正在確認登入狀態…</div>
+
+    <div id="profileBox" class="profile" style="display:none">
+      <div id="profileTitle" class="profile-title">—</div>
+      <div id="profileEmail" class="profile-sub">—</div>
+      <div id="profileWallet" class="profile-sub wallet">—</div>
+      <div id="profileChips" class="chips"></div>
+    </div>
+
+    <div class="actions" style="margin-top:12px">
+      <button id="refreshBtn" class="primary" type="button">重新整理</button>
+      <button id="loginBtn" class="light" type="button">會員登入／主錢包</button>
+    </div>
+  </section>
+
+  <section id="assetSummarySection" class="panel" style="display:none">
+    <h2>我的 IPT</h2>
+    <div class="summary">
+      <div class="card green">
+        <div class="label">目前餘額</div>
+        <div id="iptBalance" class="value">—</div>
+      </div>
+      <div class="card">
+        <div class="label">累計轉入</div>
+        <div id="iptIncoming" class="value">—</div>
+      </div>
+      <div class="card">
+        <div class="label">累計轉出</div>
+        <div id="iptOutgoing" class="value">—</div>
+      </div>
+      <div class="card">
+        <div class="label">交易筆數</div>
+        <div id="iptTxCount" class="value">—</div>
+      </div>
+    </div>
+    <div id="assetSummaryNote" class="note">
+      為避免手機首頁卡住，完整鏈上統計改為手動更新。
+    </div>
+    <button id="assetSummaryRefreshBtn" class="secondary" type="button" style="width:100%;margin-top:10px">
+      更新完整資產摘要
+    </button>
+    <div id="assetUpdatedAt" class="note" style="margin-top:8px">尚未更新完整資產摘要。</div>
+  </section>
+
+  <section class="panel">
+    <h2>會員功能</h2>
+    <div class="menu-grid">
+      <button id="myAssetBtn" class="menu primary" type="button" disabled>
+        <div class="icon">📊</div>
+        <div class="title">我的資產</div>
+        <div class="desc">餘額、轉入轉出、CSV、PDF 報表</div>
+      </button>
+
+      <button id="balanceBtn" class="menu" type="button">
+        <div class="icon">💰</div>
+        <div class="title">查看點數</div>
+        <div class="desc">進入 IPT 錢包查看鏈上餘額</div>
+      </button>
+
+      <button id="transferBtn" class="menu blue" type="button">
+        <div class="icon">↗️</div>
+        <div class="title">IPT 轉帳</div>
+        <div class="desc">前置檢查後由 Trust Wallet 核准</div>
+      </button>
+
+      <button id="receiveBtn" class="menu" type="button">
+        <div class="icon">📥</div>
+        <div class="title">收款</div>
+        <div class="desc">回到主錢包頁使用收款功能</div>
+      </button>
+
+      <button id="historyBtn" class="menu" type="button" disabled>
+        <div class="icon">🧾</div>
+        <div class="title">交易紀錄</div>
+        <div class="desc">查看自己的 IPT 鏈上交易明細</div>
+      </button>
+
+      <button id="assetCenterBtn" class="menu" type="button" disabled>
+        <div class="icon">🗂️</div>
+        <div class="title">資產中心</div>
+        <div class="desc">會員／管理員報表統一入口</div>
+      </button>
+
+      <button id="systemInfoBtn" class="menu" type="button">
+        <div class="icon">ℹ️</div>
+        <div class="title">系統資訊</div>
+        <div class="desc">版本、網路、合約與更新資訊</div>
+      </button>
+    </div>
+  </section>
+
+  <section class="panel admin-panel">
+    <h2>管理中心</h2>
+    <div class="menu-grid">
+      <button id="adminAssetBtn" class="menu blue" type="button">
+        <div class="icon">📈</div>
+        <div class="title">資產彙總</div>
+        <div class="desc">會員資產、區間報表、CSV、PDF</div>
+      </button>
+
+      <button id="adminMemberBtn" class="menu" type="button">
+        <div class="icon">👥</div>
+        <div class="title">會員管理</div>
+        <div class="desc">回主系統進入會員管理功能</div>
+      </button>
+
+      <button id="mintBtn" class="menu" type="button">
+        <div class="icon">➕</div>
+        <div class="title">Mint</div>
+        <div class="desc">管理者發行 IPT</div>
+      </button>
+
+      <button id="pauseBtn" class="menu" type="button">
+        <div class="icon">⏸️</div>
+        <div class="title">暫停／恢復</div>
+        <div class="desc">管理 IPT 合約交易狀態</div>
+      </button>
+
+      <button id="ownershipBtn" class="menu" type="button">
+        <div class="icon">🔐</div>
+        <div class="title">管理權</div>
+        <div class="desc">Owner / pendingOwner 交接</div>
+      </button>
+
+      <button id="advancedBtn" class="menu" type="button">
+        <div class="icon">⚙️</div>
+        <div class="title">進階功能</div>
+        <div class="desc">回到完整 IPT 系統操作頁</div>
+      </button>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>V4.4.1 操作體驗整合</h2>
+    <div class="status ok" style="margin-bottom:12px">V4.4.1 防卡版：首頁會員資料先完成，完整鏈上統計改為需要時才更新。</div>
+    <div class="note">
+      V4.4.1 已作為正式統一首頁。原本通過驗證的錢包核心保留在 wallet-core-v4.4.1.html；會員與管理員資產報表已統一為 V4.3 模組。
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>安裝 Independent Points</h2>
+    <div class="note">若目前瀏覽器支援 PWA，可直接安裝；Trust Wallet／WebView 不支援時，可一鍵改用 Chrome 開啟正式安裝頁。</div>
+    <div class="actions" style="margin-top:10px">
+      <button id="installAppBtn" class="secondary" type="button">直接安裝 App</button>
+      <button id="openChromeInstallBtn" class="light" type="button">用 Chrome 開啟安裝</button>
+    </div>
+    <button id="copyInstallUrlBtn" class="light" type="button" style="width:100%;margin-top:10px">複製正式網址</button>
+    <div id="installAppNote" class="note">正在檢查此瀏覽器的安裝能力…</div>
+  </section>
+
+</main>
+
+<script>
+(() => {
+  const SUPABASE_URL="https://uccexvgqmoxhgykkjdcy.supabase.co";
+  const SUPABASE_KEY="sb_publishable_FBsN1DYTQMv2_bWhpbXHAA_qdAq7ri7";
+
+  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{
+    auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
+  });
+
+  const $=id=>document.getElementById(id);
+  let currentUserId="";
+  let assetSummaryLoading=false;
+
+  function go(url){ location.href=url; }
+
+  function setStatus(kind,text){
+    const el=$("statusBox");
+    el.className="status "+kind;
+    el.textContent=text;
+  }
+
+  function fmtNumber(v){
+    const n=Number(String(v??"0"));
+    if(!Number.isFinite(n)) return String(v??"0");
+    return n.toLocaleString("zh-TW",{maximumFractionDigits:8});
+  }
+
+
+  function assetCacheKey(uid){
+    return "ipt_v411_asset_summary_" + String(uid||"");
+  }
+
+  function renderAssetSummary(asset, fromCache=false){
+    $("iptBalance").textContent=fmtNumber(asset?.member?.ipt_balance||0)+" IPT";
+    $("iptIncoming").textContent=fmtNumber(asset?.asset?.total_incoming||0)+" IPT";
+    $("iptOutgoing").textContent=fmtNumber(asset?.asset?.total_outgoing||0)+" IPT";
+    $("iptTxCount").textContent=asset?.asset?.total_transactions??0;
+    $("assetSummarySection").style.display="block";
+    $("assetSummaryNote").textContent=fromCache
+      ? "目前先顯示上次成功讀取的資產摘要；需要最新資料時再按下方更新。"
+      : "資產摘要已更新。首頁其餘功能不會等待鏈上交易掃描。";
+    const saved = fromCache ? localStorage.getItem(assetCacheKey(currentUserId)) : null;
+    let ts = Date.now();
+    try{
+      if(fromCache && saved) ts = JSON.parse(saved)?.saved_at || ts;
+    }catch(_){}
+    $("assetUpdatedAt").textContent = "最後更新：" + new Date(ts).toLocaleString("zh-TW",{hour12:false});
+  }
+
+  function loadCachedAssetSummary(uid){
+    try{
+      const raw=localStorage.getItem(assetCacheKey(uid));
+      if(!raw) return false;
+      const parsed=JSON.parse(raw);
+      if(!parsed?.data) return false;
+      renderAssetSummary(parsed.data,true);
+      return true;
+    }catch(_){
+      return false;
+    }
+  }
+
+  async function refreshAssetSummary(){
+    if(assetSummaryLoading || !currentUserId) return;
+    assetSummaryLoading=true;
+    const btn=$("assetSummaryRefreshBtn");
+    btn.disabled=true;
+    btn.textContent="正在更新資產摘要…";
+    $("assetSummaryNote").textContent="正在讀取 Sepolia IPT 餘額與交易統計；其他按鈕仍可使用。";
+
+    try{
+      const {data:asset,error:assetError}=await sb.functions.invoke("member-asset-detail",{body:{}});
+      if(assetError) throw assetError;
+      if(!asset?.ok) throw new Error(asset?.error||"資產摘要讀取失敗");
+      renderAssetSummary(asset,false);
+      try{
+        const savedAt=Date.now();
+        localStorage.setItem(assetCacheKey(currentUserId),JSON.stringify({
+          saved_at:savedAt,
+          data:asset
+        }));
+        $("assetUpdatedAt").textContent="最後更新："+new Date(savedAt).toLocaleString("zh-TW",{hour12:false});
+      }catch(_){}
+    }catch(err){
+      console.error(err);
+      $("assetSummaryNote").textContent="資產摘要暫時無法更新，可直接使用下方功能或進入「我的資產」查看。";
+    }finally{
+      assetSummaryLoading=false;
+      btn.disabled=false;
+      btn.textContent="更新完整資產摘要";
+    }
+  }
+
+
+  async function load(){
+    document.body.classList.remove("is-admin");
+    currentUserId="";
+    $("profileBox").style.display="none";
+    $("assetSummarySection").style.display="none";
+    $("myAssetBtn").disabled=true;
+    $("historyBtn").disabled=true;
+    $("assetCenterBtn").disabled=true;
+    setStatus("","正在確認登入狀態…");
+
+    try{
+      const {data:{session},error}=await sb.auth.getSession();
+      if(error) throw error;
+
+      if(!session?.user){
+        setStatus("err","目前尚未登入會員。請先按「會員登入／主錢包」。");
+        return;
+      }
+
+      const uid=session.user.id;
+      currentUserId=uid;
+      const [pRes,rRes,wRes,vRes]=await Promise.all([
+        sb.from("member_profiles")
+          .select("member_number,display_name,status")
+          .eq("id",uid).maybeSingle(),
+        sb.from("member_roles")
+          .select("role")
+          .eq("user_id",uid).maybeSingle(),
+        sb.from("member_wallets")
+          .select("wallet_address,is_primary,chain_id,created_at")
+          .eq("user_id",uid)
+          .eq("chain_id",11155111)
+          .order("is_primary",{ascending:false})
+          .order("created_at",{ascending:true}),
+        sb.from("verified_wallets")
+          .select("wallet_address,verified_at")
+          .eq("user_id",uid)
+          .eq("chain_id",11155111)
+      ]);
+
+      if(pRes.error) throw pRes.error;
+      if(rRes.error) throw rRes.error;
+      if(wRes.error) throw wRes.error;
+      if(vRes.error) throw vRes.error;
+      if(!pRes.data) throw new Error("找不到會員資料。");
+
+      const p=pRes.data;
+      const role=rRes.data?.role||"member";
+      const wallets=wRes.data||[];
+      const primary=wallets.find(w=>w.is_primary)||wallets[0]||null;
+      const address=String(primary?.wallet_address||"");
+      const verified=(vRes.data||[]).some(v=>
+        String(v.wallet_address||"").toLowerCase()===address.toLowerCase()
+      );
+
+      $("profileTitle").textContent=`${p.member_number||"—"}｜${p.display_name||"—"}`;
+      $("profileEmail").textContent=session.user.email||"—";
+      $("profileWallet").textContent=address ? "主錢包："+address : "主錢包：尚未綁定";
+      $("profileChips").innerHTML=
+        `<span class="chip ${role==="admin"?"admin":""}">${role==="admin"?"管理員":"會員"}</span>`+
+        `<span class="chip ${p.status==="active"?"ok":""}">${p.status==="active"?"正常":"已停權"}</span>`+
+        `<span class="chip ${verified?"ok":""}">${verified?"錢包已驗證":"錢包未驗證"}</span>`;
+      $("profileBox").style.display="block";
+
+      if(p.status!=="active"){
+        setStatus("err","會員目前為停權狀態，會員資產入口已停用。");
+        return;
+      }
+
+      $("myAssetBtn").disabled=false;
+      $("historyBtn").disabled=false;
+      $("assetCenterBtn").disabled=false;
+      if(role==="admin") document.body.classList.add("is-admin");
+
+      setStatus("ok",
+        role==="admin"
+          ?"V4.4.1 已登入：會員功能與管理中心均已開放。"
+          :"V4.4.1 已登入：會員功能已開放。"
+      );
+
+      $("assetSummarySection").style.display="block";
+      if(!loadCachedAssetSummary(uid)){
+        $("iptBalance").textContent="按下更新";
+        $("iptIncoming").textContent="按下更新";
+        $("iptOutgoing").textContent="按下更新";
+        $("iptTxCount").textContent="按下更新";
+        $("assetSummaryNote").textContent="首頁已就緒。需要完整鏈上統計時，再按「更新完整資產摘要」。";
+      }
+    }catch(err){
+      console.error(err);
+      setStatus("err","載入失敗："+(err?.message||String(err)));
+    }
+  }
+
+  $("refreshBtn").addEventListener("click",load);
+  $("assetSummaryRefreshBtn").addEventListener("click",refreshAssetSummary);
+  $("loginBtn").addEventListener("click",()=>go("./wallet-core-v4.4.1.html"));
+
+  $("myAssetBtn").addEventListener("click",()=>go("./member-assets-v4.4.1.html?v=441"));
+  $("historyBtn").addEventListener("click",()=>go("./wallet-core-v4.4.1.html?go=history"));
+  $("assetCenterBtn").addEventListener("click",()=>go("./asset-center-v4.4.1.html?v=441"));
+  $("systemInfoBtn").addEventListener("click",()=>go("./system-info-v4.2.html?v=441"));
+
+  $("balanceBtn").addEventListener("click",()=>go("./wallet-core-v4.4.1.html?go=balance"));
+  $("transferBtn").addEventListener("click",()=>go("./wallet-core-v4.4.1.html?go=transfer"));
+  $("receiveBtn").addEventListener("click",()=>go("./wallet-core-v4.4.1.html?go=receive"));
+
+  $("adminAssetBtn").addEventListener("click",()=>go("./admin-assets-v4.4.1.html?v=441"));
+  $("adminMemberBtn").addEventListener("click",()=>go("./admin-members-v4.1.1.html?v=412"));
+  $("mintBtn").addEventListener("click",()=>go("./wallet-core-v4.4.1.html?go=mint"));
+  $("pauseBtn").addEventListener("click",()=>go("./wallet-core-v4.4.1.html?go=pause"));
+  $("ownershipBtn").addEventListener("click",()=>go("./wallet-core-v4.4.1.html?go=ownership"));
+  $("advancedBtn").addEventListener("click",()=>go("./wallet-core-v4.4.1.html"));
+  $("v43NavAssets")?.addEventListener("click",()=>{
+    if(!$("myAssetBtn").disabled) $("myAssetBtn").click();
+  });
+
+
+  $("v432HomeBtn")?.addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
+  $("v432AssetsBtn")?.addEventListener("click",()=>{
+    if(!$("myAssetBtn")?.disabled) $("myAssetBtn").click();
+  });
+  $("v432TransferBtn")?.addEventListener("click",()=>$("transferBtn")?.click());
+  $("v432ManageBtn")?.addEventListener("click",()=>{
+    const section=document.querySelector(".admin-panel");
+    if(section && document.body.classList.contains("is-admin")){
+      section.scrollIntoView({behavior:"smooth",block:"start"});
+    }else{
+      $("assetCenterBtn")?.click();
+    }
+  });
+
+  load();
+})();
+</script>
+
+
+
+
+
+<script>
+(() => {
+  const OFFICIAL_URL = "https://avg168.github.io/independent-points/?v=441";
+  const CHROME_INTENT = "intent://avg168.github.io/independent-points/?v=441#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=https%3A%2F%2Favg168.github.io%2Findependent-points%2F%3Fv%3D441;end";
+  let deferredInstallPrompt = null;
+
+  const installBtn = document.getElementById("installAppBtn");
+  const chromeBtn = document.getElementById("openChromeInstallBtn");
+  const copyBtn = document.getElementById("copyInstallUrlBtn");
+  const note = document.getElementById("installAppNote");
+
+  function standalone() {
+    return window.matchMedia?.("(display-mode: standalone)")?.matches ||
+           window.navigator.standalone === true;
+  }
+
+  function setNote(text) {
+    if (note) note.textContent = text;
+  }
+
+  if (standalone()) {
+    if (installBtn) {
+      installBtn.disabled = true;
+      installBtn.textContent = "已安裝";
+    }
+    if (chromeBtn) chromeBtn.style.display = "none";
+    setNote("Independent Points 已以 App 模式開啟。");
+  } else {
+    if (installBtn) installBtn.textContent = "檢查直接安裝";
+    setNote("若目前是 Trust Wallet／內建瀏覽器，請使用「用 Chrome 開啟安裝」。");
+  }
+
+  window.addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
+    deferredInstallPrompt = event;
+    if (installBtn) {
+      installBtn.disabled = false;
+      installBtn.textContent = "直接安裝 App";
+    }
+    setNote("此瀏覽器已符合 PWA 安裝條件，可以直接安裝。");
+  });
+
+  installBtn?.addEventListener("click", async () => {
+    if (standalone()) {
+      setNote("目前已經是 App 模式。");
+      return;
+    }
+
+    if (deferredInstallPrompt) {
+      deferredInstallPrompt.prompt();
+      const choice = await deferredInstallPrompt.userChoice;
+      setNote(choice.outcome === "accepted" ? "已接受安裝。" : "已取消安裝。");
+      deferredInstallPrompt = null;
+      return;
+    }
+
+    setNote("目前瀏覽器不提供直接安裝視窗。請按「用 Chrome 開啟安裝」，或使用瀏覽器選單的「加到主畫面／安裝應用程式」。");
+  });
+
+  chromeBtn?.addEventListener("click", () => {
+    setNote("正在嘗試用 Chrome 開啟正式安裝頁…");
+    location.href = CHROME_INTENT;
+  });
+
+  copyBtn?.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(OFFICIAL_URL);
+      setNote("正式網址已複製。可貼到 Chrome 開啟，再選「安裝應用程式／加到主畫面」。");
+    } catch (_) {
+      const ta=document.createElement("textarea");
+      ta.value=OFFICIAL_URL;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      ta.remove();
+      setNote("正式網址已複製。");
+    }
+  });
+
+  window.addEventListener("appinstalled", () => {
+    if (installBtn) {
+      installBtn.disabled = true;
+      installBtn.textContent = "已安裝";
+    }
+    setNote("Independent Points 已安裝完成。");
+  });
+
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", async () => {
+      try {
+        const reg = await navigator.serviceWorker.register("./service-worker.js?v=441", {
+          updateViaCache: "none"
+        });
+        await reg.update().catch(()=>{});
+        await navigator.serviceWorker.ready;
+        if (!deferredInstallPrompt && !standalone()) {
+          setNote("PWA 基礎已就緒。若沒有直接安裝視窗，請使用「用 Chrome 開啟安裝」。");
+        }
+      } catch (err) {
+        setNote("目前瀏覽器不支援完整 PWA 安裝。請使用 Chrome 開啟正式網址。");
+      }
+    });
+  } else {
+    setNote("目前瀏覽器不支援 Service Worker。請使用 Chrome 開啟正式網址。");
+  }
+})();
+</script>
+
+</body>
+</html>

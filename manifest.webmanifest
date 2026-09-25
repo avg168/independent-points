@@ -3,7 +3,7 @@
   "name": "Independent Points",
   "short_name": "IPT",
   "description": "Independent Points 會員點數錢包與 IPT 資產管理系統",
-  "start_url": "./?source=pwa&v=441",
+  "start_url": "./?source=pwa&v=450",
   "scope": "./",
   "display": "standalone",
   "display_override": [
@@ -61,6 +61,18 @@
       "name": "IPT 轉帳",
       "short_name": "轉帳",
       "url": "./wallet-core-v4.4.1.html?go=transfer",
+      "icons": [
+        {
+          "src": "./ipt-icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "維運中心",
+      "short_name": "維運",
+      "url": "./maintenance-v4.5.html?v=450",
       "icons": [
         {
           "src": "./ipt-icon-192.png",
