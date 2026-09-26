@@ -1,22 +1,29 @@
 {
   "product": "Independent Points",
-  "version": "V4.9.1",
-  "build": "20260926-491",
+  "version": "V4.10.0",
+  "build": "20260926-4100",
   "release_date": "2026-09-26",
   "channel": "production",
-  "rollback_version": "V4.9.0",
+  "rollback_version": "V4.9.1",
   "fallback_version": "V4.5.0",
   "network": "Ethereum Sepolia",
   "chain_id": "11155111 / 0xaa36a7",
   "contract": "0xd3fb2480aadb8b168ec7e88a0e5c847d9750cb87",
   "notes": [
-    "通知相容模式",
-    "Notification API 不支援時自動改用頁面內提醒與震動",
-    "按鈕不再無反應"
+    "新增多國語言核心架構",
+    "繁中／简中／English",
+    "語言跨頁保存",
+    "第一階段翻譯首頁、主要導覽、常用按鈕與核心狀態",
+    "未修改 IPT 合約、Supabase 結構或 Edge Functions"
   ],
   "rollback_steps": [
     "若 V4.6.1 異常，先重新載入並清除 IPT 快取。",
     "仍異常時可回復 V4.6.0。",
     "回復網頁版本時不修改 Supabase、Owner、pendingOwner 或 paused。"
+  ],
+  "languages": [
+    "zh-TW",
+    "zh-CN",
+    "en"
   ]
 }
