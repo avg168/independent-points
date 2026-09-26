@@ -1,10 +1,10 @@
 {
   "product": "Independent Points",
-  "version": "V4.10.2",
-  "build": "20260926-4102",
+  "version": "V4.10.3",
+  "build": "20260926-4103",
   "release_date": "2026-09-26",
   "channel": "production",
-  "rollback_version": "V4.10.1",
+  "rollback_version": "V4.10.2",
   "fallback_version": "V4.5.0",
   "network": "Ethereum Sepolia",
   "chain_id": "11155111 / 0xaa36a7",
