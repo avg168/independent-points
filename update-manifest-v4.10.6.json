@@ -1,0 +1,133 @@
+{
+  "product": "Independent Points",
+  "version": "V4.10.6",
+  "build": "20260926-4106",
+  "languages": [
+    "zh-TW",
+    "zh-CN",
+    "en"
+  ],
+  "i18n_engine": "i18n-v4.10.js",
+  "member_data_protected": true,
+  "rpc": [
+    "https://ethereum-sepolia-rpc.publicnode.com",
+    "https://rpc.sepolia.org"
+  ],
+  "files": [
+    {
+      "name": "admin-assets-v4.10.6.html",
+      "bytes": 50474,
+      "sha256": "0401657fd56f7587e4ffbc803260069edb73bbb540906bec903e6b0afc59ec0d"
+    },
+    {
+      "name": "admin-members-v4.10.6.html",
+      "bytes": 20726,
+      "sha256": "0bb98c708579d8b2126ffc3529a8139f0366c62b2f396e6db24b66056459b21e"
+    },
+    {
+      "name": "asset-center-v4.10.6.html",
+      "bytes": 14960,
+      "sha256": "92afd8e52fa051994d14ff54d05a15f8c93fde6ec1e0b591b60a4332ba7b82e9"
+    },
+    {
+      "name": "event-center-v4.10.6.html",
+      "bytes": 25800,
+      "sha256": "43d0e325e02d377c4f297520c9078d5f948347d441d399d8b37ab7353132aa97"
+    },
+    {
+      "name": "i18n-v4.10.js",
+      "bytes": 95093,
+      "sha256": "2d033f8f06092c7df9fc8bbcb80c1a7bed5aa3bc6f9fc82954cdf0a37f2af802"
+    },
+    {
+      "name": "index.html",
+      "bytes": 32001,
+      "sha256": "2e1196d4418f7affbda5e929217f3ef50f74c4cde1496354ca9aca51a1460c4d"
+    },
+    {
+      "name": "ipt-apple-touch-180.png",
+      "bytes": 1620,
+      "sha256": "e9147d9c3d94055729aa9bbce16e397b5a3ac7db7b11f91cc48e923bf639112f"
+    },
+    {
+      "name": "ipt-icon-192.png",
+      "bytes": 1689,
+      "sha256": "83cd7171cb59a0ba6b5b7015bcb962cefd084adc2e769dbcf8e25080c2e3d7c1"
+    },
+    {
+      "name": "ipt-icon-512.png",
+      "bytes": 4539,
+      "sha256": "87b400c3a735f28b7c9a2f66391ac51af10a2d5ee3acffcb1c47c1e1f260b62e"
+    },
+    {
+      "name": "ipt-icon.svg",
+      "bytes": 310,
+      "sha256": "aa08f40ea988b4e1ad63a835e2ea10eca987ceaa6d9afb1eccba7095b550c19a"
+    },
+    {
+      "name": "maintenance-v4.10.6.html",
+      "bytes": 14841,
+      "sha256": "3778fc484892385649fa4b110e916db3818a6cd3143dd1627ac2aad28f341fba"
+    },
+    {
+      "name": "manifest.webmanifest",
+      "bytes": 2629,
+      "sha256": "ec0f8d4aad30f4d2c69e039bcc05ae853b1a021b5b3f7f50433c17247c72c0db"
+    },
+    {
+      "name": "member-assets-v4.10.6.html",
+      "bytes": 32712,
+      "sha256": "a22612572094d76f8501f067338b3a069f3b153720505b90002005d784ccd6ca"
+    },
+    {
+      "name": "print-report-v4.10.6.html",
+      "bytes": 15399,
+      "sha256": "d2e51ab100ea5bc2b9c249912fa85783d649ba91453dafb013959ec32e7424f8"
+    },
+    {
+      "name": "release-history.json",
+      "bytes": 8897,
+      "sha256": "dc272d7eafea71b2c1c368114116a14e92da21241cb11877ab6696be4fa7935e"
+    },
+    {
+      "name": "release.json",
+      "bytes": 779,
+      "sha256": "87ee49fdc483e5f95f114f3305607696bacef3f29394e4b564134ce8f0221220"
+    },
+    {
+      "name": "robots.txt",
+      "bytes": 88,
+      "sha256": "ec85751c1b2e59f67918dde48e57e0b3cd14dec02011e8a4db82c6b2a6506242"
+    },
+    {
+      "name": "security-center-v4.10.6.html",
+      "bytes": 20450,
+      "sha256": "1b55619a3fd25147c6a7b9723c75401683eff460f28bdeaf96a347213d8e0581"
+    },
+    {
+      "name": "security-ops-v4.10.6.html",
+      "bytes": 15480,
+      "sha256": "9c739cd2c6e4a3fc49aaf79c5d2f12927cc941463ab02d1e887cfa3cdc2ece60"
+    },
+    {
+      "name": "service-worker.js",
+      "bytes": 1415,
+      "sha256": "01b244689b796384ac76c0c73f76b92b6f391b2abfa88820f02468fab508c1c6"
+    },
+    {
+      "name": "system-info-v4.10.6.html",
+      "bytes": 11507,
+      "sha256": "429ab14aa399ddceef8e163f69acf2081b6013ed1c7b9c551e7085a367a2e36f"
+    },
+    {
+      "name": "update-center-v4.10.6.html",
+      "bytes": 17412,
+      "sha256": "268073ec4f2b348d822c4773b00f690b223b6af40169c798f76e177383de5cb7"
+    },
+    {
+      "name": "wallet-core-v4.10.6.html",
+      "bytes": 113224,
+      "sha256": "9ac579c8f1a4ae43050c0e7e2c7c6b9eccc500b34fb5c7afba7d97bb0b2b45f3"
+    }
+  ]
+}
