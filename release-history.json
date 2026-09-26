@@ -2,6 +2,19 @@
   "product": "Independent Points",
   "releases": [
     {
+      "version": "V4.8.1",
+      "date": "2026-09-26",
+      "channel": "production",
+      "title": "Android 高風險安全視窗防卡修正版",
+      "notes": [
+        "60 秒倒數改為純本機 DOM / localStorage 計時",
+        "移除每秒 Owner / pendingOwner RPC 查詢",
+        "鏈上角色只在既有鏈上讀取或啟用安全視窗時必要地讀取一次",
+        "安全視窗逾時後自動本機鎖定",
+        "不修改 IPT 合約、Supabase 或 Edge Functions"
+      ]
+    },
+    {
       "version": "V4.8.0",
       "date": "2026-09-26",
       "channel": "production",
