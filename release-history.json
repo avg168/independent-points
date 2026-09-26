@@ -2,6 +2,18 @@
   "product": "Independent Points",
   "releases": [
     {
+      "version": "V4.9.1",
+      "date": "2026-09-26",
+      "channel": "production",
+      "title": "通知相容版",
+      "notes": [
+        "不支援 Notification API 時改用頁面內大型提醒",
+        "加入震動提示",
+        "啟用通知與測試通知按鈕在所有瀏覽器皆可操作",
+        "保留支援瀏覽器的 Android 系統通知"
+      ]
+    },
+    {
       "version": "V4.9.0",
       "date": "2026-09-26",
       "channel": "production",
