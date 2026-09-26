@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Independent Points V4.8｜營運安全中心</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
+<style>
+:root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;color:#172033;background:#f4f7fb}
+*{box-sizing:border-box;min-width:0}html,body{margin:0;width:100%;max-width:100%;overflow-x:hidden;background:#f4f7fb}
+body{touch-action:pan-y}
+header{background:#10243d;color:#fff;padding:24px 18px 30px;border-radius:0 0 26px 26px}
+.badge{display:inline-block;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.78rem;font-weight:850}
+h1{margin:12px 0 8px;font-size:1.5rem}header p{margin:0;opacity:.9;line-height:1.6}
+main{max-width:920px;margin:auto;padding:16px 14px 70px}
+.panel{background:#fff;border:1px solid #dde5ef;border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:0 4px 18px rgba(24,42,68,.05)}
+.panel h2{margin:0 0 12px;color:#17365d;font-size:1.12rem}
+.status{border-radius:12px;padding:12px 14px;line-height:1.6;background:#edf4ff;color:#27456f;border:1px solid #ccddf5}
+.status.ok{background:#ebf8f2;color:#17694f;border-color:#bee5d6}
+.status.warn{background:#fff7df;color:#7e5a08;border-color:#efd996}
+.status.err{background:#fff0f0;color:#922c2c;border-color:#efc8c8}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.card{border:1px solid #dfe6ef;border-radius:14px;padding:13px;background:#f8fafc}
+.card .k{font-size:.78rem;color:#64748b}.card .v{font-weight:900;color:#17365d;margin-top:5px;word-break:break-word}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding:10px 12px;font:inherit;font-weight:850;cursor:pointer;touch-action:manipulation}
+button.primary{background:#176c59;color:#fff;border-color:#176c59}
+button.blue{background:#2a5f91;color:#fff;border-color:#2a5f91}
+button.light{background:#fff;color:#29445f}
+button.danger{background:#a83b45;color:#fff;border-color:#a83b45}
+.event{border:1px solid #e1e7ef;border-radius:13px;padding:11px 12px;margin-bottom:8px;background:#fff}
+.event .t{font-weight:850;color:#17365d}.event .m{font-size:.78rem;color:#64748b;margin-top:4px;line-height:1.5;word-break:break-word}
+.audit{border-top:1px solid #edf0f4;padding:9px 0;font-size:.82rem;line-height:1.55}
+.hidden{display:none!important}
+@media(min-width:760px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+</style>
+<script src="./i18n-v4.10.js?v=41012" defer></script>
+</head>
+<body>
+<header>
+  <div class="badge">V4.10.12</div>
+  <h1>營運安全中心</h1>
+  <p>正式營運狀態、高風險操作保護、錢包切換紀錄、管理員稽核與快速維運入口。</p>
+</header>
+<main>
+  <section class="panel">
+    <h2>管理員驗證</h2>
+    <div id="adminStatus" class="status">正在確認管理員權限…</div>
+    <div class="actions" style="margin-top:10px">
+      <button id="homeBtn" class="light" type="button">返回首頁</button>
+      <button id="refreshBtn" class="primary" type="button">重新檢查</button>
+    </div>
+  </section>
+
+  <div id="contentArea" class="hidden">
+    <section class="panel">
+      <h2>正式營運狀態</h2>
+      <div class="grid">
+        <div class="card"><div class="k">正式版本</div><div id="versionV" class="v">—</div></div>
+        <div class="card"><div class="k">IPT 合約</div><div id="contractV" class="v">檢查中…</div></div>
+        <div class="card"><div class="k">pendingOwner</div><div id="pendingV" class="v">檢查中…</div></div>
+        <div class="card"><div class="k">營運狀態</div><div id="opsV" class="v">檢查中…</div></div>
+      </div>
+      <div id="opsStatus" class="status" style="margin-top:12px">正在執行正式營運安全檢查…</div>
+    </section>
+
+    <section class="panel">
+      <h2>帳戶安全摘要</h2>
+      <div class="grid">
+        <div class="card"><div class="k">會員</div><div id="memberCount" class="v">—</div></div>
+        <div class="card"><div class="k">管理員</div><div id="adminCount" class="v">—</div></div>
+        <div class="card"><div class="k">停權會員</div><div id="suspendCount" class="v">—</div></div>
+        <div class="card"><div class="k">未驗證錢包</div><div id="unverifiedCount" class="v">—</div></div>
+      </div>
+      <div id="accountAlert" class="status" style="margin-top:12px">正在分析帳戶安全狀態…</div>
+    </section>
+
+    <section class="panel">
+      <h2>高風險操作紀錄（本機）</h2>
+      <div id="eventSummary" class="status">正在讀取本機安全紀錄…</div>
+      <div id="eventList" style="margin-top:10px"></div>
+      <div class="actions" style="margin-top:10px">
+        <button id="clearEventsBtn" class="danger" type="button">清除本機安全紀錄</button>
+        <button id="walletCoreBtn" class="blue" type="button">開啟鏈上操作</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>最近管理稽核</h2>
+      <div id="auditStatus" class="status">正在讀取目前管理員的稽核資訊…</div>
+      <div id="auditList" style="margin-top:10px"></div>
+    </section>
+
+    <section class="panel">
+      <h2>快速安全維運</h2>
+      <div class="actions">
+        <button id="securityCenterBtn" class="light" type="button">帳戶安全與權限</button>
+        <button id="maintenanceBtn" class="light" type="button">維運中心</button>
+        <button id="updateCenterBtn" class="light" type="button">版本更新中心</button>
+        <button id="systemInfoBtn" class="light" type="button">系統資訊</button>
+        <button id="eventCenterBtn" class="blue" type="button">事件與通知</button>
+      </div>
+    </section>
+  </div>
+</main>
+<script>
+(() => {
+  const SUPABASE_URL="https://uccexvgqmoxhgykkjdcy.supabase.co";
+  const SUPABASE_KEY="sb_publishable_FBsN1DYTQMv2_bWhpbXHAA_qdAq7ri7";
+  const CONTRACT="0xd3fb2480aadb8b168ec7e88a0e5c847d9750cb87";
+  const RPCS=["https://ethereum-sepolia-rpc.publicnode.com","https://rpc.sepolia.org"];
+  const ZERO="0x0000000000000000000000000000000000000000";
+  const EVENT_KEY="ipt_v48_security_events";
+  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+  const $=id=>document.getElementById(id);
+  const esc=v=>String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
+  const big=x=>BigInt(String(x||"0x0"));
+
+  async function rpc(method,params){
+    let last;
+    for(const url of RPCS){
+      try{
+        const ctl=new AbortController(); const timer=setTimeout(()=>ctl.abort(),6000);
+        const r=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({jsonrpc:"2.0",id:1,method,params}),signal:ctl.signal});
+        clearTimeout(timer); const d=await r.json();
+        if(!r.ok||d.error) throw new Error(d?.error?.message||("HTTP "+r.status));
+        return {url,result:d.result};
+      }catch(e){last=e}
+    }
+    throw last||new Error("RPC unavailable");
+  }
+  async function invoke(name,body){
+    const {data,error}=await sb.functions.invoke(name,{body});
+    if(error) throw error;
+    if(data?.error) throw new Error(data.error);
+    return data;
+  }
+  function events(){
+    try{
+      const x=JSON.parse(localStorage.getItem(EVENT_KEY)||"[]");
+      return Array.isArray(x)?x:[];
+    }catch(_){return []}
+  }
+  function time(v){
+    if(!v)return"—";
+    const d=new Date(v); return Number.isNaN(d.getTime())?"—":d.toLocaleString("zh-TW",{hour12:false});
+  }
+  function eventName(t){
+    return ({
+      wallet_changed:"錢包切換",
+      guard_armed:"高風險操作視窗啟用",
+      guard_locked:"高風險操作重新鎖定",
+      guard_expired:"60 秒操作視窗逾時",
+      guard_arm_failed:"安全核對失敗",
+      high_risk_blocked:"高風險操作遭阻擋",
+      high_risk_approval_started:"高風險送簽開始"
+    })[t]||t;
+  }
+
+  async function load(){
+    $("adminStatus").className="status";
+    $("adminStatus").textContent="正在確認管理員權限…";
+    try{
+      const data=await invoke("admin-members",{query:""});
+      const members=data.members||[];
+      const self=members.find(x=>x.is_self);
+      if(!self||self.role!=="admin") throw new Error("此頁只開放管理員。");
+      $("adminStatus").className="status ok";
+      $("adminStatus").textContent=`管理員驗證通過：${self.member_number}｜${self.display_name}`;
+      $("contentArea").classList.remove("hidden");
+
+      const admins=members.filter(x=>x.role==="admin");
+      const suspended=members.filter(x=>x.status==="suspended");
+      const unverified=members.filter(x=>!x.wallet_verified);
+      $("memberCount").textContent=members.length;
+      $("adminCount").textContent=admins.length;
+      $("suspendCount").textContent=suspended.length;
+      $("unverifiedCount").textContent=unverified.length;
+
+      const accountIssues=[];
+      if(self.status!=="active") accountIssues.push("目前管理員不是 active 狀態");
+      if(!self.wallet_verified) accountIssues.push("目前管理員錢包尚未驗證");
+      if(unverified.length) accountIssues.push(`${unverified.length} 位會員錢包尚未驗證`);
+      if(suspended.length) accountIssues.push(`${suspended.length} 位會員目前停權`);
+      $("accountAlert").className=accountIssues.length?"status warn":"status ok";
+      $("accountAlert").textContent=accountIssues.length?"需留意："+accountIssues.join("；")+"。":"目前帳戶安全摘要沒有需要立即處理的項目。";
+
+      // release
+      try{
+        const release=await fetch("./release.json?t="+Date.now(),{cache:"no-store"}).then(r=>r.json());
+        $("versionV").textContent=release.version||"未知";
+      }catch(_){$("versionV").textContent="讀取失敗"}
+
+      // chain state
+      let paused=null,pending="",owner="";
+      try{
+        const [p,o,po]=await Promise.all([
+          rpc("eth_call",[{to:CONTRACT,data:"0x5c975abb"},"latest"]),
+          rpc("eth_call",[{to:CONTRACT,data:"0x8da5cb5b"},"latest"]),
+          rpc("eth_call",[{to:CONTRACT,data:"0xe30c3978"},"latest"])
+        ]);
+        paused=big(p.result)!==0n;
+        const wordToAddr=x=>"0x"+String(x||"").replace(/^0x/,"").slice(-40);
+        owner=wordToAddr(o.result);
+        pending=wordToAddr(po.result);
+        $("contractV").textContent=paused?"已暫停":"正常";
+        $("pendingV").textContent=(pending.toLowerCase()===ZERO)?"無候任管理者":pending.slice(0,8)+"…"+pending.slice(-6);
+        const issues=[];
+        if(paused) issues.push("IPT 合約目前 paused = true");
+        if(pending.toLowerCase()!==ZERO) issues.push("目前存在 pendingOwner");
+        $("opsV").textContent=issues.length?"需注意":"正常";
+        $("opsStatus").className=issues.length?"status warn":"status ok";
+        $("opsStatus").textContent=issues.length?"營運安全提醒："+issues.join("；")+"。":"正式營運狀態正常：合約未暫停、目前沒有 pendingOwner。";
+      }catch(e){
+        $("contractV").textContent="檢查失敗";
+        $("pendingV").textContent="檢查失敗";
+        $("opsV").textContent="需檢查";
+        $("opsStatus").className="status err";
+        $("opsStatus").textContent="鏈上安全狀態讀取失敗："+(e?.message||String(e));
+      }
+
+      // local security events
+      renderEvents();
+
+      // current admin audit
+      try{
+        const detail=await invoke("admin-member-detail",{target_user_id:self.user_id});
+        const audit=detail.audit||[];
+        const recent=audit.slice(0,30);
+        const changed24=recent.filter(a=>{
+          const t=new Date(a.created_at).getTime();
+          const name=String(a.action||"").toLowerCase();
+          return Date.now()-t<86400000 && (name.includes("role")||name.includes("status"));
+        }).length;
+        $("auditStatus").className=changed24?"status warn":"status ok";
+        $("auditStatus").textContent=changed24
+          ?`近 24 小時有 ${changed24} 筆角色／狀態相關稽核，請確認是否為預期操作。`
+          :`已讀取 ${recent.length} 筆最近管理稽核；近 24 小時未發現角色／狀態異動。`;
+        $("auditList").innerHTML=recent.length?recent.map(a=>`<div class="audit">${esc(time(a.created_at))}｜${esc(a.action||"")}｜${esc(a.note||"")}</div>`).join(""):"<div class='status'>尚無稽核紀錄。</div>";
+      }catch(e){
+        $("auditStatus").className="status warn";
+        $("auditStatus").textContent="目前管理員稽核讀取失敗："+(e?.message||String(e));
+        $("auditList").innerHTML="";
+      }
+    }catch(e){
+      $("contentArea").classList.add("hidden");
+      $("adminStatus").className="status err";
+      $("adminStatus").textContent="管理員驗證失敗："+(e?.message||String(e));
+    }
+  }
+
+  function renderEvents(){
+    const list=events();
+    const last24=list.filter(x=>Date.now()-new Date(x.time).getTime()<86400000);
+    const walletChanges=last24.filter(x=>x.type==="wallet_changed").length;
+    const blocked=last24.filter(x=>x.type==="high_risk_blocked").length;
+    const sends=last24.filter(x=>x.type==="high_risk_approval_started").length;
+    $("eventSummary").className=(walletChanges||blocked)?"status warn":"status ok";
+    $("eventSummary").textContent=`近 24 小時：錢包切換 ${walletChanges} 次｜安全阻擋 ${blocked} 次｜高風險送簽 ${sends} 次。`;
+    $("eventList").innerHTML=list.length?list.slice(0,40).map(x=>{
+      const detail=Object.entries(x.detail||{}).map(([k,v])=>`${k}: ${v}`).join("｜");
+      return `<div class="event"><div class="t">${esc(eventName(x.type))}</div><div class="m">${esc(time(x.time))}${x.account?`｜${esc(x.account.slice(0,8)+"…"+x.account.slice(-6))}`:""}${detail?`<br>${esc(detail)}`:""}</div></div>`;
+    }).join(""):"<div class='status'>目前沒有本機高風險操作紀錄。</div>";
+  }
+
+  $("clearEventsBtn").addEventListener("click",()=>{
+    if(!confirm("確定要清除這台裝置上的營運安全紀錄嗎？這不會刪除 Supabase 稽核或鏈上交易。"))return;
+    localStorage.removeItem(EVENT_KEY); renderEvents();
+  });
+  $("homeBtn").addEventListener("click",()=>location.href="./index.html?v=41012");
+  $("refreshBtn").addEventListener("click",load);
+  $("walletCoreBtn").addEventListener("click",()=>location.href="./wallet-core-v4.10.12.html");
+  $("securityCenterBtn").addEventListener("click",()=>location.href="./security-center-v4.10.12.html?v=41012");
+  $("maintenanceBtn").addEventListener("click",()=>location.href="./maintenance-v4.10.12.html?v=41012");
+  $("updateCenterBtn").addEventListener("click",()=>location.href="./update-center-v4.10.12.html?v=41012");
+  $("systemInfoBtn").addEventListener("click",()=>location.href="./system-info-v4.10.12.html?v=41012");
+  $("eventCenterBtn")?.addEventListener("click",()=>location.href="./event-center-v4.10.12.html?v=41012");
+  load();
+})();
+</script>
+<script>
+if("serviceWorker" in navigator){
+  window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js?v=41012",{updateViaCache:"none"}).catch(()=>{}));
+}
+</script>
+</body>
+</html>
