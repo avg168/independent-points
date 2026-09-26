@@ -2,6 +2,18 @@
   "product": "Independent Points",
   "releases": [
     {
+      "version": "V4.10.2",
+      "date": "2026-09-26",
+      "channel": "production",
+      "title": "多語系載入修正版",
+      "notes": [
+        "修正 V4.10.1 HTML 仍載入舊 i18n-v4.10.js 的問題",
+        "固定語言引擎檔名為 i18n-v4.10.js，後續只更新內容與 cache version",
+        "加入動態句子局部翻譯，支援日期、筆數、地址旁的中文標籤",
+        "補齊資產報表交易卡片常用文字"
+      ]
+    },
+    {
       "version": "V4.10.1",
       "date": "2026-09-26",
       "channel": "production",
