@@ -1,7 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://avg168.github.io/independent-points/</loc></url>
-  <url><loc>https://avg168.github.io/independent-points/asset-center-v4.4.html</loc></url>
-  <url><loc>https://avg168.github.io/independent-points/member-assets-v4.4.html</loc></url>
-  <url><loc>https://avg168.github.io/independent-points/system-info-v4.4.html</loc></url>
+  <url><loc>https://avg168.github.io/independent-points/wallet-core-v4.10.7.html</loc></url>
+  <url><loc>https://avg168.github.io/independent-points/asset-center-v4.10.7.html</loc></url>
+  <url><loc>https://avg168.github.io/independent-points/member-assets-v4.10.7.html</loc></url>
+  <url><loc>https://avg168.github.io/independent-points/admin-assets-v4.10.7.html</loc></url>
+  <url><loc>https://avg168.github.io/independent-points/admin-members-v4.10.7.html</loc></url>
+  <url><loc>https://avg168.github.io/independent-points/print-report-v4.10.7.html</loc></url>
+  <url><loc>https://avg168.github.io/independent-points/system-info-v4.10.7.html</loc></url>
+  <url><loc>https://avg168.github.io/independent-points/maintenance-v4.10.7.html</loc></url>
+  <url><loc>https://avg168.github.io/independent-points/update-center-v4.10.7.html</loc></url>
+  <url><loc>https://avg168.github.io/independent-points/security-center-v4.10.7.html</loc></url>
+  <url><loc>https://avg168.github.io/independent-points/security-ops-v4.10.7.html</loc></url>
+  <url><loc>https://avg168.github.io/independent-points/event-center-v4.10.7.html</loc></url>
 </urlset>
