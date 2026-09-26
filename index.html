@@ -882,7 +882,7 @@ button{
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", async () => {
       try {
-        const reg = await navigator.serviceWorker.register("./service-worker.js?v=4107", {
+        const reg = await navigator.serviceWorker.register("./service-worker.js?v=4107-auto1", {
           updateViaCache: "none"
         });
         await reg.update().catch(()=>{});
