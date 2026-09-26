@@ -1,19 +1,19 @@
 {
   "product": "Independent Points",
-  "version": "V4.6.3",
-  "build": "20260926-463",
+  "version": "V4.7.0",
+  "build": "20260926-470",
   "release_date": "2026-09-26",
   "channel": "production",
-  "rollback_version": "V4.6.2",
+  "rollback_version": "V4.6.3",
   "fallback_version": "V4.5.0",
   "network": "Ethereum Sepolia",
   "chain_id": "11155111 / 0xaa36a7",
   "contract": "0xd3fb2480aadb8b168ec7e88a0e5c847d9750cb87",
   "notes": [
-    "修正版本更新中心 formatUnits 未定義錯誤",
-    "IPT totalSupply 繼續統一顯示小數點 6 位",
-    "修正更新清單檔名為 update-manifest-v4.6.3.json",
-    "鏈上合約 decimals 維持 2"
+    "新增帳戶安全與權限管理中心",
+    "會員狀態與角色異動新增會員編號二次確認",
+    "整合錢包驗證狀態與會員稽核",
+    "不修改鏈上合約與 Supabase 結構"
   ],
   "rollback_steps": [
     "若 V4.6.1 異常，先重新載入並清除 IPT 快取。",

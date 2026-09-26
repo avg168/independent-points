@@ -2,6 +2,20 @@
   "product": "Independent Points",
   "releases": [
     {
+      "version": "V4.7.0",
+      "date": "2026-09-26",
+      "channel": "production",
+      "title": "帳戶安全與權限中心",
+      "notes": [
+        "管理員權限集中檢視",
+        "會員停權／恢復二次確認",
+        "管理員升級／降級二次確認",
+        "錢包驗證狀態集中檢視",
+        "會員安全明細與管理稽核",
+        "高風險鏈上功能集中入口"
+      ]
+    },
+    {
       "version": "V4.6.3",
       "date": "2026-09-26",
       "channel": "production",
