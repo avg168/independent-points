@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Independent Points V4.10.11｜維運中心</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
+<style>
+:root{
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;
+  color:#172033;background:#f4f7fb
+}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0;width:100%;max-width:100%;overflow-x:hidden;background:#f4f7fb}
+body{touch-action:pan-y}
+header{
+  background:#10243d;color:#fff;padding:24px 18px 30px;border-radius:0 0 26px 26px
+}
+.badge{display:inline-block;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.78rem;font-weight:850}
+h1{margin:12px 0 8px;font-size:1.5rem} header p{margin:0;opacity:.9;line-height:1.6}
+main{max-width:820px;margin:auto;padding:16px 14px 70px}
+.panel{
+  background:#fff;border:1px solid #dde5ef;border-radius:18px;padding:16px;
+  margin-bottom:14px;box-shadow:0 4px 18px rgba(24,42,68,.05)
+}
+.panel h2{margin:0 0 12px;color:#17365d;font-size:1.12rem}
+.status{
+  border-radius:12px;padding:12px 14px;line-height:1.6;
+  background:#edf4ff;color:#27456f;border:1px solid #ccddf5
+}
+.status.ok{background:#ebf8f2;color:#17694f;border-color:#bee5d6}
+.status.warn{background:#fff7df;color:#7e5a08;border-color:#efd996}
+.status.err{background:#fff0f0;color:#922c2c;border-color:#efc8c8}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.card{border:1px solid #dfe6ef;border-radius:14px;padding:13px;background:#f8fafc}
+.card .k{font-size:.78rem;color:#64748b}
+.card .v{font-weight:900;color:#17365d;margin-top:5px;word-break:break-word}
+.checks{display:grid;gap:10px}
+.check{
+  border:1px solid #dfe6ef;border-radius:14px;padding:13px;background:#fff
+}
+.check-head{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.check-title{font-weight:900;color:#17365d}
+.pill{padding:4px 8px;border-radius:999px;font-size:.74rem;font-weight:850;background:#eef2f7;color:#475569}
+.pill.ok{background:#e8f7ef;color:#17694f}
+.pill.warn{background:#fff3d5;color:#8a5a00}
+.pill.err{background:#fdecec;color:#9b2b2b}
+.detail{font-size:.82rem;color:#64748b;line-height:1.55;margin-top:7px;word-break:break-all}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button{
+  min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding:10px 12px;
+  font:inherit;font-weight:850;cursor:pointer;touch-action:manipulation
+}
+button.primary{background:#176c59;color:#fff;border-color:#176c59}
+button.blue{background:#2a5f91;color:#fff;border-color:#2a5f91}
+button.light{background:#fff;color:#29445f}
+button.danger{background:#a83b45;color:#fff;border-color:#a83b45}
+button:disabled{opacity:.45}
+pre{
+  white-space:pre-wrap;word-break:break-word;
+  background:#f6f8fb;border:1px solid #e1e7ef;border-radius:12px;padding:12px;font-size:.78rem
+}
+@media(min-width:720px){.grid{grid-template-columns:repeat(4,1fr)}}
+</style>
+<script src="./i18n-v4.10.js?v=41011" defer></script>
+</head>
+<body>
+<header>
+  <div class="badge">V4.10.11</div>
+  <h1>維運中心</h1>
+  <p>版本、快取、PWA、Supabase、Sepolia 與 IPT 合約健康檢查。</p>
+</header>
+<main>
+  <section class="panel">
+    <h2>版本狀態</h2>
+    <div class="grid">
+      <div class="card"><div class="k">目前頁面版本</div><div class="v">V4.10.11</div></div>
+      <div class="card"><div class="k">正式發佈版本</div><div id="releaseVersion" class="v">讀取中…</div></div>
+      <div class="card"><div class="k">Service Worker</div><div id="swState" class="v">檢查中…</div></div>
+      <div class="card"><div class="k">App 模式</div><div id="appMode" class="v">檢查中…</div></div>
+    </div>
+    <div id="versionStatus" class="status" style="margin-top:12px">正在確認版本…</div>
+  </section>
+
+  <section class="panel">
+    <h2>系統健康檢查</h2>
+    <div class="checks">
+      <div class="check">
+        <div class="check-head"><div class="check-title">Supabase</div><span id="supabasePill" class="pill">待檢查</span></div>
+        <div id="supabaseDetail" class="detail">會員登入與資料庫連線</div>
+      </div>
+      <div class="check">
+        <div class="check-head"><div class="check-title">Ethereum Sepolia RPC</div><span id="rpcPill" class="pill">待檢查</span></div>
+        <div id="rpcDetail" class="detail">區塊高度與 RPC 回應</div>
+      </div>
+      <div class="check">
+        <div class="check-head"><div class="check-title">IPT 合約</div><span id="contractPill" class="pill">待檢查</span></div>
+        <div id="contractDetail" class="detail">totalSupply / paused 可讀性</div>
+      </div>
+      <div class="check">
+        <div class="check-head"><div class="check-title">登入會員</div><span id="memberPill" class="pill">待檢查</span></div>
+        <div id="memberDetail" class="detail">Supabase Session / 會員資料</div>
+      </div>
+    </div>
+    <button id="healthBtn" class="primary" type="button" style="width:100%;margin-top:12px">重新執行健康檢查</button>
+  </section>
+
+  <section class="panel">
+    <h2>PWA 與快取維護</h2>
+    <div class="actions">
+      <button id="updateSwBtn" class="blue" type="button">檢查 App 更新</button>
+      <button id="reloadBtn" class="light" type="button">重新載入頁面</button>
+      <button id="clearCacheBtn" class="danger" type="button">清除網站快取</button>
+      <button id="homeBtn" class="light" type="button">返回首頁</button>
+    </div>
+    <div id="cacheStatus" class="status" style="margin-top:12px">快取尚未操作。</div>
+  </section>
+
+  <section class="panel">
+    <h2>診斷資訊</h2>
+    <pre id="diag">尚未產生。</pre>
+    <button id="copyDiagBtn" class="light" type="button" style="width:100%">複製診斷資訊</button>
+  </section>
+</main>
+
+<script>
+(() => {
+  const SUPABASE_URL="https://uccexvgqmoxhgykkjdcy.supabase.co";
+  const SUPABASE_KEY="sb_publishable_FBsN1DYTQMv2_bWhpbXHAA_qdAq7ri7";
+  const CONTRACT="0xd3fb2480aadb8b168ec7e88a0e5c847d9750cb87";
+  const RPCS=["https://ethereum-sepolia-rpc.publicnode.com","https://rpc.sepolia.org"];
+  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{
+    auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
+  });
+  const $=id=>document.getElementById(id);
+  const diag={version:"V4.10.11",time:new Date().toISOString(),checks:{}};
+
+  function pill(id,state,text){
+    const el=$(id); el.className="pill "+state; el.textContent=text;
+  }
+  function hexBig(x){return BigInt(String(x||"0x0"))}
+  function formatUnits(rawValue,decimals){
+    const raw=BigInt(rawValue),d=Number(decimals);
+    if(!Number.isInteger(d)||d<0||d>255) throw new Error("無效 decimals");
+    const base=10n**BigInt(d);
+    const negative=raw<0n;
+    const abs=negative?-raw:raw;
+    const whole=abs/base;
+    const fracRaw=(abs%base).toString().padStart(d,"0");
+    const native=(negative?"-":"")+whole.toString()+(d?"."+fracRaw:"");
+    const n=Number(native);
+    return Number.isFinite(n)
+      ? n.toLocaleString("zh-TW",{minimumFractionDigits:6,maximumFractionDigits:6})
+      : native;
+  }
+  async function rpc(method,params){
+    let last;
+    for(const url of RPCS){
+      try{
+        const ctl=new AbortController();
+        const timer=setTimeout(()=>ctl.abort(),6000);
+        const res=await fetch(url,{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({jsonrpc:"2.0",id:1,method,params}),
+          signal:ctl.signal
+        });
+        clearTimeout(timer);
+        const data=await res.json();
+        if(!res.ok||data.error) throw new Error(data?.error?.message||("HTTP "+res.status));
+        return {url,result:data.result};
+      }catch(e){last=e}
+    }
+    throw last||new Error("All RPC failed");
+  }
+
+  async function checkRelease(){
+    try{
+      const res=await fetch("./release.json?t="+Date.now(),{cache:"no-store"});
+      const data=await res.json();
+      $("releaseVersion").textContent=data.version||"未知";
+      diag.release=data;
+      if(data.version==="V4.10.11"){
+        $("versionStatus").className="status ok";
+        $("versionStatus").textContent="目前已是正式最新版本。";
+      }else{
+        $("versionStatus").className="status warn";
+        $("versionStatus").textContent=`目前 V4.10.11｜正式版本 ${data.version||"未知"}，建議重新整理或更新 App。`;
+      }
+    }catch(e){
+      $("releaseVersion").textContent="無法讀取";
+      $("versionStatus").className="status warn";
+      $("versionStatus").textContent="無法讀取 release.json；可能是快取或網路問題。";
+      diag.release_error=String(e);
+    }
+  }
+
+  async function checkSw(){
+    const standalone=window.matchMedia?.("(display-mode: standalone)")?.matches||false;
+    $("appMode").textContent=standalone?"已安裝 App":"瀏覽器模式";
+    diag.app_mode=standalone?"standalone":"browser";
+
+    if(!("serviceWorker" in navigator)){
+      $("swState").textContent="不支援";
+      diag.service_worker="unsupported";
+      return;
+    }
+    try{
+      const reg=await navigator.serviceWorker.getRegistration();
+      if(!reg){
+        $("swState").textContent="未註冊";
+        diag.service_worker="not_registered";
+      }else{
+        $("swState").textContent=reg.active?"已啟用":"已註冊";
+        diag.service_worker={
+          active:!!reg.active,
+          waiting:!!reg.waiting,
+          installing:!!reg.installing,
+          scope:reg.scope
+        };
+      }
+    }catch(e){
+      $("swState").textContent="檢查失敗";
+      diag.service_worker_error=String(e);
+    }
+  }
+
+  async function health(){
+    diag.time=new Date().toISOString();
+
+    // Supabase/session
+    try{
+      const {data:{session},error}=await sb.auth.getSession();
+      if(error) throw error;
+      pill("supabasePill","ok","正常");
+      $("supabaseDetail").textContent="Supabase 可連線；Session "+(session?"存在":"目前未登入");
+      diag.checks.supabase={ok:true,session:!!session};
+
+      if(session?.user){
+        const {data:p,error:pe}=await sb.from("member_profiles")
+          .select("member_number,display_name,status").eq("id",session.user.id).maybeSingle();
+        if(pe) throw pe;
+        pill("memberPill",p?"ok":"warn",p?"正常":"找不到資料");
+        $("memberDetail").textContent=p
+          ?`${p.member_number}｜${p.display_name}｜${p.status}`
+          :"Session 存在但找不到 member_profiles";
+        diag.checks.member={ok:!!p,profile:p||null};
+      }else{
+        pill("memberPill","warn","未登入");
+        $("memberDetail").textContent="目前沒有 Supabase Session。";
+        diag.checks.member={ok:false,reason:"not_logged_in"};
+      }
+    }catch(e){
+      pill("supabasePill","err","異常");
+      $("supabaseDetail").textContent=String(e?.message||e);
+      pill("memberPill","err","無法檢查");
+      $("memberDetail").textContent="Supabase 檢查失敗";
+      diag.checks.supabase={ok:false,error:String(e)};
+    }
+
+    // RPC
+    try{
+      const block=await rpc("eth_blockNumber",[]);
+      const height=Number(hexBig(block.result));
+      pill("rpcPill","ok","正常");
+      $("rpcDetail").textContent=`區塊高度 ${height}｜${block.url}`;
+      diag.checks.rpc={ok:true,height,url:block.url};
+    }catch(e){
+      pill("rpcPill","err","異常");
+      $("rpcDetail").textContent=String(e?.message||e);
+      diag.checks.rpc={ok:false,error:String(e)};
+    }
+
+    // contract
+    try{
+      const [supply,paused,decimalsCall]=await Promise.all([
+        rpc("eth_call",[{to:CONTRACT,data:"0x18160ddd"},"latest"]),
+        rpc("eth_call",[{to:CONTRACT,data:"0x5c975abb"},"latest"]),
+        rpc("eth_call",[{to:CONTRACT,data:"0x313ce567"},"latest"])
+      ]);
+      const raw=hexBig(supply.result);
+      const decimals=Number(hexBig(decimalsCall.result));
+      const total=formatUnits(raw,decimals);
+      const isPaused=hexBig(paused.result)!==0n;
+      pill("contractPill","ok","正常");
+      $("contractDetail").textContent=`totalSupply ${total} IPT｜decimals ${decimals}｜paused ${isPaused}`;
+      diag.checks.contract={ok:true,total_supply:total,decimals,paused:isPaused};
+    }catch(e){
+      pill("contractPill","err","異常");
+      $("contractDetail").textContent=String(e?.message||e);
+      diag.checks.contract={ok:false,error:String(e)};
+    }
+
+    $("diag").textContent=JSON.stringify(diag,null,2);
+  }
+
+  $("healthBtn").addEventListener("click",health);
+
+  $("updateSwBtn").addEventListener("click",async()=>{
+    $("cacheStatus").className="status";
+    $("cacheStatus").textContent="正在檢查 Service Worker 更新…";
+    try{
+      const reg=await navigator.serviceWorker.getRegistration();
+      if(!reg) throw new Error("尚未註冊 Service Worker");
+      await reg.update();
+      $("cacheStatus").className="status ok";
+      $("cacheStatus").textContent=reg.waiting
+        ?"發現新版本，重新載入後套用。"
+        :"已完成更新檢查。";
+      await checkSw();
+    }catch(e){
+      $("cacheStatus").className="status warn";
+      $("cacheStatus").textContent="更新檢查失敗："+(e?.message||String(e));
+    }
+  });
+
+  $("clearCacheBtn").addEventListener("click",async()=>{
+    if(!confirm("確定要清除 Independent Points 的網站快取嗎？會員登入資料不會因此刪除，但頁面會重新下載。")) return;
+    try{
+      const keys=await caches.keys();
+      const targets=keys.filter(k=>k.startsWith("ipt-"));
+      await Promise.all(targets.map(k=>caches.delete(k)));
+      $("cacheStatus").className="status ok";
+      $("cacheStatus").textContent=`已清除 ${targets.length} 個 IPT 快取。建議現在重新載入。`;
+    }catch(e){
+      $("cacheStatus").className="status err";
+      $("cacheStatus").textContent="清除快取失敗："+(e?.message||String(e));
+    }
+  });
+
+  $("reloadBtn").addEventListener("click",()=>location.reload());
+  $("homeBtn").addEventListener("click",()=>location.href="./index.html?v=41011");
+
+  $("copyDiagBtn").addEventListener("click",async()=>{
+    const text=$("diag").textContent;
+    try{
+      await navigator.clipboard.writeText(text);
+      $("cacheStatus").className="status ok";
+      $("cacheStatus").textContent="診斷資訊已複製。";
+    }catch(_){
+      const ta=document.createElement("textarea");
+      ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand("copy");ta.remove();
+      $("cacheStatus").className="status ok";
+      $("cacheStatus").textContent="診斷資訊已複製。";
+    }
+  });
+
+  Promise.all([checkRelease(),checkSw()]).finally(health);
+})();
+</script>
+</body>
+</html>

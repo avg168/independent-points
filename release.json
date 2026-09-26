@@ -1,17 +1,17 @@
 {
   "product": "Independent Points",
-  "version": "V4.10.10",
-  "build": "20260926-41010",
+  "version": "V4.10.11",
+  "build": "20260926-41011",
   "release_date": "2026-09-26",
   "channel": "production",
-  "rollback_version": "V4.10.9",
+  "rollback_version": "V4.10.10",
   "fallback_version": "V4.5.0",
   "network": "Ethereum Sepolia",
   "chain_id": "11155111 / 0xaa36a7",
   "contract": "0xd3fb2480aadb8b168ec7e88a0e5c847d9750cb87",
   "notes": [
-    "Admin member load status fully localized",
-    "Duplicate admin-member navigation controls removed"
+    "Member card field i18n cleanup",
+    "Not Linked / Joined translations completed"
   ],
   "rollback_steps": [
     "若 V4.6.1 異常，先重新載入並清除 IPT 快取。",
