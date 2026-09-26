@@ -2,6 +2,18 @@
   "product": "Independent Points",
   "releases": [
     {
+      "version": "V4.10.13",
+      "date": "2026-09-26",
+      "channel": "production",
+      "title": "長段落分句翻譯修正版",
+      "notes": [
+        "修正 IPT Transfer 藍色提示框在 English 模式仍顯示中文",
+        "翻譯前正規化換行與多餘空白",
+        "多句提示框依 。！？ 分成完整句子逐句翻譯",
+        "若任一句沒有完整翻譯則保留原文，避免混語"
+      ]
+    },
+    {
       "version": "V4.10.12",
       "date": "2026-09-26",
       "channel": "production",
