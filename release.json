@@ -1,17 +1,17 @@
 {
   "product": "Independent Points",
-  "version": "V4.10.7",
-  "build": "20260926-4107",
+  "version": "V4.10.8",
+  "build": "20260926-4108",
   "release_date": "2026-09-26",
   "channel": "production",
-  "rollback_version": "V4.10.6",
+  "rollback_version": "V4.10.7",
   "fallback_version": "V4.5.0",
   "network": "Ethereum Sepolia",
   "chain_id": "11155111 / 0xaa36a7",
   "contract": "0xd3fb2480aadb8b168ec7e88a0e5c847d9750cb87",
   "notes": [
-    "Seven wallet route pages use complete translations",
-    "Fixed duplicate Mint IPT label"
+    "Final deep i18n cleanup across operational pages",
+    "Preserve member names and technical identifiers"
   ],
   "rollback_steps": [
     "若 V4.6.1 異常，先重新載入並清除 IPT 快取。",
