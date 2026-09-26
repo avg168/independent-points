@@ -2,6 +2,17 @@
   "product": "Independent Points",
   "releases": [
     {
+      "version": "V4.10.10",
+      "date": "2026-09-26",
+      "channel": "production",
+      "title": "會員管理動態訊息與介面精簡",
+      "notes": [
+        "修正會員管理載入狀態在 English 模式仍為繁中",
+        "完整翻譯 Vx.x.x Member Management loaded | Admin",
+        "移除會員管理頁重複的 Back / Refresh 控制"
+      ]
+    },
+    {
       "version": "V4.10.9",
       "date": "2026-09-26",
       "channel": "production",
