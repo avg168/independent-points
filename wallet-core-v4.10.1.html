@@ -1,0 +1,3664 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Independent Points V4.10.1 CORE｜錢包核心</title>
+<style>
+:root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;color:#172033}
+*{box-sizing:border-box}
+body{margin:0;background:#f4f7fb}
+header{background:#10243d;color:#fff;padding:26px 22px 30px;border-radius:0 0 28px 28px}
+header h1{margin:0 0 8px;font-size:1.55rem}
+header p{margin:0;line-height:1.6;opacity:.9}
+main{max-width:760px;margin:auto;padding:18px 15px 80px}
+section{background:#fff;border:1px solid #dbe2ec;border-radius:18px;padding:18px;margin:16px 0}
+h2{margin:0 0 14px;font-size:1.15rem}
+.row{padding:11px 0;border-bottom:1px solid #edf0f4}
+.row:last-child{border-bottom:0}
+.label{font-weight:700;margin-bottom:5px}
+.addr,code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;overflow-wrap:anywhere;word-break:break-word}
+button{touch-action:manipulation;-webkit-tap-highlight-color:transparent;width:100%;border:0;border-radius:14px;padding:16px 14px;margin:7px 0;font:inherit;font-weight:800}
+.blue{background:#1765d8;color:#fff}
+.gray{background:#e8eef7;color:#17365d}
+.green{background:#18866d;color:#fff}
+button:disabled{opacity:.45}
+.box{padding:14px;border-radius:12px;line-height:1.65;margin:10px 0}
+.info{background:#eef4ff;border-left:5px solid #3777d6}
+.ok{background:#e9f8ef;border-left:5px solid #198555}
+.warn{background:#fff5da;border-left:5px solid #d59a0b}
+.err{background:#ffeaea;border-left:5px solid #c93030}
+.balance{font-size:2.6rem;font-weight:850;margin:8px 0}
+.muted{color:#687486;font-size:.9rem;line-height:1.65}
+.pill{display:inline-block;padding:6px 10px;border-radius:999px;background:#eef4ff;font-weight:750}
+
+.member-hero{
+  background:linear-gradient(145deg,#10243d,#174e87);
+  color:#fff;border:0
+}
+.member-hero h2{font-size:1.35rem}
+.quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.quick-grid button{touch-action:manipulation;-webkit-tap-highlight-color:transparent;margin:0}
+.soft{background:#f1f5fb;color:#17365d}
+.owner-only,.ownership-only,.tech-only{display:none}
+body.show-owner .owner-only{display:block}
+body.show-ownership .ownership-only{display:block}
+body.show-tech .tech-only{display:block}
+.member-wallet{
+  padding:12px 14px;border-radius:12px;background:#f6f8fb;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  overflow-wrap:anywhere;word-break:break-word
+}
+.section-note{font-size:.9rem;color:#687486;line-height:1.55}
+.status-dot{
+  display:inline-block;width:9px;height:9px;border-radius:999px;
+  background:#a8b0bc;margin-right:6px
+}
+body.chain-ok .status-dot{background:#18866d}
+details.member-details{
+  border:1px solid #dbe2ec;border-radius:14px;padding:0 14px;background:#fff
+}
+details.member-details summary{
+  cursor:pointer;padding:15px 0;font-weight:800;color:#17365d
+}
+.member-danger{border:1px solid #f1d5d5}
+.member-danger summary{color:#9b2727!important}
+
+
+.simple-card-note{font-size:.92rem;color:#647083;line-height:1.6}
+.advanced-feature{display:none}
+body.show-advanced .advanced-feature{display:block}
+.admin-hub-btn{display:none}
+body.show-owner .admin-hub-btn{display:block}
+body.show-ownership .admin-hub-btn{display:block}
+.compact-warning{
+  background:#fff7df;border-left:5px solid #d59a0b;
+  padding:12px 14px;border-radius:12px;line-height:1.6
+}
+
+/* ===== focused operation UI ===== */
+html,body{width:100%;max-width:100%;overflow-x:hidden}
+body{touch-action:pan-y}
+header{position:relative}
+.v41-head-actions{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px
+}
+.v41-head-actions button{touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+  margin:0;min-height:44px;padding:11px 12px;border-radius:12px
+}
+.v41-home{background:#fff;color:#17365d}
+.v41-refresh{background:#18866d;color:#fff}
+#v41RouteGuide{display:none}
+#receiveSection{display:none}
+.receive-address{
+  padding:14px;border:1px solid #dbe2ec;border-radius:12px;background:#f6f8fb;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  overflow-wrap:anywhere;word-break:break-word;line-height:1.6
+}
+
+body.v41-route .member-hero,
+body.v41-route .tech-only,
+body.v41-route #historySection,
+body.v41-route #balanceSection,
+body.v41-route #transferSection,
+body.v41-route #burnSection,
+body.v41-route #mintSection,
+body.v41-route #pauseSection,
+body.v41-route #ownershipSection,
+body.v41-route #contractVerifySection,
+body.v41-route #receiveSection{
+  display:none!important;
+}
+body.v41-route #connectSection,
+body.v41-route #identitySection,
+body.v41-route #v41RouteGuide{
+  display:block!important;
+}
+body.v41-route.route-balance #balanceSection{display:block!important}
+body.v41-route.route-transfer #balanceSection,
+body.v41-route.route-transfer #transferSection{display:block!important}
+body.v41-route.route-history #historySection{display:block!important}
+body.v41-route.route-receive #receiveSection{display:block!important}
+body.v41-route.route-mint.show-owner #mintSection{display:block!important}
+body.v41-route.route-pause.show-owner #pauseSection{display:block!important}
+body.v41-route.route-ownership.show-ownership #ownershipSection{display:block!important}
+
+body.v41-route.route-mint.show-owner #v41RouteGuide,
+body.v41-route.route-pause.show-owner #v41RouteGuide,
+body.v41-route.route-ownership.show-ownership #v41RouteGuide,
+body.v41-route.route-balance #v41RouteGuide,
+body.v41-route.route-transfer #v41RouteGuide,
+body.v41-route.route-history #v41RouteGuide,
+body.v41-route.route-receive #v41RouteGuide{
+  display:none!important;
+}
+body.v41-route main{padding-top:6px}
+body.v41-route section{margin:12px 0}
+body.v41-route header h1{font-size:1.48rem}
+body.v41-route header p{font-size:.96rem}
+
+@media(max-width:480px){
+  header{padding:22px 18px 26px}
+  main{padding:12px 12px 72px}
+  section{padding:16px}
+  .v41-head-actions{grid-template-columns:1fr 1fr}
+}
+
+
+/* ===== UX polish ===== */
+.v42-sticky-nav{
+  position:sticky;top:0;z-index:50;
+  background:rgba(244,247,251,.94);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  border-bottom:1px solid #dfe6ef;
+  padding:8px 12px;
+  display:grid;grid-template-columns:1fr 1fr;gap:8px
+}
+.v42-sticky-nav button{
+  margin:0;min-height:42px;border-radius:11px
+}
+.v42-back{background:#fff;color:#29445f}
+.v42-read{background:#176c59;color:#fff}
+.v42-risk{
+  border-radius:14px;padding:12px 14px;margin:10px 0;
+  background:#fff7df;border:1px solid #efd996;color:#7e5a08;line-height:1.55
+}
+#v42QrWrap{
+  display:none;
+  margin-top:14px;padding:14px;
+  border:1px solid #dce4ed;border-radius:16px;background:#fff;text-align:center
+}
+#v42Qr{
+  width:210px;height:210px;margin:0 auto 10px;
+  display:flex;align-items:center;justify-content:center
+}
+#v42Qr img,#v42Qr canvas{max-width:100%!important;height:auto!important}
+.v42-success{
+  border-radius:12px;padding:11px 13px;background:#ebf8f2;border:1px solid #bee5d6;color:#17694f
+}
+
+
+/* ===== product shell ===== */
+:root{
+  --v43-navy:#10243d;
+  --v43-blue:#2a5f91;
+  --v43-green:#176c59;
+  --v43-bg:#f4f7fb;
+  --v43-border:#dde5ef;
+}
+html,body{
+  width:100%;
+  max-width:100%;
+  overflow-x:hidden!important;
+}
+body{
+  background:var(--v43-bg);
+  touch-action:pan-y;
+}
+.v43-product-tag{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:5px 10px;
+  border-radius:999px;
+  font-size:.76rem;
+  font-weight:850;
+  background:rgba(255,255,255,.14);
+}
+.v43-module-note{
+  margin-top:8px;
+  font-size:.78rem;
+  opacity:.82;
+}
+.v43-statusline{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:10px;
+}
+.v43-status-chip{
+  padding:5px 9px;
+  border-radius:999px;
+  font-size:.74rem;
+  font-weight:800;
+  background:#eef2f7;
+  color:#475569;
+}
+.v43-status-chip.ok{
+  background:#e8f7ef;
+  color:#17694f;
+}
+.v43-bottom-nav{
+  position:fixed;
+  left:50%;
+  transform:translateX(-50%);
+  bottom:calc(8px + env(safe-area-inset-bottom));
+  z-index:80;
+  width:min(94%,720px);
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:6px;
+  padding:7px;
+  border:1px solid rgba(210,220,232,.95);
+  border-radius:18px;
+  background:rgba(255,255,255,.94);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  box-shadow:0 8px 26px rgba(30,45,65,.14);
+}
+.v43-bottom-nav button{
+  min-height:48px;
+  border:0;
+  border-radius:12px;
+  background:transparent;
+  color:#29445f;
+  font:inherit;
+  font-size:.78rem;
+  font-weight:850;
+  padding:6px 4px;
+  touch-action:manipulation;
+}
+.v43-bottom-nav button.active{
+  background:#eaf2fb;
+  color:#17365d;
+}
+body{
+  padding-bottom:calc(82px + env(safe-area-inset-bottom));
+}
+@media(min-width:760px){
+  .v43-bottom-nav{display:none}
+  body{padding-bottom:0}
+}
+
+
+/* ===== V4.10.1 Android bottom-navigation fix ===== */
+.v43-bottom-nav{
+  position:fixed!important;
+  left:50%!important;
+  transform:translateX(-50%)!important;
+  bottom:calc(72px + env(safe-area-inset-bottom))!important;
+  z-index:9999!important;
+  width:calc(100% - 24px)!important;
+  max-width:680px!important;
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:6px!important;
+  padding:8px!important;
+  border:1px solid #cbd7e5!important;
+  border-radius:18px!important;
+  background:#ffffff!important;
+  opacity:1!important;
+  box-shadow:0 8px 28px rgba(20,38,60,.22)!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+}
+.v43-bottom-nav button{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  min-height:58px!important;
+  padding:7px 4px!important;
+  border:0!important;
+  border-radius:12px!important;
+  background:#f3f6fa!important;
+  color:#17365d!important;
+  font-size:.80rem!important;
+  line-height:1.25!important;
+  font-weight:900!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+  -webkit-tap-highlight-color:rgba(42,95,145,.12)!important;
+}
+.v43-bottom-nav button.active{
+  background:#dfeafa!important;
+  color:#10243d!important;
+}
+.v43-bottom-nav button:active{
+  background:#cfdff3!important;
+  transform:scale(.98);
+}
+body{
+  padding-bottom:calc(160px + env(safe-area-inset-bottom))!important;
+}
+@media(max-width:480px){
+  .v43-bottom-nav{
+    bottom:calc(78px + env(safe-area-inset-bottom))!important;
+    width:calc(100% - 18px)!important;
+  }
+  .v43-bottom-nav button{
+    min-height:60px!important;
+    font-size:.78rem!important;
+  }
+}
+@media(min-width:760px){
+  .v43-bottom-nav{display:none!important}
+  body{padding-bottom:0!important}
+}
+
+
+/* ===== V4.10.1 reliable in-page navigation ===== */
+.v43-bottom-nav{
+  display:none!important;
+}
+body{
+  padding-bottom:24px!important;
+}
+.v432-nav-panel{
+  margin:14px 0;
+  padding:14px;
+  border:1px solid #dbe4ee;
+  border-radius:18px;
+  background:#ffffff;
+  box-shadow:0 4px 18px rgba(24,42,68,.05);
+}
+.v432-nav-title{
+  font-size:1.05rem;
+  font-weight:900;
+  color:#17365d;
+  margin-bottom:10px;
+}
+.v432-nav-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+.v432-nav-grid button{
+  min-height:76px!important;
+  padding:12px 8px!important;
+  border:1px solid #cbd7e5!important;
+  border-radius:14px!important;
+  background:#f6f8fb!important;
+  color:#17365d!important;
+  font:inherit!important;
+  font-weight:900!important;
+  font-size:.96rem!important;
+  line-height:1.35!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+  -webkit-tap-highlight-color:rgba(42,95,145,.14)!important;
+}
+.v432-nav-grid button.primary{
+  background:#e2edf9!important;
+  border-color:#b9cde4!important;
+}
+.v432-nav-grid button:active{
+  transform:scale(.98);
+  background:#d7e5f5!important;
+}
+.v432-nav-note{
+  margin-top:9px;
+  color:#64748b;
+  font-size:.8rem;
+  line-height:1.5;
+}
+@media(min-width:760px){
+  .v432-nav-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+
+
+/* ===== production polish ===== */
+:root{
+  color-scheme:light;
+}
+html{
+  scroll-behavior:smooth;
+}
+body{
+  -webkit-text-size-adjust:100%;
+  text-rendering:optimizeLegibility;
+}
+button,input,select,textarea{
+  font:inherit;
+}
+button{
+  cursor:pointer;
+}
+@media(display-mode:standalone){
+  body::before{
+    content:"";
+    display:block;
+    height:env(safe-area-inset-top);
+  }
+}
+
+
+/* ===== formal operations security guard ===== */
+#securityGuardSection{display:none}
+body.show-owner #securityGuardSection,
+body.show-ownership #securityGuardSection{display:block}
+body.v41-route.route-mint.show-owner #securityGuardSection,
+body.v41-route.route-pause.show-owner #securityGuardSection,
+body.v41-route.route-ownership.show-ownership #securityGuardSection{display:block!important}
+.security-guard-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.security-guard-card{
+  border:1px solid #dfe6ef;border-radius:12px;background:#f8fafc;padding:12px
+}
+.security-guard-card .k{font-size:.78rem;color:#64748b}
+.security-guard-card .v{font-weight:850;color:#17365d;margin-top:5px;word-break:break-word}
+#securityGuardStatus.locked{background:#fff7df;border-color:#efd996;color:#7e5a08}
+#securityGuardStatus.armed{background:#ebf8f2;border-color:#bee5d6;color:#17694f}
+.security-guard-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+@media(max-width:480px){.security-guard-grid{grid-template-columns:1fr}.security-guard-actions{grid-template-columns:1fr}}
+
+</style>
+
+<link rel="manifest" href="./manifest.webmanifest?v=4101">
+<meta name="theme-color" content="#10243d">
+<meta name="application-name" content="Independent Points">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Independent Points">
+<meta name="description" content="Independent Points 會員點數錢包與 IPT 資產管理系統。">
+<link rel="icon" type="image/svg+xml" href="./ipt-icon-192.png">
+
+<link rel="apple-touch-icon" href="./ipt-apple-touch-180.png">
+<script src="./i18n-v4.10.js?v=4101" defer></script>
+</head>
+<body>
+<div class="v42-sticky-nav">
+  <button id="v42BackHomeBtn" class="v42-back" type="button">← V4.10.1 首頁</button>
+  <button id="v42ReadNowBtn" class="v42-read" type="button">重新讀取鏈上資料</button>
+</div>
+<header>
+  <div class="v43-product-tag">正式鏈上操作模組</div><div class="v43-module-note">Ethereum Sepolia｜Trust Wallet / WalletConnect</div>
+  <div id="versionBadge" style="display:inline-block;margin-bottom:10px;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.78rem;font-weight:800;letter-spacing:.04em">V4.10.1 CORE</div>
+  <h1 id="v41RouteTitle">Independent Points</h1>
+  <p id="v41RouteSubtitle">會員點數錢包｜Ethereum Sepolia</p>
+  <div class="v41-head-actions">
+    <button id="v41HomeBtn" class="v41-home" type="button">返回 V4.10.1 首頁</button>
+    <button id="v41TopReadBtn" class="v41-refresh" type="button">重新讀取鏈上資料</button>
+  </div>
+</header>
+
+<main>
+
+<section class="member-hero">
+  <h2>我的 IPT</h2>
+  <p style="margin:0 0 14px;line-height:1.7;opacity:.92">
+    連接錢包後即可查看點數、轉帳與交易紀錄。
+  </p>
+  <div class="quick-grid">
+    <button id="goBalanceBtn" class="green" type="button">查看點數</button>
+    <button id="goTransferBtn" class="blue" type="button">轉帳</button>
+    <button id="goHistoryBtn" class="soft" type="button">交易紀錄</button>
+    <button id="goAdminBtn" class="soft admin-hub-btn" type="button">管理中心</button>
+    <button id="toggleAdvancedBtn" class="soft" type="button">進階功能</button>
+  </div>
+</section>
+
+<section class="tech-only advanced-feature">
+  <h2>鏈上技術資料</h2>
+  <div class="row">
+    <div class="label">IPT 合約</div>
+    <div class="addr">0xd3fb2480aadb8b168ec7e88a0e5c847d9750cb87</div>
+  </div>
+  <div class="row">
+    <div class="label">最初部署 Owner（歷史參考）</div>
+    <div class="addr">0xfEDF5073E6664cb0a11Cc9954AE3d1CF6F554BC4</div>
+  </div>
+  <div class="row">
+    <div class="label">網路</div>
+    <div>Ethereum Sepolia｜11155111｜0xaa36a7</div>
+  </div>
+</section>
+
+
+<section id="v41RouteGuide">
+  <h2 id="v41GuideTitle">準備操作</h2>
+  <div id="v41GuideText" class="box info">
+    請先連接 Trust Wallet 並讀取 IPT 鏈上資料。
+  </div>
+</section>
+
+<section id="connectSection">
+  <h2>① 連接錢包</h2>
+  <div id="sessionState" class="box warn">尚未連線。</div>
+  <button id="connectBtn" class="blue" type="button">連接 Trust Wallet</button>
+  <button id="disconnectBtn" class="gray" type="button" disabled>中斷連線／切換錢包</button>
+  <p class="section-note">若要切換錢包，請先按「中斷連線／切換錢包」，再到 Trust Wallet 選擇正確錢包。</p>
+</section>
+
+<section id="identitySection">
+  <h2>② 我的帳戶</h2>
+  <div class="row"><div class="label">目前身分</div><div id="role">尚未連線</div></div>
+  <div class="row"><div class="label">合約狀態</div><div id="contractState">尚未讀取</div></div>
+  <button id="readBtn" class="green" type="button" disabled>讀取 IPT 鏈上資料</button>
+</section>
+
+<section id="balanceSection">
+  <h2>③ 我的 IPT</h2>
+  <div id="balance" class="balance">— IPT</div>
+  <div class="row"><div class="label">鏈上總供給量</div><div id="supply">—</div></div>
+  <div class="row"><div class="label">剩餘可發行</div><div id="remaining">—</div></div>
+</section>
+
+<section id="historySection">
+  <h2>我的交易紀錄</h2>
+  <div class="row">
+    <div class="label">目前錢包</div>
+    <div id="historyWallet" class="member-wallet">尚未連線</div>
+  </div>
+  <button id="openHistoryBtn" class="gray" type="button" disabled>在 Sepolia Etherscan 查看交易紀錄</button>
+  <p class="section-note">
+    交易紀錄由 Sepolia 區塊鏈瀏覽器顯示。若剛送出的交易尚未出現，稍候片刻再重新開啟即可。
+  </p>
+</section>
+
+
+<section id="receiveSection">
+  <h2>收款</h2>
+  <div class="box info">
+    將下方錢包地址提供給付款方即可收取 IPT。請確認對方使用 Ethereum Sepolia。
+  </div>
+  <div class="row">
+    <div class="label">我的收款錢包地址</div>
+    <div id="v41ReceiveAddress" class="receive-address">尚未連線</div>
+  </div>
+  <button id="v41CopyReceiveBtn" class="gray" type="button">複製錢包地址</button>
+  <button id="v41ShareReceiveBtn" class="blue" type="button">分享收款地址</button>
+  <button id="v42ShowQrBtn" class="gray" type="button">顯示收款 QR Code</button>
+  <div id="v42QrWrap">
+    <div id="v42Qr"></div>
+    <div class="v42-success">請付款方確認網路為 Ethereum Sepolia，再掃描或複製地址。</div>
+  </div>
+  <div id="v41ReceiveStatus" class="box info">連接 Trust Wallet 後即可取得收款地址。</div>
+</section>
+
+<section id="transferSection">
+  <h2>④ IPT 轉帳</h2>
+  <div class="box info">
+    請確認收款地址與數量。系統會先檢查鏈上餘額與交易狀態，再交由 Trust Wallet 核准。
+    若畫面逾時，先重新讀取鏈上資料，不要立即重送。
+  </div>
+
+  <div class="row">
+    <div class="label">收款錢包地址</div>
+    <input id="transferTo" placeholder="0x..." autocomplete="off" spellcheck="false"
+      style="width:100%;padding:14px;border:1px solid #ccd5e2;border-radius:12px;font:inherit">
+  </div>
+
+  <div class="row">
+    <div class="label">轉移數量（IPT）</div>
+    <input id="transferAmount" inputmode="decimal" placeholder="例如 0.01"
+      style="width:100%;padding:14px;border:1px solid #ccd5e2;border-radius:12px;font:inherit">
+  </div>
+
+  <button id="preflightTransferBtn" class="gray" type="button" disabled>先檢查轉帳</button>
+  <div id="transferCheck" class="box info">連線並讀取合約後才可檢查。</div>
+  <button id="sendTransferBtn" class="blue" type="button" disabled>由 Trust Wallet 核准轉帳</button>
+</section>
+
+<section id="burnSection" class="advanced-feature">
+  <h2>⑤ 進階功能：永久銷毀 IPT</h2>
+  <div class="box warn">
+    銷毀會永久減少你的 IPT，且不能復原。只有確定要永久減少點數時才使用。
+  </div>
+
+  <div class="row">
+    <div class="label">銷毀數量（IPT）</div>
+    <input id="burnAmount" inputmode="decimal" placeholder="例如 0.01"
+      style="width:100%;padding:14px;border:1px solid #ccd5e2;border-radius:12px;font:inherit">
+  </div>
+
+  <button id="preflightBurnBtn" class="gray" type="button" disabled>先檢查 Burn</button>
+  <div id="burnCheck" class="box info">連線並讀取合約後才可檢查。</div>
+  <button id="sendBurnBtn" class="blue" type="button" disabled>由 Trust Wallet 核准永久銷毀</button>
+</section>
+
+
+<section id="securityGuardSection">
+  <h2>營運安全保護</h2>
+  <div id="securityGuardStatus" class="box warn locked">
+    高風險交易目前鎖定。完成原本前置檢查後，還需要啟用一次 60 秒操作視窗。
+  </div>
+  <div class="security-guard-grid" style="margin-top:12px">
+    <div class="security-guard-card">
+      <div class="k">目前錢包</div>
+      <div id="securityGuardWallet" class="v">尚未連線</div>
+    </div>
+    <div class="security-guard-card">
+      <div class="k">安全角色</div>
+      <div id="securityGuardRole" class="v">尚未核對</div>
+    </div>
+    <div class="security-guard-card">
+      <div class="k">操作視窗</div>
+      <div id="securityGuardTimer" class="v">未啟用</div>
+    </div>
+    <div class="security-guard-card">
+      <div class="k">保護規則</div>
+      <div class="v">一次高風險送出即重新鎖定</div>
+    </div>
+  </div>
+  <div class="security-guard-actions">
+    <button id="armSecurityGuardBtn" class="green" type="button">啟用 60 秒操作視窗</button>
+    <button id="openSecurityOpsBtn" type="button">查看營運安全紀錄</button>
+  </div>
+  <p class="section-note">若切換錢包、變更網路或操作視窗逾時，系統會重新鎖定。鏈上交易仍需 Trust Wallet 再次核准。</p>
+</section>
+
+<section id="mintSection" class="owner-only">
+  <h2>⑥ 管理中心：發行 IPT</h2>
+  <div class="v42-risk">⚠️ Mint 會真正改變鏈上總供給量。請再次核對領取地址與發行數量；前置檢查通過後，也不要在驗收時送出真正交易。</div>
+  <div class="compact-warning">
+    僅管理者可發行 IPT。請確認領取地址與數量後，再由 Trust Wallet 核准。
+  </div>
+
+  <div class="row">
+    <div class="label">領取錢包地址</div>
+    <input id="mintTo" placeholder="0x..." autocomplete="off" spellcheck="false"
+      style="width:100%;padding:14px;border:1px solid #ccd5e2;border-radius:12px;font:inherit">
+  </div>
+
+  <div class="row">
+    <div class="label">發行數量（IPT）</div>
+    <input id="mintAmount" inputmode="decimal" placeholder="例如 0.01"
+      style="width:100%;padding:14px;border:1px solid #ccd5e2;border-radius:12px;font:inherit">
+  </div>
+
+  <button id="preflightMintBtn" class="gray" type="button" disabled>先檢查 Mint</button>
+  <div id="mintCheck" class="box info">只有 Owner 連線並讀取合約後才可檢查。</div>
+  <button id="sendMintBtn" class="blue" type="button" disabled>由 Trust Wallet 核准發行</button>
+</section>
+
+<section id="pauseSection" class="owner-only">
+  <h2>⑦ 管理中心：暫停 / 恢復</h2>
+  <div class="v42-risk">⚠️ Pause 會停止 IPT 轉帳；Unpause 會恢復交易。此操作會真正改變合約狀態，驗收時請只做前置檢查。</div>
+  <div class="compact-warning">
+    暫停會停止 IPT 交易；恢復後可繼續使用。此操作只限管理者。
+  </div>
+
+  <div class="row">
+    <div class="label">鏈上 paused 狀態</div>
+    <div id="adminPausedState">尚未讀取</div>
+  </div>
+
+  <button id="preflightPauseBtn" class="gray" type="button" disabled>先檢查暫停合約</button>
+  <button id="preflightUnpauseBtn" class="gray" type="button" disabled>先檢查恢復合約</button>
+
+  <div id="adminPauseCheck" class="box info">
+    只有 Owner 連線並讀取合約後才可操作。
+  </div>
+
+  <button id="sendPauseBtn" class="blue" type="button" disabled>由 Trust Wallet 核准暫停</button>
+  <button id="sendUnpauseBtn" class="green" type="button" disabled>由 Trust Wallet 核准恢復</button>
+</section>
+
+<section id="ownershipSection" class="ownership-only">
+  <h2>⑧ 管理中心：管理權交接</h2>
+  <div class="v42-risk">⚠️ 管理權交接屬高風險操作。候任管理者地址必須逐字核對；提出交接後，還需要 pendingOwner 使用自己的錢包簽名接任。</div>
+
+  <div class="compact-warning">
+    管理權交接分兩步：現任管理者先提出候任者，候任者再用自己的錢包簽名接任。
+  </div>
+
+  <div class="row">
+    <div class="label">目前 Owner</div>
+    <div id="ownershipOwner" class="addr">尚未讀取</div>
+  </div>
+
+  <div class="row">
+    <div class="label">目前 pendingOwner</div>
+    <div id="ownershipPendingOwner" class="addr">尚未讀取</div>
+  </div>
+
+  <div class="row">
+    <div class="label">候任管理者錢包地址</div>
+    <input id="newOwnerAddress"
+      placeholder="0x..."
+      autocomplete="off"
+      spellcheck="false"
+      style="width:100%;padding:14px;border:1px solid #ccd5e2;border-radius:12px;font:inherit">
+  </div>
+
+  <button id="preflightProposeOwnerBtn" class="gray" type="button" disabled>
+    先檢查提出交接
+  </button>
+
+  <div id="ownershipCheck" class="box info">
+    只有現任 Owner 連線並讀取合約後，才可提出交接。
+  </div>
+
+  <button id="sendProposeOwnerBtn" class="blue" type="button" disabled>
+    由 Trust Wallet 核准提出交接
+  </button>
+
+  <hr style="border:0;border-top:1px solid #edf0f4;margin:22px 0">
+
+  <div class="box info">
+    候任管理者要「接任」時，不需要輸入地址。請先切換 Trust Wallet 到 pendingOwner 對應的錢包，
+    重新連線並讀取合約，再執行下方檢查。
+  </div>
+
+  <button id="preflightAcceptOwnerBtn" class="gray" type="button" disabled>
+    先檢查接任管理權
+  </button>
+
+  <button id="sendAcceptOwnerBtn" class="green" type="button" disabled>
+    由 Trust Wallet 核准接任
+  </button>
+</section>
+
+<section id="contractVerifySection" class="tech-only advanced-feature">
+  <h2>⑨ 合約驗證資料</h2>
+  <div id="contractData" class="box info">連線後按「讀取 IPT 鏈上資料」。</div>
+</section>
+
+<section class="tech-only advanced-feature">
+  <h2>安全狀態</h2>
+  <div class="box ok">
+    已整合鏈上讀取、Transfer、Burn、Mint、Pause / Unpause 與雙簽管理權交接。<br>
+    Owner 與 pendingOwner 均以目前鏈上資料動態判定，不再綁定最初部署地址。
+  </div>
+</section>
+
+<section class="tech-only advanced-feature">
+  <h2>系統功能總覽</h2>
+  <div class="box info">
+    <b>一般錢包：</b>讀取餘額、Transfer、Burn。<br>
+    <b>Owner：</b>另可 Mint、Pause / Unpause、提出 Ownership Transfer。<br>
+    <b>pendingOwner：</b>可自行 Accept Ownership。<br>
+    <b>網路：</b>Ethereum Sepolia（Chain ID 11155111）。<br>
+    <b>安全：</b>前置模擬、Nonce / Gas 多節點備援、Gas Limit 預留、5 分鐘防重複送出。
+  </div>
+</section>
+
+</main>
+
+<script type="module">
+import { EthereumProvider } from "https://esm.sh/@walletconnect/ethereum-provider@2.25.0?bundle";
+import { BrowserProvider, JsonRpcProvider, Contract, formatUnits } from "https://esm.sh/ethers@6.15.0?bundle";
+
+const PROJECT_ID = "80a61b62ea34b975d7d27a037fc55fa8";
+const CHAIN_ID = 11155111;
+const RPC = "https://ethereum-sepolia-rpc.publicnode.com";
+const CONTRACT_ADDRESS = "0xd3fb2480aadb8b168ec7e88a0e5c847d9750cb87";
+const ORIGINAL_OWNER = "0xfEDF5073E6664cb0a11Cc9954AE3d1CF6F554BC4"; // 僅供歷史參考，不再作為驗證條件
+
+
+function fmtIPT6(raw, decimals = 2) {
+  const n = Number(formatUnits(raw, Number(decimals)));
+  if (!Number.isFinite(n)) return formatUnits(raw, Number(decimals));
+  return n.toLocaleString("zh-TW", {
+    minimumFractionDigits: 6,
+    maximumFractionDigits: 6
+  });
+}
+
+const ABI = [
+  "function name() view returns (string)",
+  "function symbol() view returns (string)",
+  "function decimals() view returns (uint8)",
+  "function owner() view returns (address)",
+  "function pendingOwner() view returns (address)",
+  "function paused() view returns (bool)",
+  "function totalSupply() view returns (uint256)",
+  "function cap() view returns (uint256)",
+  "function balanceOf(address) view returns (uint256)",
+  "function transfer(address to, uint256 amount) returns (bool)",
+  "function burn(uint256 amount)",
+  "function mint(address to, uint256 amount)",
+  "function pause()",
+  "function unpause()",
+  "function transferOwnership(address newOwner)",
+  "function acceptOwnership()"
+];
+
+let wc = null;
+let ep = null;
+let account = "";
+const READ_RPCS = [
+  "https://ethereum-sepolia-rpc.publicnode.com",
+  "https://ethereum-sepolia.publicnode.com",
+  "https://rpc.sepolia.org"
+];
+let readProvider = null;
+
+const $ = id => document.getElementById(id);
+const same = (a,b) => String(a||"").toLowerCase() === String(b||"").toLowerCase();
+const ZERO_ADDRESS_UI = "0x0000000000000000000000000000000000000000";
+
+function setMemberRoleUI(owner = "", pendingOwner = "") {
+  const isOwner = !!account && same(account, owner);
+  const isPending =
+    !!account &&
+    !!pendingOwner &&
+    !same(pendingOwner, ZERO_ADDRESS_UI) &&
+    same(account, pendingOwner);
+
+  document.body.classList.toggle("show-owner", isOwner);
+  document.body.classList.toggle("show-ownership", isOwner || isPending);
+  document.body.classList.add("chain-ok");
+
+  const historyWallet = $("historyWallet");
+  if (historyWallet) historyWallet.textContent = account || "尚未連線";
+  const historyBtn = $("openHistoryBtn");
+  if (historyBtn) historyBtn.disabled = !account;
+}
+
+function resetMemberRoleUI() {
+  document.body.classList.remove("show-owner", "show-ownership", "chain-ok");
+  const historyWallet = $("historyWallet");
+  if (historyWallet) historyWallet.textContent = "尚未連線";
+  const historyBtn = $("openHistoryBtn");
+  if (historyBtn) historyBtn.disabled = true;
+}
+
+function setSessionBox(kind, html) {
+  const el = $("sessionState");
+  el.className = "box " + kind;
+  el.innerHTML = html;
+}
+
+async function initWC() {
+  if (wc) return wc;
+
+  wc = await EthereumProvider.init({
+    projectId: PROJECT_ID,
+    chains: [CHAIN_ID],
+    showQrModal: true,
+    methods: ["eth_sendTransaction","personal_sign"],
+    optionalMethods: [
+      "eth_accounts",
+      "eth_requestAccounts",
+      "eth_chainId",
+      "wallet_switchEthereumChain"
+    ],
+    events: ["chainChanged","accountsChanged"],
+    optionalEvents: ["connect","disconnect","message"],
+    metadata: {
+      name: "Independent Points V4.10.1",
+      description: "Independent Points member wallet on Ethereum Sepolia",
+      url: "https://avg168.github.io",
+      icons: []
+    },
+    qrModalOptions: { themeMode: "light" }
+  });
+
+  wc.on("accountsChanged", async (accounts) => {
+    account = accounts?.[0] || "";
+    await renderSession();
+  });
+
+  wc.on("chainChanged", async () => {
+    await renderSession();
+  });
+
+  wc.on("disconnect", () => {
+    resetDisconnected();
+  });
+
+  return wc;
+}
+
+async function chainIdOf(p) {
+  try {
+    const v = await p.request({ method: "eth_chainId" });
+    return Number(BigInt(v));
+  } catch (_) {
+    return Number(p.chainId || 0);
+  }
+}
+
+async function renderSession() {
+  if (!wc?.session) {
+    resetDisconnected();
+    return;
+  }
+
+  account = wc.accounts?.[0] || account || "";
+  const cid = await chainIdOf(wc);
+  const ok = cid === CHAIN_ID;
+
+  setSessionBox(
+    ok ? "ok" : "err",
+    "Session：<b>已建立</b><br>" +
+    "錢包：<span class='addr'>" + (account || "未知") + "</span><br>" +
+    "Chain：<b>" + cid + " / 0x" + BigInt(cid || 0).toString(16) + "</b><br>" +
+    (ok ? "✓ Ethereum Sepolia" : "✗ 不是 Ethereum Sepolia")
+  );
+
+  $("disconnectBtn").disabled = false;
+  $("readBtn").disabled = !ok || !account;
+  $("role").innerHTML =
+    "<span class='pill'>待讀取鏈上 Owner</span>";
+  if ($("historyWallet")) $("historyWallet").textContent = account || "尚未連線";
+  if ($("openHistoryBtn")) $("openHistoryBtn").disabled = !ok || !account;
+}
+
+function resetDisconnected() {
+  account = "";
+  ep = null;
+  setSessionBox("warn", "尚未連線。");
+  $("disconnectBtn").disabled = true;
+  $("readBtn").disabled = true;
+  $("role").textContent = "尚未連線";
+  $("contractState").textContent = "尚未讀取";
+  $("balance").textContent = "— IPT";
+  $("supply").textContent = "—";
+  $("remaining").textContent = "—";
+  $("contractData").className = "box info";
+  $("contractData").textContent = "連線後按「讀取 IPT 鏈上資料」。";
+  resetMemberRoleUI();
+}
+
+
+async function withTimeout(promise, ms, label = "RPC") {
+  let timer;
+  try {
+    return await Promise.race([
+      promise,
+      new Promise((_, reject) => {
+        timer = setTimeout(
+          () => reject(new Error(label + " 逾時")),
+          ms
+        );
+      })
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
+async function getWorkingReadProvider() {
+  if (readProvider) {
+    try {
+      await withTimeout(readProvider.getBlockNumber(), 7000, "Sepolia RPC");
+      return readProvider;
+    } catch (_) {
+      try { readProvider.destroy?.(); } catch (_) {}
+      readProvider = null;
+    }
+  }
+
+  let lastError = null;
+
+  for (const url of READ_RPCS) {
+    try {
+      const p = new JsonRpcProvider(url, CHAIN_ID, {
+        staticNetwork: true
+      });
+      await withTimeout(p.getBlockNumber(), 7000, "Sepolia RPC");
+      readProvider = p;
+      return p;
+    } catch (e) {
+      lastError = e;
+    }
+  }
+
+  throw new Error(
+    "目前所有 Sepolia 讀取節點都沒有回應。" +
+    (lastError?.message ? " 最後錯誤：" + lastError.message : "")
+  );
+}
+
+$("connectBtn").addEventListener("click", async () => {
+  try {
+    const p = await initWC();
+
+    if (!p.session) {
+      await p.connect({
+        chains: [CHAIN_ID]
+      });
+    }
+
+    ep = new BrowserProvider(p);
+    await renderSession();
+
+  } catch (e) {
+    setSessionBox("err", "連線失敗：" + (e?.message || String(e)));
+  }
+});
+
+$("disconnectBtn").addEventListener("click", async () => {
+  try {
+    if (wc?.session) await wc.disconnect();
+  } catch (_) {}
+  resetDisconnected();
+});
+
+$("readBtn").addEventListener("click", async () => {
+  const btn = $("readBtn");
+
+  try {
+    btn.disabled = true;
+    btn.textContent = "正在讀取 Sepolia…";
+    $("contractState").textContent = "讀取中…";
+    $("contractData").className = "box info";
+    $("contractData").textContent =
+      "正在直接從 Sepolia RPC 讀取合約，不需要 Trust Wallet 簽名…";
+
+    if (!wc?.session) {
+      throw new Error("WalletConnect 尚未連線。");
+    }
+
+    if (!account) {
+      account = wc.accounts?.[0] || "";
+    }
+
+    if (!account) {
+      throw new Error("沒有取得目前錢包地址。");
+    }
+
+    const rp = await getWorkingReadProvider();
+
+    const code = await withTimeout(
+      rp.getCode(CONTRACT_ADDRESS),
+      10000,
+      "讀取合約程式碼"
+    );
+
+    if (!code || code === "0x") {
+      throw new Error("此地址在 Sepolia 沒有合約程式碼。");
+    }
+
+    const c = new Contract(CONTRACT_ADDRESS, ABI, rp);
+
+    const [
+      name, symbol, decimals, owner,
+      pendingOwner, paused, totalSupply,
+      cap, bal
+    ] = await withTimeout(
+      Promise.all([
+        c.name(),
+        c.symbol(),
+        c.decimals(),
+        c.owner(),
+        c.pendingOwner(),
+        c.paused(),
+        c.totalSupply(),
+        c.cap(),
+        c.balanceOf(account)
+      ]),
+      15000,
+      "讀取 IPT 合約資料"
+    );
+
+    const d = Number(decimals);
+    const supplyText = fmtIPT6(totalSupply, d);
+    const balText = fmtIPT6(bal, d);
+    const remainText = fmtIPT6(cap - totalSupply, d);
+
+    const ZERO = "0x0000000000000000000000000000000000000000";
+    const ownerValid =
+      /^0x[a-fA-F0-9]{40}$/.test(String(owner || "")) &&
+      !same(owner, ZERO);
+
+    const checks = {
+      name: name === "Independent Points",
+      symbol: symbol === "IPT",
+      decimals: d === 2,
+      owner: ownerValid
+    };
+
+    const allOk = Object.values(checks).every(Boolean);
+
+    // 身分一律依「目前鏈上 owner」動態判定，不再綁死最初部署 Owner。
+    $("role").innerHTML = same(account, owner)
+      ? "<span class='pill'>管理者 Owner</span>"
+      : (!same(pendingOwner, ZERO) && same(account, pendingOwner)
+          ? "<span class='pill'>候任管理者 pendingOwner</span>"
+          : "<span class='pill'>一般錢包</span>");
+
+    setMemberRoleUI(owner, pendingOwner);
+
+    $("contractState").textContent = allOk ? "正常" : "資料不一致";
+    $("balance").textContent = balText + " IPT";
+    $("supply").textContent = supplyText + " IPT";
+    $("remaining").textContent = remainText + " IPT";
+
+    $("contractData").className = "box " + (allOk ? "ok" : "err");
+    $("contractData").innerHTML =
+      (allOk ? "✓ IPT 合約驗證通過" : "✗ 合約核心資料異常") +
+      "<br><br>" +
+      "name：<b>" + name + "</b> " + (checks.name ? "✓" : "✗") + "<br>" +
+      "symbol：<b>" + symbol + "</b> " + (checks.symbol ? "✓" : "✗") + "<br>" +
+      "decimals：<b>" + d + "</b> " + (checks.decimals ? "✓" : "✗") + "<br>" +
+      "owner：<span class='addr'>" + owner + "</span> " + (checks.owner ? "✓" : "✗") + "<br>" +
+      "pendingOwner：<span class='addr'>" + pendingOwner + "</span><br>" +
+      "paused：<b>" + String(paused) + "</b><br><br>" +
+      "<span class='muted'>Owner 採鏈上動態驗證；管理權合法交接後，不會再因與最初部署 Owner 不同而誤判。</span>";
+
+  } catch (e) {
+    $("contractState").textContent = "讀取失敗";
+    $("contractData").className = "box err";
+    $("contractData").textContent =
+      "讀取失敗：" + (e?.message || String(e));
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "重新讀取 IPT 鏈上資料";
+  }
+});
+
+const transferState = {
+  checked: false,
+  to: "",
+  amountRaw: 0n,
+  data: "",
+  nonce: null,
+  gasLimit: null,
+  gasPrice: null,
+  fingerprint: ""
+};
+
+function resetTransferCheck(message = "請重新檢查轉帳。") {
+  transferState.checked = false;
+  transferState.to = "";
+  transferState.amountRaw = 0n;
+  transferState.data = "";
+  transferState.nonce = null;
+  transferState.gasLimit = null;
+  transferState.gasPrice = null;
+  transferState.fingerprint = "";
+  $("sendTransferBtn").disabled = true;
+  $("transferCheck").className = "box info";
+  $("transferCheck").textContent = message;
+}
+
+function isAddressLike(v) {
+  return /^0x[a-fA-F0-9]{40}$/.test(String(v || "").trim());
+}
+
+function decimalToRaw2(v) {
+  const s = String(v || "").trim();
+  if (!/^\d+(\.\d{1,2})?$/.test(s)) {
+    throw new Error("數量格式錯誤；IPT 最多 2 位小數。");
+  }
+  const [whole, frac = ""] = s.split(".");
+  return BigInt(whole) * 100n + BigInt((frac + "00").slice(0, 2));
+}
+
+function fingerprintOf(from, to, amountRaw) {
+  return [String(from).toLowerCase(), String(to).toLowerCase(), amountRaw.toString()].join("|");
+}
+
+function guardStorageKey(fp) {
+  let h = 2166136261;
+  for (let i = 0; i < fp.length; i++) {
+    h ^= fp.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return "ipt-v22-transfer-guard-" + (h >>> 0).toString(16);
+}
+
+function readGuard(fp) {
+  try {
+    return JSON.parse(localStorage.getItem(guardStorageKey(fp)) || "null");
+  } catch (_) {
+    return null;
+  }
+}
+
+function writeGuard(fp, obj) {
+  try {
+    localStorage.setItem(guardStorageKey(fp), JSON.stringify(obj));
+  } catch (_) {}
+}
+
+function clearGuard(fp) {
+  try {
+    localStorage.removeItem(guardStorageKey(fp));
+  } catch (_) {}
+}
+
+async function directRpcJson(url, method, params, timeoutMs = 6000) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: Date.now(),
+        method,
+        params
+      }),
+      signal: ctrl.signal,
+      cache: "no-store"
+    });
+
+    if (!res.ok) {
+      throw new Error("HTTP " + res.status);
+    }
+
+    const json = await res.json();
+    if (json.error) {
+      throw new Error(json.error.message || "RPC error");
+    }
+
+    return json.result;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function latestNonce(address) {
+  const nonceRpcs = [
+    "https://ethereum-sepolia-rpc.publicnode.com",
+    "https://ethereum-sepolia.publicnode.com",
+    "https://rpc.sepolia.org"
+  ];
+
+  let lastError = null;
+
+  for (const url of nonceRpcs) {
+    try {
+      const hex = await directRpcJson(
+        url,
+        "eth_getTransactionCount",
+        [address, "pending"],
+        6500
+      );
+
+      if (typeof hex === "string" && /^0x[0-9a-fA-F]+$/.test(hex)) {
+        return Number(BigInt(hex));
+      }
+    } catch (e) {
+      lastError = e;
+    }
+  }
+
+  throw new Error(
+    "Nonce 節點暫時無回應；本次沒有送出交易。" +
+    (lastError?.message ? " 最後錯誤：" + lastError.message : "")
+  );
+}
+
+
+async function latestGasPriceHex() {
+  const gasRpcs = [
+    "https://ethereum-sepolia-rpc.publicnode.com",
+    "https://ethereum-sepolia.publicnode.com",
+    "https://rpc.sepolia.org"
+  ];
+
+  let lastError = null;
+
+  for (const url of gasRpcs) {
+    try {
+      const hex = await directRpcJson(
+        url,
+        "eth_gasPrice",
+        [],
+        6500
+      );
+
+      if (typeof hex === "string" && /^0x[0-9a-fA-F]+$/.test(hex)) {
+        return hex;
+      }
+    } catch (e) {
+      lastError = e;
+    }
+  }
+
+  throw new Error(
+    "Gas Price 節點暫時無回應；本次沒有送出交易。" +
+    (lastError?.message ? " 最後錯誤：" + lastError.message : "")
+  );
+}
+
+async function verifyTransferPreflight() {
+  resetTransferCheck("正在檢查…");
+
+  if (!wc?.session || !account) {
+    throw new Error("WalletConnect 尚未連線。");
+  }
+
+  const cid = await chainIdOf(wc);
+  if (cid !== CHAIN_ID) {
+    throw new Error("目前不是 Ethereum Sepolia。");
+  }
+
+  const to = $("transferTo").value.trim();
+  if (!isAddressLike(to)) {
+    throw new Error("收款地址格式錯誤。");
+  }
+
+  if (same(to, account)) {
+    throw new Error("收款地址不能與目前錢包相同。");
+  }
+
+  if (same(to, CONTRACT_ADDRESS)) {
+    throw new Error("不能把 IPT 直接轉到 IPT 合約地址。");
+  }
+
+  const amountRaw = decimalToRaw2($("transferAmount").value);
+  if (amountRaw <= 0n) {
+    throw new Error("轉移數量必須大於 0。");
+  }
+
+  const rp = await getWorkingReadProvider();
+  const c = new Contract(CONTRACT_ADDRESS, ABI, rp);
+
+  const [paused, bal, code] = await withTimeout(
+    Promise.all([
+      c.paused(),
+      c.balanceOf(account),
+      rp.getCode(CONTRACT_ADDRESS)
+    ]),
+    15000,
+    "轉帳前檢查"
+  );
+
+  if (!code || code === "0x") {
+    throw new Error("IPT 合約不存在。");
+  }
+
+  if (paused) {
+    throw new Error("IPT 合約目前已暫停。");
+  }
+
+  if (bal < amountRaw) {
+    throw new Error(
+      "IPT 餘額不足。現在餘額：" + fmtIPT6(bal, 2) + " IPT"
+    );
+  }
+
+  const iface = c.interface;
+  const data = iface.encodeFunctionData("transfer", [to, amountRaw]);
+
+  // Read-only simulation / gas estimate through independent RPC.
+  const gas = await withTimeout(
+    rp.estimateGas({
+      from: account,
+      to: CONTRACT_ADDRESS,
+      data,
+      value: 0n
+    }),
+    15000,
+    "交易模擬"
+  );
+
+  // Add 20% safety margin so Trust Wallet does not need to estimate gas again.
+  const gasLimit = (gas * 120n + 99n) / 100n;
+
+  const nonce = null;
+  const fp = fingerprintOf(account, to, amountRaw);
+  const guard = readGuard(fp);
+
+  if (guard && (Date.now() - Number(guard.time || 0)) < 5 * 60 * 1000) {
+    throw new Error(
+      "防重複保護：相同收款地址與數量在 5 分鐘內已嘗試送出。請先確認鏈上結果。"
+    );
+  }
+
+  transferState.checked = true;
+  transferState.to = to;
+  transferState.amountRaw = amountRaw;
+  transferState.data = data;
+  transferState.nonce = nonce;
+  transferState.gasLimit = gasLimit;
+  transferState.gasPrice = null;
+  transferState.fingerprint = fp;
+
+  $("transferCheck").className = "box ok";
+  $("transferCheck").innerHTML =
+    "✓ 轉帳前檢查通過<br>" +
+    "收款地址：<span class='addr'>" + to + "</span><br>" +
+    "數量：<b>" + fmtIPT6(amountRaw, 2) + " IPT</b><br>" +
+    "目前餘額：<b>" + fmtIPT6(bal, 2) + " IPT</b><br>" +
+    "預估 Gas：<b>" + gas.toString() + "</b><br>" +
+    "送出 Gas Limit：<b>" + gasLimit.toString() + "</b><br>" +
+    "Nonce：<b>送出前再核對</b>";
+
+  $("sendTransferBtn").disabled = false;
+}
+
+$("preflightTransferBtn").addEventListener("click", async () => {
+  const btn = $("preflightTransferBtn");
+  try {
+    btn.disabled = true;
+    btn.textContent = "檢查中…";
+    await verifyTransferPreflight();
+  } catch (e) {
+    $("transferCheck").className = "box err";
+    $("transferCheck").textContent =
+      "檢查失敗：" + (e?.message || String(e));
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "先檢查轉帳";
+  }
+});
+
+$("transferTo").addEventListener("input", () => {
+  resetTransferCheck("收款地址已變更，請重新檢查。");
+});
+$("transferAmount").addEventListener("input", () => {
+  resetTransferCheck("轉移數量已變更，請重新檢查。");
+});
+
+$("sendTransferBtn").addEventListener("click", async () => {
+  const btn = $("sendTransferBtn");
+
+  try {
+    if (!transferState.checked) {
+      throw new Error("請先完成轉帳前檢查。");
+    }
+
+    const cid = await chainIdOf(wc);
+    if (cid !== CHAIN_ID) {
+      throw new Error("目前不是 Ethereum Sepolia。");
+    }
+
+    // Read nonce and gas price only immediately before signing.
+    // These values are prepared by the DApp so Trust Wallet does not need
+    // to query the WalletConnect RPC just to build the confirmation screen.
+    const [nonceNow, gasPriceHex] = await Promise.all([
+      latestNonce(account),
+      latestGasPriceHex()
+    ]);
+
+    transferState.nonce = nonceNow;
+    transferState.gasPrice = gasPriceHex;
+
+    const amountText = fmtIPT6(transferState.amountRaw, 2);
+    const ok = window.confirm(
+      "確認在 Ethereum Sepolia 轉出 " +
+      amountText +
+      " IPT 到：\n" +
+      transferState.to +
+      "\n\n這是測試網交易，仍會消耗 Sepolia Gas。"
+    );
+    if (!ok) return;
+
+    btn.disabled = true;
+    btn.textContent = "等待 Trust Wallet…";
+
+    writeGuard(transferState.fingerprint, {
+      time: Date.now(),
+      state: "requesting",
+      from: account,
+      to: transferState.to,
+      amountRaw: transferState.amountRaw.toString(),
+      nonce: nonceNow
+    });
+
+    let hash = null;
+
+    try {
+      hash = await withTimeout(
+        wc.request({
+          method: "eth_sendTransaction",
+          params: [{
+            from: account,
+            to: CONTRACT_ADDRESS,
+            value: "0x0",
+            data: transferState.data,
+            chainId: "0xaa36a7",
+            nonce: "0x" + BigInt(nonceNow).toString(16),
+            gas: "0x" + BigInt(transferState.gasLimit).toString(16),
+            gasPrice: gasPriceHex
+          }]
+        }),
+        90000,
+        "等待 Trust Wallet 交易回覆"
+      );
+    } catch (e) {
+      // Do NOT clear the guard on timeout / ambiguous errors.
+      const msg = String(e?.message || e);
+      if (
+        /user rejected|user denied|rejected by user|cancelled|canceled/i.test(msg)
+      ) {
+        clearGuard(transferState.fingerprint);
+        throw new Error("你已取消交易；沒有送出。");
+      }
+
+      $("transferCheck").className = "box warn";
+      $("transferCheck").textContent =
+        "交易結果不明，已啟用 5 分鐘防重複保護。請勿立即重送；先用「重新讀取 IPT 鏈上資料」確認餘額。";
+      throw new Error(
+        "WalletConnect / RPC 回覆不明。為避免重複轉帳，暫時禁止相同交易再次送出。"
+      );
+    }
+
+    if (!/^0x[a-fA-F0-9]{64}$/.test(String(hash || ""))) {
+      $("transferCheck").className = "box warn";
+      $("transferCheck").textContent =
+        "錢包沒有回傳標準 Tx Hash，已保留防重複鎖。請先確認鏈上餘額。";
+      throw new Error("沒有取得有效 Tx Hash。");
+    }
+
+    writeGuard(transferState.fingerprint, {
+      time: Date.now(),
+      state: "sent",
+      hash,
+      from: account,
+      to: transferState.to,
+      amountRaw: transferState.amountRaw.toString(),
+      nonce: nonceNow
+    });
+
+    $("transferCheck").className = "box ok";
+    $("transferCheck").innerHTML =
+      "✓ 交易已送出<br>" +
+      "Tx Hash：<span class='addr'>" + hash + "</span><br>" +
+      "請等待區塊確認後，再重新讀取 IPT 餘額。";
+
+    transferState.checked = false;
+    $("sendTransferBtn").disabled = true;
+
+  } catch (e) {
+    if (!$("transferCheck").textContent.includes("結果不明")) {
+      $("transferCheck").className = "box err";
+      $("transferCheck").textContent =
+        "送出失敗：" + (e?.message || String(e));
+    }
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "由 Trust Wallet 核准轉帳";
+  }
+});
+
+// Enable transfer preflight after a successful contract read and active session.
+const originalReadHandlerEnable = () => {
+  const connected = !!(wc?.session && account);
+  const contractOk = $("contractState").textContent === "正常";
+  $("preflightTransferBtn").disabled = !(connected && contractOk);
+};
+
+// Observe read result only; no self-observing loop.
+new MutationObserver(originalReadHandlerEnable).observe(
+  $("contractState"),
+  { childList: true, characterData: true, subtree: true }
+);
+
+setInterval(originalReadHandlerEnable, 3000);
+
+const burnState = {
+  checked: false,
+  amountRaw: 0n,
+  data: "",
+  nonce: null,
+  gasLimit: null,
+  gasPrice: null,
+  fingerprint: ""
+};
+
+function resetBurnCheck(message = "請重新檢查 Burn。") {
+  burnState.checked = false;
+  burnState.amountRaw = 0n;
+  burnState.data = "";
+  burnState.nonce = null;
+  burnState.gasLimit = null;
+  burnState.gasPrice = null;
+  burnState.fingerprint = "";
+  $("sendBurnBtn").disabled = true;
+  $("burnCheck").className = "box info";
+  $("burnCheck").textContent = message;
+}
+
+function burnFingerprint(from, amountRaw) {
+  return [
+    "burn",
+    String(from || "").toLowerCase(),
+    amountRaw.toString()
+  ].join("|");
+}
+
+function burnGuardKey(fp) {
+  let h = 2166136261;
+  for (let i = 0; i < fp.length; i++) {
+    h ^= fp.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return "ipt-v23-burn-guard-" + (h >>> 0).toString(16);
+}
+
+function readBurnGuard(fp) {
+  try {
+    return JSON.parse(localStorage.getItem(burnGuardKey(fp)) || "null");
+  } catch (_) {
+    return null;
+  }
+}
+
+function writeBurnGuard(fp, obj) {
+  try {
+    localStorage.setItem(burnGuardKey(fp), JSON.stringify(obj));
+  } catch (_) {}
+}
+
+function clearBurnGuard(fp) {
+  try {
+    localStorage.removeItem(burnGuardKey(fp));
+  } catch (_) {}
+}
+
+async function verifyBurnPreflight() {
+  resetBurnCheck("正在檢查 Burn…");
+
+  if (!wc?.session || !account) {
+    throw new Error("WalletConnect 尚未連線。");
+  }
+
+  const cid = await chainIdOf(wc);
+  if (cid !== CHAIN_ID) {
+    throw new Error("目前不是 Ethereum Sepolia。");
+  }
+
+  const amountRaw = decimalToRaw2($("burnAmount").value);
+  if (amountRaw <= 0n) {
+    throw new Error("銷毀數量必須大於 0。");
+  }
+
+  const rp = await getWorkingReadProvider();
+  const c = new Contract(CONTRACT_ADDRESS, ABI, rp);
+
+  const [paused, bal, supply, code] = await withTimeout(
+    Promise.all([
+      c.paused(),
+      c.balanceOf(account),
+      c.totalSupply(),
+      rp.getCode(CONTRACT_ADDRESS)
+    ]),
+    15000,
+    "Burn 前檢查"
+  );
+
+  if (!code || code === "0x") {
+    throw new Error("IPT 合約不存在。");
+  }
+
+  if (paused) {
+    throw new Error("IPT 合約目前已暫停。");
+  }
+
+  if (bal < amountRaw) {
+    throw new Error(
+      "IPT 餘額不足。現在餘額：" + fmtIPT6(bal, 2) + " IPT"
+    );
+  }
+
+  const iface = c.interface;
+  const data = iface.encodeFunctionData("burn", [amountRaw]);
+
+  const gas = await withTimeout(
+    rp.estimateGas({
+      from: account,
+      to: CONTRACT_ADDRESS,
+      data,
+      value: 0n
+    }),
+    15000,
+    "Burn 交易模擬"
+  );
+
+  const gasLimit = (gas * 120n + 99n) / 100n;
+
+  const fp = burnFingerprint(account, amountRaw);
+  const guard = readBurnGuard(fp);
+
+  if (guard && (Date.now() - Number(guard.time || 0)) < 5 * 60 * 1000) {
+    throw new Error(
+      "防重複保護：相同數量的 Burn 在 5 分鐘內已嘗試送出。請先重新讀取餘額與總供給量。"
+    );
+  }
+
+  burnState.checked = true;
+  burnState.amountRaw = amountRaw;
+  burnState.data = data;
+  burnState.nonce = null;
+  burnState.gasLimit = gasLimit;
+  burnState.gasPrice = null;
+  burnState.fingerprint = fp;
+
+  $("burnCheck").className = "box ok";
+  $("burnCheck").innerHTML =
+    "✓ Burn 前檢查通過<br>" +
+    "銷毀數量：<b>" + fmtIPT6(amountRaw, 2) + " IPT</b><br>" +
+    "目前餘額：<b>" + fmtIPT6(bal, 2) + " IPT</b><br>" +
+    "目前總供給：<b>" + fmtIPT6(supply, 2) + " IPT</b><br>" +
+    "Burn 後預期餘額：<b>" + fmtIPT6(bal - amountRaw, 2) + " IPT</b><br>" +
+    "Burn 後預期總供給：<b>" + fmtIPT6(supply - amountRaw, 2) + " IPT</b><br>" +
+    "預估 Gas：<b>" + gas.toString() + "</b><br>" +
+    "送出 Gas Limit：<b>" + gasLimit.toString() + "</b><br>" +
+    "Nonce：<b>送出前再核對</b>";
+
+  $("sendBurnBtn").disabled = false;
+}
+
+$("preflightBurnBtn").addEventListener("click", async () => {
+  const btn = $("preflightBurnBtn");
+
+  try {
+    btn.disabled = true;
+    btn.textContent = "檢查中…";
+    await verifyBurnPreflight();
+  } catch (e) {
+    $("burnCheck").className = "box err";
+    $("burnCheck").textContent =
+      "檢查失敗：" + (e?.message || String(e));
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "先檢查 Burn";
+  }
+});
+
+$("burnAmount").addEventListener("input", () => {
+  resetBurnCheck("銷毀數量已變更，請重新檢查。");
+});
+
+$("sendBurnBtn").addEventListener("click", async () => {
+  const btn = $("sendBurnBtn");
+
+  try {
+    if (!burnState.checked) {
+      throw new Error("請先完成 Burn 前檢查。");
+    }
+
+    const cid = await chainIdOf(wc);
+    if (cid !== CHAIN_ID) {
+      throw new Error("目前不是 Ethereum Sepolia。");
+    }
+
+    const [nonceNow, gasPriceHex] = await Promise.all([
+      latestNonce(account),
+      latestGasPriceHex()
+    ]);
+
+    burnState.nonce = nonceNow;
+    burnState.gasPrice = gasPriceHex;
+
+    const amountText = fmtIPT6(burnState.amountRaw, 2);
+    const ok = window.confirm(
+      "確認在 Ethereum Sepolia 永久銷毀 " +
+      amountText +
+      " IPT？\n\n" +
+      "Burn 會永久減少你的 IPT 與 totalSupply，不能復原。\n" +
+      "這是測試網交易，仍會消耗 Sepolia Gas。"
+    );
+
+    if (!ok) return;
+
+    btn.disabled = true;
+    btn.textContent = "等待 Trust Wallet…";
+
+    writeBurnGuard(burnState.fingerprint, {
+      time: Date.now(),
+      state: "requesting",
+      from: account,
+      amountRaw: burnState.amountRaw.toString(),
+      nonce: nonceNow
+    });
+
+    let hash = null;
+
+    try {
+      hash = await withTimeout(
+        wc.request({
+          method: "eth_sendTransaction",
+          params: [{
+            from: account,
+            to: CONTRACT_ADDRESS,
+            value: "0x0",
+            data: burnState.data,
+            chainId: "0xaa36a7",
+            nonce: "0x" + BigInt(nonceNow).toString(16),
+            gas: "0x" + BigInt(burnState.gasLimit).toString(16),
+            gasPrice: gasPriceHex
+          }]
+        }),
+        90000,
+        "等待 Trust Wallet Burn 回覆"
+      );
+    } catch (e) {
+      const msg = String(e?.message || e);
+
+      if (
+        /user rejected|user denied|rejected by user|cancelled|canceled/i.test(msg)
+      ) {
+        clearBurnGuard(burnState.fingerprint);
+        throw new Error("你已取消 Burn；沒有送出。");
+      }
+
+      $("burnCheck").className = "box warn";
+      $("burnCheck").textContent =
+        "Burn 結果不明，已啟用 5 分鐘防重複保護。不要按『再試一次』；請先重新讀取 IPT 餘額與 totalSupply。";
+
+      throw new Error(
+        "WalletConnect / RPC 回覆不明。為避免重複 Burn，暫時禁止相同 Burn 再次送出。"
+      );
+    }
+
+    if (!/^0x[a-fA-F0-9]{64}$/.test(String(hash || ""))) {
+      $("burnCheck").className = "box warn";
+      $("burnCheck").textContent =
+        "錢包沒有回傳標準 Tx Hash，已保留防重複鎖。請先重新讀取餘額與 totalSupply。";
+      throw new Error("沒有取得有效 Tx Hash。");
+    }
+
+    writeBurnGuard(burnState.fingerprint, {
+      time: Date.now(),
+      state: "sent",
+      hash,
+      from: account,
+      amountRaw: burnState.amountRaw.toString(),
+      nonce: nonceNow
+    });
+
+    $("burnCheck").className = "box ok";
+    $("burnCheck").innerHTML =
+      "✓ Burn 交易已送出<br>" +
+      "Tx Hash：<span class='addr'>" + hash + "</span><br>" +
+      "請等待區塊確認後，按「重新讀取 IPT 鏈上資料」核對餘額與 totalSupply。";
+
+    burnState.checked = false;
+    $("sendBurnBtn").disabled = true;
+
+  } catch (e) {
+    if (!$("burnCheck").textContent.includes("結果不明")) {
+      $("burnCheck").className = "box err";
+      $("burnCheck").textContent =
+        "Burn 送出失敗：" + (e?.message || String(e));
+    }
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "由 Trust Wallet 核准永久銷毀";
+  }
+});
+
+const enableBurnPreflight = () => {
+  const connected = !!(wc?.session && account);
+  const contractOk = $("contractState").textContent === "正常";
+  $("preflightBurnBtn").disabled = !(connected && contractOk);
+};
+
+new MutationObserver(enableBurnPreflight).observe(
+  $("contractState"),
+  { childList: true, characterData: true, subtree: true }
+);
+
+setInterval(enableBurnPreflight, 3000);
+
+const mintState = {
+  checked: false,
+  to: "",
+  amountRaw: 0n,
+  data: "",
+  nonce: null,
+  gasLimit: null,
+  gasPrice: null,
+  fingerprint: ""
+};
+
+function resetMintCheck(message = "請重新檢查 Mint。") {
+  mintState.checked = false;
+  mintState.to = "";
+  mintState.amountRaw = 0n;
+  mintState.data = "";
+  mintState.nonce = null;
+  mintState.gasLimit = null;
+  mintState.gasPrice = null;
+  mintState.fingerprint = "";
+  $("sendMintBtn").disabled = true;
+  $("mintCheck").className = "box info";
+  $("mintCheck").textContent = message;
+}
+
+function mintFingerprint(from, to, amountRaw) {
+  return [
+    "mint",
+    String(from || "").toLowerCase(),
+    String(to || "").toLowerCase(),
+    amountRaw.toString()
+  ].join("|");
+}
+
+function mintGuardKey(fp) {
+  let h = 2166136261;
+  for (let i = 0; i < fp.length; i++) {
+    h ^= fp.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return "ipt-v24-mint-guard-" + (h >>> 0).toString(16);
+}
+
+function readMintGuard(fp) {
+  try {
+    return JSON.parse(localStorage.getItem(mintGuardKey(fp)) || "null");
+  } catch (_) {
+    return null;
+  }
+}
+
+function writeMintGuard(fp, obj) {
+  try {
+    localStorage.setItem(mintGuardKey(fp), JSON.stringify(obj));
+  } catch (_) {}
+}
+
+function clearMintGuard(fp) {
+  try {
+    localStorage.removeItem(mintGuardKey(fp));
+  } catch (_) {}
+}
+
+async function verifyMintPreflight() {
+  resetMintCheck("正在檢查 Mint…");
+
+  if (!wc?.session || !account) {
+    throw new Error("WalletConnect 尚未連線。");
+  }
+
+  const cid = await chainIdOf(wc);
+  if (cid !== CHAIN_ID) {
+    throw new Error("目前不是 Ethereum Sepolia。");
+  }
+
+  const to = $("mintTo").value.trim();
+  if (!isAddressLike(to)) {
+    throw new Error("領取地址格式錯誤。");
+  }
+
+  if (/^0x0{40}$/i.test(to)) {
+    throw new Error("領取地址不能是零地址。");
+  }
+
+  if (same(to, CONTRACT_ADDRESS)) {
+    throw new Error("不建議直接 Mint 到 IPT 合約地址。");
+  }
+
+  const amountRaw = decimalToRaw2($("mintAmount").value);
+  if (amountRaw <= 0n) {
+    throw new Error("發行數量必須大於 0。");
+  }
+
+  const rp = await getWorkingReadProvider();
+  const c = new Contract(CONTRACT_ADDRESS, ABI, rp);
+
+  const [owner, paused, supply, cap, code, recipientBalance] = await withTimeout(
+    Promise.all([
+      c.owner(),
+      c.paused(),
+      c.totalSupply(),
+      c.cap(),
+      rp.getCode(CONTRACT_ADDRESS),
+      c.balanceOf(to)
+    ]),
+    15000,
+    "Mint 前檢查"
+  );
+
+  if (!code || code === "0x") {
+    throw new Error("IPT 合約不存在。");
+  }
+
+  if (!same(account, owner)) {
+    throw new Error(
+      "目前錢包不是鏈上 Owner，不能 Mint。Owner：" + owner
+    );
+  }
+
+  if (paused) {
+    throw new Error("IPT 合約目前已暫停，依目前管理介面規則不執行 Mint。");
+  }
+
+  const remaining = cap - supply;
+  if (amountRaw > remaining) {
+    throw new Error(
+      "超過剩餘可發行量。剩餘：" + fmtIPT6(remaining, 2) + " IPT"
+    );
+  }
+
+  const iface = c.interface;
+  const data = iface.encodeFunctionData("mint", [to, amountRaw]);
+
+  const gas = await withTimeout(
+    rp.estimateGas({
+      from: account,
+      to: CONTRACT_ADDRESS,
+      data,
+      value: 0n
+    }),
+    15000,
+    "Mint 交易模擬"
+  );
+
+  const gasLimit = (gas * 120n + 99n) / 100n;
+
+  const fp = mintFingerprint(account, to, amountRaw);
+  const guard = readMintGuard(fp);
+
+  if (guard && (Date.now() - Number(guard.time || 0)) < 5 * 60 * 1000) {
+    throw new Error(
+      "防重複保護：相同領取地址與數量的 Mint 在 5 分鐘內已嘗試送出。請先重新讀取 totalSupply 與領取錢包餘額。"
+    );
+  }
+
+  mintState.checked = true;
+  mintState.to = to;
+  mintState.amountRaw = amountRaw;
+  mintState.data = data;
+  mintState.nonce = null;
+  mintState.gasLimit = gasLimit;
+  mintState.gasPrice = null;
+  mintState.fingerprint = fp;
+
+  $("mintCheck").className = "box ok";
+  $("mintCheck").innerHTML =
+    "✓ Mint 前檢查通過<br>" +
+    "目前 Owner：<span class='addr'>" + owner + "</span><br>" +
+    "領取地址：<span class='addr'>" + to + "</span><br>" +
+    "發行數量：<b>" + fmtIPT6(amountRaw, 2) + " IPT</b><br>" +
+    "領取地址目前餘額：<b>" + fmtIPT6(recipientBalance, 2) + " IPT</b><br>" +
+    "目前總供給：<b>" + fmtIPT6(supply, 2) + " IPT</b><br>" +
+    "目前剩餘可發行：<b>" + fmtIPT6(remaining, 2) + " IPT</b><br>" +
+    "Mint 後預期領取餘額：<b>" + fmtIPT6(recipientBalance + amountRaw, 2) + " IPT</b><br>" +
+    "Mint 後預期總供給：<b>" + fmtIPT6(supply + amountRaw, 2) + " IPT</b><br>" +
+    "Mint 後預期剩餘可發行：<b>" + fmtIPT6(remaining - amountRaw, 2) + " IPT</b><br>" +
+    "預估 Gas：<b>" + gas.toString() + "</b><br>" +
+    "送出 Gas Limit：<b>" + gasLimit.toString() + "</b><br>" +
+    "Nonce：<b>送出前再核對</b>";
+
+  $("sendMintBtn").disabled = false;
+}
+
+$("preflightMintBtn").addEventListener("click", async () => {
+  const btn = $("preflightMintBtn");
+
+  try {
+    btn.disabled = true;
+    btn.textContent = "檢查中…";
+    await verifyMintPreflight();
+  } catch (e) {
+    $("mintCheck").className = "box err";
+    $("mintCheck").textContent =
+      "檢查失敗：" + (e?.message || String(e));
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "先檢查 Mint";
+  }
+});
+
+$("mintTo").addEventListener("input", () => {
+  resetMintCheck("領取地址已變更，請重新檢查。");
+});
+
+$("mintAmount").addEventListener("input", () => {
+  resetMintCheck("發行數量已變更，請重新檢查。");
+});
+
+$("sendMintBtn").addEventListener("click", async () => {
+  const btn = $("sendMintBtn");
+
+  try {
+    if (!mintState.checked) {
+      throw new Error("請先完成 Mint 前檢查。");
+    }
+
+    const cid = await chainIdOf(wc);
+    if (cid !== CHAIN_ID) {
+      throw new Error("目前不是 Ethereum Sepolia。");
+    }
+
+    // Final owner check before signing.
+    const rp = await getWorkingReadProvider();
+    const c = new Contract(CONTRACT_ADDRESS, ABI, rp);
+    const ownerNow = await withTimeout(c.owner(), 10000, "重新核對 Owner");
+
+    if (!same(account, ownerNow)) {
+      resetMintCheck("Owner 已改變；請重新讀取資料後再檢查 Mint。");
+      throw new Error("目前錢包已不是鏈上 Owner，取消本次 Mint。");
+    }
+
+    const [nonceNow, gasPriceHex] = await Promise.all([
+      latestNonce(account),
+      latestGasPriceHex()
+    ]);
+
+    mintState.nonce = nonceNow;
+    mintState.gasPrice = gasPriceHex;
+
+    const amountText = fmtIPT6(mintState.amountRaw, 2);
+    const ok = window.confirm(
+      "確認在 Ethereum Sepolia 發行 " +
+      amountText +
+      " IPT 到：\n" +
+      mintState.to +
+      "\n\nMint 會增加 totalSupply，只有鏈上 Owner 可以執行。\n" +
+      "這是測試網交易，仍會消耗 Sepolia Gas。"
+    );
+
+    if (!ok) return;
+
+    btn.disabled = true;
+    btn.textContent = "等待 Trust Wallet…";
+
+    writeMintGuard(mintState.fingerprint, {
+      time: Date.now(),
+      state: "requesting",
+      from: account,
+      to: mintState.to,
+      amountRaw: mintState.amountRaw.toString(),
+      nonce: nonceNow
+    });
+
+    let hash = null;
+
+    try {
+      hash = await withTimeout(
+        wc.request({
+          method: "eth_sendTransaction",
+          params: [{
+            from: account,
+            to: CONTRACT_ADDRESS,
+            value: "0x0",
+            data: mintState.data,
+            chainId: "0xaa36a7",
+            nonce: "0x" + BigInt(nonceNow).toString(16),
+            gas: "0x" + BigInt(mintState.gasLimit).toString(16),
+            gasPrice: gasPriceHex
+          }]
+        }),
+        90000,
+        "等待 Trust Wallet Mint 回覆"
+      );
+    } catch (e) {
+      const msg = String(e?.message || e);
+
+      if (
+        /user rejected|user denied|rejected by user|cancelled|canceled/i.test(msg)
+      ) {
+        clearMintGuard(mintState.fingerprint);
+        throw new Error("你已取消 Mint；沒有送出。");
+      }
+
+      $("mintCheck").className = "box warn";
+      $("mintCheck").textContent =
+        "Mint 結果不明，已啟用 5 分鐘防重複保護。不要按『再試一次』；請先重新讀取 totalSupply 與領取地址餘額。";
+
+      throw new Error(
+        "WalletConnect / RPC 回覆不明。為避免重複 Mint，暫時禁止相同 Mint 再次送出。"
+      );
+    }
+
+    if (!/^0x[a-fA-F0-9]{64}$/.test(String(hash || ""))) {
+      $("mintCheck").className = "box warn";
+      $("mintCheck").textContent =
+        "錢包沒有回傳標準 Tx Hash，已保留防重複鎖。請先重新讀取 totalSupply 與領取地址餘額。";
+      throw new Error("沒有取得有效 Tx Hash。");
+    }
+
+    writeMintGuard(mintState.fingerprint, {
+      time: Date.now(),
+      state: "sent",
+      hash,
+      from: account,
+      to: mintState.to,
+      amountRaw: mintState.amountRaw.toString(),
+      nonce: nonceNow
+    });
+
+    $("mintCheck").className = "box ok";
+    $("mintCheck").innerHTML =
+      "✓ Mint 交易已送出<br>" +
+      "Tx Hash：<span class='addr'>" + hash + "</span><br>" +
+      "請等待區塊確認後，按「重新讀取 IPT 鏈上資料」核對 totalSupply，並切換至領取錢包核對餘額。";
+
+    mintState.checked = false;
+    $("sendMintBtn").disabled = true;
+
+  } catch (e) {
+    if (!$("mintCheck").textContent.includes("結果不明")) {
+      $("mintCheck").className = "box err";
+      $("mintCheck").textContent =
+        "Mint 送出失敗：" + (e?.message || String(e));
+    }
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "由 Trust Wallet 核准發行";
+  }
+});
+
+const enableMintPreflight = async () => {
+  try {
+    const connected = !!(wc?.session && account);
+    const contractOk = $("contractState").textContent === "正常";
+
+    if (!connected || !contractOk) {
+      $("preflightMintBtn").disabled = true;
+      return;
+    }
+
+    const rp = await getWorkingReadProvider();
+    const c = new Contract(CONTRACT_ADDRESS, ABI, rp);
+    const owner = await withTimeout(c.owner(), 7000, "核對 Owner");
+
+    $("preflightMintBtn").disabled = !same(account, owner);
+  } catch (_) {
+    $("preflightMintBtn").disabled = true;
+  }
+};
+
+new MutationObserver(() => { enableMintPreflight(); }).observe(
+  $("contractState"),
+  { childList: true, characterData: true, subtree: true }
+);
+
+setInterval(enableMintPreflight, 5000);
+
+const adminPauseState = {
+  action: "",
+  data: "",
+  nonce: null,
+  gasLimit: null,
+  gasPrice: null,
+  fingerprint: ""
+};
+
+let adminPauseRefreshBusy = false;
+
+function resetAdminPauseCheck(message = "請重新檢查管理操作。") {
+  adminPauseState.action = "";
+  adminPauseState.data = "";
+  adminPauseState.nonce = null;
+  adminPauseState.gasLimit = null;
+  adminPauseState.gasPrice = null;
+  adminPauseState.fingerprint = "";
+
+  $("sendPauseBtn").disabled = true;
+  $("sendUnpauseBtn").disabled = true;
+  $("adminPauseCheck").className = "box info";
+  $("adminPauseCheck").textContent = message;
+}
+
+function adminFingerprint(action, from) {
+  return [
+    "admin",
+    action,
+    String(from || "").toLowerCase()
+  ].join("|");
+}
+
+function adminGuardKey(fp) {
+  let h = 2166136261;
+  for (let i = 0; i < fp.length; i++) {
+    h ^= fp.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return "ipt-v25-admin-guard-" + (h >>> 0).toString(16);
+}
+
+function readAdminGuard(fp) {
+  try {
+    return JSON.parse(localStorage.getItem(adminGuardKey(fp)) || "null");
+  } catch (_) {
+    return null;
+  }
+}
+
+function writeAdminGuard(fp, obj) {
+  try {
+    localStorage.setItem(adminGuardKey(fp), JSON.stringify(obj));
+  } catch (_) {}
+}
+
+function clearAdminGuard(fp) {
+  try {
+    localStorage.removeItem(adminGuardKey(fp));
+  } catch (_) {}
+}
+
+async function readAdminPauseState() {
+  if (adminPauseRefreshBusy) return;
+  adminPauseRefreshBusy = true;
+
+  try {
+    const connected = !!(wc?.session && account);
+    const contractOk = $("contractState").textContent === "正常";
+
+    if (!connected || !contractOk) {
+      $("adminPausedState").textContent = "尚未連線或合約尚未驗證";
+      $("preflightPauseBtn").disabled = true;
+      $("preflightUnpauseBtn").disabled = true;
+      return;
+    }
+
+    const rp = await getWorkingReadProvider();
+    const c = new Contract(CONTRACT_ADDRESS, ABI, rp);
+
+    const [owner, paused] = await withTimeout(
+      Promise.all([c.owner(), c.paused()]),
+      10000,
+      "讀取管理狀態"
+    );
+
+    const isOwner = same(account, owner);
+
+    $("adminPausedState").innerHTML =
+      paused
+        ? "<b>paused = true（已暫停）</b>"
+        : "<b>paused = false（正常）</b>";
+
+    if (!isOwner) {
+      $("preflightPauseBtn").disabled = true;
+      $("preflightUnpauseBtn").disabled = true;
+      $("adminPauseCheck").className = "box info";
+      $("adminPauseCheck").textContent =
+        "目前錢包不是鏈上 Owner，管理按鈕已停用。";
+      return;
+    }
+
+    $("preflightPauseBtn").disabled = paused;
+    $("preflightUnpauseBtn").disabled = !paused;
+
+  } catch (e) {
+    $("adminPausedState").textContent =
+      "讀取失敗：" + (e?.message || String(e));
+    $("preflightPauseBtn").disabled = true;
+    $("preflightUnpauseBtn").disabled = true;
+  } finally {
+    adminPauseRefreshBusy = false;
+  }
+}
+
+async function verifyAdminAction(action) {
+  resetAdminPauseCheck("正在檢查管理操作…");
+
+  if (!wc?.session || !account) {
+    throw new Error("WalletConnect 尚未連線。");
+  }
+
+  const cid = await chainIdOf(wc);
+  if (cid !== CHAIN_ID) {
+    throw new Error("目前不是 Ethereum Sepolia。");
+  }
+
+  if (action !== "pause" && action !== "unpause") {
+    throw new Error("未知的管理操作。");
+  }
+
+  const rp = await getWorkingReadProvider();
+  const c = new Contract(CONTRACT_ADDRESS, ABI, rp);
+
+  const [owner, paused, supply, code] = await withTimeout(
+    Promise.all([
+      c.owner(),
+      c.paused(),
+      c.totalSupply(),
+      rp.getCode(CONTRACT_ADDRESS)
+    ]),
+    15000,
+    "管理操作前檢查"
+  );
+
+  if (!code || code === "0x") {
+    throw new Error("IPT 合約不存在。");
+  }
+
+  if (!same(account, owner)) {
+    throw new Error(
+      "目前錢包不是鏈上 Owner，不能執行此管理操作。Owner：" + owner
+    );
+  }
+
+  if (action === "pause" && paused) {
+    throw new Error("合約目前已經是 paused = true，不需要再次 Pause。");
+  }
+
+  if (action === "unpause" && !paused) {
+    throw new Error("合約目前已經是 paused = false，不需要 Unpause。");
+  }
+
+  const iface = c.interface;
+  const data = iface.encodeFunctionData(action, []);
+
+  const gas = await withTimeout(
+    rp.estimateGas({
+      from: account,
+      to: CONTRACT_ADDRESS,
+      data,
+      value: 0n
+    }),
+    15000,
+    action === "pause" ? "Pause 交易模擬" : "Unpause 交易模擬"
+  );
+
+  const gasLimit = (gas * 120n + 99n) / 100n;
+
+  const fp = adminFingerprint(action, account);
+  const guard = readAdminGuard(fp);
+
+  if (guard && (Date.now() - Number(guard.time || 0)) < 5 * 60 * 1000) {
+    throw new Error(
+      "防重複保護：相同管理操作在 5 分鐘內已嘗試送出。請先重新讀取 paused 狀態。"
+    );
+  }
+
+  adminPauseState.action = action;
+  adminPauseState.data = data;
+  adminPauseState.nonce = null;
+  adminPauseState.gasLimit = gasLimit;
+  adminPauseState.gasPrice = null;
+  adminPauseState.fingerprint = fp;
+
+  const actionLabel = action === "pause" ? "暫停 Pause" : "恢復 Unpause";
+  const expected = action === "pause" ? "true（已暫停）" : "false（正常）";
+
+  $("adminPauseCheck").className = "box ok";
+  $("adminPauseCheck").innerHTML =
+    "✓ " + actionLabel + " 前檢查通過<br>" +
+    "目前 Owner：<span class='addr'>" + owner + "</span><br>" +
+    "目前 paused：<b>" + String(paused) + "</b><br>" +
+    "目前 totalSupply：<b>" + fmtIPT6(supply, 2) + " IPT</b><br>" +
+    "操作後預期 paused：<b>" + expected + "</b><br>" +
+    "totalSupply：<b>不變</b><br>" +
+    "預估 Gas：<b>" + gas.toString() + "</b><br>" +
+    "送出 Gas Limit：<b>" + gasLimit.toString() + "</b><br>" +
+    "Nonce：<b>送出前再核對</b>";
+
+  $("sendPauseBtn").disabled = action !== "pause";
+  $("sendUnpauseBtn").disabled = action !== "unpause";
+}
+
+$("preflightPauseBtn").addEventListener("click", async () => {
+  const btn = $("preflightPauseBtn");
+
+  try {
+    btn.disabled = true;
+    btn.textContent = "檢查中…";
+    await verifyAdminAction("pause");
+  } catch (e) {
+    $("adminPauseCheck").className = "box err";
+    $("adminPauseCheck").textContent =
+      "檢查失敗：" + (e?.message || String(e));
+  } finally {
+    btn.textContent = "先檢查暫停合約";
+    await readAdminPauseState();
+  }
+});
+
+$("preflightUnpauseBtn").addEventListener("click", async () => {
+  const btn = $("preflightUnpauseBtn");
+
+  try {
+    btn.disabled = true;
+    btn.textContent = "檢查中…";
+    await verifyAdminAction("unpause");
+  } catch (e) {
+    $("adminPauseCheck").className = "box err";
+    $("adminPauseCheck").textContent =
+      "檢查失敗：" + (e?.message || String(e));
+  } finally {
+    btn.textContent = "先檢查恢復合約";
+    await readAdminPauseState();
+  }
+});
+
+async function sendAdminAction(expectedAction) {
+  const btn = expectedAction === "pause" ? $("sendPauseBtn") : $("sendUnpauseBtn");
+
+  try {
+    if (adminPauseState.action !== expectedAction) {
+      throw new Error("請先完成對應的管理操作檢查。");
+    }
+
+    const cid = await chainIdOf(wc);
+    if (cid !== CHAIN_ID) {
+      throw new Error("目前不是 Ethereum Sepolia。");
+    }
+
+    const rp = await getWorkingReadProvider();
+    const c = new Contract(CONTRACT_ADDRESS, ABI, rp);
+
+    const [ownerNow, pausedNow, supplyNow] = await withTimeout(
+      Promise.all([
+        c.owner(),
+        c.paused(),
+        c.totalSupply()
+      ]),
+      12000,
+      "送出前重新核對管理狀態"
+    );
+
+    if (!same(account, ownerNow)) {
+      resetAdminPauseCheck("Owner 已改變；請重新讀取資料。");
+      throw new Error("目前錢包已不是鏈上 Owner。");
+    }
+
+    if (expectedAction === "pause" && pausedNow) {
+      resetAdminPauseCheck("鏈上已經 paused = true。");
+      throw new Error("合約已經暫停，不再重複送出 Pause。");
+    }
+
+    if (expectedAction === "unpause" && !pausedNow) {
+      resetAdminPauseCheck("鏈上已經 paused = false。");
+      throw new Error("合約已經恢復，不再重複送出 Unpause。");
+    }
+
+    const [nonceNow, gasPriceHex] = await Promise.all([
+      latestNonce(account),
+      latestGasPriceHex()
+    ]);
+
+    adminPauseState.nonce = nonceNow;
+    adminPauseState.gasPrice = gasPriceHex;
+
+    const actionLabel = expectedAction === "pause" ? "暫停合約" : "恢復合約";
+    const expectedPaused = expectedAction === "pause" ? "true" : "false";
+
+    const ok = window.confirm(
+      "確認在 Ethereum Sepolia " + actionLabel + "？\n\n" +
+      "目前 totalSupply：" + fmtIPT6(supplyNow, 2) + " IPT\n" +
+      "操作後 paused 將變成：" + expectedPaused + "\n" +
+      "IPT 餘額與 totalSupply 不會因這筆管理操作改變。\n\n" +
+      "這是測試網交易，仍會消耗 Sepolia Gas。"
+    );
+
+    if (!ok) return;
+
+    btn.disabled = true;
+    btn.textContent = "等待 Trust Wallet…";
+
+    writeAdminGuard(adminPauseState.fingerprint, {
+      time: Date.now(),
+      state: "requesting",
+      action: expectedAction,
+      from: account,
+      nonce: nonceNow
+    });
+
+    let hash = null;
+
+    try {
+      hash = await withTimeout(
+        wc.request({
+          method: "eth_sendTransaction",
+          params: [{
+            from: account,
+            to: CONTRACT_ADDRESS,
+            value: "0x0",
+            data: adminPauseState.data,
+            chainId: "0xaa36a7",
+            nonce: "0x" + BigInt(nonceNow).toString(16),
+            gas: "0x" + BigInt(adminPauseState.gasLimit).toString(16),
+            gasPrice: gasPriceHex
+          }]
+        }),
+        90000,
+        "等待 Trust Wallet 管理交易回覆"
+      );
+    } catch (e) {
+      const msg = String(e?.message || e);
+
+      if (
+        /user rejected|user denied|rejected by user|cancelled|canceled/i.test(msg)
+      ) {
+        clearAdminGuard(adminPauseState.fingerprint);
+        throw new Error("你已取消管理交易；沒有送出。");
+      }
+
+      $("adminPauseCheck").className = "box warn";
+      $("adminPauseCheck").textContent =
+        "交易結果不明，已啟用 5 分鐘防重複保護。不要按『再試一次』；請先重新讀取 paused 狀態。";
+
+      throw new Error(
+        "WalletConnect / RPC 回覆不明。為避免重複管理交易，暫時禁止相同操作再次送出。"
+      );
+    }
+
+    if (!/^0x[a-fA-F0-9]{64}$/.test(String(hash || ""))) {
+      $("adminPauseCheck").className = "box warn";
+      $("adminPauseCheck").textContent =
+        "錢包沒有回傳標準 Tx Hash，已保留防重複鎖。請先重新讀取 paused 狀態。";
+      throw new Error("沒有取得有效 Tx Hash。");
+    }
+
+    writeAdminGuard(adminPauseState.fingerprint, {
+      time: Date.now(),
+      state: "sent",
+      action: expectedAction,
+      hash,
+      from: account,
+      nonce: nonceNow
+    });
+
+    $("adminPauseCheck").className = "box ok";
+    $("adminPauseCheck").innerHTML =
+      "✓ " + actionLabel + "交易已送出<br>" +
+      "Tx Hash：<span class='addr'>" + hash + "</span><br>" +
+      "請等待區塊確認後，按「重新讀取 IPT 鏈上資料」並核對 paused 狀態。";
+
+    adminPauseState.action = "";
+    $("sendPauseBtn").disabled = true;
+    $("sendUnpauseBtn").disabled = true;
+
+  } catch (e) {
+    if (!$("adminPauseCheck").textContent.includes("結果不明")) {
+      $("adminPauseCheck").className = "box err";
+      $("adminPauseCheck").textContent =
+        "管理交易失敗：" + (e?.message || String(e));
+    }
+  } finally {
+    btn.disabled = false;
+    btn.textContent =
+      expectedAction === "pause"
+        ? "由 Trust Wallet 核准暫停"
+        : "由 Trust Wallet 核准恢復";
+
+    setTimeout(() => { readAdminPauseState(); }, 1500);
+  }
+}
+
+$("sendPauseBtn").addEventListener("click", async () => {
+  await sendAdminAction("pause");
+});
+
+$("sendUnpauseBtn").addEventListener("click", async () => {
+  await sendAdminAction("unpause");
+});
+
+new MutationObserver(() => {
+  resetAdminPauseCheck("鏈上資料已更新，請重新檢查管理操作。");
+  readAdminPauseState();
+}).observe(
+  $("contractState"),
+  { childList: true, characterData: true, subtree: true }
+);
+
+setInterval(readAdminPauseState, 10000);
+
+const ownershipState = {
+  action: "",
+  candidate: "",
+  data: "",
+  nonce: null,
+  gasLimit: null,
+  gasPrice: null,
+  fingerprint: ""
+};
+
+const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
+let ownershipRefreshBusy = false;
+
+function resetOwnershipCheck(message = "請重新檢查管理權操作。") {
+  ownershipState.action = "";
+  ownershipState.candidate = "";
+  ownershipState.data = "";
+  ownershipState.nonce = null;
+  ownershipState.gasLimit = null;
+  ownershipState.gasPrice = null;
+  ownershipState.fingerprint = "";
+
+  $("sendProposeOwnerBtn").disabled = true;
+  $("sendAcceptOwnerBtn").disabled = true;
+  $("ownershipCheck").className = "box info";
+  $("ownershipCheck").textContent = message;
+}
+
+function ownershipFingerprint(action, from, target = "") {
+  return [
+    "ownership",
+    action,
+    String(from || "").toLowerCase(),
+    String(target || "").toLowerCase()
+  ].join("|");
+}
+
+function ownershipGuardKey(fp) {
+  let h = 2166136261;
+  for (let i = 0; i < fp.length; i++) {
+    h ^= fp.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return "ipt-v26-ownership-guard-" + (h >>> 0).toString(16);
+}
+
+function readOwnershipGuard(fp) {
+  try {
+    return JSON.parse(localStorage.getItem(ownershipGuardKey(fp)) || "null");
+  } catch (_) {
+    return null;
+  }
+}
+
+function writeOwnershipGuard(fp, obj) {
+  try {
+    localStorage.setItem(ownershipGuardKey(fp), JSON.stringify(obj));
+  } catch (_) {}
+}
+
+function clearOwnershipGuard(fp) {
+  try {
+    localStorage.removeItem(ownershipGuardKey(fp));
+  } catch (_) {}
+}
+
+async function readOwnershipState() {
+  if (ownershipRefreshBusy) return;
+  ownershipRefreshBusy = true;
+
+  try {
+    const connected = !!(wc?.session && account);
+    const contractOk = $("contractState").textContent === "正常";
+
+    if (!connected || !contractOk) {
+      $("ownershipOwner").textContent = "尚未連線或合約尚未驗證";
+      $("ownershipPendingOwner").textContent = "尚未連線或合約尚未驗證";
+      $("preflightProposeOwnerBtn").disabled = true;
+      $("preflightAcceptOwnerBtn").disabled = true;
+      return;
+    }
+
+    const rp = await getWorkingReadProvider();
+    const c = new Contract(CONTRACT_ADDRESS, ABI, rp);
+
+    const [owner, pendingOwner] = await withTimeout(
+      Promise.all([
+        c.owner(),
+        c.pendingOwner()
+      ]),
+      10000,
+      "讀取管理權狀態"
+    );
+
+    $("ownershipOwner").textContent = owner;
+    $("ownershipPendingOwner").textContent =
+      same(pendingOwner, ZERO_ADDRESS) ? "無候任管理者" : pendingOwner;
+
+    const isOwner = same(account, owner);
+    const isPending = !same(pendingOwner, ZERO_ADDRESS) && same(account, pendingOwner);
+
+    $("preflightProposeOwnerBtn").disabled = !isOwner;
+    $("preflightAcceptOwnerBtn").disabled = !isPending;
+
+    if (!isOwner && !isPending) {
+      $("ownershipCheck").className = "box info";
+      $("ownershipCheck").textContent =
+        "目前錢包既不是現任 Owner，也不是 pendingOwner，因此管理權操作已停用。";
+    }
+
+  } catch (e) {
+    $("ownershipOwner").textContent =
+      "讀取失敗：" + (e?.message || String(e));
+    $("ownershipPendingOwner").textContent = "讀取失敗";
+    $("preflightProposeOwnerBtn").disabled = true;
+    $("preflightAcceptOwnerBtn").disabled = true;
+  } finally {
+    ownershipRefreshBusy = false;
+  }
+}
+
+async function verifyProposeOwnership() {
+  resetOwnershipCheck("正在檢查提出交接…");
+
+  if (!wc?.session || !account) {
+    throw new Error("WalletConnect 尚未連線。");
+  }
+
+  const cid = await chainIdOf(wc);
+  if (cid !== CHAIN_ID) {
+    throw new Error("目前不是 Ethereum Sepolia。");
+  }
+
+  const candidate = $("newOwnerAddress").value.trim();
+
+  if (!isAddressLike(candidate)) {
+    throw new Error("候任管理者地址格式錯誤。");
+  }
+
+  if (same(candidate, ZERO_ADDRESS)) {
+    throw new Error("候任管理者不能是零地址。");
+  }
+
+  if (same(candidate, CONTRACT_ADDRESS)) {
+    throw new Error("候任管理者不能是 IPT 合約地址。");
+  }
+
+  const rp = await getWorkingReadProvider();
+  const c = new Contract(CONTRACT_ADDRESS, ABI, rp);
+
+  const [owner, pendingOwner, paused, code] = await withTimeout(
+    Promise.all([
+      c.owner(),
+      c.pendingOwner(),
+      c.paused(),
+      rp.getCode(CONTRACT_ADDRESS)
+    ]),
+    15000,
+    "提出交接前檢查"
+  );
+
+  if (!code || code === "0x") {
+    throw new Error("IPT 合約不存在。");
+  }
+
+  if (!same(account, owner)) {
+    throw new Error(
+      "目前錢包不是鏈上 Owner，不能提出交接。Owner：" + owner
+    );
+  }
+
+  if (same(candidate, owner)) {
+    throw new Error("候任管理者不能與目前 Owner 相同。");
+  }
+
+  const iface = c.interface;
+  const data = iface.encodeFunctionData("transferOwnership", [candidate]);
+
+  const gas = await withTimeout(
+    rp.estimateGas({
+      from: account,
+      to: CONTRACT_ADDRESS,
+      data,
+      value: 0n
+    }),
+    15000,
+    "提出交接交易模擬"
+  );
+
+  const gasLimit = (gas * 120n + 99n) / 100n;
+  const fp = ownershipFingerprint("propose", account, candidate);
+  const guard = readOwnershipGuard(fp);
+
+  if (guard && (Date.now() - Number(guard.time || 0)) < 5 * 60 * 1000) {
+    throw new Error(
+      "防重複保護：相同候任管理者的交接在 5 分鐘內已嘗試送出。請先重新讀取 owner / pendingOwner。"
+    );
+  }
+
+  ownershipState.action = "propose";
+  ownershipState.candidate = candidate;
+  ownershipState.data = data;
+  ownershipState.nonce = null;
+  ownershipState.gasLimit = gasLimit;
+  ownershipState.gasPrice = null;
+  ownershipState.fingerprint = fp;
+
+  const hasPending = !same(pendingOwner, ZERO_ADDRESS);
+
+  $("ownershipCheck").className = "box ok";
+  $("ownershipCheck").innerHTML =
+    "✓ 提出交接前檢查通過<br>" +
+    "目前 Owner：<span class='addr'>" + owner + "</span><br>" +
+    "目前 pendingOwner：<span class='addr'>" +
+      (hasPending ? pendingOwner : "無") +
+    "</span><br>" +
+    "新候任管理者：<span class='addr'>" + candidate + "</span><br>" +
+    "目前 paused：<b>" + String(paused) + "</b><br>" +
+    (hasPending
+      ? "<b>注意：送出後會把目前 pendingOwner 改成新的候任管理者。</b><br>"
+      : "") +
+    "正式 Owner 在候任管理者接任前：<b>不變</b><br>" +
+    "預估 Gas：<b>" + gas.toString() + "</b><br>" +
+    "送出 Gas Limit：<b>" + gasLimit.toString() + "</b><br>" +
+    "Nonce：<b>送出前再核對</b>";
+
+  $("sendProposeOwnerBtn").disabled = false;
+}
+
+async function verifyAcceptOwnership() {
+  resetOwnershipCheck("正在檢查接任管理權…");
+
+  if (!wc?.session || !account) {
+    throw new Error("WalletConnect 尚未連線。");
+  }
+
+  const cid = await chainIdOf(wc);
+  if (cid !== CHAIN_ID) {
+    throw new Error("目前不是 Ethereum Sepolia。");
+  }
+
+  const rp = await getWorkingReadProvider();
+  const c = new Contract(CONTRACT_ADDRESS, ABI, rp);
+
+  const [owner, pendingOwner, paused, code] = await withTimeout(
+    Promise.all([
+      c.owner(),
+      c.pendingOwner(),
+      c.paused(),
+      rp.getCode(CONTRACT_ADDRESS)
+    ]),
+    15000,
+    "接任前檢查"
+  );
+
+  if (!code || code === "0x") {
+    throw new Error("IPT 合約不存在。");
+  }
+
+  if (same(pendingOwner, ZERO_ADDRESS)) {
+    throw new Error("目前沒有 pendingOwner，無法接任。");
+  }
+
+  if (!same(account, pendingOwner)) {
+    throw new Error(
+      "目前錢包不是 pendingOwner，不能接任。pendingOwner：" + pendingOwner
+    );
+  }
+
+  const iface = c.interface;
+  const data = iface.encodeFunctionData("acceptOwnership", []);
+
+  const gas = await withTimeout(
+    rp.estimateGas({
+      from: account,
+      to: CONTRACT_ADDRESS,
+      data,
+      value: 0n
+    }),
+    15000,
+    "接任管理權交易模擬"
+  );
+
+  const gasLimit = (gas * 120n + 99n) / 100n;
+  const fp = ownershipFingerprint("accept", account, owner);
+  const guard = readOwnershipGuard(fp);
+
+  if (guard && (Date.now() - Number(guard.time || 0)) < 5 * 60 * 1000) {
+    throw new Error(
+      "防重複保護：接任管理權在 5 分鐘內已嘗試送出。請先重新讀取 owner / pendingOwner。"
+    );
+  }
+
+  ownershipState.action = "accept";
+  ownershipState.candidate = account;
+  ownershipState.data = data;
+  ownershipState.nonce = null;
+  ownershipState.gasLimit = gasLimit;
+  ownershipState.gasPrice = null;
+  ownershipState.fingerprint = fp;
+
+  $("ownershipCheck").className = "box ok";
+  $("ownershipCheck").innerHTML =
+    "✓ 接任管理權前檢查通過<br>" +
+    "目前 Owner：<span class='addr'>" + owner + "</span><br>" +
+    "pendingOwner：<span class='addr'>" + pendingOwner + "</span><br>" +
+    "目前連線錢包：<span class='addr'>" + account + "</span><br>" +
+    "目前 paused：<b>" + String(paused) + "</b><br>" +
+    "接任後預期 Owner：<span class='addr'>" + account + "</span><br>" +
+    "接任後 pendingOwner：<b>清空</b><br>" +
+    "預估 Gas：<b>" + gas.toString() + "</b><br>" +
+    "送出 Gas Limit：<b>" + gasLimit.toString() + "</b><br>" +
+    "Nonce：<b>送出前再核對</b>";
+
+  $("sendAcceptOwnerBtn").disabled = false;
+}
+
+$("preflightProposeOwnerBtn").addEventListener("click", async () => {
+  const btn = $("preflightProposeOwnerBtn");
+  try {
+    btn.disabled = true;
+    btn.textContent = "檢查中…";
+    await verifyProposeOwnership();
+  } catch (e) {
+    $("ownershipCheck").className = "box err";
+    $("ownershipCheck").textContent =
+      "檢查失敗：" + (e?.message || String(e));
+  } finally {
+    btn.textContent = "先檢查提出交接";
+    await readOwnershipState();
+  }
+});
+
+$("preflightAcceptOwnerBtn").addEventListener("click", async () => {
+  const btn = $("preflightAcceptOwnerBtn");
+  try {
+    btn.disabled = true;
+    btn.textContent = "檢查中…";
+    await verifyAcceptOwnership();
+  } catch (e) {
+    $("ownershipCheck").className = "box err";
+    $("ownershipCheck").textContent =
+      "檢查失敗：" + (e?.message || String(e));
+  } finally {
+    btn.textContent = "先檢查接任管理權";
+    await readOwnershipState();
+  }
+});
+
+$("newOwnerAddress").addEventListener("input", () => {
+  resetOwnershipCheck("候任管理者地址已變更，請重新檢查。");
+});
+
+async function sendOwnershipAction(expectedAction) {
+  const isPropose = expectedAction === "propose";
+  const btn = isPropose ? $("sendProposeOwnerBtn") : $("sendAcceptOwnerBtn");
+
+  try {
+    if (ownershipState.action !== expectedAction) {
+      throw new Error("請先完成對應的管理權前置檢查。");
+    }
+
+    const cid = await chainIdOf(wc);
+    if (cid !== CHAIN_ID) {
+      throw new Error("目前不是 Ethereum Sepolia。");
+    }
+
+    const rp = await getWorkingReadProvider();
+    const c = new Contract(CONTRACT_ADDRESS, ABI, rp);
+
+    const [ownerNow, pendingNow] = await withTimeout(
+      Promise.all([
+        c.owner(),
+        c.pendingOwner()
+      ]),
+      12000,
+      "送出前重新核對管理權"
+    );
+
+    if (isPropose) {
+      if (!same(account, ownerNow)) {
+        resetOwnershipCheck("Owner 已改變；請重新讀取資料。");
+        throw new Error("目前錢包已不是鏈上 Owner。");
+      }
+
+      if (!isAddressLike(ownershipState.candidate)) {
+        throw new Error("候任管理者地址已失效。");
+      }
+    } else {
+      if (!same(account, pendingNow)) {
+        resetOwnershipCheck("pendingOwner 已改變；請重新讀取資料。");
+        throw new Error("目前錢包已不是鏈上 pendingOwner。");
+      }
+    }
+
+    const [nonceNow, gasPriceHex] = await Promise.all([
+      latestNonce(account),
+      latestGasPriceHex()
+    ]);
+
+    ownershipState.nonce = nonceNow;
+    ownershipState.gasPrice = gasPriceHex;
+
+    let message = "";
+
+    if (isPropose) {
+      message =
+        "確認在 Ethereum Sepolia 提出管理權交接？\n\n" +
+        "目前 Owner：\n" + ownerNow + "\n\n" +
+        "新 pendingOwner：\n" + ownershipState.candidate + "\n\n" +
+        "這一步不會立即更換 Owner；候任管理者仍需自己簽名接任。\n" +
+        "這是測試網交易，仍會消耗 Sepolia Gas。";
+    } else {
+      message =
+        "確認在 Ethereum Sepolia 接任 IPT 管理權？\n\n" +
+        "目前 Owner：\n" + ownerNow + "\n\n" +
+        "目前 pendingOwner：\n" + pendingNow + "\n\n" +
+        "核准後，連線錢包將成為新的 Owner。\n" +
+        "這是測試網交易，仍會消耗 Sepolia Gas。";
+    }
+
+    const ok = window.confirm(message);
+    if (!ok) return;
+
+    btn.disabled = true;
+    btn.textContent = "等待 Trust Wallet…";
+
+    writeOwnershipGuard(ownershipState.fingerprint, {
+      time: Date.now(),
+      state: "requesting",
+      action: expectedAction,
+      from: account,
+      candidate: ownershipState.candidate,
+      nonce: nonceNow
+    });
+
+    let hash = null;
+
+    try {
+      hash = await withTimeout(
+        wc.request({
+          method: "eth_sendTransaction",
+          params: [{
+            from: account,
+            to: CONTRACT_ADDRESS,
+            value: "0x0",
+            data: ownershipState.data,
+            chainId: "0xaa36a7",
+            nonce: "0x" + BigInt(nonceNow).toString(16),
+            gas: "0x" + BigInt(ownershipState.gasLimit).toString(16),
+            gasPrice: gasPriceHex
+          }]
+        }),
+        90000,
+        "等待 Trust Wallet 管理權交易回覆"
+      );
+    } catch (e) {
+      const msg = String(e?.message || e);
+
+      if (
+        /user rejected|user denied|rejected by user|cancelled|canceled/i.test(msg)
+      ) {
+        clearOwnershipGuard(ownershipState.fingerprint);
+        throw new Error("你已取消管理權交易；沒有送出。");
+      }
+
+      $("ownershipCheck").className = "box warn";
+      $("ownershipCheck").textContent =
+        "管理權交易結果不明，已啟用 5 分鐘防重複保護。不要按『再試一次』；請先重新讀取 owner / pendingOwner。";
+
+      throw new Error(
+        "WalletConnect / RPC 回覆不明。為避免重複管理權交易，暫時禁止相同操作再次送出。"
+      );
+    }
+
+    if (!/^0x[a-fA-F0-9]{64}$/.test(String(hash || ""))) {
+      $("ownershipCheck").className = "box warn";
+      $("ownershipCheck").textContent =
+        "錢包沒有回傳標準 Tx Hash，已保留防重複鎖。請先重新讀取 owner / pendingOwner。";
+      throw new Error("沒有取得有效 Tx Hash。");
+    }
+
+    writeOwnershipGuard(ownershipState.fingerprint, {
+      time: Date.now(),
+      state: "sent",
+      action: expectedAction,
+      hash,
+      from: account,
+      candidate: ownershipState.candidate,
+      nonce: nonceNow
+    });
+
+    $("ownershipCheck").className = "box ok";
+    $("ownershipCheck").innerHTML =
+      "✓ 管理權交易已送出<br>" +
+      "動作：<b>" + (isPropose ? "提出交接" : "接任管理權") + "</b><br>" +
+      "Tx Hash：<span class='addr'>" + hash + "</span><br>" +
+      "請等待區塊確認後，按「重新讀取 IPT 鏈上資料」，並核對 owner / pendingOwner。";
+
+    ownershipState.action = "";
+    $("sendProposeOwnerBtn").disabled = true;
+    $("sendAcceptOwnerBtn").disabled = true;
+
+  } catch (e) {
+    if (!$("ownershipCheck").textContent.includes("結果不明")) {
+      $("ownershipCheck").className = "box err";
+      $("ownershipCheck").textContent =
+        "管理權交易失敗：" + (e?.message || String(e));
+    }
+  } finally {
+    btn.disabled = false;
+    btn.textContent = isPropose
+      ? "由 Trust Wallet 核准提出交接"
+      : "由 Trust Wallet 核准接任";
+
+    setTimeout(() => { readOwnershipState(); }, 1500);
+  }
+}
+
+$("sendProposeOwnerBtn").addEventListener("click", async () => {
+  await sendOwnershipAction("propose");
+});
+
+$("sendAcceptOwnerBtn").addEventListener("click", async () => {
+  await sendOwnershipAction("accept");
+});
+
+new MutationObserver(() => {
+  resetOwnershipCheck("鏈上資料已更新，請重新檢查管理權操作。");
+  readOwnershipState();
+}).observe(
+  $("contractState"),
+  { childList: true, characterData: true, subtree: true }
+);
+
+setInterval(readOwnershipState, 10000);
+
+// Member-facing navigation.
+$("goBalanceBtn")?.addEventListener("click", () => {
+  $("balanceSection")?.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+$("goTransferBtn")?.addEventListener("click", () => {
+  $("transferSection")?.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+$("goHistoryBtn")?.addEventListener("click", () => {
+  $("historySection")?.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+$("goAdminBtn")?.addEventListener("click", () => {
+  const target = document.querySelector(".owner-only, .ownership-only");
+  target?.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+$("toggleAdvancedBtn")?.addEventListener("click", () => {
+  const on = document.body.classList.toggle("show-advanced");
+  document.body.classList.toggle("show-tech", on);
+  $("toggleAdvancedBtn").textContent = on ? "收合進階功能" : "進階功能";
+});
+
+$("openHistoryBtn")?.addEventListener("click", () => {
+  if (!account) return;
+  const url =
+    "https://sepolia.etherscan.io/address/" +
+    encodeURIComponent(account) +
+    "#tokentxns";
+  window.open(url, "_blank", "noopener,noreferrer");
+});
+
+
+
+// ===== V4.10.1 phone-safe formal operations security guard =====
+const V48_EVENT_KEY = "ipt_v48_security_events";
+const V48_LAST_WALLET_KEY = "ipt_v48_last_wallet";
+const V48_GUARD_UNTIL_KEY = "ipt_v48_guard_until";
+const V48_GUARD_ACCOUNT_KEY = "ipt_v48_guard_account";
+const V48_HIGH_RISK_IDS = new Set([
+  "sendMintBtn","sendPauseBtn","sendUnpauseBtn",
+  "sendProposeOwnerBtn","sendAcceptOwnerBtn"
+]);
+
+let v48CachedRole = "尚未核對";
+let v48CachedOwner = "";
+let v48CachedPendingOwner = "";
+
+function v48ReadEvents(){
+  try{
+    const x=JSON.parse(localStorage.getItem(V48_EVENT_KEY)||"[]");
+    return Array.isArray(x)?x:[];
+  }catch(_){return []}
+}
+function v48LogSecurityEvent(type, detail={}){
+  try{
+    const arr=v48ReadEvents();
+    arr.unshift({
+      id:Date.now()+"-"+Math.random().toString(16).slice(2),
+      time:new Date().toISOString(),
+      type,
+      account:account||"",
+      chainId:CHAIN_ID,
+      detail
+    });
+    localStorage.setItem(V48_EVENT_KEY,JSON.stringify(arr.slice(0,120)));
+  }catch(_){}
+}
+function v48GuardUntil(){
+  return Number(localStorage.getItem(V48_GUARD_UNTIL_KEY)||"0");
+}
+function v48GuardAccount(){
+  return String(localStorage.getItem(V48_GUARD_ACCOUNT_KEY)||"").toLowerCase();
+}
+function v48GuardValid(){
+  return !!account &&
+    Date.now()<v48GuardUntil() &&
+    String(account).toLowerCase()===v48GuardAccount();
+}
+function v48UpdateCachedRole(owner="", pendingOwner=""){
+  v48CachedOwner=owner||"";
+  v48CachedPendingOwner=pendingOwner||"";
+  if(!account){
+    v48CachedRole="尚未連線";
+  }else if(owner && same(account,owner)){
+    v48CachedRole="Owner";
+  }else if(pendingOwner && !same(pendingOwner,ZERO_ADDRESS_UI) && same(account,pendingOwner)){
+    v48CachedRole="pendingOwner";
+  }else{
+    v48CachedRole="一般錢包";
+  }
+}
+function v48RenderGuardLocal(){
+  const walletEl=$("securityGuardWallet");
+  const roleEl=$("securityGuardRole");
+  const timerEl=$("securityGuardTimer");
+  const statusEl=$("securityGuardStatus");
+
+  if(walletEl) walletEl.textContent=account||"尚未連線";
+  if(roleEl) roleEl.textContent=v48CachedRole||"尚未核對";
+  if(!timerEl||!statusEl) return;
+
+  const until=v48GuardUntil();
+  const left=Math.max(0,Math.ceil((until-Date.now())/1000));
+
+  if(v48GuardValid()&&left>0){
+    timerEl.textContent=left+" 秒";
+    statusEl.className="box ok armed";
+    statusEl.textContent="高風險操作視窗已啟用。只能送出一次；送出後會立即重新鎖定。";
+    return;
+  }
+
+  if(until>0 && Date.now()>=until){
+    localStorage.removeItem(V48_GUARD_UNTIL_KEY);
+    localStorage.removeItem(V48_GUARD_ACCOUNT_KEY);
+    v48LogSecurityEvent("guard_expired",{});
+  }
+
+  timerEl.textContent="未啟用";
+  statusEl.className="box warn locked";
+  statusEl.textContent="高風險交易目前鎖定。完成前置檢查後，請再啟用 60 秒操作視窗。";
+}
+function v48Disarm(reason="manual"){
+  const hadGuard=v48GuardUntil()>0;
+  localStorage.removeItem(V48_GUARD_UNTIL_KEY);
+  localStorage.removeItem(V48_GUARD_ACCOUNT_KEY);
+  if(hadGuard && reason!=="ui_refresh"){
+    v48LogSecurityEvent("guard_locked",{reason});
+  }
+  v48RenderGuardLocal();
+}
+function v48ObserveWallet(){
+  if(!account) return;
+  try{
+    const current=String(account).toLowerCase();
+    const last=String(localStorage.getItem(V48_LAST_WALLET_KEY)||"").toLowerCase();
+    if(last && last!==current){
+      v48LogSecurityEvent("wallet_changed",{from:last,to:current});
+      v48Disarm("wallet_changed");
+    }
+    localStorage.setItem(V48_LAST_WALLET_KEY,current);
+  }catch(_){}
+}
+async function v48RefreshRoleOnce(){
+  if(!account){
+    v48CachedRole="尚未連線";
+    v48RenderGuardLocal();
+    return v48CachedRole;
+  }
+  try{
+    const rp=await getWorkingReadProvider();
+    const c=new Contract(CONTRACT_ADDRESS,ABI,rp);
+    const [owner,pending]=await Promise.all([c.owner(),c.pendingOwner()]);
+    v48UpdateCachedRole(owner,pending);
+  }catch(_){
+    // Do not repeatedly retry. Keep the most recently known role when possible.
+    if(!v48CachedRole || v48CachedRole==="尚未核對"){
+      v48CachedRole="角色讀取失敗";
+    }
+  }
+  v48RenderGuardLocal();
+  return v48CachedRole;
+}
+
+$("armSecurityGuardBtn")?.addEventListener("click",async()=>{
+  try{
+    if(!account) throw new Error("請先連接 Trust Wallet。");
+
+    // Use already-read owner state first. Only do one RPC refresh if needed.
+    let role=v48CachedRole;
+    if(role!=="Owner" && role!=="pendingOwner"){
+      role=await v48RefreshRoleOnce();
+    }
+    if(role!=="Owner" && role!=="pendingOwner"){
+      throw new Error("目前錢包不是 Owner 或 pendingOwner，或尚未完成鏈上角色讀取。");
+    }
+
+    const suffix=String(account).slice(-6).toLowerCase();
+    if(!confirm("將啟用 60 秒高風險操作視窗。倒數只在本機執行，不會持續讀取鏈上資料。是否繼續？")) return;
+
+    const typed=prompt("請輸入目前錢包地址最後 6 碼以再次確認：\n"+suffix);
+    if(typed===null) return;
+    if(typed.trim().toLowerCase()!==suffix){
+      v48LogSecurityEvent("guard_arm_failed",{reason:"wallet_suffix_mismatch"});
+      throw new Error("錢包地址核對不一致，安全視窗未啟用。");
+    }
+
+    localStorage.setItem(V48_GUARD_UNTIL_KEY,String(Date.now()+60000));
+    localStorage.setItem(V48_GUARD_ACCOUNT_KEY,String(account).toLowerCase());
+    v48LogSecurityEvent("guard_armed",{seconds:60,role,mode:"local_timer"});
+    v48RenderGuardLocal();
+  }catch(e){
+    alert(e?.message||String(e));
+  }
+});
+
+$("openSecurityOpsBtn")?.addEventListener("click",()=>{
+  location.href="./security-ops-v4.10.1.html?v=4101";
+});
+
+// Capture high-risk sends before the existing transaction handlers.
+document.addEventListener("click",(e)=>{
+  const btn=e.target?.closest?.("button");
+  if(!btn || !V48_HIGH_RISK_IDS.has(btn.id) || btn.disabled) return;
+
+  if(!v48GuardValid()){
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+    v48LogSecurityEvent("high_risk_blocked",{button:btn.id,reason:"guard_locked"});
+    alert("營運安全保護尚未解鎖。請先完成前置檢查，再按「啟用 60 秒操作視窗」。");
+    $("securityGuardSection")?.scrollIntoView({behavior:"smooth",block:"start"});
+    return;
+  }
+
+  v48LogSecurityEvent("high_risk_approval_started",{button:btn.id});
+  localStorage.removeItem(V48_GUARD_UNTIL_KEY);
+  localStorage.removeItem(V48_GUARD_ACCOUNT_KEY);
+  setTimeout(v48RenderGuardLocal,0);
+},true);
+
+// IMPORTANT: this timer only updates local DOM/localStorage.
+// It performs zero RPC calls and zero wallet calls.
+setInterval(v48RenderGuardLocal,1000);
+
+// Reuse owner / pendingOwner that the existing page has already read.
+const v48OldSetMemberRoleUI=setMemberRoleUI;
+setMemberRoleUI=function(owner="",pendingOwner=""){
+  v48OldSetMemberRoleUI(owner,pendingOwner);
+  v48UpdateCachedRole(owner,pendingOwner);
+  v48ObserveWallet();
+  v48RenderGuardLocal();
+};
+
+v48RenderGuardLocal();
+
+</script>
+
+
+
+
+
+
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const route = (new URLSearchParams(location.search).get("go") || "").toLowerCase();
+
+  const routeMeta = {
+    balance: {
+      cls:"route-balance",
+      title:"查看 IPT 點數",
+      subtitle:"目前餘額與鏈上供給量",
+      guide:"連接 Trust Wallet 並讀取鏈上資料後，即可查看 IPT 餘額。"
+    },
+    transfer: {
+      cls:"route-transfer",
+      title:"IPT 轉帳",
+      subtitle:"前置檢查後，由 Trust Wallet 核准",
+      guide:"連接 Trust Wallet 並讀取鏈上資料後，即可進行轉帳前置檢查。"
+    },
+    receive: {
+      cls:"route-receive",
+      title:"IPT 收款",
+      subtitle:"顯示、複製或分享你的 Sepolia 收款地址",
+      guide:"連接 Trust Wallet 後即可取得收款地址。"
+    },
+    history: {
+      cls:"route-history",
+      title:"交易紀錄",
+      subtitle:"查看目前錢包的 Sepolia IPT 交易",
+      guide:"連接 Trust Wallet 後即可查看鏈上交易紀錄。"
+    },
+    mint: {
+      cls:"route-mint",
+      title:"Mint 發行 IPT",
+      subtitle:"僅 Owner 可執行",
+      guide:"請先連接 Trust Wallet、讀取鏈上資料並確認目前錢包是 Owner。"
+    },
+    pause: {
+      cls:"route-pause",
+      title:"暫停／恢復 IPT",
+      subtitle:"管理合約交易狀態",
+      guide:"請先連接 Trust Wallet、讀取鏈上資料並確認目前錢包是 Owner。"
+    },
+    ownership: {
+      cls:"route-ownership",
+      title:"管理權交接",
+      subtitle:"Owner / pendingOwner 雙步驟交接",
+      guide:"請先連接 Trust Wallet 並讀取鏈上資料；確認 Owner 或 pendingOwner 後會顯示管理權操作。"
+    }
+  };
+
+  if(routeMeta[route]){
+    document.body.classList.add("v41-route", routeMeta[route].cls);
+    $("v41RouteTitle").textContent = routeMeta[route].title;
+    $("v41RouteSubtitle").textContent = routeMeta[route].subtitle;
+    $("v41GuideText").textContent = routeMeta[route].guide;
+  }
+
+  $("v41HomeBtn")?.addEventListener("click", () => {
+    location.href = "./index.html?v=4101";
+  });
+
+  $("v41TopReadBtn")?.addEventListener("click", () => {
+    const read = $("readBtn");
+    if(read && !read.disabled){
+      read.click();
+      return;
+    }
+    const connect = $("connectBtn");
+    if(connect && !$("sessionState")?.textContent?.includes("已建立")){
+      connect.scrollIntoView({behavior:"smooth",block:"center"});
+      return;
+    }
+    $("identitySection")?.scrollIntoView({behavior:"smooth",block:"start"});
+  });
+
+  function currentAddress(){
+    const v = $("historyWallet")?.textContent?.trim() || "";
+    return /^0x[a-fA-F0-9]{40}$/.test(v) ? v : "";
+  }
+
+  function syncReceive(){
+    const a = currentAddress();
+    if($("v41ReceiveAddress")) $("v41ReceiveAddress").textContent = a || "尚未連線";
+    if($("v41ReceiveStatus")){
+      $("v41ReceiveStatus").className = "box " + (a ? "ok" : "info");
+      $("v41ReceiveStatus").textContent = a
+        ? "收款地址已準備完成。"
+        : "連接 Trust Wallet 後即可取得收款地址。";
+    }
+  }
+
+  $("v41CopyReceiveBtn")?.addEventListener("click", async () => {
+    const a = currentAddress();
+    if(!a){
+      $("v41ReceiveStatus").className="box warn";
+      $("v41ReceiveStatus").textContent="目前尚未取得錢包地址。";
+      return;
+    }
+    try{
+      await navigator.clipboard.writeText(a);
+      $("v41ReceiveStatus").className="box ok";
+      $("v41ReceiveStatus").textContent="錢包地址已複製。";
+    }catch(_){
+      const ta=document.createElement("textarea");
+      ta.value=a; document.body.appendChild(ta); ta.select();
+      document.execCommand("copy"); ta.remove();
+      $("v41ReceiveStatus").className="box ok";
+      $("v41ReceiveStatus").textContent="錢包地址已複製。";
+    }
+  });
+
+  $("v41ShareReceiveBtn")?.addEventListener("click", async () => {
+    const a = currentAddress();
+    if(!a){
+      $("v41ReceiveStatus").className="box warn";
+      $("v41ReceiveStatus").textContent="目前尚未取得錢包地址。";
+      return;
+    }
+    const text = "Independent Points IPT 收款地址（Ethereum Sepolia）\\n" + a;
+    try{
+      if(navigator.share){
+        await navigator.share({title:"IPT 收款地址",text});
+        $("v41ReceiveStatus").className="box ok";
+        $("v41ReceiveStatus").textContent="已開啟分享功能。";
+      }else{
+        await navigator.clipboard.writeText(text);
+        $("v41ReceiveStatus").className="box ok";
+        $("v41ReceiveStatus").textContent="此瀏覽器不支援分享，內容已複製。";
+      }
+    }catch(e){
+      if(e?.name!=="AbortError"){
+        $("v41ReceiveStatus").className="box warn";
+        $("v41ReceiveStatus").textContent="分享未完成，可改用複製錢包地址。";
+      }
+    }
+  });
+
+  // 收款頁才需要定期同步錢包地址；其他操作頁不做全頁 MutationObserver，
+  // 避免 Android WebView 因持續監看整份 DOM 而變慢。
+  if(route==="receive"){
+    const receiveTimer=setInterval(syncReceive,1200);
+    setTimeout(()=>clearInterval(receiveTimer),5*60*1000);
+    window.addEventListener("load",()=>setTimeout(syncReceive,350));
+  }else{
+    window.addEventListener("load",()=>setTimeout(syncReceive,350));
+  }
+})();
+</script>
+
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+
+  $("v42BackHomeBtn")?.addEventListener("click",()=>location.href="./index.html?v=4101");
+  $("v42ReadNowBtn")?.addEventListener("click",()=>{
+    const b=$("readBtn");
+    if(b && !b.disabled){ b.click(); return; }
+    $("connectSection")?.scrollIntoView({behavior:"smooth",block:"start"});
+  });
+
+  let qrInstance=null;
+  $("v42ShowQrBtn")?.addEventListener("click",()=>{
+    const address=$("v41ReceiveAddress")?.textContent?.trim()||"";
+    const wrap=$("v42QrWrap");
+    const qr=$("v42Qr");
+    if(!/^0x[a-fA-F0-9]{40}$/.test(address)){
+      $("v41ReceiveStatus").className="box warn";
+      $("v41ReceiveStatus").textContent="目前尚未取得有效錢包地址。";
+      return;
+    }
+    wrap.style.display="block";
+    qr.innerHTML="";
+    if(window.QRCode){
+      qrInstance=new QRCode(qr,{
+        text:address,
+        width:210,
+        height:210,
+        correctLevel:QRCode.CorrectLevel.M
+      });
+      $("v42ShowQrBtn").textContent="重新產生 QR Code";
+    }else{
+      qr.textContent=address;
+    }
+  });
+
+  function bindConfirm(btnId, message){
+    const btn=$(btnId);
+    if(!btn) return;
+    btn.addEventListener("click",(e)=>{
+      // only intercept when it is actually enabled and would proceed
+      if(btn.disabled) return;
+      if(!confirm(message)){
+        e.stopImmediatePropagation();
+        e.preventDefault();
+      }
+    }, true);
+  }
+
+  bindConfirm("sendMintBtn","Mint 會真正發行 IPT。是否確定已核對地址與數量，並要送交 Trust Wallet？");
+  bindConfirm("sendPauseBtn","Pause 會停止 IPT 轉帳。是否確定要送交 Trust Wallet？");
+  bindConfirm("sendUnpauseBtn","是否確定要恢復 IPT 轉帳？");
+  bindConfirm("sendProposeOwnerBtn","管理權交接屬高風險操作。是否確定已再次核對候任管理者地址，並要提出交接？");
+  bindConfirm("sendAcceptOwnerBtn","接任管理權會讓目前錢包成為新的 Owner。是否確定要送出接任交易？");
+})();
+</script>
+
+
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js?v=4101",{updateViaCache:"none"}).catch(()=>{}));
+}
+</script>
+
+</body>
+</html>

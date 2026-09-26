@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Independent Points V4.9｜營運事件與通知中心</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
+<style>
+:root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;color:#172033;background:#f4f7fb}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0;width:100%;max-width:100%;overflow-x:hidden;background:#f4f7fb}
+body{touch-action:pan-y}
+header{background:#10243d;color:#fff;padding:24px 18px 30px;border-radius:0 0 26px 26px}
+.badge{display:inline-block;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.78rem;font-weight:850}
+h1{margin:12px 0 8px;font-size:1.5rem}header p{margin:0;opacity:.9;line-height:1.6}
+main{max-width:960px;margin:auto;padding:16px 14px 70px}
+.panel{background:#fff;border:1px solid #dde5ef;border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:0 4px 18px rgba(24,42,68,.05)}
+.panel h2{margin:0 0 12px;color:#17365d;font-size:1.12rem}
+.status{border-radius:12px;padding:12px 14px;line-height:1.6;background:#edf4ff;color:#27456f;border:1px solid #ccddf5}
+.status.ok{background:#ebf8f2;color:#17694f;border-color:#bee5d6}
+.status.warn{background:#fff7df;color:#7e5a08;border-color:#efd996}
+.status.err{background:#fff0f0;color:#922c2c;border-color:#efc8c8}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.card{border:1px solid #dfe6ef;border-radius:14px;padding:13px;background:#f8fafc}
+.card .k{font-size:.78rem;color:#64748b}.card .v{font-weight:900;color:#17365d;margin-top:5px;word-break:break-word;font-size:1.08rem}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button,select,input{min-height:46px;border-radius:12px;border:1px solid #cbd5e1;padding:9px 11px;font:inherit;touch-action:manipulation}
+button{font-weight:850;cursor:pointer}button.primary{background:#176c59;color:#fff;border-color:#176c59}
+button.blue{background:#2a5f91;color:#fff;border-color:#2a5f91}button.light{background:#fff;color:#29445f}
+button.warn{background:#a46a08;color:#fff;border-color:#a46a08}button.danger{background:#a83b45;color:#fff;border-color:#a83b45}
+.filters{display:grid;grid-template-columns:1fr 1fr;gap:8px}.filters input{grid-column:1/-1;width:100%}
+.events{display:grid;gap:9px}
+.event{border:1px solid #dfe6ef;border-left:5px solid #94a3b8;border-radius:14px;padding:12px;background:#fff}
+.event.critical{border-left-color:#b4232e}.event.warn{border-left-color:#b77905}.event.info{border-left-color:#2a5f91}.event.success{border-left-color:#17694f}
+.event-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.event-title{font-weight:900;color:#17365d}
+.event-time{font-size:.72rem;color:#64748b;white-space:nowrap}.event-meta{font-size:.8rem;color:#64748b;line-height:1.55;margin-top:6px;word-break:break-word}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}.chip{display:inline-block;border-radius:999px;padding:4px 8px;font-size:.7rem;font-weight:850;background:#eef2f7;color:#475569}
+.chip.critical{background:#fdecec;color:#9b2b2b}.chip.warn{background:#fff3d5;color:#8a5a00}.chip.info{background:#e9f1fc;color:#245a91}.chip.success{background:#e8f7ef;color:#17694f}.chip.unread{background:#17365d;color:white}
+.note{font-size:.8rem;color:#64748b;line-height:1.55}.hidden{display:none!important}
+.empty{padding:18px;text-align:center;color:#64748b;border:1px dashed #cbd5e1;border-radius:14px}
+@media(min-width:760px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}.filters{grid-template-columns:2fr 1fr 1fr 1fr}.filters input{grid-column:auto}}
+
+.fallback-toast{
+  position:fixed;left:14px;right:14px;top:calc(14px + env(safe-area-inset-top));
+  z-index:99999;background:#10243d;color:#fff;border-radius:16px;padding:14px 16px;
+  box-shadow:0 10px 35px rgba(0,0,0,.25);display:none
+}
+.fallback-toast.show{display:block}
+.fallback-toast .t{font-weight:900;font-size:1rem}
+.fallback-toast .m{font-size:.86rem;line-height:1.5;margin-top:5px;opacity:.92}
+
+</style>
+<script src="./i18n-v4.10.js?v=4101" defer></script>
+</head>
+<body>
+<div id="fallbackToast" class="fallback-toast"><div id="fallbackToastTitle" class="t"></div><div id="fallbackToastMsg" class="m"></div></div>
+<header>
+  <div class="badge">V4.10.1</div>
+  <h1>營運事件與通知中心</h1>
+  <p>集中查看安全事件、錢包切換、管理員異動、鏈上營運狀態與裝置通知。</p>
+</header>
+<main>
+  <section class="panel">
+    <h2>管理員驗證</h2>
+    <div id="adminStatus" class="status">正在確認管理員身分…</div>
+    <div class="actions" style="margin-top:10px">
+      <button id="homeBtn" class="light" type="button">返回首頁</button>
+      <button id="refreshBtn" class="primary" type="button">重新整理事件</button>
+    </div>
+  </section>
+
+  <div id="contentArea" class="hidden">
+    <section class="panel">
+      <h2>事件總覽</h2>
+      <div class="grid">
+        <div class="card"><div class="k">全部事件</div><div id="totalV" class="v">0</div></div>
+        <div class="card"><div class="k">未讀</div><div id="unreadV" class="v">0</div></div>
+        <div class="card"><div class="k">重要／警告</div><div id="riskV" class="v">0</div></div>
+        <div class="card"><div class="k">近 24 小時</div><div id="dayV" class="v">0</div></div>
+      </div>
+      <div id="summaryStatus" class="status ok" style="margin-top:12px">正在整理事件…</div>
+    </section>
+
+    <section class="panel">
+      <h2>裝置通知</h2>
+      <div id="notifyStatus" class="status">正在檢查通知權限…</div>
+      <div class="actions" style="margin-top:10px">
+        <button id="enableNotifyBtn" class="blue" type="button">啟用系統通知</button>
+        <button id="testNotifyBtn" class="light" type="button">測試通知</button>
+      </div>
+      <div class="note" style="margin-top:10px">
+        本版具備雙模式提醒：瀏覽器支援時使用 Android 系統通知；不支援時自動改用頁面內大型提醒＋震動。App 完全關閉後的背景即時推播，仍需要另外建立 Push 後端。
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>事件篩選</h2>
+      <div class="filters">
+        <input id="searchInput" type="search" placeholder="搜尋事件、會員、錢包、備註…">
+        <select id="sourceFilter">
+          <option value="">全部來源</option>
+          <option value="security">高風險安全</option>
+          <option value="admin">管理稽核</option>
+          <option value="system">系統／鏈上</option>
+        </select>
+        <select id="severityFilter">
+          <option value="">全部等級</option>
+          <option value="critical">重要</option>
+          <option value="warn">警告</option>
+          <option value="info">一般</option>
+          <option value="success">正常</option>
+        </select>
+        <select id="readFilter">
+          <option value="">全部狀態</option>
+          <option value="unread">未讀</option>
+          <option value="read">已讀</option>
+        </select>
+      </div>
+      <div class="actions" style="margin-top:10px">
+        <button id="markReadBtn" class="primary" type="button">全部標記已讀</button>
+        <button id="exportBtn" class="light" type="button">匯出 CSV</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>事件列表</h2>
+      <div id="eventList" class="events"></div>
+      <button id="loadAllAuditBtn" class="light" type="button" style="width:100%;margin-top:12px">載入更多會員管理稽核</button>
+      <div class="note" style="margin-top:8px">會員很多時可能需要數秒；此操作只讀取稽核，不修改會員資料。</div>
+    </section>
+
+    <section class="panel">
+      <h2>快速入口</h2>
+      <div class="actions">
+        <button id="securityOpsBtn" class="light" type="button">營運安全</button>
+        <button id="securityCenterBtn" class="light" type="button">安全與權限</button>
+        <button id="maintenanceBtn" class="light" type="button">維運中心</button>
+        <button id="updateCenterBtn" class="light" type="button">版本更新中心</button>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script>
+(() => {
+  const SUPABASE_URL="https://uccexvgqmoxhgykkjdcy.supabase.co";
+  const SUPABASE_KEY="sb_publishable_FBsN1DYTQMv2_bWhpbXHAA_qdAq7ri7";
+  const CONTRACT="0xd3fb2480aadb8b168ec7e88a0e5c847d9750cb87";
+  const RPCS=["https://ethereum-sepolia-rpc.publicnode.com","https://rpc.sepolia.org","https://sepolia.drpc.org"];
+  const ZERO="0x0000000000000000000000000000000000000000";
+  const SECURITY_KEY="ipt_v48_security_events";
+  const OPS_KEY="ipt_v49_ops_events";
+  const LAST_READ_KEY="ipt_v49_last_read_at";
+  const STATE_KEY="ipt_v49_last_state";
+  const LAST_NOTIFY_KEY="ipt_v49_last_notified_at";
+  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{
+    auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
+  });
+  const $=id=>document.getElementById(id);
+  const esc=v=>String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
+  const big=x=>BigInt(String(x||"0x0"));
+  let events=[];let members=[];let selfMember=null;let loadingAllAudit=false;
+
+  async function invoke(name,body){
+    const {data,error}=await sb.functions.invoke(name,{body});
+    if(error) throw error;if(data?.error) throw new Error(data.error);return data;
+  }
+  async function rpc(method,params){
+    let last;
+    for(const url of RPCS){
+      try{
+        const ctl=new AbortController();const timer=setTimeout(()=>ctl.abort(),6000);
+        const r=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({jsonrpc:"2.0",id:1,method,params}),signal:ctl.signal});
+        clearTimeout(timer);const d=await r.json();
+        if(!r.ok||d.error)throw new Error(d?.error?.message||("HTTP "+r.status));
+        return d.result;
+      }catch(e){last=e}
+    }
+    throw last||new Error("RPC unavailable");
+  }
+  function time(v){const d=new Date(v);return Number.isNaN(d.getTime())?"—":d.toLocaleString("zh-TW",{hour12:false})}
+  function isoMs(v){const n=new Date(v).getTime();return Number.isFinite(n)?n:0}
+  function readJson(key,fallback){try{const raw=localStorage.getItem(key);if(!raw)return fallback;const x=JSON.parse(raw);return x??fallback}catch(_){return fallback}}
+  function writeJson(key,value){try{localStorage.setItem(key,JSON.stringify(value))}catch(_){}}
+  function opsEvents(){const x=readJson(OPS_KEY,[]);return Array.isArray(x)?x:[]}
+  function securityEvents(){const x=readJson(SECURITY_KEY,[]);return Array.isArray(x)?x:[]}
+
+  function addOpsEvent(type,title,detail,severity="info",dedupKey=""){
+    const arr=opsEvents();
+    if(dedupKey && arr.some(x=>x.dedupKey===dedupKey))return null;
+    const item={id:"ops-"+Date.now()+"-"+Math.random().toString(16).slice(2),time:new Date().toISOString(),source:"system",type,title,detail,severity,dedupKey};
+    arr.unshift(item);writeJson(OPS_KEY,arr.slice(0,200));return item;
+  }
+
+  function securityTitle(type){
+    return ({wallet_changed:"錢包切換",guard_armed:"60 秒安全視窗啟用",guard_locked:"高風險操作重新鎖定",guard_expired:"60 秒安全視窗逾時",guard_arm_failed:"錢包安全核對失敗",high_risk_blocked:"高風險操作遭阻擋",high_risk_approval_started:"高風險交易送簽開始"})[type]||type;
+  }
+  function securitySeverity(type){
+    if(["guard_arm_failed","high_risk_blocked"].includes(type))return"warn";
+    if(["wallet_changed","high_risk_approval_started"].includes(type))return"critical";
+    if(type==="guard_armed")return"info";return"success";
+  }
+  function normalizeSecurity(){
+    return securityEvents().map(x=>({id:"sec-"+x.id,time:x.time,source:"security",type:x.type,title:securityTitle(x.type),detail:Object.entries(x.detail||{}).map(([k,v])=>`${k}: ${v}`).join("｜"),severity:securitySeverity(x.type),account:x.account||"",raw:x}));
+  }
+  function normalizeOps(){return opsEvents().map(x=>({...x,source:"system"}))}
+  function normalizeAudit(rows){
+    return (rows||[]).map((a,i)=>{
+      const action=String(a.action||"");let sev="info";
+      if(/role/i.test(action))sev="critical";else if(/status|suspend/i.test(action))sev="warn";
+      const target=a.target_user_id||a.user_id||"";
+      return {id:"audit-"+(a.id||`${a.created_at||""}-${i}`),time:a.created_at||new Date().toISOString(),source:"admin",type:action||"admin_audit",title:action||"管理員操作",detail:[a.note||"",target?`target: ${target}`:""].filter(Boolean).join("｜"),severity:sev,raw:a};
+    });
+  }
+  function dedupSort(list){
+    const map=new Map();list.forEach(x=>{const id=String(x.id||"");if(id&&!map.has(id))map.set(id,x)});
+    return [...map.values()].sort((a,b)=>isoMs(b.time)-isoMs(a.time));
+  }
+
+
+  function fallbackAlert(title,body){
+    const box=$("fallbackToast");
+    const t=$("fallbackToastTitle");
+    const m=$("fallbackToastMsg");
+    if(t)t.textContent=title;
+    if(m)m.textContent=body;
+    if(box){
+      box.classList.add("show");
+      clearTimeout(window.__iptFallbackTimer);
+      window.__iptFallbackTimer=setTimeout(()=>box.classList.remove("show"),5000);
+    }
+    try{
+      if("vibrate" in navigator) navigator.vibrate([180,80,180]);
+    }catch(_){}
+    return true;
+  }
+  function notificationSupported(){
+    return "Notification" in window;
+  }
+
+  async function notify(title,body,tag="ipt-v49"){
+    if(!notificationSupported()){
+      return fallbackAlert(title,body);
+    }
+    if(Notification.permission!=="granted") return false;
+    try{
+      if("serviceWorker" in navigator){
+        const reg=await navigator.serviceWorker.ready;
+        await reg.showNotification(title,{body,tag,icon:"./ipt-icon-192.png",badge:"./ipt-icon-192.png",data:{url:"./event-center-v4.10.1.html?v=4101"}});
+      }else{
+        new Notification(title,{body,tag,icon:"./ipt-icon-192.png"});
+      }
+      return true;
+    }catch(_){
+      return fallbackAlert(title,body);
+    }
+  }
+  async function maybeNotifyNew(){
+    const last=Number(localStorage.getItem(LAST_NOTIFY_KEY)||"0");
+    const newest=events.filter(x=>["critical","warn"].includes(x.severity)&&isoMs(x.time)>last);
+    if(!newest.length)return;
+    const x=newest[0];
+    const ok=await notify("IPT 營運提醒",`${x.title}${x.detail?"｜"+x.detail:""}`,"ipt-"+x.id);
+    if(ok)localStorage.setItem(LAST_NOTIFY_KEY,String(Date.now()));
+  }
+  function isUnread(x){return isoMs(x.time)>Number(localStorage.getItem(LAST_READ_KEY)||"0")}
+  function sourceName(s){return s==="security"?"高風險安全":s==="admin"?"管理稽核":"系統／鏈上"}
+  function severityName(s){return s==="critical"?"重要":s==="warn"?"警告":s==="success"?"正常":"一般"}
+
+  function filtered(){
+    const q=$("searchInput").value.trim().toLowerCase(),sf=$("sourceFilter").value,vf=$("severityFilter").value,rf=$("readFilter").value;
+    return events.filter(x=>{
+      if(sf&&x.source!==sf)return false;if(vf&&x.severity!==vf)return false;
+      if(rf==="unread"&&!isUnread(x))return false;if(rf==="read"&&isUnread(x))return false;
+      if(q){const hay=[x.title,x.detail,x.type,x.account,sourceName(x.source)].join(" ").toLowerCase();if(!hay.includes(q))return false}
+      return true;
+    });
+  }
+  function render(){
+    const list=filtered(),unread=events.filter(isUnread).length,risks=events.filter(x=>["critical","warn"].includes(x.severity)).length,day=events.filter(x=>Date.now()-isoMs(x.time)<86400000).length;
+    $("totalV").textContent=events.length;$("unreadV").textContent=unread;$("riskV").textContent=risks;$("dayV").textContent=day;
+    $("summaryStatus").className=risks?"status warn":"status ok";
+    $("summaryStatus").textContent=risks?`目前共 ${events.length} 筆事件，其中 ${risks} 筆為重要／警告；未讀 ${unread} 筆。`:`目前共 ${events.length} 筆事件，沒有重要／警告事件；未讀 ${unread} 筆。`;
+    $("eventList").innerHTML=list.length?list.map(x=>`
+      <article class="event ${esc(x.severity)}">
+        <div class="event-head"><div class="event-title">${esc(x.title)}</div><div class="event-time">${esc(time(x.time))}</div></div>
+        <div class="chips"><span class="chip ${esc(x.severity)}">${esc(severityName(x.severity))}</span><span class="chip">${esc(sourceName(x.source))}</span>${isUnread(x)?'<span class="chip unread">未讀</span>':''}</div>
+        <div class="event-meta">${esc(x.detail||"無附加說明")}${x.account?`<br>錢包：${esc(x.account)}`:""}</div>
+      </article>`).join(""):'<div class="empty">目前沒有符合條件的事件。</div>';
+  }
+
+  async function collectSystemState(){
+    try{
+      const release=await fetch("./release.json?t="+Date.now(),{cache:"no-store"}).then(r=>r.json());
+      const state=readJson(STATE_KEY,{});
+      if(state.version&&state.version!==release.version)addOpsEvent("version_changed","正式版本已更新",`${state.version} → ${release.version}`,"info",`version:${release.version}`);
+      state.version=release.version||"";
+      try{
+        const [pausedRaw,pendingRaw]=await Promise.all([rpc("eth_call",[{to:CONTRACT,data:"0x5c975abb"},"latest"]),rpc("eth_call",[{to:CONTRACT,data:"0xe30c3978"},"latest"])]);
+        const paused=big(pausedRaw)!==0n;
+        const pending="0x"+String(pendingRaw||"").replace(/^0x/,"").slice(-40);
+        if(paused&&state.paused!==true)addOpsEvent("contract_paused","IPT 合約已暫停","paused = true","critical","paused:true:"+new Date().toISOString().slice(0,13));
+        if(state.paused===true&&!paused)addOpsEvent("contract_unpaused","IPT 合約已恢復","paused = false","success","paused:false:"+new Date().toISOString().slice(0,13));
+        if(pending.toLowerCase()!==ZERO&&pending.toLowerCase()!==String(state.pendingOwner||"").toLowerCase())addOpsEvent("pending_owner","出現候任管理者",pending,"critical","pending:"+pending.toLowerCase());
+        if(state.pendingOwner&&String(state.pendingOwner).toLowerCase()!==ZERO&&pending.toLowerCase()===ZERO)addOpsEvent("pending_owner_cleared","候任管理者已清除","pendingOwner = 0x0","success","pending:cleared:"+new Date().toISOString().slice(0,13));
+        state.paused=paused;state.pendingOwner=pending;
+      }catch(e){addOpsEvent("chain_check_failed","鏈上營運狀態檢查失敗",e?.message||String(e),"warn","chainfail:"+new Date().toISOString().slice(0,13))}
+      writeJson(STATE_KEY,state);
+    }catch(e){addOpsEvent("release_check_failed","正式版本資訊讀取失敗",e?.message||String(e),"warn","releasefail:"+new Date().toISOString().slice(0,13))}
+  }
+
+  async function loadCurrentAdminAudit(){
+    if(!selfMember)return[];
+    try{const d=await invoke("admin-member-detail",{target_user_id:selfMember.user_id});return d.audit||[]}catch(_){return[]}
+  }
+  async function tryDirectAudit(){
+    try{
+      const {data,error}=await sb.from("admin_audit_log").select("*").order("created_at",{ascending:false}).limit(100);
+      if(error)throw error;return {rows:data||[],direct:true};
+    }catch(_){return {rows:[],direct:false}}
+  }
+  async function loadAllAuditFallback(){
+    if(loadingAllAudit)return;loadingAllAudit=true;$("loadAllAuditBtn").disabled=true;$("loadAllAuditBtn").textContent="正在載入會員稽核…";
+    try{
+      const targets=members.slice(0,50),collected=[],seen=new Set(),chunk=4;
+      for(let i=0;i<targets.length;i+=chunk){
+        const res=await Promise.all(targets.slice(i,i+chunk).map(async m=>{try{return await invoke("admin-member-detail",{target_user_id:m.user_id})}catch(_){return null}}));
+        res.forEach(d=>(d?.audit||[]).forEach(a=>{const key=String(a.id||`${a.created_at}-${a.action}-${a.target_user_id||""}`);if(!seen.has(key)){seen.add(key);collected.push(a)}}));
+      }
+      events=dedupSort([...normalizeSecurity(),...normalizeOps(),...normalizeAudit(collected)]);render();await maybeNotifyNew();$("loadAllAuditBtn").textContent=`已載入 ${targets.length} 位會員稽核`;
+    }finally{loadingAllAudit=false;$("loadAllAuditBtn").disabled=false}
+  }
+
+  async function load(){
+    $("adminStatus").className="status";$("adminStatus").textContent="正在確認管理員身分…";
+    try{
+      const data=await invoke("admin-members",{query:""});members=data.members||[];selfMember=members.find(x=>x.is_self);
+      if(!selfMember||selfMember.role!=="admin")throw new Error("此頁只開放管理員。");
+      $("adminStatus").className="status ok";$("adminStatus").textContent=`管理員驗證通過：${selfMember.member_number}｜${selfMember.display_name}`;$("contentArea").classList.remove("hidden");
+      await collectSystemState();
+      const direct=await tryDirectAudit();let audits=direct.rows;
+      if(!direct.direct){audits=await loadCurrentAdminAudit();$("loadAllAuditBtn").textContent="載入更多會員管理稽核"}else{$("loadAllAuditBtn").textContent=`已直接讀取 ${audits.length} 筆管理稽核`}
+      events=dedupSort([...normalizeSecurity(),...normalizeOps(),...normalizeAudit(audits)]);render();await maybeNotifyNew();updateNotifyStatus();
+    }catch(e){$("contentArea").classList.add("hidden");$("adminStatus").className="status err";$("adminStatus").textContent="載入失敗："+(e?.message||String(e))}
+  }
+
+  function updateNotifyStatus(){
+    const el=$("notifyStatus");
+    if(!notificationSupported()){
+      el.className="status warn";
+      el.textContent="目前瀏覽器不支援 Android 系統通知；已自動改用頁面內提醒＋震動。";
+      $("enableNotifyBtn").disabled=false;
+      $("enableNotifyBtn").textContent="啟用頁面內提醒";
+      $("testNotifyBtn").disabled=false;
+      return;
+    }
+    $("enableNotifyBtn").disabled=false;
+    $("testNotifyBtn").disabled=false;
+    if(Notification.permission==="granted"){
+      el.className="status ok";
+      el.textContent="系統通知已允許。新重要／警告事件可顯示 Android 通知。";
+      $("enableNotifyBtn").textContent="系統通知已啟用";
+    }else if(Notification.permission==="denied"){
+      el.className="status warn";
+      el.textContent="系統通知已被瀏覽器拒絕；重要事件仍會使用頁面內提醒＋震動。";
+      $("enableNotifyBtn").textContent="使用頁面內提醒";
+    }else{
+      el.className="status";
+      el.textContent="尚未取得系統通知權限；若瀏覽器不支援，會自動使用頁面內提醒。";
+      $("enableNotifyBtn").textContent="啟用系統通知";
+    }
+  }
+
+  $("enableNotifyBtn").addEventListener("click",async()=>{
+    if(!notificationSupported()){
+      fallbackAlert("IPT 提醒已啟用","此瀏覽器將使用頁面內提醒＋震動。");
+      updateNotifyStatus();
+      return;
+    }
+    try{
+      if(Notification.permission==="default"){
+        await Notification.requestPermission();
+      }
+      if(Notification.permission!=="granted"){
+        fallbackAlert("IPT 提醒模式","系統通知未啟用，已改用頁面內提醒＋震動。");
+      }
+    }catch(_){
+      fallbackAlert("IPT 提醒模式","無法取得系統通知權限，已改用頁面內提醒＋震動。");
+    }
+    updateNotifyStatus();
+  });
+  $("testNotifyBtn").addEventListener("click",async()=>{
+    let ok=false;
+    if(notificationSupported() && Notification.permission==="granted"){
+      ok=await notify("IPT 測試通知","V4.10.1 營運事件與通知中心運作正常。","ipt-v491-test");
+    }else{
+      ok=fallbackAlert("IPT 測試提醒","V4.10.1 頁面內提醒運作正常。");
+    }
+    $("notifyStatus").className=ok?"status ok":"status warn";
+    $("notifyStatus").textContent=ok
+      ?(notificationSupported()&&Notification.permission==="granted"?"測試系統通知已送出。":"測試頁面內提醒已送出。")
+      :"提醒送出失敗。";
+  });
+  $("markReadBtn").addEventListener("click",()=>{localStorage.setItem(LAST_READ_KEY,String(Date.now()));render()});
+  $("exportBtn").addEventListener("click",()=>{
+    const rows=[["時間","等級","來源","事件","說明","錢包"]];
+    filtered().forEach(x=>rows.push([time(x.time),severityName(x.severity),sourceName(x.source),x.title,x.detail||"",x.account||""]));
+    const csv="\ufeff"+rows.map(r=>r.map(v=>`"${String(v??"").replaceAll('"','""')}"`).join(",")).join("\r\n");
+    const blob=new Blob([csv],{type:"text/csv;charset=utf-8"}),a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);a.download=`IPT-事件-${new Date().toISOString().slice(0,10)}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  });
+  ["searchInput","sourceFilter","severityFilter","readFilter"].forEach(id=>$(id).addEventListener(id==="searchInput"?"input":"change",render));
+  $("loadAllAuditBtn").addEventListener("click",loadAllAuditFallback);
+  $("homeBtn").addEventListener("click",()=>location.href="./index.html?v=4101");
+  $("refreshBtn").addEventListener("click",load);
+  $("securityOpsBtn").addEventListener("click",()=>location.href="./security-ops-v4.10.1.html?v=4101");
+  $("securityCenterBtn").addEventListener("click",()=>location.href="./security-center-v4.10.1.html?v=4101");
+  $("maintenanceBtn").addEventListener("click",()=>location.href="./maintenance-v4.10.1.html?v=4101");
+  $("updateCenterBtn").addEventListener("click",()=>location.href="./update-center-v4.10.1.html?v=4101");
+  updateNotifyStatus();load();
+})();
+</script>
+<script>
+if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js?v=4101",{updateViaCache:"none"}).catch(()=>{}))}
+</script>
+</body>
+</html>
