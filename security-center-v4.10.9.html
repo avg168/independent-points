@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Independent Points V4.10.9｜帳戶安全與權限中心</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
+<style>
+:root{
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;
+  color:#172033;background:#f4f7fb
+}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0;width:100%;max-width:100%;overflow-x:hidden;background:#f4f7fb}
+body{touch-action:pan-y}
+header{
+  background:#10243d;color:#fff;padding:24px 18px 30px;border-radius:0 0 26px 26px
+}
+.badge{display:inline-block;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.78rem;font-weight:850}
+h1{margin:12px 0 8px;font-size:1.5rem}
+header p{margin:0;opacity:.9;line-height:1.6}
+main{max-width:900px;margin:auto;padding:16px 14px 70px}
+.panel{
+  background:#fff;border:1px solid #dde5ef;border-radius:18px;padding:16px;
+  margin-bottom:14px;box-shadow:0 4px 18px rgba(24,42,68,.05)
+}
+.panel h2{margin:0 0 12px;color:#17365d;font-size:1.12rem}
+.status{
+  border-radius:12px;padding:12px 14px;line-height:1.6;background:#edf4ff;
+  color:#27456f;border:1px solid #ccddf5
+}
+.status.ok{background:#ebf8f2;color:#17694f;border-color:#bee5d6}
+.status.warn{background:#fff7df;color:#7e5a08;border-color:#efd996}
+.status.err{background:#fff0f0;color:#922c2c;border-color:#efc8c8}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.card{border:1px solid #dfe6ef;border-radius:14px;padding:13px;background:#f8fafc}
+.card .k{font-size:.78rem;color:#64748b}
+.card .v{font-weight:900;color:#17365d;margin-top:5px;word-break:break-word;font-size:1.15rem}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button{
+  min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding:10px 12px;
+  font:inherit;font-weight:850;cursor:pointer;touch-action:manipulation
+}
+button.primary{background:#176c59;color:#fff;border-color:#176c59}
+button.blue{background:#2a5f91;color:#fff;border-color:#2a5f91}
+button.light{background:#fff;color:#29445f}
+button.danger{background:#a83b45;color:#fff;border-color:#a83b45}
+button.warn{background:#a46a08;color:#fff;border-color:#a46a08}
+button:disabled{opacity:.45;cursor:not-allowed}
+.search{display:grid;grid-template-columns:1fr auto auto;gap:8px}
+input{
+  width:100%;min-height:46px;border:1px solid #cbd5e1;border-radius:12px;
+  padding:10px 12px;font:inherit
+}
+.list{display:grid;gap:10px}
+.member{
+  border:1px solid #dfe6ef;border-radius:15px;padding:13px;background:#fff
+}
+.member-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.member-title{font-weight:900;color:#17365d}
+.meta{font-size:.82rem;color:#64748b;line-height:1.6;margin-top:7px;word-break:break-word}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
+.chip{display:inline-block;border-radius:999px;padding:4px 8px;font-size:.72rem;font-weight:850;background:#eef2f7;color:#475569}
+.chip.ok{background:#e7f7ef;color:#17694f}
+.chip.warn{background:#fff3d5;color:#8a5a00}
+.chip.off{background:#fdecec;color:#9b2b2b}
+.chip.admin{background:#e7effb;color:#245a91}
+.risk{
+  background:#fff7df;border:1px solid #efd996;color:#7e5a08;border-radius:12px;padding:12px;line-height:1.6
+}
+.safe{
+  background:#ebf8f2;border:1px solid #bee5d6;color:#17694f;border-radius:12px;padding:12px;line-height:1.6
+}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.detail-box{border:1px solid #dfe6ef;border-radius:13px;padding:11px;background:#f8fafc}
+.detail-box .k{font-size:.76rem;color:#64748b}
+.detail-box .v{font-weight:800;color:#17365d;margin-top:5px;word-break:break-word}
+.audit{font-size:.8rem;line-height:1.6;border-top:1px solid #edf0f4;padding:8px 0}
+.hidden{display:none!important}
+@media(min-width:720px){.grid{grid-template-columns:repeat(6,minmax(0,1fr))}}
+</style>
+<script src="./i18n-v4.10.js?v=4109" defer></script>
+</head>
+<body>
+<header>
+  <div class="badge">V4.10.9</div>
+  <h1>帳戶安全與權限中心</h1>
+  <p>集中管理管理員權限、會員停權、錢包驗證狀態、會員稽核與高風險操作入口。</p>
+</header>
+<main>
+  <section class="panel">
+    <h2>管理員驗證</h2>
+    <div id="statusBox" class="status">正在驗證管理員權限…</div>
+    <div class="actions" style="margin-top:10px">
+      <button id="homeBtn" class="light" type="button">返回首頁</button>
+      <button id="refreshBtn" class="primary" type="button">重新整理</button>
+    </div>
+  </section>
+
+  <section id="contentArea" class="hidden">
+    <section class="panel">
+      <h2>安全總覽</h2>
+      <div class="grid">
+        <div class="card"><div class="k">會員總數</div><div id="sTotal" class="v">—</div></div>
+        <div class="card"><div class="k">管理員</div><div id="sAdmin" class="v">—</div></div>
+        <div class="card"><div class="k">正常會員</div><div id="sActive" class="v">—</div></div>
+        <div class="card"><div class="k">停權會員</div><div id="sSuspended" class="v">—</div></div>
+        <div class="card"><div class="k">錢包已驗證</div><div id="sVerified" class="v">—</div></div>
+        <div class="card"><div class="k">錢包未驗證</div><div id="sUnverified" class="v">—</div></div>
+      </div>
+      <div id="securitySummary" class="safe" style="margin-top:12px">正在分析安全狀態…</div>
+    </section>
+
+    <section class="panel">
+      <h2>管理員權限</h2>
+      <div class="risk">
+        管理員可以操作會員權限與高風險功能。降級其他管理員前，系統會要求再次輸入會員編號；目前登入的管理員自己不提供角色修改按鈕。
+      </div>
+      <div id="adminList" class="list" style="margin-top:12px"></div>
+    </section>
+
+    <section class="panel">
+      <h2>會員安全管理</h2>
+      <div class="search">
+        <input id="queryInput" type="search" placeholder="會員編號／暱稱／Email／錢包地址">
+        <button id="searchBtn" class="primary" type="button">搜尋</button>
+        <button id="clearBtn" class="light" type="button">清除</button>
+      </div>
+      <div id="memberList" class="list" style="margin-top:12px"></div>
+    </section>
+
+    <section class="panel">
+      <h2>錢包驗證狀態</h2>
+      <div id="walletNote" class="status">正在整理錢包狀態…</div>
+      <div id="walletList" class="list" style="margin-top:12px"></div>
+    </section>
+
+    <section class="panel">
+      <h2>高風險操作入口</h2>
+      <div class="risk">以下功能會直接影響鏈上資產或管理權。進入後仍會使用目前正式版已驗證的前置檢查與二次確認。</div>
+      <div class="actions" style="margin-top:12px">
+        <button id="mintBtn" class="warn" type="button">Mint 發行</button>
+        <button id="pauseBtn" class="warn" type="button">暫停／恢復</button>
+        <button id="ownershipBtn" class="danger" type="button">管理權交接</button>
+        <button id="memberAdminBtn" class="light" type="button">完整會員管理</button>
+        <button id="securityOpsBtn" class="blue" type="button">營運安全中心</button>
+        <button id="eventCenterBtn" class="light" type="button">事件與通知</button>
+      </div>
+    </section>
+
+    <section id="detailSection" class="panel hidden">
+      <h2>會員安全明細／稽核</h2>
+      <div id="detailContent"></div>
+      <button id="closeDetailBtn" class="light" type="button" style="width:100%;margin-top:12px">關閉明細</button>
+    </section>
+  </section>
+</main>
+
+<script>
+(() => {
+  const URL="https://uccexvgqmoxhgykkjdcy.supabase.co";
+  const KEY="sb_publishable_FBsN1DYTQMv2_bWhpbXHAA_qdAq7ri7";
+  const sb=window.supabase.createClient(URL,KEY,{
+    auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
+  });
+  const $=id=>document.getElementById(id);
+  let members=[];
+  let summary={};
+
+  function esc(v){
+    return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;")
+      .replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
+  }
+  function time(v){
+    if(!v)return"—";
+    const d=new Date(v);
+    return Number.isNaN(d.getTime())?"—":d.toLocaleString("zh-TW",{hour12:false});
+  }
+  function status(kind,text){
+    const e=$("statusBox");e.className="status "+kind;e.textContent=text;
+  }
+  async function invoke(name,body){
+    const {data,error}=await sb.functions.invoke(name,{body});
+    if(error) throw error;
+    if(data?.error) throw new Error(data.error);
+    return data;
+  }
+
+  function renderSummary(){
+    const total=summary.total_members??members.length;
+    const admin=summary.admin_members??members.filter(x=>x.role==="admin").length;
+    const active=summary.active_members??members.filter(x=>x.status!=="suspended").length;
+    const suspended=summary.suspended_members??members.filter(x=>x.status==="suspended").length;
+    const verified=members.filter(x=>x.wallet_verified).length;
+    const unverified=members.filter(x=>!x.wallet_verified).length;
+
+    $("sTotal").textContent=total;
+    $("sAdmin").textContent=admin;
+    $("sActive").textContent=active;
+    $("sSuspended").textContent=suspended;
+    $("sVerified").textContent=verified;
+    $("sUnverified").textContent=unverified;
+
+    const self=members.find(x=>x.is_self);
+    const issues=[];
+    if(admin<1) issues.push("沒有管理員");
+    if(!self) issues.push("找不到目前管理員帳戶");
+    if(self?.status==="suspended") issues.push("目前管理員狀態為停權");
+    if(unverified>0) issues.push(`${unverified} 位會員錢包尚未驗證`);
+    if(suspended>0) issues.push(`${suspended} 位會員目前停權`);
+
+    const box=$("securitySummary");
+    if(!issues.length){
+      box.className="safe";
+      box.textContent="目前帳戶與權限狀態沒有發現需要立即處理的項目。";
+    }else{
+      box.className="risk";
+      box.textContent="需留意："+issues.join("；")+"。";
+    }
+  }
+
+  function memberBadges(m){
+    return [
+      m.role==="admin"?'<span class="chip admin">管理員</span>':'<span class="chip">會員</span>',
+      m.status==="suspended"?'<span class="chip off">已停權</span>':'<span class="chip ok">正常</span>',
+      m.wallet_verified?'<span class="chip ok">錢包已驗證</span>':'<span class="chip warn">錢包未驗證</span>',
+      m.is_self?'<span class="chip admin">目前帳戶</span>':''
+    ].join("");
+  }
+
+  function renderAdmins(){
+    const admins=members.filter(m=>m.role==="admin");
+    $("adminList").innerHTML=admins.length?admins.map(m=>{
+      const demote=m.is_self?"":`<button class="warn demoteBtn" data-id="${esc(m.user_id)}" data-number="${esc(m.member_number)}">降為一般會員</button>`;
+      return `<article class="member">
+        <div class="member-head">
+          <div class="member-title"><span data-member-data="1">${esc(m.member_number)}｜${esc(m.display_name)}</span></div>
+        </div>
+        <div class="chips">${memberBadges(m)}</div>
+        <div class="meta">Email：${esc(m.email||"—")}<br>錢包：${esc(m.wallet_address||"尚未綁定")}</div>
+        <div class="actions" style="margin-top:10px">
+          <button class="light detailBtn" data-id="${esc(m.user_id)}">查看稽核</button>
+          ${demote}
+        </div>
+      </article>`;
+    }).join(""):'<div class="status warn">目前沒有管理員資料。</div>';
+
+    document.querySelectorAll(".demoteBtn").forEach(b=>b.addEventListener("click",()=>changeRole(
+      b.dataset.id,"member",b.dataset.number,"降為一般會員"
+    )));
+    bindDetailButtons();
+  }
+
+  function renderMembers(list){
+    if(!list.length){
+      $("memberList").innerHTML='<div class="status">沒有符合條件的會員。</div>';return;
+    }
+    $("memberList").innerHTML=list.map(m=>{
+      const statusBtn=m.is_self||m.role==="admin"?"":(
+        m.status==="suspended"
+        ?`<button class="primary statusActionBtn" data-id="${esc(m.user_id)}" data-status="active" data-number="${esc(m.member_number)}">恢復會員</button>`
+        :`<button class="danger statusActionBtn" data-id="${esc(m.user_id)}" data-status="suspended" data-number="${esc(m.member_number)}">停權會員</button>`
+      );
+      const roleBtn=m.is_self?"":(
+        m.role==="admin"
+        ?`<button class="warn roleActionBtn" data-id="${esc(m.user_id)}" data-role="member" data-number="${esc(m.member_number)}">降為一般會員</button>`
+        :`<button class="blue roleActionBtn" data-id="${esc(m.user_id)}" data-role="admin" data-number="${esc(m.member_number)}">升級為管理員</button>`
+      );
+      return `<article class="member">
+        <div class="member-title"><span data-member-data="1">${esc(m.member_number)}｜${esc(m.display_name)}</span></div>
+        <div class="chips">${memberBadges(m)}</div>
+        <div class="meta">
+          Email：${esc(m.email||"—")}<br>
+          錢包：${esc(m.wallet_address||"尚未綁定")}<br>
+          常用收款人：${esc(m.contacts_count??0)} 筆
+        </div>
+        <div class="actions" style="margin-top:10px">
+          <button class="light detailBtn" data-id="${esc(m.user_id)}">安全明細</button>
+          ${statusBtn}
+          ${roleBtn}
+        </div>
+      </article>`;
+    }).join("");
+
+    document.querySelectorAll(".statusActionBtn").forEach(b=>b.addEventListener("click",()=>changeStatus(
+      b.dataset.id,b.dataset.status,b.dataset.number
+    )));
+    document.querySelectorAll(".roleActionBtn").forEach(b=>b.addEventListener("click",()=>changeRole(
+      b.dataset.id,b.dataset.role,b.dataset.number,
+      b.dataset.role==="admin"?"升級為管理員":"降為一般會員"
+    )));
+    bindDetailButtons();
+  }
+
+  function renderWallets(){
+    const list=members.slice().sort((a,b)=>Number(a.wallet_verified)-Number(b.wallet_verified));
+    const noWallet=list.filter(x=>!x.wallet_address).length;
+    const unverified=list.filter(x=>x.wallet_address&&!x.wallet_verified).length;
+    $("walletNote").className=(noWallet||unverified)?"status warn":"status ok";
+    $("walletNote").textContent=`未綁定錢包 ${noWallet} 位｜已綁定但未驗證 ${unverified} 位。`;
+
+    $("walletList").innerHTML=list.map(m=>`<article class="member">
+      <div class="member-title"><span data-member-data="1">${esc(m.member_number)}｜${esc(m.display_name)}</span></div>
+      <div class="chips">${memberBadges(m)}</div>
+      <div class="meta">錢包：${esc(m.wallet_address||"尚未綁定")}</div>
+      <button class="light detailBtn" data-id="${esc(m.user_id)}" style="width:100%;margin-top:10px">查看錢包明細</button>
+    </article>`).join("");
+    bindDetailButtons();
+  }
+
+  function bindDetailButtons(){
+    document.querySelectorAll(".detailBtn").forEach(b=>{
+      if(b.dataset.bound==="1")return;
+      b.dataset.bound="1";
+      b.addEventListener("click",()=>loadDetail(b.dataset.id));
+    });
+  }
+
+  async function confirmTyped(memberNumber,actionText){
+    const first=confirm(`${actionText}會直接改變會員權限。是否繼續？`);
+    if(!first)return false;
+    const typed=prompt(`請輸入會員編號 ${memberNumber} 以確認：`);
+    if(typed===null)return false;
+    if(typed.trim()!==memberNumber){
+      alert("會員編號不一致，操作已取消。");
+      return false;
+    }
+    return true;
+  }
+
+  async function changeStatus(id,newStatus,memberNumber){
+    const actionText=newStatus==="suspended"?"停權會員":"恢復會員";
+    if(!await confirmTyped(memberNumber,actionText))return;
+    status("","正在更新會員狀態…");
+    try{
+      await invoke("admin-member-actions",{
+        action:"set_status",target_user_id:id,status:newStatus,
+        note:"安全與權限中心"
+      });
+      await load($("queryInput").value.trim());
+    }catch(e){status("err","更新失敗："+(e?.message||String(e)))}
+  }
+
+  async function changeRole(id,newRole,memberNumber,actionText){
+    if(!await confirmTyped(memberNumber,actionText))return;
+    status("","正在更新會員角色…");
+    try{
+      await invoke("admin-member-actions",{
+        action:"set_role",target_user_id:id,role:newRole,
+        note:"安全與權限中心"
+      });
+      await load($("queryInput").value.trim());
+    }catch(e){status("err","更新失敗："+(e?.message||String(e)))}
+  }
+
+  async function loadDetail(id){
+    $("detailSection").classList.remove("hidden");
+    $("detailContent").innerHTML='<div class="status">正在載入安全明細…</div>';
+    $("detailSection").scrollIntoView({behavior:"smooth",block:"start"});
+    try{
+      const data=await invoke("admin-member-detail",{target_user_id:id});
+      const m=data.member||{};
+      const wallets=data.wallets||[];
+      const audit=data.audit||[];
+      $("detailContent").innerHTML=`
+        <div class="detail-grid">
+          <div class="detail-box"><div class="k">會員</div><div class="v"><span data-member-data="1">${esc(m.member_number)}｜${esc(m.display_name)}</span></div></div>
+          <div class="detail-box"><div class="k">角色／狀態</div><div class="v">${esc(m.role||"member")}／${esc(m.status||"active")}</div></div>
+          <div class="detail-box"><div class="k">Email</div><div class="v">${esc(m.email||"—")}</div></div>
+          <div class="detail-box"><div class="k">最近登入</div><div class="v">${esc(time(m.last_sign_in_at))}</div></div>
+        </div>
+        <h2 style="margin-top:20px">錢包驗證</h2>
+        ${wallets.length?wallets.map(w=>`<div class="detail-box" style="margin-bottom:8px">
+          <div class="k">${esc(w.label||"錢包")}${w.is_primary?"｜主錢包":""}</div>
+          <div class="v">${esc(w.wallet_address)}<br>${w.verified_at?"已驗證："+esc(time(w.verified_at)):"未驗證"}</div>
+        </div>`).join(""):'<div class="detail-box"><div class="v">尚未綁定錢包</div></div>'}
+        <h2 style="margin-top:20px">最近管理稽核</h2>
+        ${audit.length?audit.slice(0,30).map(a=>`<div class="audit">${esc(time(a.created_at))}｜${esc(a.action)}｜${esc(a.note||"")}</div>`).join(""):'<div class="detail-box"><div class="v">尚無管理紀錄</div></div>'}
+      `;
+    }catch(e){
+      $("detailContent").innerHTML=`<div class="status err">載入失敗：${esc(e?.message||String(e))}</div>`;
+    }
+  }
+
+  async function load(query=""){
+    status("","正在載入安全與權限資料…");
+    try{
+      const data=await invoke("admin-members",{query});
+      members=data.members||[];
+      summary=data.summary||{};
+      renderSummary();
+      renderAdmins();
+      renderMembers(members);
+      renderWallets();
+      $("contentArea").classList.remove("hidden");
+      status("ok",`V4.10.9 安全中心已載入｜管理員：${data.admin?.email||"已登入"}`);
+    }catch(e){
+      $("contentArea").classList.add("hidden");
+      status("err","載入失敗："+(e?.message||String(e)));
+    }
+  }
+
+  $("homeBtn").addEventListener("click",()=>location.href="./index.html?v=4109");
+  $("refreshBtn").addEventListener("click",()=>load($("queryInput").value.trim()));
+  $("searchBtn").addEventListener("click",()=>load($("queryInput").value.trim()));
+  $("clearBtn").addEventListener("click",()=>{$("queryInput").value="";load("")});
+  $("queryInput").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();load($("queryInput").value.trim())}});
+  $("closeDetailBtn").addEventListener("click",()=>$("detailSection").classList.add("hidden"));
+
+  $("mintBtn").addEventListener("click",()=>location.href="./wallet-core-v4.10.9.html?go=mint");
+  $("pauseBtn").addEventListener("click",()=>location.href="./wallet-core-v4.10.9.html?go=pause");
+  $("ownershipBtn").addEventListener("click",()=>location.href="./wallet-core-v4.10.9.html?go=ownership");
+  $("memberAdminBtn").addEventListener("click",()=>location.href="./admin-members-v4.10.9.html?v=4109");
+  $("securityOpsBtn")?.addEventListener("click",()=>location.href="./security-ops-v4.10.9.html?v=4109");
+  $("eventCenterBtn")?.addEventListener("click",()=>location.href="./event-center-v4.10.9.html?v=4109");
+
+  load("");
+})();
+</script>
+<script>
+if("serviceWorker" in navigator){
+  window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js?v=4109",{updateViaCache:"none"}).catch(()=>{}));
+}
+</script>
+</body>
+</html>

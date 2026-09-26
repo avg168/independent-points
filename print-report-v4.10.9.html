@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Independent Points｜列印／PDF 預覽</title>
+<style>
+:root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;color:#172033}
+*{box-sizing:border-box}
+body{margin:0;background:#eef2f7}
+.top{position:sticky;top:0;z-index:5;background:#10243d;color:#fff;padding:14px}
+.top-inner{max-width:900px;margin:auto}
+.top h1{font-size:1.1rem;margin:0 0 8px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+button{min-height:46px;border-radius:12px;border:0;font:inherit;font-weight:900}
+.print{background:#176c59;color:#fff}.back{background:#fff;color:#29445f}
+.note{font-size:.8rem;line-height:1.5;opacity:.9;margin-top:8px}
+main{max-width:900px;margin:auto;padding:18px}
+.sheet{background:#fff;border:1px solid #dbe3ed;border-radius:16px;padding:20px}
+h2{color:#17365d;margin:0 0 14px} h3{color:#17365d;margin:22px 0 10px}
+.meta{line-height:1.7;color:#526071}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:14px 0}
+.card{border:1px solid #dde5ef;border-radius:12px;padding:12px}
+.card .k{font-size:.78rem;color:#64748b}.card .v{font-size:1.05rem;font-weight:900;margin-top:5px}
+table{width:100%;border-collapse:collapse;font-size:.82rem}
+th,td{border:1px solid #dbe3ed;padding:7px;vertical-align:top;word-break:break-all}
+th{background:#f4f7fb;text-align:left}
+.empty{padding:20px;text-align:center;color:#64748b}
+@media(min-width:700px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media print{
+  body{background:#fff}.top{display:none!important}main{padding:0;max-width:none}
+  .sheet{border:0;border-radius:0;padding:0} .card,table,tr{break-inside:avoid}
+}
+
+/* V4.10.9 print preview mobile lock */
+html,body{
+  width:100%;
+  max-width:100%;
+  overflow-x:hidden!important;
+  overscroll-behavior-x:none;
+}
+body{
+  position:relative;
+  touch-action:pan-y;
+}
+.top{
+  left:0;
+  right:0;
+  width:100%;
+  max-width:100%;
+}
+.top-inner,main,.sheet{
+  width:100%;
+  max-width:100%;
+  min-width:0;
+}
+.sheet{
+  overflow:hidden;
+}
+.meta{
+  max-width:100%;
+  overflow-wrap:anywhere!important;
+  word-break:break-word!important;
+  white-space:normal!important;
+}
+.actions{
+  width:100%;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+}
+.actions>*{
+  min-width:0;
+  width:100%;
+}
+table{
+  width:100%!important;
+  max-width:100%!important;
+  table-layout:fixed!important;
+  font-size:.72rem;
+}
+th,td{
+  max-width:1px;
+  overflow-wrap:anywhere!important;
+  word-break:break-word!important;
+  white-space:normal!important;
+  padding:5px;
+}
+@media(max-width:480px){
+  main{padding:12px}
+  .sheet{padding:14px}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .card{padding:10px}
+  .card .v{font-size:.95rem}
+  .meta{font-size:.88rem}
+  h2{font-size:1.35rem}
+  h3{font-size:1.05rem}
+}
+
+
+/* ===== product shell ===== */
+:root{
+  --v43-navy:#10243d;
+  --v43-blue:#2a5f91;
+  --v43-green:#176c59;
+  --v43-bg:#f4f7fb;
+  --v43-border:#dde5ef;
+}
+html,body{
+  width:100%;
+  max-width:100%;
+  overflow-x:hidden!important;
+}
+body{
+  background:var(--v43-bg);
+  touch-action:pan-y;
+}
+.v43-product-tag{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:5px 10px;
+  border-radius:999px;
+  font-size:.76rem;
+  font-weight:850;
+  background:rgba(255,255,255,.14);
+}
+.v43-module-note{
+  margin-top:8px;
+  font-size:.78rem;
+  opacity:.82;
+}
+.v43-statusline{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:10px;
+}
+.v43-status-chip{
+  padding:5px 9px;
+  border-radius:999px;
+  font-size:.74rem;
+  font-weight:800;
+  background:#eef2f7;
+  color:#475569;
+}
+.v43-status-chip.ok{
+  background:#e8f7ef;
+  color:#17694f;
+}
+.v43-bottom-nav{
+  position:fixed;
+  left:50%;
+  transform:translateX(-50%);
+  bottom:calc(8px + env(safe-area-inset-bottom));
+  z-index:80;
+  width:min(94%,720px);
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:6px;
+  padding:7px;
+  border:1px solid rgba(210,220,232,.95);
+  border-radius:18px;
+  background:rgba(255,255,255,.94);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  box-shadow:0 8px 26px rgba(30,45,65,.14);
+}
+.v43-bottom-nav button{
+  min-height:48px;
+  border:0;
+  border-radius:12px;
+  background:transparent;
+  color:#29445f;
+  font:inherit;
+  font-size:.78rem;
+  font-weight:850;
+  padding:6px 4px;
+  touch-action:manipulation;
+}
+.v43-bottom-nav button.active{
+  background:#eaf2fb;
+  color:#17365d;
+}
+body{
+  padding-bottom:calc(82px + env(safe-area-inset-bottom));
+}
+@media(min-width:760px){
+  .v43-bottom-nav{display:none}
+  body{padding-bottom:0}
+}
+
+
+/* ===== V4.10.9 Android bottom-navigation fix ===== */
+.v43-bottom-nav{
+  position:fixed!important;
+  left:50%!important;
+  transform:translateX(-50%)!important;
+  bottom:calc(72px + env(safe-area-inset-bottom))!important;
+  z-index:9999!important;
+  width:calc(100% - 24px)!important;
+  max-width:680px!important;
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:6px!important;
+  padding:8px!important;
+  border:1px solid #cbd7e5!important;
+  border-radius:18px!important;
+  background:#ffffff!important;
+  opacity:1!important;
+  box-shadow:0 8px 28px rgba(20,38,60,.22)!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+}
+.v43-bottom-nav button{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  min-height:58px!important;
+  padding:7px 4px!important;
+  border:0!important;
+  border-radius:12px!important;
+  background:#f3f6fa!important;
+  color:#17365d!important;
+  font-size:.80rem!important;
+  line-height:1.25!important;
+  font-weight:900!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+  -webkit-tap-highlight-color:rgba(42,95,145,.12)!important;
+}
+.v43-bottom-nav button.active{
+  background:#dfeafa!important;
+  color:#10243d!important;
+}
+.v43-bottom-nav button:active{
+  background:#cfdff3!important;
+  transform:scale(.98);
+}
+body{
+  padding-bottom:calc(160px + env(safe-area-inset-bottom))!important;
+}
+@media(max-width:480px){
+  .v43-bottom-nav{
+    bottom:calc(78px + env(safe-area-inset-bottom))!important;
+    width:calc(100% - 18px)!important;
+  }
+  .v43-bottom-nav button{
+    min-height:60px!important;
+    font-size:.78rem!important;
+  }
+}
+@media(min-width:760px){
+  .v43-bottom-nav{display:none!important}
+  body{padding-bottom:0!important}
+}
+
+
+/* ===== V4.10.9 reliable in-page navigation ===== */
+.v43-bottom-nav{
+  display:none!important;
+}
+body{
+  padding-bottom:24px!important;
+}
+.v432-nav-panel{
+  margin:14px 0;
+  padding:14px;
+  border:1px solid #dbe4ee;
+  border-radius:18px;
+  background:#ffffff;
+  box-shadow:0 4px 18px rgba(24,42,68,.05);
+}
+.v432-nav-title{
+  font-size:1.05rem;
+  font-weight:900;
+  color:#17365d;
+  margin-bottom:10px;
+}
+.v432-nav-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+.v432-nav-grid button{
+  min-height:76px!important;
+  padding:12px 8px!important;
+  border:1px solid #cbd7e5!important;
+  border-radius:14px!important;
+  background:#f6f8fb!important;
+  color:#17365d!important;
+  font:inherit!important;
+  font-weight:900!important;
+  font-size:.96rem!important;
+  line-height:1.35!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+  -webkit-tap-highlight-color:rgba(42,95,145,.14)!important;
+}
+.v432-nav-grid button.primary{
+  background:#e2edf9!important;
+  border-color:#b9cde4!important;
+}
+.v432-nav-grid button:active{
+  transform:scale(.98);
+  background:#d7e5f5!important;
+}
+.v432-nav-note{
+  margin-top:9px;
+  color:#64748b;
+  font-size:.8rem;
+  line-height:1.5;
+}
+@media(min-width:760px){
+  .v432-nav-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+
+
+/* ===== production polish ===== */
+:root{
+  color-scheme:light;
+}
+html{
+  scroll-behavior:smooth;
+}
+body{
+  -webkit-text-size-adjust:100%;
+  text-rendering:optimizeLegibility;
+}
+button,input,select,textarea{
+  font:inherit;
+}
+button{
+  cursor:pointer;
+}
+@media(display-mode:standalone){
+  body::before{
+    content:"";
+    display:block;
+    height:env(safe-area-inset-top);
+  }
+}
+
+</style>
+
+<link rel="manifest" href="./manifest.webmanifest?v=4109">
+<meta name="theme-color" content="#10243d">
+<meta name="application-name" content="Independent Points">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Independent Points">
+<meta name="description" content="Independent Points 會員點數錢包與 IPT 資產管理系統。">
+<link rel="icon" type="image/svg+xml" href="./ipt-icon-192.png">
+
+<link rel="apple-touch-icon" href="./ipt-apple-touch-180.png">
+<script src="./i18n-v4.10.js?v=4109" defer></script>
+</head>
+<body>
+<div class="top">
+  <div class="top-inner">
+    <h1>列印／PDF 預覽</h1>
+    <div class="actions">
+      <button id="printBtn" class="print" type="button">開啟系統列印／另存 PDF</button>
+      <button id="backBtn" class="back" type="button">返回報表</button>
+    </div>
+    <div id="printNote" class="note">
+      若 Android 沒有跳出系統列印畫面，仍可在此預覽報表；可再使用瀏覽器右上角選單的分享／列印功能。
+    </div>
+  </div>
+</div>
+<main>
+  <div id="sheet" class="sheet"></div>
+</main>
+<script>
+(() => {
+  const $=id=>document.getElementById(id);
+  const raw=sessionStorage.getItem("ipt_print_report");
+  let report=null;
+  try{report=raw?JSON.parse(raw):null}catch(_){}
+
+  function esc(v){
+    return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;").replaceAll("'","&#039;");
+  }
+  function time(v){
+    if(!v) return "—";
+    const d=typeof v==="number"?new Date(v*1000):new Date(v);
+    return Number.isNaN(d.getTime())?"—":d.toLocaleString("zh-TW",{hour12:false});
+  }
+  function fmt6(v){
+    const n=Number(String(v??"0").replace(" IPT",""));
+    if(!Number.isFinite(n)) return String(v??"0");
+    return n.toLocaleString("zh-TW",{minimumFractionDigits:6,maximumFractionDigits:6});
+  }
+
+  function shortAddr(a){
+    if(!a) return "—";
+    return a.length<20?a:a.slice(0,10)+"…"+a.slice(-8);
+  }
+
+  if(!report){
+    $("sheet").innerHTML='<div class="empty">找不到列印資料，請返回資產報表重新按「列印／PDF 預覽」。</div>';
+  }else if(report.kind==="member"){
+    const m=report.member||{},s=report.summary||{},f=report.filters||{},txs=report.transactions||[];
+    $("sheet").innerHTML=`
+      <h2>${esc(report.title||"我的資產報表")}</h2>
+      <div class="meta">
+        版本：${esc(report.version||"")}<br>
+        產生時間：${esc(time(report.generated_at))}<br>
+        會員：${esc(m.member_number)}｜${esc(m.display_name)}<br>
+        Email：${esc(m.email)}<br>
+        錢包：<span style="overflow-wrap:anywhere;word-break:break-word">${esc(m.wallet_address||"尚未綁定")}</span><br>
+        篩選：${esc(f.from||"全部")} ～ ${esc(f.to||"全部")}｜${esc(f.type||"全部交易")}
+      </div>
+      <div class="grid">
+        <div class="card"><div class="k">目前餘額</div><div class="v">${esc(fmt6(s.current_balance))} IPT</div></div>
+        <div class="card"><div class="k">累計轉入</div><div class="v">${esc(fmt6(s.incoming))} IPT</div></div>
+        <div class="card"><div class="k">累計轉出</div><div class="v">${esc(fmt6(s.outgoing))} IPT</div></div>
+        <div class="card"><div class="k">資產淨變動</div><div class="v">${esc(fmt6(s.net))} IPT</div></div>
+        <div class="card"><div class="k">交易筆數</div><div class="v">${esc(s.count)}</div></div>
+        <div class="card"><div class="k">Mint / Burn</div><div class="v">${esc(s.mint_burn)}</div></div>
+      </div>
+      <h3>交易紀錄</h3>
+      ${txs.length?`<table><thead><tr><th>類型</th><th>時間</th><th>數量</th><th>From</th><th>To</th><th>區塊</th></tr></thead><tbody>${
+        txs.map(tx=>`<tr><td>${esc(tx.type)}</td><td>${esc(time(tx.timestamp))}</td><td>${esc(tx.amount)} IPT</td><td>${esc(shortAddr(tx.from))}</td><td>${esc(shortAddr(tx.to))}</td><td>${esc(tx.block_number)}</td></tr>`).join("")
+      }</tbody></table>`:'<div class="empty">無交易紀錄</div>'}
+    `;
+  }else{
+    const c=report.criteria||{},s=report.summary||{},members=report.members||[],txs=report.transactions||[];
+    $("sheet").innerHTML=`
+      <h2>${esc(report.title||"管理員資產彙總報表")}</h2>
+      <div class="meta">
+        版本：${esc(report.version||"")}<br>
+        產生時間：${esc(time(report.generated_at))}<br>
+        篩選：${esc(c.from||"全部")} ～ ${esc(c.to||"全部")}｜${esc(c.type||"全部交易")}｜會員搜尋：${esc(c.query||"全部")}
+      </div>
+      <div class="grid">
+        <div class="card"><div class="k">符合會員數</div><div class="v">${esc(s.members)}</div></div>
+        <div class="card"><div class="k">區間轉入</div><div class="v">${esc(fmt6(s.incoming))} IPT</div></div>
+        <div class="card"><div class="k">區間轉出</div><div class="v">${esc(fmt6(s.outgoing))} IPT</div></div>
+        <div class="card"><div class="k">區間淨變動</div><div class="v">${esc(fmt6(s.net))} IPT</div></div>
+        <div class="card"><div class="k">資產變動筆數</div><div class="v">${esc(s.count)}</div></div>
+        <div class="card"><div class="k">Mint / Burn</div><div class="v">${esc(s.mint)} / ${esc(s.burn)}</div></div>
+      </div>
+      <h3>會員區間彙總</h3>
+      ${members.length?`<table><thead><tr><th>會員</th><th>目前餘額</th><th>轉入</th><th>轉出</th><th>淨變動</th><th>筆數</th></tr></thead><tbody>${
+        members.map(x=>`<tr><td>${esc(x.member?.member_number)}｜${esc(x.member?.display_name)}</td><td>${esc(fmt6(x.member?.ipt_balance))} IPT</td><td>${esc(fmt6(x.incoming))} IPT</td><td>${esc(fmt6(x.outgoing))} IPT</td><td>${esc(fmt6(x.net))} IPT</td><td>${esc(x.count)}</td></tr>`).join("")
+      }</tbody></table>`:'<div class="empty">無會員資料</div>'}
+      <h3>交易紀錄</h3>
+      ${txs.length?`<table><thead><tr><th>會員</th><th>類型</th><th>時間</th><th>數量</th><th>區塊</th></tr></thead><tbody>${
+        txs.map(x=>`<tr><td>${esc(x.member?.member_number)}｜${esc(x.member?.display_name)}</td><td>${esc(x.tx?.type)}</td><td>${esc(time(x.tx?.timestamp))}</td><td>${esc(x.tx?.amount)} IPT</td><td>${esc(x.tx?.block_number)}</td></tr>`).join("")
+      }</tbody></table>`:'<div class="empty">無交易紀錄</div>'}
+    `;
+  }
+
+  $("printBtn").addEventListener("click",()=>{
+    $("printNote").textContent="已送出系統列印要求。若仍沒有跳出，請使用右上角選單的分享／列印功能。";
+    try{window.print()}catch(err){
+      $("printNote").textContent="此瀏覽器不支援 window.print()。請使用右上角選單的分享／列印功能。";
+    }
+  });
+  $("backBtn").addEventListener("click",()=>history.back());
+})();
+</script>
+
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js?v=4109",{updateViaCache:"none"}).catch(()=>{}));
+}
+</script>
+
+</body>
+</html>
