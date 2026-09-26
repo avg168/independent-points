@@ -1,18 +1,18 @@
 {
   "product": "Independent Points",
-  "version": "V4.10.3",
-  "build": "20260926-4103",
+  "version": "V4.10.4",
+  "build": "20260926-4104",
   "release_date": "2026-09-26",
   "channel": "production",
-  "rollback_version": "V4.10.2",
+  "rollback_version": "V4.10.3",
   "fallback_version": "V4.5.0",
   "network": "Ethereum Sepolia",
   "chain_id": "11155111 / 0xaa36a7",
   "contract": "0xd3fb2480aadb8b168ec7e88a0e5c847d9750cb87",
   "notes": [
-    "修正語言引擎載入路徑",
-    "資產報表與交易動態文字支援局部翻譯",
-    "固定 i18n 檔名避免版本檔名失配"
+    "動態狀態句型翻譯",
+    "修正中英混合",
+    "地址與會員名稱保持原文"
   ],
   "rollback_steps": [
     "若 V4.6.1 異常，先重新載入並清除 IPT 快取。",
