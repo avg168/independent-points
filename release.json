@@ -1,17 +1,17 @@
 {
   "product": "Independent Points",
-  "version": "V4.10.13",
-  "build": "20260926-41013",
+  "version": "V4.11.0",
+  "build": "20260927-4110",
   "release_date": "2026-09-26",
-  "channel": "production",
-  "rollback_version": "V4.10.12",
+  "channel": "release-candidate",
+  "rollback_version": "V4.10.13",
   "fallback_version": "V4.5.0",
   "network": "Ethereum Sepolia",
   "chain_id": "11155111 / 0xaa36a7",
   "contract": "0xd3fb2480aadb8b168ec7e88a0e5c847d9750cb87",
   "notes": [
-    "Whitespace-normalized exact translation",
-    "Multi-sentence paragraph translation"
+    "Final multilingual integration acceptance candidate",
+    "No contract, Supabase schema, or Edge Function changes"
   ],
   "rollback_steps": [
     "若 V4.6.1 異常，先重新載入並清除 IPT 快取。",

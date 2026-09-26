@@ -2,6 +2,18 @@
   "product": "Independent Points",
   "releases": [
     {
+      "version": "V4.11.0",
+      "date": "2026-09-27",
+      "channel": "release-candidate",
+      "title": "多語系最終整合驗收版",
+      "notes": [
+        "以 V4.10.13 為功能基準，不增加新功能",
+        "統一繁中／简中／English 版本與正式頁面名稱",
+        "執行 JavaScript、內部連結、PWA、版本一致性與安全結構檢查",
+        "Mint / Pause / Ownership 最終實機驗收到前置檢查，不送出真正交易"
+      ]
+    },
+    {
       "version": "V4.10.13",
       "date": "2026-09-26",
       "channel": "production",
