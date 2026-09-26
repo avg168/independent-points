@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Independent Points V4.12.0｜帳戶安全與 MFA</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
+<style>
+:root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;color:#172033;background:#f4f7fb}
+*{box-sizing:border-box;min-width:0}html,body{width:100%;max-width:100%;overflow-x:hidden}body{margin:0;background:#f4f7fb}
+header{background:#10243d;color:#fff;padding:24px 18px 30px;border-radius:0 0 26px 26px}
+.version{display:inline-block;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.78rem;font-weight:800;margin-bottom:9px}
+h1{margin:0 0 8px;font-size:1.5rem}header p{margin:0;opacity:.9;line-height:1.6}
+main{max-width:760px;margin:auto;padding:16px 14px 72px}.panel{background:#fff;border:1px solid #dde5ef;border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:0 4px 18px rgba(24,42,68,.05)}
+.panel h2{margin:0 0 12px;color:#17365d;font-size:1.12rem}.status{border-radius:12px;padding:12px 14px;line-height:1.6;background:#edf4ff;color:#27456f;border:1px solid #ccddf5}
+.status.ok{background:#ebf8f2;color:#17694f;border-color:#bee5d6}.status.warn{background:#fff7df;color:#7e5a08;border-color:#efd996}.status.err{background:#fff0f0;color:#922c2c;border-color:#efc8c8}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.card{background:#f8fafc;border:1px solid #e1e7ef;border-radius:14px;padding:13px}.k{font-size:.78rem;color:#64748b}.v{font-weight:850;margin-top:5px;word-break:break-all}
+button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding:10px 12px;font:inherit}button{font-weight:850;cursor:pointer}button.primary{background:#176c59;color:#fff;border-color:#176c59}button.blue{background:#2a5f91;color:#fff;border-color:#2a5f91}button.light{background:#fff;color:#29445f}button.danger{background:#a83b45;color:#fff;border-color:#a83b45}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.full{grid-column:1/-1}.note{font-size:.82rem;color:#64748b;line-height:1.65;margin-top:10px}.hidden{display:none!important}
+#qrWrap{margin-top:14px;text-align:center}#qrWrap img{max-width:260px;width:100%;height:auto;background:white;padding:10px;border-radius:14px;border:1px solid #dbe3ed}
+.secret{word-break:break-all;background:#f8fafc;border:1px solid #e1e7ef;border-radius:12px;padding:10px;margin-top:10px;font-family:ui-monospace,monospace;font-size:.82rem}
+.langbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.langbar button{min-height:38px;padding:7px 10px}
+@media(max-width:520px){.grid,.actions{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div class="version">V4.12.0</div>
+  <h1 id="title">帳戶安全與 MFA</h1>
+  <p id="subtitle">每次登入重新確認身分；管理員使用驗證器 App 進行第二因素驗證。</p>
+  <div class="langbar">
+    <button type="button" data-lang="zh-TW">繁中</button>
+    <button type="button" data-lang="zh-CN">简中</button>
+    <button type="button" data-lang="en">English</button>
+  </div>
+</header>
+<main>
+  <section class="panel">
+    <h2 id="hIdentity">登入身分驗證</h2>
+    <div id="identityStatus" class="status">正在向伺服器重新驗證目前登入身分…</div>
+    <div class="grid" style="margin-top:12px">
+      <div class="card"><div class="k" id="kEmail">Email</div><div id="email" class="v">—</div></div>
+      <div class="card"><div class="k" id="kUser">User ID</div><div id="uid" class="v">—</div></div>
+      <div class="card"><div class="k" id="kAal">目前驗證等級</div><div id="aal" class="v">—</div></div>
+      <div class="card"><div class="k" id="kFactor">已驗證 MFA</div><div id="factorCount" class="v">—</div></div>
+    </div>
+    <div class="actions">
+      <button id="recheckBtn" class="blue" type="button">重新驗證登入身分</button>
+      <button id="homeBtn" class="light" type="button">返回首頁</button>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2 id="hMfa">驗證器 App（TOTP）</h2>
+    <div id="mfaStatus" class="status">正在讀取 MFA 狀態…</div>
+    <div id="enrollArea" class="hidden">
+      <div class="note" id="enrollNote">第一次設定時，按下「建立 MFA」，再用 Google Authenticator、Microsoft Authenticator、1Password 等驗證器掃描 QR Code。</div>
+      <button id="enrollBtn" class="primary" type="button" style="width:100%;margin-top:12px">建立 MFA</button>
+      <div id="qrWrap" class="hidden">
+        <img id="qrImg" alt="MFA QR Code">
+        <div id="secret" class="secret"></div>
+        <input id="enrollCode" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="輸入驗證器 6 位數代碼" style="width:100%;margin-top:12px">
+        <button id="verifyEnrollBtn" class="primary" type="button" style="width:100%;margin-top:10px">驗證並啟用 MFA</button>
+      </div>
+    </div>
+
+    <div id="challengeArea" class="hidden">
+      <div class="note" id="challengeNote">這個帳號已設定 MFA。每個新的登入工作階段都要完成一次第二因素驗證，才能進入管理員敏感功能。</div>
+      <input id="challengeCode" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="輸入驗證器 6 位數代碼" style="width:100%;margin-top:12px">
+      <button id="challengeBtn" class="primary" type="button" style="width:100%;margin-top:10px">完成二次驗證</button>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2 id="hSession">工作階段安全</h2>
+    <div class="status ok" id="sessionPolicy">
+      V4.12 使用 server-validated getUser() 重新確認登入身分；管理員頁面另檢查 MFA AAL2。
+    </div>
+    <div class="actions">
+      <button id="signOutBtn" class="danger full" type="button">登出此裝置</button>
+    </div>
+    <div class="note" id="rolloutNote">
+      本版先完成 MFA 設定與前端驗證。當管理員手機完成 MFA 設定並測試成功後，再進 V4.12.1 將管理員 Edge Functions 改為後端強制 AAL2，避免尚未設定 MFA 時直接鎖住管理員。
+    </div>
+  </section>
+</main>
+<script>
+(() => {
+  const URL="https://uccexvgqmoxhgykkjdcy.supabase.co";
+  const KEY="sb_publishable_FBsN1DYTQMv2_bWhpbXHAA_qdAq7ri7";
+  const sb=window.supabase.createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+  const $=id=>document.getElementById(id);
+  let factorId="", enrollFactorId="", lang=localStorage.getItem("ipt_language")||"zh-TW";
+
+  const S={
+    "zh-TW":{
+      title:"帳戶安全與 MFA",subtitle:"每次登入重新確認身分；管理員使用驗證器 App 進行第二因素驗證。",
+      hIdentity:"登入身分驗證",checking:"正在向伺服器重新驗證目前登入身分…",valid:"登入身分已由伺服器重新驗證。",
+      invalid:"目前沒有有效登入工作階段。",kEmail:"Email",kUser:"User ID",kAal:"目前驗證等級",kFactor:"已驗證 MFA",
+      recheck:"重新驗證登入身分",home:"返回首頁",hMfa:"驗證器 App（TOTP）",reading:"正在讀取 MFA 狀態…",
+      noFactor:"尚未設定 MFA。管理員建議立即設定。",hasFactor:"MFA 已設定，但這次登入尚未完成第二因素驗證。",
+      aal2:"這次登入已完成 MFA（AAL2）。",enrollNote:"第一次設定時，按下「建立 MFA」，再用 Google Authenticator、Microsoft Authenticator、1Password 等驗證器掃描 QR Code。",
+      enroll:"建立 MFA",code:"輸入驗證器 6 位數代碼",enable:"驗證並啟用 MFA",challengeNote:"這個帳號已設定 MFA。每個新的登入工作階段都要完成一次第二因素驗證，才能進入管理員敏感功能。",
+      challenge:"完成二次驗證",hSession:"工作階段安全",policy:"V4.12 使用 server-validated getUser() 重新確認登入身分；管理員頁面另檢查 MFA AAL2。",
+      signout:"登出此裝置",rollout:"本版先完成 MFA 設定與前端驗證。當管理員手機完成 MFA 設定並測試成功後，再進 V4.12.1 將管理員 Edge Functions 改為後端強制 AAL2，避免尚未設定 MFA 時直接鎖住管理員。",
+      enabled:"MFA 已成功啟用，這次工作階段已提升為 AAL2。",verified:"二次驗證完成，這次工作階段已提升為 AAL2。"
+    },
+    "zh-CN":{
+      title:"账户安全与 MFA",subtitle:"每次登录重新确认身份；管理员使用验证器 App 进行第二因素验证。",
+      hIdentity:"登录身份验证",checking:"正在向服务器重新验证当前登录身份…",valid:"登录身份已由服务器重新验证。",
+      invalid:"当前没有有效登录工作阶段。",kEmail:"Email",kUser:"User ID",kAal:"当前验证等级",kFactor:"已验证 MFA",
+      recheck:"重新验证登录身份",home:"返回首页",hMfa:"验证器 App（TOTP）",reading:"正在读取 MFA 状态…",
+      noFactor:"尚未设置 MFA。管理员建议立即设置。",hasFactor:"MFA 已设置，但这次登录尚未完成第二因素验证。",
+      aal2:"这次登录已完成 MFA（AAL2）。",enrollNote:"第一次设置时，按下“建立 MFA”，再用 Google Authenticator、Microsoft Authenticator、1Password 等验证器扫描 QR Code。",
+      enroll:"建立 MFA",code:"输入验证器 6 位数代码",enable:"验证并启用 MFA",challengeNote:"这个账号已设置 MFA。每个新的登录工作阶段都要完成一次第二因素验证，才能进入管理员敏感功能。",
+      challenge:"完成二次验证",hSession:"工作阶段安全",policy:"V4.12 使用 server-validated getUser() 重新确认登录身份；管理员页面另检查 MFA AAL2。",
+      signout:"登出此设备",rollout:"本版先完成 MFA 设置与前端验证。管理员手机完成 MFA 设置并测试成功后，再进入 V4.12.1，将管理员 Edge Functions 改为后端强制 AAL2，避免尚未设置 MFA 时直接锁住管理员。",
+      enabled:"MFA 已成功启用，这次工作阶段已提升为 AAL2。",verified:"二次验证完成，这次工作阶段已提升为 AAL2。"
+    },
+    "en":{
+      title:"Account Security & MFA",subtitle:"Revalidate identity on every sign-in; administrators use an authenticator app as a second factor.",
+      hIdentity:"Sign-in Identity Verification",checking:"Revalidating the current sign-in with the server…",valid:"Your sign-in identity was revalidated by the server.",
+      invalid:"There is no valid signed-in session.",kEmail:"Email",kUser:"User ID",kAal:"Current Assurance Level",kFactor:"Verified MFA",
+      recheck:"Revalidate Sign-in",home:"Back to Home",hMfa:"Authenticator App (TOTP)",reading:"Reading MFA status…",
+      noFactor:"MFA is not configured. Administrators should configure it now.",hasFactor:"MFA is configured, but this sign-in has not completed the second factor.",
+      aal2:"This sign-in has completed MFA (AAL2).",enrollNote:"For first-time setup, tap “Set up MFA”, then scan the QR code with Google Authenticator, Microsoft Authenticator, 1Password, or another TOTP authenticator.",
+      enroll:"Set up MFA",code:"Enter the 6-digit authenticator code",enable:"Verify & Enable MFA",challengeNote:"MFA is configured for this account. Each new sign-in session must complete the second factor before accessing administrator-sensitive features.",
+      challenge:"Complete MFA Verification",hSession:"Session Security",policy:"V4.12 uses server-validated getUser() to revalidate sign-in identity; administrator pages also check MFA AAL2.",
+      signout:"Sign Out on This Device",rollout:"This release adds MFA enrollment and client-side verification first. After the administrator successfully configures and tests MFA on the phone, V4.12.1 can enforce AAL2 inside administrator Edge Functions without risking an administrator lockout.",
+      enabled:"MFA was enabled successfully. This session is now AAL2.",verified:"MFA verification completed. This session is now AAL2."
+    }
+  };
+
+  function T(k){return (S[lang]||S["zh-TW"])[k]||k}
+  function status(id,kind,text){const e=$(id);e.className="status "+kind;e.textContent=text}
+  function applyLang(){
+    localStorage.setItem("ipt_language",lang);
+    document.documentElement.lang=lang==="en"?"en":(lang==="zh-CN"?"zh-Hans":"zh-Hant");
+    ["title","subtitle","hIdentity","kEmail","kUser","kAal","kFactor","hMfa","enrollNote","challengeNote","hSession","sessionPolicy","rolloutNote"].forEach(id=>{
+      const map={sessionPolicy:"policy",rolloutNote:"rollout"}; if($(id)) $(id).textContent=T(map[id]||id);
+    });
+    $("recheckBtn").textContent=T("recheck"); $("homeBtn").textContent=T("home"); $("enrollBtn").textContent=T("enroll");
+    $("enrollCode").placeholder=T("code"); $("verifyEnrollBtn").textContent=T("enable");
+    $("challengeCode").placeholder=T("code"); $("challengeBtn").textContent=T("challenge"); $("signOutBtn").textContent=T("signout");
+  }
+
+  document.querySelectorAll("[data-lang]").forEach(b=>b.onclick=()=>{lang=b.dataset.lang;applyLang();refresh()});
+  $("homeBtn").onclick=()=>location.href="./index.html?v=4120";
+  $("recheckBtn").onclick=()=>refresh();
+
+  async function refresh(){
+    applyLang();
+    status("identityStatus","",T("checking"));
+    status("mfaStatus","",T("reading"));
+    $("enrollArea").classList.add("hidden"); $("challengeArea").classList.add("hidden");
+    const {data:{user},error:userErr}=await sb.auth.getUser();
+    if(userErr||!user){
+      $("email").textContent="—";$("uid").textContent="—";$("aal").textContent="—";$("factorCount").textContent="0";
+      status("identityStatus","err",T("invalid"));status("mfaStatus","warn",T("noFactor"));return;
+    }
+    $("email").textContent=user.email||"—";$("uid").textContent=user.id||"—";status("identityStatus","ok",T("valid"));
+
+    const [{data:aal,error:aalErr},{data:factors,error:fErr}]=await Promise.all([
+      sb.auth.mfa.getAuthenticatorAssuranceLevel(),sb.auth.mfa.listFactors()
+    ]);
+    if(aalErr||fErr){status("mfaStatus","err",(aalErr||fErr).message);return}
+    $("aal").textContent=aal?.currentLevel||"aal1";
+    const verified=(factors?.totp||[]).filter(x=>x.status==="verified");
+    $("factorCount").textContent=String(verified.length);
+    factorId=verified[0]?.id||"";
+
+    if(verified.length && aal?.currentLevel==="aal2"){
+      status("mfaStatus","ok",T("aal2"));
+    }else if(verified.length){
+      status("mfaStatus","warn",T("hasFactor"));
+      $("challengeArea").classList.remove("hidden");
+    }else{
+      status("mfaStatus","warn",T("noFactor"));
+      $("enrollArea").classList.remove("hidden");
+    }
+  }
+
+  $("enrollBtn").onclick=async()=>{
+    $("enrollBtn").disabled=true;
+    try{
+      const {data,error}=await sb.auth.mfa.enroll({factorType:"totp",friendlyName:"Independent Points"});
+      if(error) throw error;
+      enrollFactorId=data.id;
+      $("qrImg").src=data.totp.qr_code;
+      $("secret").textContent="Secret: "+data.totp.secret;
+      $("qrWrap").classList.remove("hidden");
+    }catch(e){status("mfaStatus","err",e.message||String(e))}
+    finally{$("enrollBtn").disabled=false}
+  };
+
+  $("verifyEnrollBtn").onclick=async()=>{
+    const code=$("enrollCode").value.trim();
+    if(!enrollFactorId||!code)return;
+    $("verifyEnrollBtn").disabled=true;
+    try{
+      const {data:ch,error:ce}=await sb.auth.mfa.challenge({factorId:enrollFactorId}); if(ce)throw ce;
+      const {error:ve}=await sb.auth.mfa.verify({factorId:enrollFactorId,challengeId:ch.id,code}); if(ve)throw ve;
+      status("mfaStatus","ok",T("enabled"));$("enrollCode").value="";await refresh();
+    }catch(e){status("mfaStatus","err",e.message||String(e))}
+    finally{$("verifyEnrollBtn").disabled=false}
+  };
+
+  $("challengeBtn").onclick=async()=>{
+    const code=$("challengeCode").value.trim();
+    if(!factorId||!code)return;
+    $("challengeBtn").disabled=true;
+    try{
+      const {data:ch,error:ce}=await sb.auth.mfa.challenge({factorId});if(ce)throw ce;
+      const {error:ve}=await sb.auth.mfa.verify({factorId,challengeId:ch.id,code});if(ve)throw ve;
+      status("mfaStatus","ok",T("verified"));$("challengeCode").value="";await refresh();
+    }catch(e){status("mfaStatus","err",e.message||String(e))}
+    finally{$("challengeBtn").disabled=false}
+  };
+
+  $("signOutBtn").onclick=async()=>{
+    if(!confirm(lang==="en"?"Sign out on this device?":"確定要登出此裝置嗎？"))return;
+    await sb.auth.signOut();
+    location.href="./index.html?v=4120";
+  };
+
+  applyLang();refresh().catch(e=>status("identityStatus","err",e.message||String(e)));
+})();
+</script>
+</body></html>
