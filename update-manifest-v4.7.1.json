@@ -1,0 +1,109 @@
+{
+  "product": "Independent Points",
+  "version": "V4.7.1",
+  "build": "20260926-471",
+  "display_precision": 6,
+  "contract_decimals": 2,
+  "files": [
+    {
+      "name": "admin-assets-v4.7.1.html",
+      "bytes": 50417,
+      "sha256": "7bd59d803e9deb137cbbb4b460779a88c84f790cfa500d58f5558f8f5333a680"
+    },
+    {
+      "name": "admin-members-v4.7.1.html",
+      "bytes": 20596,
+      "sha256": "59a265733a5cdaac12dc6c73188354c0a66513d8e912df30fe18dfa5e9e119b4"
+    },
+    {
+      "name": "asset-center-v4.7.1.html",
+      "bytes": 14906,
+      "sha256": "d95d6028cff209c9b3e0264325a70dcd161f19d2e98109ef19bc9cd54123f574"
+    },
+    {
+      "name": "index.html",
+      "bytes": 30980,
+      "sha256": "d5f301609bf842c1c48bdfa524d014fb2204e4f37d633c3e7aec8f07888707ae"
+    },
+    {
+      "name": "ipt-apple-touch-180.png",
+      "bytes": 1620,
+      "sha256": "e9147d9c3d94055729aa9bbce16e397b5a3ac7db7b11f91cc48e923bf639112f"
+    },
+    {
+      "name": "ipt-icon-192.png",
+      "bytes": 1689,
+      "sha256": "83cd7171cb59a0ba6b5b7015bcb962cefd084adc2e769dbcf8e25080c2e3d7c1"
+    },
+    {
+      "name": "ipt-icon-512.png",
+      "bytes": 4539,
+      "sha256": "87b400c3a735f28b7c9a2f66391ac51af10a2d5ee3acffcb1c47c1e1f260b62e"
+    },
+    {
+      "name": "ipt-icon.svg",
+      "bytes": 310,
+      "sha256": "aa08f40ea988b4e1ad63a835e2ea10eca987ceaa6d9afb1eccba7095b550c19a"
+    },
+    {
+      "name": "maintenance-v4.7.1.html",
+      "bytes": 14824,
+      "sha256": "9b83eee231d324c8a7bc9a23e1a259f804ca30d803a34fc8da9e36d2ff483140"
+    },
+    {
+      "name": "manifest.webmanifest",
+      "bytes": 2085,
+      "sha256": "5be571de9745215218185dd5b920b90f47a06c281abcd976f3a638ccf4ebe1dc"
+    },
+    {
+      "name": "member-assets-v4.7.1.html",
+      "bytes": 32655,
+      "sha256": "3546107e9182cfb65091a546dadb30f8bf4191db30b49c3b2ff404700c37ae0c"
+    },
+    {
+      "name": "print-report-v4.7.1.html",
+      "bytes": 15351,
+      "sha256": "f41f78239640bfd63cd38ebcfcfa3a3118a5bff81c804126aad57b75fda45152"
+    },
+    {
+      "name": "release-history.json",
+      "bytes": 3044,
+      "sha256": "f117af1f52262f300365704f47e2958753d0861c12a822c7139b85d4f289e7c7"
+    },
+    {
+      "name": "release.json",
+      "bytes": 705,
+      "sha256": "1eb481dfbe6463b40208f142c10bf42d55be4d8d7da151a8630cac7aefe38f9f"
+    },
+    {
+      "name": "robots.txt",
+      "bytes": 88,
+      "sha256": "ec85751c1b2e59f67918dde48e57e0b3cd14dec02011e8a4db82c6b2a6506242"
+    },
+    {
+      "name": "security-center-v4.7.1.html",
+      "bytes": 19868,
+      "sha256": "d89e655f42543752db3cb0480db6b2c210f04cfeaf54c4002a5919f62a094c76"
+    },
+    {
+      "name": "service-worker.js",
+      "bytes": 1582,
+      "sha256": "e0f2e4115eafe532778f341a40dc8353dd7c5e2b15ef0ac750685382ad12c37a"
+    },
+    {
+      "name": "system-info-v4.7.1.html",
+      "bytes": 10501,
+      "sha256": "1ca809a855ac9ea9df71c62a97016adb7ef6ef3c4de7d38640b7a0ea5188fe3f"
+    },
+    {
+      "name": "update-center-v4.7.1.html",
+      "bytes": 17283,
+      "sha256": "aa7c71ec14833319b6d0b06ef70f58d10a8115ef5cb732de207978cdcbf8572a"
+    },
+    {
+      "name": "wallet-core-v4.7.1.html",
+      "bytes": 103777,
+      "sha256": "d99d2d947503d3a4565f1f310d79bd4b33d0ad317124767dc220f96243dd4945"
+    }
+  ]
+}

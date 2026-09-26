@@ -1,19 +1,18 @@
 {
   "product": "Independent Points",
-  "version": "V4.7.0",
-  "build": "20260926-470",
+  "version": "V4.7.1",
+  "build": "20260926-471",
   "release_date": "2026-09-26",
   "channel": "production",
-  "rollback_version": "V4.6.3",
+  "rollback_version": "V4.7.0",
   "fallback_version": "V4.5.0",
   "network": "Ethereum Sepolia",
   "chain_id": "11155111 / 0xaa36a7",
   "contract": "0xd3fb2480aadb8b168ec7e88a0e5c847d9750cb87",
   "notes": [
-    "新增帳戶安全與權限管理中心",
-    "會員狀態與角色異動新增會員編號二次確認",
-    "整合錢包驗證狀態與會員稽核",
-    "不修改鏈上合約與 Supabase 結構"
+    "修正錢包核心舊版 UI 標示",
+    "修正返回首頁舊版網址",
+    "不修改合約、Supabase 或 Edge Functions"
   ],
   "rollback_steps": [
     "若 V4.6.1 異常，先重新載入並清除 IPT 快取。",
