@@ -3,7 +3,7 @@
   "name": "Independent Points",
   "short_name": "IPT",
   "description": "Independent Points 會員點數錢包與 IPT 資產管理系統",
-  "start_url": "./?source=pwa&v=472",
+  "start_url": "./?source=pwa&v=473",
   "scope": "./",
   "display": "standalone",
   "display_override": [
@@ -72,7 +72,7 @@
     {
       "name": "維運中心",
       "short_name": "維運",
-      "url": "./maintenance-v4.7.2.html?v=472",
+      "url": "./maintenance-v4.7.3.html?v=473",
       "icons": [
         {
           "src": "./ipt-icon-192.png",
@@ -84,7 +84,7 @@
     {
       "name": "安全與權限",
       "short_name": "安全",
-      "url": "./security-center-v4.7.2.html?v=472",
+      "url": "./security-center-v4.7.3.html?v=473",
       "icons": [
         {
           "src": "./ipt-icon-192.png",
