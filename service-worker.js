@@ -1,21 +1,22 @@
-const CACHE_NAME="ipt-v4.8.1";
+const CACHE_NAME="ipt-v4.9.0";
 const PRECACHE=[
   "./",
   "./index.html",
-  "./wallet-core-v4.8.1.html",
-  "./asset-center-v4.8.1.html",
-  "./member-assets-v4.8.1.html",
-  "./admin-assets-v4.8.1.html",
-  "./admin-members-v4.8.1.html",
-  "./print-report-v4.8.1.html",
-  "./system-info-v4.8.1.html",
-  "./maintenance-v4.8.1.html",
-  "./update-center-v4.8.1.html",
-  "./security-center-v4.8.1.html",
-  "./security-ops-v4.8.1.html",
+  "./wallet-core-v4.9.html",
+  "./asset-center-v4.9.html",
+  "./member-assets-v4.9.html",
+  "./admin-assets-v4.9.html",
+  "./admin-members-v4.9.html",
+  "./print-report-v4.9.html",
+  "./system-info-v4.9.html",
+  "./maintenance-v4.9.html",
+  "./update-center-v4.9.html",
+  "./security-center-v4.9.html",
+  "./security-ops-v4.9.html",
+  "./event-center-v4.9.html",
   "./release.json",
   "./release-history.json",
-  "./update-manifest-v4.8.1.json",
+  "./update-manifest-v4.9.json",
   "./manifest.webmanifest",
   "./ipt-icon.svg",
   "./ipt-icon-192.png",
@@ -25,3 +26,4 @@ const PRECACHE=[
 self.addEventListener("install",event=>{event.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll(PRECACHE)).then(()=>self.skipWaiting()))});
 self.addEventListener("activate",event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith("ipt-")&&k!==CACHE_NAME).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 self.addEventListener("fetch",event=>{const req=event.request;if(req.method!=="GET")return;const url=new URL(req.url);if(url.origin!==self.location.origin)return;if(req.mode==="navigate"){event.respondWith(fetch(req).then(res=>{const copy=res.clone();caches.open(CACHE_NAME).then(c=>c.put(req,copy)).catch(()=>{});return res}).catch(()=>caches.match(req).then(hit=>hit||caches.match("./index.html"))));return}event.respondWith(caches.match(req).then(hit=>{const net=fetch(req).then(res=>{const copy=res.clone();caches.open(CACHE_NAME).then(c=>c.put(req,copy)).catch(()=>{});return res}).catch(()=>hit);return hit||net}))});
+self.addEventListener("notificationclick",event=>{event.notification.close();const target=event.notification?.data?.url||"./event-center-v4.9.html?v=490";event.waitUntil(clients.matchAll({type:"window",includeUncontrolled:true}).then(list=>{for(const c of list){if("focus" in c){c.navigate(target).catch(()=>{});return c.focus()}}return clients.openWindow?clients.openWindow(target):undefined}))});

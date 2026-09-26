@@ -1,18 +1,19 @@
 {
   "product": "Independent Points",
-  "version": "V4.8.1",
-  "build": "20260926-481",
+  "version": "V4.9.0",
+  "build": "20260926-490",
   "release_date": "2026-09-26",
   "channel": "production",
-  "rollback_version": "V4.8.0",
+  "rollback_version": "V4.8.1",
   "fallback_version": "V4.5.0",
   "network": "Ethereum Sepolia",
   "chain_id": "11155111 / 0xaa36a7",
   "contract": "0xd3fb2480aadb8b168ec7e88a0e5c847d9750cb87",
   "notes": [
-    "修正 Android 高風險安全視窗卡頓",
-    "倒數期間不再呼叫 RPC 或 WalletConnect",
-    "保留 60 秒一次性安全視窗與 Trust Wallet 最終核准"
+    "新增正式營運事件與通知中心",
+    "集中安全事件、管理稽核、鏈上狀態與版本事件",
+    "支援未讀、篩選、搜尋、CSV 與裝置通知",
+    "未修改 IPT 合約、Supabase 結構或 Edge Functions"
   ],
   "rollback_steps": [
     "若 V4.6.1 異常，先重新載入並清除 IPT 快取。",

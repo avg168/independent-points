@@ -2,6 +2,19 @@
   "product": "Independent Points",
   "releases": [
     {
+      "version": "V4.9.0",
+      "date": "2026-09-26",
+      "channel": "production",
+      "title": "正式營運事件與通知中心",
+      "notes": [
+        "集中高風險安全事件、錢包切換與管理稽核",
+        "監測 paused / pendingOwner / 版本變更等營運狀態",
+        "未讀事件、分類、搜尋與 CSV 匯出",
+        "Android / PWA 裝置通知權限與測試通知",
+        "通知為頁面／PWA 開啟期間的裝置端提醒，不含背景 Push 後端"
+      ]
+    },
+    {
       "version": "V4.8.1",
       "date": "2026-09-26",
       "channel": "production",
