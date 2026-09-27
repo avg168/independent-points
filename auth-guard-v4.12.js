@@ -1,4 +1,5 @@
 
+/* V4.12.4 Logout Wallet Guard Hotfix 13 */
 (() => {
   "use strict";
   const SUPABASE_URL="https://uccexvgqmoxhgykkjdcy.supabase.co";
@@ -14,6 +15,7 @@
     "update-center-v4.12.html"
   ]);
   const MEMBER_PAGES=new Set([
+    "wallet-core-v4.12.html",
     "member-assets-v4.12.html",
     "asset-center-v4.12.html",
     ...ADMIN_PAGES
@@ -77,6 +79,18 @@
       auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
     });
 
+    if(path==="wallet-core-v4.12.html"){
+      showOverlay(
+        t("正在驗證會員登入","正在验证会员登录","Checking member sign-in"),
+        t("錢包功能需要有效的會員登入，正在向伺服器重新確認身分。","钱包功能需要有效的会员登录，正在向服务器重新确认身份。","Wallet features require a valid member sign-in. Your identity is being revalidated with the server."),
+        t("驗證中…","验证中…","Checking…"),
+        "./auth-security-v4.12.html?v=4124",
+        false
+      );
+      const checkingBtn=document.getElementById("iptGuardPrimary");
+      if(checkingBtn) checkingBtn.disabled=true;
+    }
+
     // Server-validated identity: do not trust local getSession alone.
     const {data:{user},error:userErr}=await sb.auth.getUser();
     if(userErr || !user){
@@ -136,6 +150,16 @@
     }
 
     hideOverlay();
+
+    if(!window.__iptV412AuthGuardSubscribed){
+      window.__iptV412AuthGuardSubscribed=true;
+      sb.auth.onAuthStateChange((event)=>{
+        if(event==="SIGNED_OUT"){
+          run().catch(console.error);
+        }
+      });
+    }
+
     try{
       sessionStorage.setItem("ipt_v412_last_server_validation",new Date().toISOString());
       sessionStorage.setItem("ipt_v412_user_id",user.id);
