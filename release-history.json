@@ -2,6 +2,19 @@
   "product": "Independent Points",
   "releases": [
     {
+      "version": "V4.12.4",
+      "date": "2026-09-28",
+      "channel": "production",
+      "title": "資安驗收正式封版",
+      "notes": [
+        "完成登出→登入→aal1 阻擋→MFA aal2→管理功能恢復實機驗證",
+        "完成會員管理、會員明細、我的資產、管理員資產、營運安全與維運健康檢查",
+        "完成繁中／简中／English 動態文字修正與實機巡檢",
+        "Version Update 與 Maintenance Diagnostics 預設收合",
+        "整併 V4.12.3.2 後續 Hotfix，統一正式版本、PWA 快取與導覽參數"
+      ]
+    },
+    {
       "version": "V4.12.3.2",
       "date": "2026-09-27",
       "channel": "version-sync-hotfix",

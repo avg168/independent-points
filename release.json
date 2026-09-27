@@ -1,23 +1,25 @@
 {
   "product": "Independent Points",
-  "version": "V4.12.3.2",
-  "build": "20260927-41232",
-  "release_date": "2026-09-26",
-  "channel": "version-sync-hotfix",
-  "rollback_version": "V4.12.3.1",
-  "fallback_version": "V4.5.0",
+  "version": "V4.12.4",
+  "build": "20260928-4124",
+  "release_date": "2026-09-28",
+  "channel": "production",
+  "rollback_version": "V4.12.3.2",
+  "fallback_version": "V4.12.3.2",
   "network": "Ethereum Sepolia",
   "chain_id": "11155111 / 0xaa36a7",
   "contract": "0xd3fb2480aadb8b168ec7e88a0e5c847d9750cb87",
   "notes": [
-    "Synchronize all production frontend version labels",
-    "Keep administrator Edge Functions AAL2 enforcement active",
-    "Keep tested MFA hotfix behavior",
-    "Synchronize PWA cache and navigation query versions"
+    "Security acceptance production seal after Android/Chrome end-to-end verification",
+    "Administrator sensitive pages require verified MFA AAL2",
+    "Integrates trilingual dynamic-text fixes across production pages",
+    "Maintenance and Version Update diagnostics are collapsed by default",
+    "Keeps member names, emails, wallet addresses and hashes as original data",
+    "Keeps tested Sepolia, Supabase and PWA production behavior"
   ],
   "rollback_steps": [
-    "若 V4.12.3.2 異常，先重新載入並清除 IPT 快取。",
-    "仍異常時可回復 V4.12.3.1。",
+    "若 V4.12.4 異常，先重新載入並清除 IPT 快取。",
+    "仍異常時可回復 V4.12.3.2。",
     "回復網頁版本時不修改 Supabase、Owner、pendingOwner 或 paused。"
   ],
   "languages": [

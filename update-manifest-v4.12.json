@@ -1,77 +1,58 @@
 {
   "product": "Independent Points",
-  "version": "V4.12.3.2",
-  "build": "20260927-41232",
+  "version": "V4.12.4",
+  "build": "20260928-4124",
+  "release_date": "2026-09-28",
+  "channel": "production",
   "checks": {
     "javascript": true,
-    "detect_unverified_factor": true,
-    "cleanup_unfinished_mfa": true
+    "server_validated_identity": true,
+    "mfa_aal2_admin_gate": true,
+    "admin_edge_aal2_enforced": true,
+    "three_languages": true,
+    "diagnostics_collapsed": true,
+    "android_chrome_acceptance": true
   },
   "files": [
     {
-      "name": "V4.11.0-多語系最終整合驗收報告.txt",
-      "bytes": 1443,
-      "sha256": "5569f9eb2bdbf58dec12466979c00f27695fe5c4c145f98f638ec1b210fc847b"
-    },
-    {
-      "name": "V4.12.0-登入與身分安全驗收報告.txt",
-      "bytes": 1387,
-      "sha256": "423da6d439b5e807d83333ec2443d8751c6a3fe80d3de164772a74f2b7a6aca5"
-    },
-    {
-      "name": "V4.12.1-會員登入流程修正說明.txt",
-      "bytes": 646,
-      "sha256": "1f98d38e86e062faf7fa55ceffdaa4d9e2d362b3baa3ebde7d8e60ac3cc1000d"
-    },
-    {
-      "name": "V4.12.2-未完成MFA清理說明.txt",
-      "bytes": 652,
-      "sha256": "710bd4cee188f8f4726e407e0eb530ca031dac3a8e13eb9cfb2d82a4664e9aed"
-    },
-    {
-      "name": "V4.12.3-後端AAL2安全整合說明.txt",
-      "bytes": 680,
-      "sha256": "e2bc9a84ebf261f5fbc4e026002bdf69a59a687997ef171977d0e4515c5f9b88"
-    },
-    {
       "name": "admin-assets-v4.12.html",
-      "bytes": 50506,
-      "sha256": "ce6528106d5956aff6b75a33ef24b27208e07070598ea0d501584bd5cd263679"
+      "bytes": 52338,
+      "sha256": "7b27ad7f947d5de572730d6252ecb8f5faa71d1f75a0c256ae1bbacf2965a5da"
     },
     {
       "name": "admin-members-v4.12.html",
-      "bytes": 20882,
-      "sha256": "14d17333fcbe4e2bd7a9b38133973bcd183f2a992dba56fd97d0ee8daa70bee4"
+      "bytes": 22503,
+      "sha256": "e902017bade0a2877c717c52f7fed55d691efb2341e1bb399523afc961db7789"
     },
     {
       "name": "asset-center-v4.12.html",
-      "bytes": 15019,
-      "sha256": "4dc7ac92cb698cd6bcb6ca838efa5da3b3c9bb022bb34460143f56216b846a5e"
+      "bytes": 15003,
+      "sha256": "956d4bed0d5fe956c0ad4a2d6cf843783d037a856dbf2b17cd6f873c6acbf008"
     },
     {
       "name": "auth-guard-v4.12.js",
-      "bytes": 7031,
-      "sha256": "04d96ce22bd52c0af9d6bda814df075442d1ebce531acc6a8e3316c6dddec747"
+      "bytes": 7025,
+      "sha256": "779ca0afa6ad5683bd7612240aaaf2c62f5ec7c37343d3f0154ba8bb7134b01b"
     },
     {
       "name": "auth-security-v4.12.html",
-      "bytes": 21545,
-      "sha256": "ce1d404a1706280d226650fd0a2193ba472128224cea605c8284800cbb240c98"
+      "bytes": 21531,
+      "sha256": "ce2b69fa2d4945066466699c9641b36f4b4ecdce712b9079e9e6a280a9572bd3"
     },
     {
       "name": "event-center-v4.12.html",
-      "bytes": 25858,
-      "sha256": "3ce0273ade6e87b556c1393d204f196e9c874cd9932ac66771a8f53b327c2a0a"
+      "bytes": 28091,
+      "sha256": "d6c016028b09e7be76770321fce801ba703c00fba44d2314ba4c4b1fb83cc9f9"
     },
     {
       "name": "i18n-v4.10.js",
-      "bytes": 114037,
-      "sha256": "4c3a966c55630586d2af3ff36b18b16c025970aa4536837165614c0a4ab9589d"
+      "bytes": 113989,
+      "sha256": "b431e27ef0cda4c44e44a58f00af77543c9c806425f11299f4a8e0ba6fe1d396"
     },
     {
       "name": "index.html",
-      "bytes": 32318,
-      "sha256": "7df2f0cd2aee612bdce1973e32bf7ebc2a100125dbbd2f5b133ad67dd319b072"
+      "bytes": 39116,
+      "sha256": "d07a0e6adbc0dfe1ed45adedf4c4e1d1406b78d63d7734f9524b1f37e9dcd6f9"
     },
     {
       "name": "ipt-apple-touch-180.png",
@@ -95,33 +76,33 @@
     },
     {
       "name": "maintenance-v4.12.html",
-      "bytes": 14849,
-      "sha256": "1eb9f3486330be501056ad8a64afe4492f58cce1be4890f2b45ca0afd9d69afe"
+      "bytes": 19380,
+      "sha256": "83067a20c7e6759846564dc17cf0ed4b2ba0ed66efef47617c42a6e4b108b787"
     },
     {
       "name": "manifest.webmanifest",
-      "bytes": 2944,
-      "sha256": "2ab9816e31bdd3a7c3bd2b30e3a943d566c408469556bba171ea0c97d4a36ff6"
+      "bytes": 2938,
+      "sha256": "0d0c872d6c9a3593e42b62508d147a088372ee56af601149c53aa839e36d4db4"
     },
     {
       "name": "member-assets-v4.12.html",
-      "bytes": 32775,
-      "sha256": "4a3ff2e498685f2ab4e36d18dc37e2e21ad88762115c5e4260060530578c2bb5"
+      "bytes": 32737,
+      "sha256": "6e9ab3162c8587663b54f9285103e8a62c39bd52be1cb0f2fffa2abe5a80b34d"
     },
     {
       "name": "print-report-v4.12.html",
-      "bytes": 15408,
-      "sha256": "d7f8e224f27924b18438c6bb835b9812866d0b2c303906b97d910ff1c7929f9d"
+      "bytes": 15399,
+      "sha256": "b524385263c420ddc562fcb2a332b45b19210b1adad552341e413369de76a759"
     },
     {
       "name": "release-history.json",
-      "bytes": 14308,
-      "sha256": "c2405b9622f3cac29b5ef27387915df23e4b7442470c3e9660960e8ae3ee93a6"
+      "bytes": 14916,
+      "sha256": "9285d01f5e78428500f839aaa1156104cd446a2bfef91d0969b57be09712676e"
     },
     {
       "name": "release.json",
-      "bytes": 1232,
-      "sha256": "2f83641dc726337e2b864bf1e84f756bf2d229737da1b3566bc651ed862558e9"
+      "bytes": 1451,
+      "sha256": "8c65cd9ec858c7145f621abbb1149cf782f13b5a84a20bd520414b7987ba594a"
     },
     {
       "name": "robots.txt",
@@ -130,49 +111,38 @@
     },
     {
       "name": "security-center-v4.12.html",
-      "bytes": 20504,
-      "sha256": "d028cb6c17a4ec4a770b80f2a9aebc94ee70ffe7f001e13c666e6233d4f86db5"
+      "bytes": 21316,
+      "sha256": "50ed68b4bb985fbec6d3928e10e0b7b5374d17100d7307091b10311bb142a788"
     },
     {
       "name": "security-ops-v4.12.html",
-      "bytes": 15593,
-      "sha256": "a73c86aded49c085e8987a69006c36b9c64aa6a8a75f938ba9a72977fe679f66"
+      "bytes": 15390,
+      "sha256": "2e0a687ec8d69883fddac393c0ce092f06b459ad4d83c94fdd369c5d9dbd89bb"
     },
     {
       "name": "service-worker.js",
-      "bytes": 1446,
-      "sha256": "9e85c61fa863c81b620468eaf2d6b888c6728405279daf702740ed439b0ba409"
+      "bytes": 1444,
+      "sha256": "7235d2a9ce25b7fc96d7c303c42c6964412ae440e02d27fa5f9a153b1ca38a1f"
     },
     {
       "name": "system-info-v4.12.html",
-      "bytes": 11506,
-      "sha256": "1fc5ca3c6ea08042b6bd833da7ed2d66593e63ea8d6d71ce74601403ee1a149d"
+      "bytes": 12439,
+      "sha256": "ab0ca684ef432b6c6d37a5691a97713dd2abd352377685eeb8961324870fe304"
     },
     {
       "name": "update-center-v4.12.html",
-      "bytes": 17841,
-      "sha256": "f49f360ca97097a6ce1b04256ac9a02a465dfca953937258cfe76831cb3b13d3"
+      "bytes": 21326,
+      "sha256": "b275d35d77692e42a70b95e2a3299c07c2e31916a3b8e1303e71d79a261aafde"
     },
     {
-      "name": "update-manifest-v4.11.json",
-      "bytes": 4380,
-      "sha256": "8f5d3213ab42e445b6effb1b82a82edb638cad9a901d77e859613aae2bafc633"
+      "name": "V4.12.4-資安驗收封版報告.txt",
+      "bytes": 1846,
+      "sha256": "15753157ade6fa8bc5ad60e8c943d2633911c3a8d25bcf4854c9f338ffe513d2"
     },
     {
       "name": "wallet-core-v4.12.html",
-      "bytes": 113244,
-      "sha256": "1279e316365bba54720fbd49db36dfec592389c24e4e4636cc24aee26c9f3f0c"
+      "bytes": 113222,
+      "sha256": "ce69347f25f2dcf992879ea13eabc105bbaf5609c879199baa15482cc2fee5f2"
     }
-  ],
-  "channel": "version-sync-hotfix",
-  "security": {
-    "admin_edge_aal2_enforced": true,
-    "protected_admin_functions": [
-      "admin-members",
-      "admin-member-detail",
-      "admin-member-actions",
-      "admin-assets",
-      "admin-asset-detail"
-    ]
-  }
+  ]
 }
