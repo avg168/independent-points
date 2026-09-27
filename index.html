@@ -560,15 +560,36 @@ button{
 </main>
 
 <script>
+/* V4.12.3.2 Home Startup Hotfix 1 */
 (() => {
   const SUPABASE_URL="https://uccexvgqmoxhgykkjdcy.supabase.co";
   const SUPABASE_KEY="sb_publishable_FBsN1DYTQMv2_bWhpbXHAA_qdAq7ri7";
 
-  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{
-    auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
-  });
+  let sb=null;
 
   const $=id=>document.getElementById(id);
+
+  function withTimeout(promise,ms,label){
+    return Promise.race([
+      promise,
+      new Promise((_,reject)=>setTimeout(()=>reject(new Error(label+"逾時")),ms))
+    ]);
+  }
+
+  async function getSupabaseClient(){
+    if(sb) return sb;
+    const started=Date.now();
+    while(Date.now()-started<10000){
+      if(window.supabase?.createClient){
+        sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{
+          auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
+        });
+        return sb;
+      }
+      await new Promise(r=>setTimeout(r,150));
+    }
+    throw new Error("Supabase 登入模組載入逾時，請重新整理頁面。");
+  }
   let currentUserId="";
   let assetSummaryLoading=false;
 
@@ -630,7 +651,12 @@ button{
     $("assetSummaryNote").textContent="正在讀取 Sepolia IPT 餘額與交易統計；其他按鈕仍可使用。";
 
     try{
-      const {data:asset,error:assetError}=await sb.functions.invoke("member-asset-detail",{body:{}});
+      const client=await getSupabaseClient();
+      const {data:asset,error:assetError}=await withTimeout(
+        client.functions.invoke("member-asset-detail",{body:{}}),
+        12000,
+        "資產摘要讀取"
+      );
       if(assetError) throw assetError;
       if(!asset?.ok) throw new Error(asset?.error||"資產摘要讀取失敗");
       renderAssetSummary(asset,false);
@@ -664,7 +690,12 @@ button{
     setStatus("","正在確認登入狀態…");
 
     try{
-      const {data:{user},error}=await sb.auth.getUser();
+      const client=await getSupabaseClient();
+      const {data:{user},error}=await withTimeout(
+        client.auth.getUser(),
+        8000,
+        "登入身分驗證"
+      );
       if(error) throw error;
 
       if(!user){
@@ -674,24 +705,24 @@ button{
 
       const uid=user.id;
       currentUserId=uid;
-      const [pRes,rRes,wRes,vRes]=await Promise.all([
-        sb.from("member_profiles")
+      const [pRes,rRes,wRes,vRes]=await withTimeout(Promise.all([
+        client.from("member_profiles")
           .select("member_number,display_name,status")
           .eq("id",uid).maybeSingle(),
-        sb.from("member_roles")
+        client.from("member_roles")
           .select("role")
           .eq("user_id",uid).maybeSingle(),
-        sb.from("member_wallets")
+        client.from("member_wallets")
           .select("wallet_address,is_primary,chain_id,created_at")
           .eq("user_id",uid)
           .eq("chain_id",11155111)
           .order("is_primary",{ascending:false})
           .order("created_at",{ascending:true}),
-        sb.from("verified_wallets")
+        client.from("verified_wallets")
           .select("wallet_address,verified_at")
           .eq("user_id",uid)
           .eq("chain_id",11155111)
-      ]);
+      ]),10000,"會員資料讀取");
 
       if(pRes.error) throw pRes.error;
       if(rRes.error) throw rRes.error;
@@ -743,7 +774,7 @@ button{
       }
     }catch(err){
       console.error(err);
-      setStatus("err","載入失敗："+(err?.message||String(err)));
+      setStatus("err","載入失敗："+(err?.message||String(err))+"。請按「重新整理」重試。");
     }
   }
 
@@ -791,7 +822,15 @@ button{
     }
   });
 
-  load();
+
+  const startupWatchdog=setTimeout(()=>{
+    const box=$("statusBox");
+    if(box && box.textContent.includes("正在確認登入狀態")){
+      setStatus("err","登入確認逾時。請按「重新整理」重試；若持續發生，請進入「會員登入／帳戶安全」重新驗證。");
+    }
+  },12000);
+
+  load().finally(()=>clearTimeout(startupWatchdog));
 })();
 </script>
 
