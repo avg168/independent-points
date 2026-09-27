@@ -124,6 +124,7 @@ pre{
 </main>
 
 <script>
+/* V4.12.3.2 Maintenance Health Hotfix 1 */
 (() => {
   const SUPABASE_URL="https://uccexvgqmoxhgykkjdcy.supabase.co";
   const SUPABASE_KEY="sb_publishable_FBsN1DYTQMv2_bWhpbXHAA_qdAq7ri7";
@@ -228,66 +229,88 @@ pre{
   async function health(){
     diag.time=new Date().toISOString();
 
-    // Supabase/session
+    // Supabase/session:
+    // Signed-out is a valid account state, not a Supabase outage.
     try{
-      const {data:{user},error}=await sb.auth.getUser();
-      if(error) throw error;
-      pill("supabasePill","ok","正常");
-      $("supabaseDetail").textContent="Supabase 可連線；Session "+(session?"存在":"目前未登入");
-      diag.checks.supabase={ok:true,session:!!session};
+      const {data:sessionData,error:sessionError}=await sb.auth.getSession();
+      if(sessionError) throw sessionError;
 
-      if(session?.user){
+      const session=sessionData?.session||null;
+      pill("supabasePill","ok","正常");
+
+      if(!session){
+        $("supabaseDetail").textContent="Supabase 模組正常；目前已登出。";
+        diag.checks.supabase={ok:true,session:false};
+
+        pill("memberPill","warn","已登出");
+        $("memberDetail").textContent="目前已登出；重新登入後可檢查會員資料。";
+        diag.checks.member={ok:true,signed_in:false};
+      }else{
+        const {data:{user},error:userError}=await sb.auth.getUser();
+        if(userError||!user) throw userError||new Error("登入身分驗證失敗");
+
+        $("supabaseDetail").textContent="Supabase 可連線；登入 Session 正常。";
+        diag.checks.supabase={ok:true,session:true};
+
         const {data:p,error:pe}=await sb.from("member_profiles")
-          .select("member_number,display_name,status").eq("id",session.user.id).maybeSingle();
+          .select("member_number,display_name,status").eq("id",user.id).maybeSingle();
         if(pe) throw pe;
+
         pill("memberPill",p?"ok":"warn",p?"正常":"找不到資料");
         $("memberDetail").textContent=p
           ?`${p.member_number}｜${p.display_name}｜${p.status}`
-          :"Session 存在但找不到 member_profiles";
-        diag.checks.member={ok:!!p,profile:p||null};
-      }else{
-        pill("memberPill","warn","未登入");
-        $("memberDetail").textContent="目前沒有 Supabase Session。";
-        diag.checks.member={ok:false,reason:"not_logged_in"};
+          :"Session 正常，但找不到 member_profiles";
+        diag.checks.member={ok:!!p,signed_in:true,profile:p||null};
       }
     }catch(e){
       pill("supabasePill","err","異常");
       $("supabaseDetail").textContent=String(e?.message||e);
       pill("memberPill","err","無法檢查");
-      $("memberDetail").textContent="Supabase 檢查失敗";
+      $("memberDetail").textContent="Supabase 登入／會員資料檢查失敗";
       diag.checks.supabase={ok:false,error:String(e)};
+      diag.checks.member={ok:false,error:String(e)};
     }
 
-    // RPC
+    // Sepolia + IPT contract:
+    // Use Supabase Edge Function so Android/Chrome does not directly call RPC.
     try{
-      const block=await rpc("eth_blockNumber",[]);
-      const height=Number(hexBig(block.result));
+      const res=await fetch(SUPABASE_URL+"/functions/v1/system-chain-health",{
+        method:"POST",
+        headers:{
+          "apikey":SUPABASE_KEY,
+          "Content-Type":"application/json"
+        },
+        body:"{}",
+        cache:"no-store"
+      });
+
+      const chain=await res.json().catch(()=>({}));
+      if(!res.ok||!chain?.ok) throw new Error(chain?.error||("HTTP "+res.status));
+
       pill("rpcPill","ok","正常");
-      $("rpcDetail").textContent=`區塊高度 ${height}｜${block.url}`;
-      diag.checks.rpc={ok:true,height,url:block.url};
+      $("rpcDetail").textContent=`區塊高度 ${chain.block_number}｜${chain.rpc}`;
+      diag.checks.rpc={
+        ok:true,
+        height:chain.block_number,
+        url:chain.rpc
+      };
+
+      pill("contractPill","ok","正常");
+      $("contractDetail").textContent=
+        `totalSupply ${chain.total_supply} IPT｜decimals ${chain.decimals}｜paused ${chain.paused}`;
+      diag.checks.contract={
+        ok:true,
+        total_supply:chain.total_supply,
+        decimals:chain.decimals,
+        paused:chain.paused
+      };
     }catch(e){
       pill("rpcPill","err","異常");
-      $("rpcDetail").textContent=String(e?.message||e);
+      $("rpcDetail").textContent="Sepolia 後端健康檢查失敗："+String(e?.message||e);
       diag.checks.rpc={ok:false,error:String(e)};
-    }
 
-    // contract
-    try{
-      const [supply,paused,decimalsCall]=await Promise.all([
-        rpc("eth_call",[{to:CONTRACT,data:"0x18160ddd"},"latest"]),
-        rpc("eth_call",[{to:CONTRACT,data:"0x5c975abb"},"latest"]),
-        rpc("eth_call",[{to:CONTRACT,data:"0x313ce567"},"latest"])
-      ]);
-      const raw=hexBig(supply.result);
-      const decimals=Number(hexBig(decimalsCall.result));
-      const total=formatUnits(raw,decimals);
-      const isPaused=hexBig(paused.result)!==0n;
-      pill("contractPill","ok","正常");
-      $("contractDetail").textContent=`totalSupply ${total} IPT｜decimals ${decimals}｜paused ${isPaused}`;
-      diag.checks.contract={ok:true,total_supply:total,decimals,paused:isPaused};
-    }catch(e){
       pill("contractPill","err","異常");
-      $("contractDetail").textContent=String(e?.message||e);
+      $("contractDetail").textContent="IPT 合約後端健康檢查失敗："+String(e?.message||e);
       diag.checks.contract={ok:false,error:String(e)};
     }
 
