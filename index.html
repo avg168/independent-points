@@ -560,7 +560,7 @@ button{
 </main>
 
 <script>
-/* V4.12.3.2 Home Startup Hotfix 1 */
+/* V4.12.3.2 Home Startup Hotfix 2 - multilingual sign-out states */
 (() => {
   const SUPABASE_URL="https://uccexvgqmoxhgykkjdcy.supabase.co";
   const SUPABASE_KEY="sb_publishable_FBsN1DYTQMv2_bWhpbXHAA_qdAq7ri7";
@@ -568,6 +568,27 @@ button{
   let sb=null;
 
   const $=id=>document.getElementById(id);
+
+  function uiLang(){
+    try{return localStorage.getItem("ipt_language")||"zh-TW"}catch(_){return "zh-TW"}
+  }
+
+  function uiText(zhTW,zhCN,en){
+    const lang=uiLang();
+    if(lang==="en") return en;
+    if(lang==="zh-CN") return zhCN;
+    return zhTW;
+  }
+
+  function isSignedOutError(err){
+    const s=String(err?.message||err||"").toLowerCase();
+    return s.includes("auth session missing")
+      || s.includes("session missing")
+      || s.includes("invalid session")
+      || s.includes("session expired")
+      || s.includes("refresh token")
+      || s.includes("jwt expired");
+  }
 
   function withTimeout(promise,ms,label){
     return Promise.race([
@@ -687,7 +708,11 @@ button{
     $("myAssetBtn").disabled=true;
     $("historyBtn").disabled=true;
     $("assetCenterBtn").disabled=true;
-    setStatus("","正在確認登入狀態…");
+    setStatus("",uiText(
+      "正在確認登入狀態…",
+      "正在确认登录状态…",
+      "Checking sign-in status…"
+    ));
 
     try{
       const client=await getSupabaseClient();
@@ -699,7 +724,11 @@ button{
       if(error) throw error;
 
       if(!user){
-        setStatus("err","目前尚未登入會員。請先完成會員登入。");
+        setStatus("",uiText(
+          "目前已登出，請重新登入。",
+          "当前已登出，请重新登录。",
+          "You are signed out. Please sign in again."
+        ));
         return;
       }
 
@@ -774,7 +803,21 @@ button{
       }
     }catch(err){
       console.error(err);
-      setStatus("err","載入失敗："+(err?.message||String(err))+"。請按「重新整理」重試。");
+      if(isSignedOutError(err)){
+        setStatus("",uiText(
+          "目前已登出，請重新登入。",
+          "当前已登出，请重新登录。",
+          "You are signed out. Please sign in again."
+        ));
+      }else{
+        const prefix=uiText("載入失敗：","加载失败：","Load failed: ");
+        const suffix=uiText(
+          "。請按「重新整理」重試。",
+          "。请按“重新整理”重试。",
+          ". Tap “Refresh” to try again."
+        );
+        setStatus("err",prefix+(err?.message||String(err))+suffix);
+      }
     }
   }
 
@@ -826,7 +869,11 @@ button{
   const startupWatchdog=setTimeout(()=>{
     const box=$("statusBox");
     if(box && box.textContent.includes("正在確認登入狀態")){
-      setStatus("err","登入確認逾時。請按「重新整理」重試；若持續發生，請進入「會員登入／帳戶安全」重新驗證。");
+      setStatus("err",uiText(
+        "登入確認逾時。請按「重新整理」重試；若持續發生，請進入「會員登入／帳戶安全」重新驗證。",
+        "登录确认超时。请按“重新整理”重试；若持续发生，请进入“会员登录／账户安全”重新验证。",
+        "Sign-in verification timed out. Tap “Refresh” to retry. If it continues, open “Member Sign-in / Security” and verify again."
+      ));
     }
   },12000);
 
