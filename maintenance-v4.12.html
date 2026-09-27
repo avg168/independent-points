@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Independent Points V4.12.1｜維運中心</title>
+<title>Independent Points V4.12.2｜維運中心</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
 <style>
 :root{
@@ -62,11 +62,11 @@ pre{
 }
 @media(min-width:720px){.grid{grid-template-columns:repeat(4,1fr)}}
 </style>
-<script src="./i18n-v4.10.js?v=4121" defer></script>
+<script src="./i18n-v4.10.js?v=4122" defer></script>
 </head>
 <body>
 <header>
-  <div class="badge">V4.12.1</div>
+  <div class="badge">V4.12.2</div>
   <h1>維運中心</h1>
   <p>版本、快取、PWA、Supabase、Sepolia 與 IPT 合約健康檢查。</p>
 </header>
@@ -74,7 +74,7 @@ pre{
   <section class="panel">
     <h2>版本狀態</h2>
     <div class="grid">
-      <div class="card"><div class="k">目前頁面版本</div><div class="v">V4.12.1</div></div>
+      <div class="card"><div class="k">目前頁面版本</div><div class="v">V4.12.2</div></div>
       <div class="card"><div class="k">正式發佈版本</div><div id="releaseVersion" class="v">讀取中…</div></div>
       <div class="card"><div class="k">Service Worker</div><div id="swState" class="v">檢查中…</div></div>
       <div class="card"><div class="k">App 模式</div><div id="appMode" class="v">檢查中…</div></div>
@@ -133,7 +133,7 @@ pre{
     auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
   });
   const $=id=>document.getElementById(id);
-  const diag={version:"V4.12.1",time:new Date().toISOString(),checks:{}};
+  const diag={version:"V4.12.2",time:new Date().toISOString(),checks:{}};
 
   function pill(id,state,text){
     const el=$(id); el.className="pill "+state; el.textContent=text;
@@ -180,12 +180,12 @@ pre{
       const data=await res.json();
       $("releaseVersion").textContent=data.version||"未知";
       diag.release=data;
-      if(data.version==="V4.12.1"){
+      if(data.version==="V4.12.2"){
         $("versionStatus").className="status ok";
         $("versionStatus").textContent="目前已是正式最新版本。";
       }else{
         $("versionStatus").className="status warn";
-        $("versionStatus").textContent=`目前 V4.12.1｜正式版本 ${data.version||"未知"}，建議重新整理或更新 App。`;
+        $("versionStatus").textContent=`目前 V4.12.2｜正式版本 ${data.version||"未知"}，建議重新整理或更新 App。`;
       }
     }catch(e){
       $("releaseVersion").textContent="無法讀取";
@@ -329,7 +329,7 @@ pre{
   });
 
   $("reloadBtn").addEventListener("click",()=>location.reload());
-  $("homeBtn").addEventListener("click",()=>location.href="./index.html?v=4121");
+  $("homeBtn").addEventListener("click",()=>location.href="./index.html?v=4122");
 
   $("copyDiagBtn").addEventListener("click",async()=>{
     const text=$("diag").textContent;

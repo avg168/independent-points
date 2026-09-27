@@ -2,7 +2,19 @@
   "product": "Independent Points",
   "releases": [
     {
-      "version": "V4.12.1",
+      "version": "V4.12.2",
+      "date": "2026-09-27",
+      "channel": "mfa-enrollment-fix",
+      "title": "未完成 MFA 清理修正版",
+      "notes": [
+        "修正 friendly name already exists",
+        "偵測 unverified TOTP factor",
+        "新增「清除未完成 MFA」",
+        "清除後可重新建立並完成 AAL2"
+      ]
+    },
+    {
+      "version": "V4.12.2",
       "date": "2026-09-27",
       "channel": "security-login-fix",
       "title": "會員登入流程修正版",
@@ -14,7 +26,7 @@
       ]
     },
     {
-      "version": "V4.12.1",
+      "version": "V4.12.2",
       "date": "2026-09-27",
       "channel": "security-rollout",
       "title": "登入與身分安全導入版",
@@ -23,11 +35,11 @@
         "新增 Account Security / MFA 頁面與 TOTP 設定/驗證流程",
         "管理員敏感頁面在前端要求 MFA AAL2",
         "本版暫不修改管理員 Edge Functions 的 AAL2 後端硬性要求，以避免尚未設定 MFA 時造成管理員鎖定",
-        "管理員完成 MFA 實機設定後再升級 V4.12.1 後端強制 AAL2"
+        "管理員完成 MFA 實機設定後再升級 V4.12.2 後端強制 AAL2"
       ]
     },
     {
-      "version": "V4.12.1",
+      "version": "V4.12.2",
       "date": "2026-09-27",
       "channel": "release-candidate",
       "title": "多語系最終整合驗收版",

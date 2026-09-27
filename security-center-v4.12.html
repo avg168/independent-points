@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Independent Points V4.12.1｜帳戶安全與權限中心</title>
+<title>Independent Points V4.12.2｜帳戶安全與權限中心</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
 <style>
 :root{
@@ -79,12 +79,12 @@ input{
 .hidden{display:none!important}
 @media(min-width:720px){.grid{grid-template-columns:repeat(6,minmax(0,1fr))}}
 </style>
-<script src="./i18n-v4.10.js?v=4121" defer></script>
-<script src="./auth-guard-v4.12.js?v=4121"></script>
+<script src="./i18n-v4.10.js?v=4122" defer></script>
+<script src="./auth-guard-v4.12.js?v=4122"></script>
 </head>
 <body>
 <header>
-  <div class="badge">V4.12.1</div>
+  <div class="badge">V4.12.2</div>
   <h1>帳戶安全與權限中心</h1>
   <p>集中管理管理員權限、會員停權、錢包驗證狀態、會員稽核與高風險操作入口。</p>
 </header>
@@ -394,14 +394,14 @@ input{
       renderMembers(members);
       renderWallets();
       $("contentArea").classList.remove("hidden");
-      status("ok",`V4.12.1 安全中心已載入｜管理員：${data.admin?.email||"已登入"}`);
+      status("ok",`V4.12.2 安全中心已載入｜管理員：${data.admin?.email||"已登入"}`);
     }catch(e){
       $("contentArea").classList.add("hidden");
       status("err","載入失敗："+(e?.message||String(e)));
     }
   }
 
-  $("homeBtn").addEventListener("click",()=>location.href="./index.html?v=4121");
+  $("homeBtn").addEventListener("click",()=>location.href="./index.html?v=4122");
   $("refreshBtn").addEventListener("click",()=>load($("queryInput").value.trim()));
   $("searchBtn").addEventListener("click",()=>load($("queryInput").value.trim()));
   $("clearBtn").addEventListener("click",()=>{$("queryInput").value="";load("")});
@@ -411,16 +411,16 @@ input{
   $("mintBtn").addEventListener("click",()=>location.href="./wallet-core-v4.12.html?go=mint");
   $("pauseBtn").addEventListener("click",()=>location.href="./wallet-core-v4.12.html?go=pause");
   $("ownershipBtn").addEventListener("click",()=>location.href="./wallet-core-v4.12.html?go=ownership");
-  $("memberAdminBtn").addEventListener("click",()=>location.href="./admin-members-v4.12.html?v=4121");
-  $("securityOpsBtn")?.addEventListener("click",()=>location.href="./security-ops-v4.12.html?v=4121");
-  $("eventCenterBtn")?.addEventListener("click",()=>location.href="./event-center-v4.12.html?v=4121");
+  $("memberAdminBtn").addEventListener("click",()=>location.href="./admin-members-v4.12.html?v=4122");
+  $("securityOpsBtn")?.addEventListener("click",()=>location.href="./security-ops-v4.12.html?v=4122");
+  $("eventCenterBtn")?.addEventListener("click",()=>location.href="./event-center-v4.12.html?v=4122");
 
   load("");
 })();
 </script>
 <script>
 if("serviceWorker" in navigator){
-  window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js?v=4121",{updateViaCache:"none"}).catch(()=>{}));
+  window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js?v=4122",{updateViaCache:"none"}).catch(()=>{}));
 }
 </script>
 </body>

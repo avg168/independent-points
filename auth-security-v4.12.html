@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Independent Points V4.12.1｜帳戶安全與 MFA</title>
+<title>Independent Points V4.12.2｜帳戶安全與 MFA</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
 <style>
 :root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;color:#172033;background:#f4f7fb}
@@ -25,7 +25,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
 </head>
 <body>
 <header>
-  <div class="version">V4.12.1</div>
+  <div class="version">V4.12.2</div>
   <h1 id="title">帳戶安全與 MFA</h1>
   <p id="subtitle">每次登入重新確認身分；管理員使用驗證器 App 進行第二因素驗證。</p>
   <div class="langbar">
@@ -62,6 +62,10 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
   <section class="panel">
     <h2 id="hMfa">驗證器 App（TOTP）</h2>
     <div id="mfaStatus" class="status">正在讀取 MFA 狀態…</div>
+    <div id="staleArea" class="hidden" style="margin-top:12px">
+      <div class="status warn" id="staleText">偵測到未完成的 MFA 設定。請先清除後重新建立。</div>
+      <button id="clearStaleBtn" class="danger" type="button" style="width:100%;margin-top:10px">清除未完成 MFA</button>
+    </div>
     <div id="enrollArea" class="hidden">
       <div class="note" id="enrollNote">第一次設定時，按下「建立 MFA」，再用 Google Authenticator、Microsoft Authenticator、1Password 等驗證器掃描 QR Code。</div>
       <button id="enrollBtn" class="primary" type="button" style="width:100%;margin-top:12px">建立 MFA</button>
@@ -89,7 +93,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       <button id="signOutBtn" class="danger full" type="button">登出此裝置</button>
     </div>
     <div class="note" id="rolloutNote">
-      本版先完成 MFA 設定與前端驗證。當管理員手機完成 MFA 設定並測試成功後，再進 V4.12.1 將管理員 Edge Functions 改為後端強制 AAL2，避免尚未設定 MFA 時直接鎖住管理員。
+      本版先完成 MFA 設定與前端驗證。當管理員手機完成 MFA 設定並測試成功後，再進 V4.12.2 將管理員 Edge Functions 改為後端強制 AAL2，避免尚未設定 MFA 時直接鎖住管理員。
     </div>
   </section>
 </main>
@@ -99,7 +103,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
   const KEY="sb_publishable_FBsN1DYTQMv2_bWhpbXHAA_qdAq7ri7";
   const sb=window.supabase.createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
   const $=id=>document.getElementById(id);
-  let factorId="", enrollFactorId="", lang=localStorage.getItem("ipt_language")||"zh-TW";
+  let factorId="", enrollFactorId="", staleFactorIds=[], lang=localStorage.getItem("ipt_language")||"zh-TW";
 
   const S={
     "zh-TW":{
@@ -111,10 +115,11 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       invalid:"目前沒有有效登入工作階段。",kEmail:"Email",kUser:"User ID",kAal:"目前驗證等級",kFactor:"已驗證 MFA",
       recheck:"重新驗證登入身分",home:"返回首頁",hMfa:"驗證器 App（TOTP）",reading:"正在讀取 MFA 狀態…",
       noFactor:"尚未設定 MFA。管理員建議立即設定。",hasFactor:"MFA 已設定，但這次登入尚未完成第二因素驗證。",
+      stale:"偵測到未完成的 MFA 設定。請先清除後重新建立。",clearStale:"清除未完成 MFA",cleared:"未完成的 MFA 已清除，現在可以重新建立。",clearFail:"清除失敗：",
       aal2:"這次登入已完成 MFA（AAL2）。",enrollNote:"第一次設定時，按下「建立 MFA」，再用 Google Authenticator、Microsoft Authenticator、1Password 等驗證器掃描 QR Code。",
       enroll:"建立 MFA",code:"輸入驗證器 6 位數代碼",enable:"驗證並啟用 MFA",challengeNote:"這個帳號已設定 MFA。每個新的登入工作階段都要完成一次第二因素驗證，才能進入管理員敏感功能。",
       challenge:"完成二次驗證",hSession:"工作階段安全",policy:"V4.12 使用 server-validated getUser() 重新確認登入身分；管理員頁面另檢查 MFA AAL2。",
-      signout:"登出此裝置",rollout:"本版先完成 MFA 設定與前端驗證。當管理員手機完成 MFA 設定並測試成功後，再進 V4.12.1 將管理員 Edge Functions 改為後端強制 AAL2，避免尚未設定 MFA 時直接鎖住管理員。",
+      signout:"登出此裝置",rollout:"本版先完成 MFA 設定與前端驗證。當管理員手機完成 MFA 設定並測試成功後，再進 V4.12.2 將管理員 Edge Functions 改為後端強制 AAL2，避免尚未設定 MFA 時直接鎖住管理員。",
       enabled:"MFA 已成功啟用，這次工作階段已提升為 AAL2。",verified:"二次驗證完成，這次工作階段已提升為 AAL2。"
     },
     "zh-CN":{
@@ -126,10 +131,11 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       invalid:"当前没有有效登录工作阶段。",kEmail:"Email",kUser:"User ID",kAal:"当前验证等级",kFactor:"已验证 MFA",
       recheck:"重新验证登录身份",home:"返回首页",hMfa:"验证器 App（TOTP）",reading:"正在读取 MFA 状态…",
       noFactor:"尚未设置 MFA。管理员建议立即设置。",hasFactor:"MFA 已设置，但这次登录尚未完成第二因素验证。",
+      stale:"检测到未完成的 MFA 设置。请先清除后重新建立。",clearStale:"清除未完成 MFA",cleared:"未完成的 MFA 已清除，现在可以重新建立。",clearFail:"清除失败：",
       aal2:"这次登录已完成 MFA（AAL2）。",enrollNote:"第一次设置时，按下“建立 MFA”，再用 Google Authenticator、Microsoft Authenticator、1Password 等验证器扫描 QR Code。",
       enroll:"建立 MFA",code:"输入验证器 6 位数代码",enable:"验证并启用 MFA",challengeNote:"这个账号已设置 MFA。每个新的登录工作阶段都要完成一次第二因素验证，才能进入管理员敏感功能。",
       challenge:"完成二次验证",hSession:"工作阶段安全",policy:"V4.12 使用 server-validated getUser() 重新确认登录身份；管理员页面另检查 MFA AAL2。",
-      signout:"登出此设备",rollout:"本版先完成 MFA 设置与前端验证。管理员手机完成 MFA 设置并测试成功后，再进入 V4.12.1，将管理员 Edge Functions 改为后端强制 AAL2，避免尚未设置 MFA 时直接锁住管理员。",
+      signout:"登出此设备",rollout:"本版先完成 MFA 设置与前端验证。管理员手机完成 MFA 设置并测试成功后，再进入 V4.12.2，将管理员 Edge Functions 改为后端强制 AAL2，避免尚未设置 MFA 时直接锁住管理员。",
       enabled:"MFA 已成功启用，这次工作阶段已提升为 AAL2。",verified:"二次验证完成，这次工作阶段已提升为 AAL2。"
     },
     "en":{
@@ -141,10 +147,11 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       invalid:"There is no valid signed-in session.",kEmail:"Email",kUser:"User ID",kAal:"Current Assurance Level",kFactor:"Verified MFA",
       recheck:"Revalidate Sign-in",home:"Back to Home",hMfa:"Authenticator App (TOTP)",reading:"Reading MFA status…",
       noFactor:"MFA is not configured. Administrators should configure it now.",hasFactor:"MFA is configured, but this sign-in has not completed the second factor.",
+      stale:"An unfinished MFA enrollment was detected. Remove it before starting again.",clearStale:"Remove Unfinished MFA",cleared:"The unfinished MFA enrollment was removed. You can set up MFA again now.",clearFail:"Removal failed: ",
       aal2:"This sign-in has completed MFA (AAL2).",enrollNote:"For first-time setup, tap “Set up MFA”, then scan the QR code with Google Authenticator, Microsoft Authenticator, 1Password, or another TOTP authenticator.",
       enroll:"Set up MFA",code:"Enter the 6-digit authenticator code",enable:"Verify & Enable MFA",challengeNote:"MFA is configured for this account. Each new sign-in session must complete the second factor before accessing administrator-sensitive features.",
       challenge:"Complete MFA Verification",hSession:"Session Security",policy:"V4.12 uses server-validated getUser() to revalidate sign-in identity; administrator pages also check MFA AAL2.",
-      signout:"Sign Out on This Device",rollout:"This release adds MFA enrollment and client-side verification first. After the administrator successfully configures and tests MFA on the phone, V4.12.1 can enforce AAL2 inside administrator Edge Functions without risking an administrator lockout.",
+      signout:"Sign Out on This Device",rollout:"This release adds MFA enrollment and client-side verification first. After the administrator successfully configures and tests MFA on the phone, V4.12.2 can enforce AAL2 inside administrator Edge Functions without risking an administrator lockout.",
       enabled:"MFA was enabled successfully. This session is now AAL2.",verified:"MFA verification completed. This session is now AAL2."
     }
   };
@@ -195,14 +202,14 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
     if(last) $("loginEmail").value=last;
   }catch(_){}
 
-  $("homeBtn").onclick=()=>location.href="./index.html?v=4121";
+  $("homeBtn").onclick=()=>location.href="./index.html?v=4122";
   $("recheckBtn").onclick=()=>refresh();
 
   async function refresh(){
     applyLang();
     status("identityStatus","",T("checking"));
     status("mfaStatus","",T("reading"));
-    $("enrollArea").classList.add("hidden"); $("challengeArea").classList.add("hidden");
+    $("enrollArea").classList.add("hidden"); $("challengeArea").classList.add("hidden"); $("staleArea").classList.add("hidden"); staleFactorIds=[];
     const {data:{user},error:userErr}=await sb.auth.getUser();
     if(userErr||!user){
       status("loginStatus","warn",T("loginReady"));
@@ -217,7 +224,10 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
     ]);
     if(aalErr||fErr){status("mfaStatus","err",(aalErr||fErr).message);return}
     $("aal").textContent=aal?.currentLevel||"aal1";
-    const verified=(factors?.totp||[]).filter(x=>x.status==="verified");
+    const allTotp=(factors?.totp||[]);
+    const verified=allTotp.filter(x=>x.status==="verified");
+    const unverified=allTotp.filter(x=>x.status!=="verified");
+    staleFactorIds=unverified.map(x=>x.id).filter(Boolean);
     $("factorCount").textContent=String(verified.length);
     factorId=verified[0]?.id||"";
 
@@ -226,16 +236,38 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
     }else if(verified.length){
       status("mfaStatus","warn",T("hasFactor"));
       $("challengeArea").classList.remove("hidden");
+    }else if(unverified.length){
+      status("mfaStatus","warn",T("stale"));
+      $("staleArea").classList.remove("hidden");
     }else{
       status("mfaStatus","warn",T("noFactor"));
       $("enrollArea").classList.remove("hidden");
     }
   }
 
+
+  $("clearStaleBtn").onclick=async()=>{
+    if(!staleFactorIds.length) return;
+    $("clearStaleBtn").disabled=true;
+    try{
+      for(const factorIdToRemove of staleFactorIds){
+        const {error}=await sb.auth.mfa.unenroll({factorId:factorIdToRemove});
+        if(error) throw error;
+      }
+      status("mfaStatus","ok",T("cleared"));
+      staleFactorIds=[];
+      await refresh();
+    }catch(e){
+      status("mfaStatus","err",T("clearFail")+(e?.message||String(e)));
+    }finally{
+      $("clearStaleBtn").disabled=false;
+    }
+  };
+
   $("enrollBtn").onclick=async()=>{
     $("enrollBtn").disabled=true;
     try{
-      const {data,error}=await sb.auth.mfa.enroll({factorType:"totp",friendlyName:"Independent Points"});
+      const {data,error}=await sb.auth.mfa.enroll({factorType:"totp",friendlyName:"Independent Points MFA"});
       if(error) throw error;
       enrollFactorId=data.id;
       $("qrImg").src=data.totp.qr_code;
@@ -272,7 +304,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
   $("signOutBtn").onclick=async()=>{
     if(!confirm(lang==="en"?"Sign out on this device?":"確定要登出此裝置嗎？"))return;
     await sb.auth.signOut();
-    location.href="./index.html?v=4121";
+    location.href="./index.html?v=4122";
   };
 
   applyLang();refresh().catch(e=>status("identityStatus","err",e.message||String(e)));
