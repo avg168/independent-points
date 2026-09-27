@@ -105,6 +105,7 @@ button.danger{background:#a83b45;color:#fff;border-color:#a83b45}
   </div>
 </main>
 <script>
+/* V4.12.3.2 Operations Security Chain Hotfix 1 */
 (() => {
   const tr=(s)=>window.IPTI18N?.t?window.IPTI18N.t(s):s;
   const SUPABASE_URL="https://uccexvgqmoxhgykkjdcy.supabase.co";
@@ -193,26 +194,23 @@ button.danger{background:#a83b45;color:#fff;border-color:#a83b45}
         $("versionV").textContent=release.version||"未知";
       }catch(_){$("versionV").textContent="讀取失敗"}
 
-      // chain state
-      let paused=null,pending="",owner="";
+      // chain state — read through Supabase Edge Function to avoid mobile-browser RPC/CORS failures.
       try{
-        const [p,o,po]=await Promise.all([
-          rpc("eth_call",[{to:CONTRACT,data:"0x5c975abb"},"latest"]),
-          rpc("eth_call",[{to:CONTRACT,data:"0x8da5cb5b"},"latest"]),
-          rpc("eth_call",[{to:CONTRACT,data:"0xe30c3978"},"latest"])
-        ]);
-        paused=big(p.result)!==0n;
-        const wordToAddr=x=>"0x"+String(x||"").replace(/^0x/,"").slice(-40);
-        owner=wordToAddr(o.result);
-        pending=wordToAddr(po.result);
+        const chain=await invoke("admin-security-state",{});
+        const paused=!!chain.paused;
+        const pending=String(chain.pending_owner||ZERO);
         $("contractV").textContent=paused?"已暫停":"正常";
-        $("pendingV").textContent=(pending.toLowerCase()===ZERO)?"無候任管理者":pending.slice(0,8)+"…"+pending.slice(-6);
+        $("pendingV").textContent=chain.has_pending_owner
+          ? pending.slice(0,8)+"…"+pending.slice(-6)
+          : "無候任管理者";
         const issues=[];
         if(paused) issues.push("IPT 合約目前 paused = true");
-        if(pending.toLowerCase()!==ZERO) issues.push("目前存在 pendingOwner");
+        if(chain.has_pending_owner) issues.push("目前存在 pendingOwner");
         $("opsV").textContent=issues.length?"需注意":"正常";
         $("opsStatus").className=issues.length?"status warn":"status ok";
-        $("opsStatus").textContent=issues.length?"營運安全提醒："+issues.join("；")+"。":tr("正式營運狀態正常：合約未暫停、目前沒有 pendingOwner。");
+        $("opsStatus").textContent=issues.length
+          ?"營運安全提醒："+issues.join("；")+"。"
+          :tr("正式營運狀態正常：合約未暫停、目前沒有 pendingOwner。");
       }catch(e){
         $("contractV").textContent="檢查失敗";
         $("pendingV").textContent="檢查失敗";
