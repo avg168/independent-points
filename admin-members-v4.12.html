@@ -379,11 +379,31 @@ button{
 </main>
 
 <script>
+/* V4.12.3.2 Admin Members Detail i18n Hotfix 12 */
 (() => {
   const URL="https://uccexvgqmoxhgykkjdcy.supabase.co";
   const KEY="sb_publishable_FBsN1DYTQMv2_bWhpbXHAA_qdAq7ri7";
   const sb=window.supabase.createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
   const $=id=>document.getElementById(id);
+
+  function uiLang(){
+    try{
+      return window.IPTI18N?.getLang?.()
+        || localStorage.getItem("ipt_language")
+        || "zh-TW";
+    }catch(_){
+      return "zh-TW";
+    }
+  }
+
+  function L(zhTW,zhCN,en){
+    const x=uiLang();
+    if(x==="en") return en;
+    if(x==="zh-CN") return zhCN;
+    return zhTW;
+  }
+
+  let currentDetailId=null;
   let members=[];
 
   function esc(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
@@ -480,8 +500,13 @@ button{
   }
 
   async function loadDetail(id){
+    currentDetailId=id;
     $("detailSection").classList.remove("hidden");
-    $("detailContent").innerHTML='<div class="status">正在載入完整資料…</div>';
+    $("detailContent").innerHTML=`<div class="status">${L(
+      "正在載入完整資料…",
+      "正在加载完整资料…",
+      "Loading full member details…"
+    )}</div>`;
     $("detailSection").scrollIntoView({behavior:"smooth",block:"start"});
     try{
       const data=await invoke("admin-member-detail",{target_user_id:id});
@@ -491,23 +516,64 @@ button{
       const audit=data.audit||[];
       $("detailContent").innerHTML=`
         <div class="detail-grid">
-          <div class="detail-box"><div class="k">會員</div><div class="v"><span data-member-data="1">${esc(m.member_number)}｜${esc(m.display_name)}</span></div></div>
-          <div class="detail-box"><div class="k">Email</div><div class="v">${esc(m.email||"—")}</div></div>
-          <div class="detail-box"><div class="k">角色／狀態</div><div class="v">${esc(m.role||"member")}／${esc(m.status||"active")}</div></div>
-          <div class="detail-box"><div class="k">最近登入</div><div class="v">${esc(time(m.last_sign_in_at))}</div></div>
+          <div class="detail-box">
+            <div class="k">${L("會員","会员","Member")}</div>
+            <div class="v"><span data-member-data="1">${esc(m.member_number)}｜${esc(m.display_name)}</span></div>
+          </div>
+          <div class="detail-box">
+            <div class="k">Email</div>
+            <div class="v">${esc(m.email||"—")}</div>
+          </div>
+          <div class="detail-box">
+            <div class="k">${L("角色／狀態","角色／状态","Role / Status")}</div>
+            <div class="v">${esc(m.role||"member")}／${esc(m.status||"active")}</div>
+          </div>
+          <div class="detail-box">
+            <div class="k">${L("最近登入","最近登录","Last Sign-in")}</div>
+            <div class="v">${esc(time(m.last_sign_in_at))}</div>
+          </div>
         </div>
-        <h2 style="margin-top:20px">錢包</h2>
+
+        <h2 style="margin-top:20px">${L("錢包","钱包","Wallet")}</h2>
         ${wallets.length?wallets.map(w=>`<div class="detail-box" style="margin-bottom:8px">
-          <div class="k">${esc(w.label||"錢包")}${w.is_primary?"｜主錢包":""}</div>
-          <div class="v">${esc(w.wallet_address)}<br>${w.verified_at?"已驗證："+esc(time(w.verified_at)):"未驗證"}</div>
-        </div>`).join(""):'<div class="detail-box"><div class="v">尚未綁定錢包</div></div>'}
-        <h2 style="margin-top:20px">常用收款人</h2>
-        ${contacts.length?contacts.map(c=>`<div class="detail-box" style="margin-bottom:8px"><div class="v">${esc(c.contact_name)}<br>${esc(c.wallet_address)}</div></div>`).join(""):'<div class="detail-box"><div class="v">0 筆</div></div>'}
-        <h2 style="margin-top:20px">最近管理紀錄</h2>
-        ${audit.length?audit.slice(0,20).map(a=>`<div class="audit">${esc(time(a.created_at))}｜${esc(a.action)}｜${esc(a.note||"")}</div>`).join(""):'<div class="detail-box"><div class="v">尚無管理紀錄</div></div>'}
+          <div class="k">${
+            esc(w.label||L("錢包","钱包","Wallet"))
+          }${
+            w.is_primary?L("｜主錢包","｜主钱包"," | Primary Wallet"):""
+          }</div>
+          <div class="v">${esc(w.wallet_address)}<br>${
+            w.verified_at
+              ?L("已驗證：","已验证：","Verified: ")+esc(time(w.verified_at))
+              :L("未驗證","未验证","Unverified")
+          }</div>
+        </div>`).join(""):
+          `<div class="detail-box"><div class="v">${
+            L("尚未綁定錢包","尚未绑定钱包","Wallet Not Linked")
+          }</div></div>`
+        }
+
+        <h2 style="margin-top:20px">${L("常用收款人","常用收款人","Saved Recipients")}</h2>
+        ${contacts.length?contacts.map(c=>`<div class="detail-box" style="margin-bottom:8px">
+          <div class="v">${esc(c.contact_name)}<br>${esc(c.wallet_address)}</div>
+        </div>`).join(""):
+          `<div class="detail-box"><div class="v">${
+            L("0 筆","0 笔","0")
+          }</div></div>`
+        }
+
+        <h2 style="margin-top:20px">${L("最近管理紀錄","最近管理记录","Recent Admin History")}</h2>
+        ${audit.length?audit.slice(0,20).map(a=>`<div class="audit">${
+          esc(time(a.created_at))
+        }｜${esc(a.action)}｜${esc(a.note||"")}</div>`).join(""):
+          `<div class="detail-box"><div class="v">${
+            L("尚無管理紀錄","尚无管理记录","No admin history yet")
+          }</div></div>`
+        }
       `;
     }catch(e){
-      $("detailContent").innerHTML=`<div class="status err">載入失敗：${esc(e?.message||String(e))}</div>`;
+      $("detailContent").innerHTML=`<div class="status err">${
+        L("載入失敗：","加载失败：","Load failed: ")
+      }${esc(e?.message||String(e))}</div>`;
     }
   }
 
@@ -518,8 +584,15 @@ button{
   $("searchBtn").addEventListener("click",()=>load($("queryInput").value.trim()));
   $("clearBtn").addEventListener("click",()=>{$("queryInput").value="";load("")});
   $("queryInput").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();load($("queryInput").value.trim())}});
-  $("closeDetailBtn").addEventListener("click",()=>$("detailSection").classList.add("hidden"));
+  $("closeDetailBtn").addEventListener("click",()=>{
+    currentDetailId=null;
+    $("detailSection").classList.add("hidden");
+  });
 
+  window.addEventListener("ipt-language-change",()=>{
+    load($("queryInput").value.trim());
+    if(currentDetailId) loadDetail(currentDetailId);
+  });
   load("");
 })();
 </script>
