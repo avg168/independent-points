@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Independent Points V4.12.2｜帳戶安全與 MFA</title>
+<title>Independent Points V4.12.2-HF1｜帳戶安全與 MFA</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
 <style>
 :root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;color:#172033;background:#f4f7fb}
@@ -25,7 +25,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
 </head>
 <body>
 <header>
-  <div class="version">V4.12.2</div>
+  <div class="version">V4.12.2-HF1</div>
   <h1 id="title">帳戶安全與 MFA</h1>
   <p id="subtitle">每次登入重新確認身分；管理員使用驗證器 App 進行第二因素驗證。</p>
   <div class="langbar">
@@ -68,6 +68,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
     </div>
     <div id="enrollArea" class="hidden">
       <div class="note" id="enrollNote">第一次設定時，按下「建立 MFA」，再用 Google Authenticator、Microsoft Authenticator、1Password 等驗證器掃描 QR Code。</div>
+      <div class="note" style="margin-top:8px">MFA Hotfix 1：新設定不再使用固定名稱，避免舊的未完成設定造成衝突。</div>
       <button id="enrollBtn" class="primary" type="button" style="width:100%;margin-top:12px">建立 MFA</button>
       <div id="qrWrap" class="hidden">
         <img id="qrImg" alt="MFA QR Code">
@@ -267,7 +268,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
   $("enrollBtn").onclick=async()=>{
     $("enrollBtn").disabled=true;
     try{
-      const {data,error}=await sb.auth.mfa.enroll({factorType:"totp",friendlyName:"Independent Points MFA"});
+      const {data,error}=await sb.auth.mfa.enroll({factorType:"totp"});
       if(error) throw error;
       enrollFactorId=data.id;
       $("qrImg").src=data.totp.qr_code;
