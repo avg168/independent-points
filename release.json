@@ -1,17 +1,18 @@
 {
   "product": "Independent Points",
-  "version": "V4.12.0",
-  "build": "20260927-4120",
+  "version": "V4.12.1",
+  "build": "20260927-4121",
   "release_date": "2026-09-26",
-  "channel": "security-rollout",
-  "rollback_version": "V4.11.0",
+  "channel": "security-login-fix",
+  "rollback_version": "V4.12.0",
   "fallback_version": "V4.5.0",
   "network": "Ethereum Sepolia",
   "chain_id": "11155111 / 0xaa36a7",
   "contract": "0xd3fb2480aadb8b168ec7e88a0e5c847d9750cb87",
   "notes": [
-    "Final multilingual integration acceptance candidate",
-    "No contract, Supabase schema, or Edge Function changes"
+    "Actual Supabase email/password sign-in added",
+    "Homepage sign-in button routes to Account Security",
+    "Wallet and Auth sessions separated"
   ],
   "rollback_steps": [
     "若 V4.6.1 異常，先重新載入並清除 IPT 快取。",

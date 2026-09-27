@@ -2,7 +2,19 @@
   "product": "Independent Points",
   "releases": [
     {
-      "version": "V4.12.0",
+      "version": "V4.12.1",
+      "date": "2026-09-27",
+      "channel": "security-login-fix",
+      "title": "會員登入流程修正版",
+      "notes": [
+        "修正首頁登入按鈕只開 Wallet Core 的問題",
+        "新增 Supabase Email/密碼登入",
+        "登入成功後以 auth.getUser() 重新驗證",
+        "Wallet Session 與 Auth Session 分離"
+      ]
+    },
+    {
+      "version": "V4.12.1",
       "date": "2026-09-27",
       "channel": "security-rollout",
       "title": "登入與身分安全導入版",
@@ -15,7 +27,7 @@
       ]
     },
     {
-      "version": "V4.12.0",
+      "version": "V4.12.1",
       "date": "2026-09-27",
       "channel": "release-candidate",
       "title": "多語系最終整合驗收版",

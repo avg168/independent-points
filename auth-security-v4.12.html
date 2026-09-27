@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Independent Points V4.12.0｜帳戶安全與 MFA</title>
+<title>Independent Points V4.12.1｜帳戶安全與 MFA</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
 <style>
 :root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;color:#172033;background:#f4f7fb}
@@ -25,7 +25,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
 </head>
 <body>
 <header>
-  <div class="version">V4.12.0</div>
+  <div class="version">V4.12.1</div>
   <h1 id="title">帳戶安全與 MFA</h1>
   <p id="subtitle">每次登入重新確認身分；管理員使用驗證器 App 進行第二因素驗證。</p>
   <div class="langbar">
@@ -35,6 +35,15 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
   </div>
 </header>
 <main>
+
+  <section class="panel" id="loginPanel">
+    <h2 id="hLogin">會員登入</h2>
+    <div id="loginStatus" class="status">請使用會員 Email 與密碼登入。</div>
+    <input id="loginEmail" type="email" autocomplete="username" placeholder="會員 Email" style="width:100%;margin-top:12px">
+    <input id="loginPassword" type="password" autocomplete="current-password" placeholder="密碼" style="width:100%;margin-top:10px">
+    <button id="loginSubmitBtn" class="primary" type="button" style="width:100%;margin-top:10px">登入</button>
+    <div class="note" id="loginNote">Supabase 會員登入與 Trust Wallet 連線是兩件不同的事。登入成功後才會建立會員 Auth Session。</div>
+  </section>
   <section class="panel">
     <h2 id="hIdentity">登入身分驗證</h2>
     <div id="identityStatus" class="status">正在向伺服器重新驗證目前登入身分…</div>
@@ -95,6 +104,9 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
   const S={
     "zh-TW":{
       title:"帳戶安全與 MFA",subtitle:"每次登入重新確認身分；管理員使用驗證器 App 進行第二因素驗證。",
+      hLogin:"會員登入",loginReady:"請使用會員 Email 與密碼登入。",loginEmail:"會員 Email",loginPassword:"密碼",loginSubmit:"登入",
+      loginNote:"Supabase 會員登入與 Trust Wallet 連線是兩件不同的事。登入成功後才會建立會員 Auth Session。",
+      loginOk:"會員登入成功，Auth Session 已建立。",loginFail:"登入失敗：",
       hIdentity:"登入身分驗證",checking:"正在向伺服器重新驗證目前登入身分…",valid:"登入身分已由伺服器重新驗證。",
       invalid:"目前沒有有效登入工作階段。",kEmail:"Email",kUser:"User ID",kAal:"目前驗證等級",kFactor:"已驗證 MFA",
       recheck:"重新驗證登入身分",home:"返回首頁",hMfa:"驗證器 App（TOTP）",reading:"正在讀取 MFA 狀態…",
@@ -107,6 +119,9 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
     },
     "zh-CN":{
       title:"账户安全与 MFA",subtitle:"每次登录重新确认身份；管理员使用验证器 App 进行第二因素验证。",
+      hLogin:"会员登录",loginReady:"请使用会员 Email 与密码登录。",loginEmail:"会员 Email",loginPassword:"密码",loginSubmit:"登录",
+      loginNote:"Supabase 会员登录与 Trust Wallet 连接是两件不同的事。登录成功后才会建立会员 Auth Session。",
+      loginOk:"会员登录成功，Auth Session 已建立。",loginFail:"登录失败：",
       hIdentity:"登录身份验证",checking:"正在向服务器重新验证当前登录身份…",valid:"登录身份已由服务器重新验证。",
       invalid:"当前没有有效登录工作阶段。",kEmail:"Email",kUser:"User ID",kAal:"当前验证等级",kFactor:"已验证 MFA",
       recheck:"重新验证登录身份",home:"返回首页",hMfa:"验证器 App（TOTP）",reading:"正在读取 MFA 状态…",
@@ -119,6 +134,9 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
     },
     "en":{
       title:"Account Security & MFA",subtitle:"Revalidate identity on every sign-in; administrators use an authenticator app as a second factor.",
+      hLogin:"Member Sign-in",loginReady:"Sign in with your member Email and password.",loginEmail:"Member Email",loginPassword:"Password",loginSubmit:"Sign In",
+      loginNote:"Supabase member sign-in is separate from Trust Wallet. A member Auth Session is created only after successful sign-in.",
+      loginOk:"Member sign-in succeeded. Auth Session established.",loginFail:"Sign-in failed: ",
       hIdentity:"Sign-in Identity Verification",checking:"Revalidating the current sign-in with the server…",valid:"Your sign-in identity was revalidated by the server.",
       invalid:"There is no valid signed-in session.",kEmail:"Email",kUser:"User ID",kAal:"Current Assurance Level",kFactor:"Verified MFA",
       recheck:"Revalidate Sign-in",home:"Back to Home",hMfa:"Authenticator App (TOTP)",reading:"Reading MFA status…",
@@ -136,16 +154,48 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
   function applyLang(){
     localStorage.setItem("ipt_language",lang);
     document.documentElement.lang=lang==="en"?"en":(lang==="zh-CN"?"zh-Hans":"zh-Hant");
-    ["title","subtitle","hIdentity","kEmail","kUser","kAal","kFactor","hMfa","enrollNote","challengeNote","hSession","sessionPolicy","rolloutNote"].forEach(id=>{
+    ["title","subtitle","hLogin","loginNote","hIdentity","kEmail","kUser","kAal","kFactor","hMfa","enrollNote","challengeNote","hSession","sessionPolicy","rolloutNote"].forEach(id=>{
       const map={sessionPolicy:"policy",rolloutNote:"rollout"}; if($(id)) $(id).textContent=T(map[id]||id);
     });
+    $("loginEmail").placeholder=T("loginEmail");
+    $("loginPassword").placeholder=T("loginPassword");
+    $("loginSubmitBtn").textContent=T("loginSubmit");
     $("recheckBtn").textContent=T("recheck"); $("homeBtn").textContent=T("home"); $("enrollBtn").textContent=T("enroll");
     $("enrollCode").placeholder=T("code"); $("verifyEnrollBtn").textContent=T("enable");
     $("challengeCode").placeholder=T("code"); $("challengeBtn").textContent=T("challenge"); $("signOutBtn").textContent=T("signout");
   }
 
   document.querySelectorAll("[data-lang]").forEach(b=>b.onclick=()=>{lang=b.dataset.lang;applyLang();refresh()});
-  $("homeBtn").onclick=()=>location.href="./index.html?v=4120";
+
+  $("loginSubmitBtn").onclick=async()=>{
+    const email=$("loginEmail").value.trim();
+    const password=$("loginPassword").value;
+    if(!email||!password){
+      status("loginStatus","warn",T("loginReady"));
+      return;
+    }
+    $("loginSubmitBtn").disabled=true;
+    try{
+      const {data,error}=await sb.auth.signInWithPassword({email,password});
+      if(error) throw error;
+      if(!data?.user) throw new Error("No user returned");
+      try{localStorage.setItem("ipt_last_login_email",email)}catch(_){}
+      $("loginPassword").value="";
+      status("loginStatus","ok",T("loginOk"));
+      await refresh();
+    }catch(e){
+      status("loginStatus","err",T("loginFail")+(e?.message||String(e)));
+    }finally{
+      $("loginSubmitBtn").disabled=false;
+    }
+  };
+
+  try{
+    const last=localStorage.getItem("ipt_last_login_email");
+    if(last) $("loginEmail").value=last;
+  }catch(_){}
+
+  $("homeBtn").onclick=()=>location.href="./index.html?v=4121";
   $("recheckBtn").onclick=()=>refresh();
 
   async function refresh(){
@@ -155,9 +205,11 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
     $("enrollArea").classList.add("hidden"); $("challengeArea").classList.add("hidden");
     const {data:{user},error:userErr}=await sb.auth.getUser();
     if(userErr||!user){
+      status("loginStatus","warn",T("loginReady"));
       $("email").textContent="—";$("uid").textContent="—";$("aal").textContent="—";$("factorCount").textContent="0";
       status("identityStatus","err",T("invalid"));status("mfaStatus","warn",T("noFactor"));return;
     }
+    status("loginStatus","ok",T("loginOk"));
     $("email").textContent=user.email||"—";$("uid").textContent=user.id||"—";status("identityStatus","ok",T("valid"));
 
     const [{data:aal,error:aalErr},{data:factors,error:fErr}]=await Promise.all([
@@ -220,7 +272,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
   $("signOutBtn").onclick=async()=>{
     if(!confirm(lang==="en"?"Sign out on this device?":"確定要登出此裝置嗎？"))return;
     await sb.auth.signOut();
-    location.href="./index.html?v=4120";
+    location.href="./index.html?v=4121";
   };
 
   applyLang();refresh().catch(e=>status("identityStatus","err",e.message||String(e)));

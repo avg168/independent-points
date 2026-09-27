@@ -1,21 +1,11 @@
 {
   "product": "Independent Points",
-  "version": "V4.12.0",
-  "build": "20260927-4120",
-  "channel": "security-rollout",
-  "security": {
-    "server_validated_identity": true,
-    "totp_mfa_ui": true,
-    "client_aal2_admin_gate": true,
-    "edge_aal2_enforced": false
-  },
+  "version": "V4.12.1",
+  "build": "20260927-4121",
   "checks": {
-    "JavaScript 語法": true,
-    "V4.12 正式檔案": true,
-    "會員／管理頁登入守門": true,
-    "MFA / 身分 API": true,
-    "安全遷移防鎖定": true,
-    "伺服器端重新驗證導向": true
+    "javascript": true,
+    "supabase_login": true,
+    "home_route": true
   },
   "files": [
     {
@@ -25,48 +15,48 @@
     },
     {
       "name": "V4.12.0-登入與身分安全驗收報告.txt",
-      "bytes": 1403,
-      "sha256": "392a1fd0a3464db243a91e13c050541e0f3dfa1a7f5bc32d769168d3ae7867bb"
+      "bytes": 1387,
+      "sha256": "423da6d439b5e807d83333ec2443d8751c6a3fe80d3de164772a74f2b7a6aca5"
     },
     {
       "name": "admin-assets-v4.12.html",
       "bytes": 50484,
-      "sha256": "3c209c2062520597447ce9ecf4ee5e3005ffc240801533e6be7ccf88f133eb00"
+      "sha256": "cca65c315bed5c0d7287425accc2b810a20ab1625f0f800c71813fe33ee4af96"
     },
     {
       "name": "admin-members-v4.12.html",
       "bytes": 20862,
-      "sha256": "45d39a865a1dbc1be8d6d3547d3b7392ef59cb1f66e4c0e63baba65a3313ee1f"
+      "sha256": "19da8d58e8dadd34ea74851ba047d9bc23f30224cc89cc7288263909c9bc99b6"
     },
     {
       "name": "asset-center-v4.12.html",
       "bytes": 15003,
-      "sha256": "20c6fcf189550e8a7e3b6c340ed2ebeeb1e258d92f7c5163d07f6b5aef9dfca3"
+      "sha256": "6f56633c304c2a7c31701bee653760d66a404526932e26802dbf5da580836e2e"
     },
     {
       "name": "auth-guard-v4.12.js",
       "bytes": 7025,
-      "sha256": "856694e3cbfb5e4a5ac57c871687287823c8869087b97a5234731c9c4b25b3be"
+      "sha256": "297a6dccd0f91e1b210fc617c13ab22518a89eec5617c43cd49faa8d99988c1b"
     },
     {
       "name": "auth-security-v4.12.html",
-      "bytes": 16755,
-      "sha256": "848810b61421a168df9da87aef33c5a4d04a3dd70f1839b4f4ca941eff631ce5"
+      "bytes": 19814,
+      "sha256": "9a1015c7c046facf941724970969d6abc2bc82c54aa1f26c33e709a33bfa2373"
     },
     {
       "name": "event-center-v4.12.html",
       "bytes": 25843,
-      "sha256": "b13a6ff10ef344399c04b97c5195629cde473d309f7ab572dc72c12d7a2001b3"
+      "sha256": "b163c0ad306ef0e598c415c7d34f3999736dc20f03f4c5b8a55a41744857994d"
     },
     {
       "name": "i18n-v4.10.js",
-      "bytes": 113159,
-      "sha256": "43de0af34497a06e0df1f2d3ba057856a998d26c47c08c4513ddb5ad25dcfa68"
+      "bytes": 113479,
+      "sha256": "c2e9a4b5fbbf331c7ba8b81c14188945ed34d93eb4b6b12ae9a230fd2e1d8553"
     },
     {
       "name": "index.html",
-      "bytes": 32269,
-      "sha256": "38b8d838a8e82eb1b9f914205e1d0f8efa96bcd386c5ea1ed46511fb7da66cb0"
+      "bytes": 32281,
+      "sha256": "bfc53da11b37728a4ca2620a34d91f955928c15662cba9d587465e9ab5629059"
     },
     {
       "name": "ipt-apple-touch-180.png",
@@ -91,32 +81,32 @@
     {
       "name": "maintenance-v4.12.html",
       "bytes": 14835,
-      "sha256": "11f03759ea64f7f5ec67597547fdbee158152e2f442cc5be6673c1f47c372e3e"
+      "sha256": "4f16f52eddeb9fca38272b16420e3341cd0c39f834a69a7743e5cc5375367218"
     },
     {
       "name": "manifest.webmanifest",
       "bytes": 2937,
-      "sha256": "25ab403ea7132d727878bb445fec9705b73f6239418e0069a7e1a2290445dc9d"
+      "sha256": "3170e4dead3e2b1760f45ad66dee2c6ea3f0ab14adf9e608c8f777cb65921748"
     },
     {
       "name": "member-assets-v4.12.html",
       "bytes": 32753,
-      "sha256": "5c8bae91c1e4c72b920e749f3431b2fe2fe2df0cd70478d2cdf8391a6248142a"
+      "sha256": "ccd352e65e813cce92553d8a9d84b6786796a4ea8ecb7c7d0a7fb5e896d69c87"
     },
     {
       "name": "print-report-v4.12.html",
       "bytes": 15399,
-      "sha256": "58db01debc22b0935f623be2e3b4b233a04d9aca7994aa3e8427b1825e0c989f"
+      "sha256": "b4c19bbc3434540fc74774ec4c6fa6de8ae73c79f0d88972e387eae5f620ef31"
     },
     {
       "name": "release-history.json",
-      "bytes": 12919,
-      "sha256": "bfdf117bf4b13964642df7b57cc5bf910dcdda2ff5e260a2bfb23a26c414a33a"
+      "bytes": 13315,
+      "sha256": "43b1aab985b9e4e636d8be9f0bfdbfa3fff27a394f640b5ccfacad72d533068c"
     },
     {
       "name": "release.json",
-      "bytes": 952,
-      "sha256": "80cc7f2eacfb218fd9cbed36086f5017f480b1543c48757b301d8a38c516ec97"
+      "bytes": 985,
+      "sha256": "1747dab7d4b0f9e9ef430ee2c2c1581b2af81a21e87747b4c9fca12ebc053bf8"
     },
     {
       "name": "robots.txt",
@@ -126,27 +116,27 @@
     {
       "name": "security-center-v4.12.html",
       "bytes": 20491,
-      "sha256": "25de04b02083694a97a2e22bf279ff22e4c6d514ab81ef68e413feee30273ac8"
+      "sha256": "d6e2f3cd5e44151c4388ab4674e189b287aa46d400d913a72c8eb319312abf0e"
     },
     {
       "name": "security-ops-v4.12.html",
       "bytes": 15521,
-      "sha256": "2ddf90cc752ac0dbea852af6980ba6c2db92d587bc98f342324daad02ef8f02f"
+      "sha256": "7097c42010a49a8489a86a078c8d460efed7d5abfe969ddc92a978b386b44a09"
     },
     {
       "name": "service-worker.js",
       "bytes": 1444,
-      "sha256": "c4aab51ef3a871d5e6eca614c3ebd5cb73f04068631508a557a4001574687d6a"
+      "sha256": "a11273f9eaed6f224436d23825c5fc1223b4738ec0173ea40f8f91e08e66645b"
     },
     {
       "name": "system-info-v4.12.html",
       "bytes": 11483,
-      "sha256": "1843f4df3f0e675e49d4284e835b2adae343b5a1e44694bb834cbbfbcb45e01f"
+      "sha256": "b3ffa6b753368730c0dbfc547cc5f43c9136c3438feea3e861fae39de531f5fe"
     },
     {
       "name": "update-center-v4.12.html",
       "bytes": 17820,
-      "sha256": "44a4b83ae4f0b78968f07a8ff4568210579e7b88c92b559c1663523c53f025eb"
+      "sha256": "e7fe65768dfe2358cd024404997970cf27cc4145eb255cb8b07c32b8072a42fe"
     },
     {
       "name": "update-manifest-v4.11.json",
@@ -156,7 +146,7 @@
     {
       "name": "wallet-core-v4.12.html",
       "bytes": 113222,
-      "sha256": "197c5a60b8c73a7a365d8878a2d2335181ea763256ea1354a2ffce45203d0cdb"
+      "sha256": "0723a54b1e6c07b50339d6a7854986e55a87328b719159a570b18ab59eba8cfd"
     }
   ]
 }
