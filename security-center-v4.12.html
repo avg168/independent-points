@@ -158,6 +158,7 @@ input{
 </main>
 
 <script>
+/* V4.12.3.2 Security Center Wallet i18n Hotfix 8 */
 (() => {
   const URL="https://uccexvgqmoxhgykkjdcy.supabase.co";
   const KEY="sb_publishable_FBsN1DYTQMv2_bWhpbXHAA_qdAq7ri7";
@@ -247,7 +248,7 @@ input{
           <div class="member-title"><span data-member-data="1">${esc(m.member_number)}｜${esc(m.display_name)}</span></div>
         </div>
         <div class="chips">${memberBadges(m)}</div>
-        <div class="meta">Email：${esc(m.email||"—")}<br>錢包：${esc(m.wallet_address||"尚未綁定")}</div>
+        <div class="meta">Email：${esc(m.email||"—")}<br>錢包：${esc(m.wallet_address||L("尚未綁定","尚未绑定","Not Linked"))}</div>
         <div class="actions" style="margin-top:10px">
           <button class="light detailBtn" data-id="${esc(m.user_id)}">查看稽核</button>
           ${demote}
@@ -281,7 +282,7 @@ input{
         <div class="chips">${memberBadges(m)}</div>
         <div class="meta">
           Email：${esc(m.email||"—")}<br>
-          錢包：${esc(m.wallet_address||"尚未綁定")}<br>
+          錢包：${esc(m.wallet_address||L("尚未綁定","尚未绑定","Not Linked"))}<br>
           常用收款人：${esc(m.contacts_count??0)} 筆
         </div>
         <div class="actions" style="margin-top:10px">
@@ -307,12 +308,16 @@ input{
     const noWallet=list.filter(x=>!x.wallet_address).length;
     const unverified=list.filter(x=>x.wallet_address&&!x.wallet_verified).length;
     $("walletNote").className=(noWallet||unverified)?"status warn":"status ok";
-    $("walletNote").textContent=`未綁定錢包 ${noWallet} 位｜已綁定但未驗證 ${unverified} 位。`;
+    $("walletNote").textContent=L(
+      `未綁定錢包 ${noWallet} 位｜已綁定但未驗證 ${unverified} 位。`,
+      `未绑定钱包 ${noWallet} 位｜已绑定但未验证 ${unverified} 位。`,
+      `Wallets not linked: ${noWallet} | Linked but unverified: ${unverified}.`
+    );
 
     $("walletList").innerHTML=list.map(m=>`<article class="member">
       <div class="member-title"><span data-member-data="1">${esc(m.member_number)}｜${esc(m.display_name)}</span></div>
       <div class="chips">${memberBadges(m)}</div>
-      <div class="meta">錢包：${esc(m.wallet_address||"尚未綁定")}</div>
+      <div class="meta">錢包：${esc(m.wallet_address||L("尚未綁定","尚未绑定","Not Linked"))}</div>
       <button class="light detailBtn" data-id="${esc(m.user_id)}" style="width:100%;margin-top:10px">查看錢包明細</button>
     </article>`).join("");
     bindDetailButtons();
