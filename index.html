@@ -560,7 +560,7 @@ button{
 </main>
 
 <script>
-/* V4.12.3.2 Home Startup Hotfix 2 - multilingual sign-out states */
+/* V4.12.3.2 Home Startup Hotfix 3 - live language account status */
 (() => {
   const SUPABASE_URL="https://uccexvgqmoxhgykkjdcy.supabase.co";
   const SUPABASE_KEY="sb_publishable_FBsN1DYTQMv2_bWhpbXHAA_qdAq7ri7";
@@ -570,7 +570,13 @@ button{
   const $=id=>document.getElementById(id);
 
   function uiLang(){
-    try{return localStorage.getItem("ipt_language")||"zh-TW"}catch(_){return "zh-TW"}
+    try{
+      return window.IPTI18N?.getLang?.()
+        || localStorage.getItem("ipt_language")
+        || "zh-TW";
+    }catch(_){
+      return "zh-TW";
+    }
   }
 
   function uiText(zhTW,zhCN,en){
@@ -613,6 +619,23 @@ button{
   }
   let currentUserId="";
   let assetSummaryLoading=false;
+  let accountUiState="checking";
+
+  function renderAccountUiState(){
+    if(accountUiState==="checking"){
+      setStatus("",uiText(
+        "正在確認登入狀態…",
+        "正在确认登录状态…",
+        "Checking sign-in status…"
+      ));
+    }else if(accountUiState==="signed_out"){
+      setStatus("",uiText(
+        "目前已登出，請重新登入。",
+        "当前已登出，请重新登录。",
+        "You are signed out. Please sign in again."
+      ));
+    }
+  }
 
   function go(url){ location.href=url; }
 
@@ -708,11 +731,8 @@ button{
     $("myAssetBtn").disabled=true;
     $("historyBtn").disabled=true;
     $("assetCenterBtn").disabled=true;
-    setStatus("",uiText(
-      "正在確認登入狀態…",
-      "正在确认登录状态…",
-      "Checking sign-in status…"
-    ));
+    accountUiState="checking";
+    renderAccountUiState();
 
     try{
       const client=await getSupabaseClient();
@@ -724,11 +744,8 @@ button{
       if(error) throw error;
 
       if(!user){
-        setStatus("",uiText(
-          "目前已登出，請重新登入。",
-          "当前已登出，请重新登录。",
-          "You are signed out. Please sign in again."
-        ));
+        accountUiState="signed_out";
+        renderAccountUiState();
         return;
       }
 
@@ -787,6 +804,7 @@ button{
       $("assetCenterBtn").disabled=false;
       if(role==="admin") document.body.classList.add("is-admin");
 
+      accountUiState="signed_in";
       setStatus("ok",
         role==="admin"
           ?"V4.12.3.2 已登入：會員功能與管理中心均已開放。"
@@ -804,11 +822,8 @@ button{
     }catch(err){
       console.error(err);
       if(isSignedOutError(err)){
-        setStatus("",uiText(
-          "目前已登出，請重新登入。",
-          "当前已登出，请重新登录。",
-          "You are signed out. Please sign in again."
-        ));
+        accountUiState="signed_out";
+        renderAccountUiState();
       }else{
         const prefix=uiText("載入失敗：","加载失败：","Load failed: ");
         const suffix=uiText(
@@ -865,6 +880,17 @@ button{
     }
   });
 
+
+  // Keep runtime account status in sync when the shared language toolbar changes language.
+  document.addEventListener("click",event=>{
+    const btn=event.target?.closest?.("button[data-lang]");
+    if(!btn) return;
+    setTimeout(()=>{
+      if(accountUiState==="checking" || accountUiState==="signed_out"){
+        renderAccountUiState();
+      }
+    },0);
+  });
 
   const startupWatchdog=setTimeout(()=>{
     const box=$("statusBox");
