@@ -641,6 +641,7 @@ button{
 </main>
 
 <script>
+/* V4.12.3.2 Admin Assets Dynamic i18n Hotfix 5 */
 (() => {
   const SUPABASE_URL = "https://uccexvgqmoxhgykkjdcy.supabase.co";
   const SUPABASE_KEY = "sb_publishable_FBsN1DYTQMv2_bWhpbXHAA_qdAq7ri7";
@@ -652,6 +653,23 @@ button{
   });
 
   const $ = (id) => document.getElementById(id);
+
+  function uiLang(){
+    try{
+      return window.IPTI18N?.getLang?.()
+        || localStorage.getItem("ipt_language")
+        || "zh-TW";
+    }catch(_){
+      return "zh-TW";
+    }
+  }
+
+  function L(zhTW,zhCN,en){
+    const x=uiLang();
+    if(x==="en") return en;
+    if(x==="zh-CN") return zhCN;
+    return zhTW;
+  }
   let allMembers = [];
   let lastReportMembers = [];
   let lastReportTxs = [];
@@ -1378,15 +1396,15 @@ button{
 
   async function loadAssets() {
     $("refreshBtn").disabled = true;
-    setStatus("warn","正在讀取會員資料與 Sepolia IPT 鏈上餘額…");
+    setStatus("warn",L("正在讀取會員資料與 Sepolia IPT 鏈上餘額…","正在读取会员资料与 Sepolia IPT 链上余额…","Loading member data and Sepolia IPT balances…"));
 
     try {
       const { data:{user}, error:sessionError } = await sb.auth.getUser();
       if (sessionError) throw sessionError;
 
       if (!user) {
-        setStatus("err","尚未登入雲端會員。請先完成會員登入。");
-        $("memberList").innerHTML = '<div class="empty">需要管理員登入。</div>';
+        setStatus("err",L("尚未登入雲端會員。請先完成會員登入。","尚未登录云端会员。请先完成会员登录。","You are not signed in. Please complete member sign-in first."));
+        $("memberList").innerHTML = `<div class="empty">${L("需要管理員登入。","需要管理员登录。","Administrator sign-in required.")}</div>`;
         return;
       }
 
@@ -1401,12 +1419,15 @@ button{
       setSummary(data.summary || {});
       resetFilters();
 
-      setStatus("ok",
-        `V4.12.3.2 已載入。管理員：${data.admin?.email || "已登入"}｜共 ${allMembers.length} 位會員。`);
+      setStatus("ok",L(
+        `V4.12.3.2 已載入。管理員：${data.admin?.email || "已登入"}｜共 ${allMembers.length} 位會員。`,
+        `V4.12.3.2 已加载。管理员：${data.admin?.email || "已登录"}｜共 ${allMembers.length} 位会员。`,
+        `V4.12.3.2 loaded. Admin: ${data.admin?.email || "Signed in"} | ${allMembers.length} members.`
+      ));
       $("refreshBtn").disabled = false;
     } catch (err) {
       console.error(err);
-      setStatus("err","載入失敗：" + (err?.message || String(err)));
+      setStatus("err",L("載入失敗：","加载失败：","Load failed: ") + (err?.message || String(err)));
       $("refreshBtn").disabled = false;
     }
   }
@@ -1431,6 +1452,7 @@ button{
     else location.href="./index.html";
   });
 
+  window.addEventListener("ipt-language-change",()=>loadAssets());
   loadAssets();
 })();
 </script>
