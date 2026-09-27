@@ -118,17 +118,17 @@ pre{
 
   <section class="panel">
     <details id="diagDetails">
-      <summary id="diagSummary" style="cursor:pointer;font-weight:850;color:#17365d;font-size:1.12rem">
+      <summary id="diagSummary" data-ipt-i18n-skip="1" style="cursor:pointer;font-weight:850;color:#17365d;font-size:1.12rem">
         進階診斷資訊
       </summary>
       <pre id="diag" style="margin-top:12px">尚未產生。</pre>
-      <button id="copyDiagBtn" class="light" type="button" style="width:100%">複製診斷資訊</button>
+      <button id="copyDiagBtn" data-ipt-i18n-skip="1" class="light" type="button" style="width:100%">複製診斷資訊</button>
     </details>
   </section>
 </main>
 
 <script>
-/* V4.12.3.2 Maintenance Diagnostics Collapse Hotfix 10 */
+/* V4.12.3.2 Maintenance Diagnostics/Race Hotfix 11 */
 (() => {
   const SUPABASE_URL="https://uccexvgqmoxhgykkjdcy.supabase.co";
   const SUPABASE_KEY="sb_publishable_FBsN1DYTQMv2_bWhpbXHAA_qdAq7ri7";
@@ -266,7 +266,7 @@ pre{
     }
   }
 
-  async function health(){
+  async function healthCore(){
     diag.time=new Date().toISOString();
 
     // Supabase/session:
@@ -304,8 +304,15 @@ pre{
         );
         diag.checks.supabase={ok:true,session:true};
 
-        const {data:p,error:pe}=await sb.from("member_profiles")
+        let profileResult=await sb.from("member_profiles")
           .select("member_number,display_name,status").eq("id",user.id).maybeSingle();
+        if(profileResult.error){
+          await new Promise(r=>setTimeout(r,250));
+          profileResult=await sb.from("member_profiles")
+            .select("member_number,display_name,status").eq("id",user.id).maybeSingle();
+        }
+        const p=profileResult.data;
+        const pe=profileResult.error;
         if(pe) throw pe;
 
         pill("memberPill",p?"ok":"warn",p?L("正常","正常","Normal"):L("找不到資料","找不到资料","Not Found"));
@@ -388,6 +395,14 @@ pre{
     $("diag").textContent=JSON.stringify(diag,null,2);
   }
 
+  let healthPromise=null;
+  function health(){
+    if(!healthPromise){
+      healthPromise=healthCore().finally(()=>{healthPromise=null;});
+    }
+    return healthPromise;
+  }
+
   $("healthBtn").addEventListener("click",health);
 
   $("updateSwBtn").addEventListener("click",async()=>{
@@ -441,10 +456,11 @@ pre{
 
   window.addEventListener("ipt-language-change",()=>{
     updateDiagnosticsLabel();
-    updateDiagnosticsLabel();
-  Promise.all([checkRelease(),checkSw()]).finally(health);
+    checkRelease();
+    checkSw();
   });
 
+  updateDiagnosticsLabel();
   Promise.all([checkRelease(),checkSw()]).finally(health);
 })();
 </script>
