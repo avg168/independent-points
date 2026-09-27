@@ -641,7 +641,7 @@ button{
 </main>
 
 <script>
-/* V4.12.3.2 Admin Assets Dynamic i18n Hotfix 5 */
+/* V4.12.3.2 Admin Assets Dynamic i18n Hotfix 6 */
 (() => {
   const SUPABASE_URL = "https://uccexvgqmoxhgykkjdcy.supabase.co";
   const SUPABASE_KEY = "sb_publishable_FBsN1DYTQMv2_bWhpbXHAA_qdAq7ri7";
@@ -744,10 +744,18 @@ button{
   }
 
   function renderMembers(list) {
-    $("resultCount").textContent = `顯示 ${list.length} / ${allMembers.length} 位會員。`;
+    $("resultCount").textContent = L(
+      `顯示 ${list.length} / ${allMembers.length} 位會員。`,
+      `显示 ${list.length} / ${allMembers.length} 位会员。`,
+      `Showing ${list.length} / ${allMembers.length} members.`
+    );
 
     if (!list.length) {
-      $("memberList").innerHTML = '<div class="empty">沒有符合條件的會員。</div>';
+      $("memberList").innerHTML = `<div class="empty">${L(
+        "沒有符合條件的會員。",
+        "没有符合条件的会员。",
+        "No members match the current filters."
+      )}</div>`;
       return;
     }
 
@@ -1383,6 +1391,25 @@ button{
   }
 
 
+  function syncSearchPlaceholders(){
+    const search=$("searchInput");
+    const report=$("reportQuery");
+    if(search){
+      search.placeholder=L(
+        "會員編號／暱稱／Email／錢包地址",
+        "会员编号／昵称／Email／钱包地址",
+        "Member No. / Nickname / Email / Wallet Address"
+      );
+    }
+    if(report){
+      report.placeholder=L(
+        "編號／暱稱／Email／錢包",
+        "编号／昵称／Email／钱包",
+        "Member No. / Nickname / Email / Wallet"
+      );
+    }
+  }
+
   function applyFilters() { renderMembers(filteredMembers()); }
 
   function resetFilters() {
@@ -1452,7 +1479,11 @@ button{
     else location.href="./index.html";
   });
 
-  window.addEventListener("ipt-language-change",()=>loadAssets());
+  window.addEventListener("ipt-language-change",()=>{
+    syncSearchPlaceholders();
+    loadAssets();
+  });
+  syncSearchPlaceholders();
   loadAssets();
 })();
 </script>
