@@ -1,18 +1,18 @@
 {
   "product": "Independent Points",
-  "version": "V4.12.2",
-  "build": "20260927-4122",
+  "version": "V4.12.3.1",
+  "build": "20260927-41231",
   "release_date": "2026-09-26",
-  "channel": "mfa-enrollment-fix",
-  "rollback_version": "V4.12.1",
+  "channel": "i18n-hotfix",
+  "rollback_version": "V4.12.3",
   "fallback_version": "V4.5.0",
   "network": "Ethereum Sepolia",
   "chain_id": "11155111 / 0xaa36a7",
   "contract": "0xd3fb2480aadb8b168ec7e88a0e5c847d9750cb87",
   "notes": [
-    "Detect unverified/stale TOTP factors",
-    "Add explicit cleanup button for unfinished MFA enrollment",
-    "Allow clean restart of TOTP enrollment"
+    "Fix untranslated Operations Security production-status sentence in English",
+    "Sync Production Version display to V4.12.3",
+    "Member display names remain untranslated by design"
   ],
   "rollback_steps": [
     "若 V4.6.1 異常，先重新載入並清除 IPT 快取。",
@@ -29,6 +29,13 @@
     "server_validated_get_user": true,
     "mfa_totp_ui": true,
     "admin_client_aal2_gate": true,
-    "admin_edge_aal2_enforced": false
+    "admin_edge_aal2_enforced": true,
+    "protected_admin_functions": [
+      "admin-members",
+      "admin-member-detail",
+      "admin-member-actions",
+      "admin-assets",
+      "admin-asset-detail"
+    ]
   }
 }
