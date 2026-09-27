@@ -1,4 +1,4 @@
-const CACHE_NAME="ipt-v4.12.3.1";
+const CACHE_NAME="ipt-v4.12.3.2";
 const PRECACHE=["./", "./index.html", "./i18n-v4.10.js", "./auth-guard-v4.12.js", "./auth-security-v4.12.html", "./wallet-core-v4.12.html", "./asset-center-v4.12.html", "./member-assets-v4.12.html", "./admin-assets-v4.12.html", "./admin-members-v4.12.html", "./print-report-v4.12.html", "./system-info-v4.12.html", "./maintenance-v4.12.html", "./update-center-v4.12.html", "./security-center-v4.12.html", "./security-ops-v4.12.html", "./event-center-v4.12.html", "./release.json", "./release-history.json", "./update-manifest-v4.12.json", "./manifest.webmanifest", "./ipt-icon.svg", "./ipt-icon-192.png", "./ipt-icon-512.png", "./ipt-apple-touch-180.png"];
 self.addEventListener("install",e=>e.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll(PRECACHE)).then(()=>self.skipWaiting())));
 self.addEventListener("activate",e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith("ipt-")&&k!==CACHE_NAME).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));

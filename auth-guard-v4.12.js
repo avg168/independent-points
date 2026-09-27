@@ -62,7 +62,7 @@
       </div>`;
     document.getElementById("iptGuardPrimary").onclick=()=>location.href=primaryHref;
     const hb=document.getElementById("iptGuardHome");
-    if(hb) hb.onclick=()=>location.href="./index.html?v=4122";
+    if(hb) hb.onclick=()=>location.href="./index.html?v=41232";
   }
 
   function hideOverlay(){
@@ -84,7 +84,7 @@
         t("需要重新登入","需要重新登录","Sign-in required"),
         t("這個頁面需要有效的會員登入。系統已重新向伺服器驗證目前身分，但沒有取得有效使用者。","此页面需要有效的会员登录。系统已重新向服务器验证当前身份，但没有取得有效用户。","This page requires a valid member sign-in. Your identity was revalidated with the server, but no valid user was found."),
         t("前往帳戶安全","前往账户安全","Open Account Security"),
-        "./auth-security-v4.12.html?v=4122"
+        "./auth-security-v4.12.html?v=41232"
       );
       return;
     }
@@ -97,7 +97,7 @@
           t("無法確認二次驗證","无法确认二次验证","Unable to verify MFA"),
           t("目前無法確認管理員二次驗證狀態。為安全起見，此頁暫時鎖定。","目前无法确认管理员二次验证状态。为安全起见，此页暂时锁定。","The administrator MFA status could not be confirmed. This page is locked for safety."),
           t("前往帳戶安全","前往账户安全","Open Account Security"),
-          "./auth-security-v4.12.html?v=4122"
+          "./auth-security-v4.12.html?v=41232"
         );
         return;
       }
@@ -108,7 +108,7 @@
           t("MFA 狀態讀取失敗","MFA 状态读取失败","MFA status unavailable"),
           t("管理員頁面需要先確認 MFA 狀態。","管理员页面需要先确认 MFA 状态。","Administrator pages require MFA status verification."),
           t("前往帳戶安全","前往账户安全","Open Account Security"),
-          "./auth-security-v4.12.html?v=4122"
+          "./auth-security-v4.12.html?v=41232"
         );
         return;
       }
@@ -119,7 +119,7 @@
           t("管理員尚未設定 MFA","管理员尚未设置 MFA","Administrator MFA not configured"),
           t("V4.12 開始，管理員敏感頁面建議先設定驗證器 App（TOTP）。完成後再進入管理功能。","V4.12 开始，管理员敏感页面建议先设置验证器 App（TOTP）。完成后再进入管理功能。","Starting with V4.12, administrator-sensitive pages should use an authenticator app (TOTP). Configure MFA before continuing."),
           t("立即設定 MFA","立即设置 MFA","Set up MFA"),
-          "./auth-security-v4.12.html?v=4122"
+          "./auth-security-v4.12.html?v=41232"
         );
         return;
       }
@@ -129,7 +129,7 @@
           t("需要二次驗證","需要二次验证","Second-factor verification required"),
           t("你的帳號已設定 MFA，但這次登入尚未完成第二因素驗證。完成後才可進入管理員敏感頁面。","你的账号已设置 MFA，但这次登录尚未完成第二因素验证。完成后才可进入管理员敏感页面。","MFA is enrolled, but this sign-in has not completed second-factor verification. Complete MFA before accessing administrator-sensitive pages."),
           t("進行二次驗證","进行二次验证","Verify MFA"),
-          "./auth-security-v4.12.html?v=4122"
+          "./auth-security-v4.12.html?v=41232"
         );
         return;
       }

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>Independent Points V4.12.2｜資產中心</title>
+  <title>Independent Points V4.12.3.2｜資產中心</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
   <style>
     :root{
@@ -63,7 +63,7 @@
       .grid{grid-template-columns:1fr 1fr}
     }
   
-/* V4.12.2 Android mobile viewport lock */
+/* V4.12.3.2 Android mobile viewport lock */
 html,body{
   width:100%;
   max-width:100%;
@@ -223,7 +223,7 @@ body{
 }
 
 
-/* ===== V4.12.2 Android bottom-navigation fix ===== */
+/* ===== V4.12.3.2 Android bottom-navigation fix ===== */
 .v43-bottom-nav{
   position:fixed!important;
   left:50%!important;
@@ -290,7 +290,7 @@ body{
 }
 
 
-/* ===== V4.12.2 reliable in-page navigation ===== */
+/* ===== V4.12.3.2 reliable in-page navigation ===== */
 .v43-bottom-nav{
   display:none!important;
 }
@@ -378,7 +378,7 @@ button{
 
 </style>
 
-<link rel="manifest" href="./manifest.webmanifest?v=4122">
+<link rel="manifest" href="./manifest.webmanifest?v=41232">
 <meta name="theme-color" content="#10243d">
 <meta name="application-name" content="Independent Points">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -388,12 +388,12 @@ button{
 <link rel="icon" type="image/svg+xml" href="./ipt-icon-192.png">
 
 <link rel="apple-touch-icon" href="./ipt-apple-touch-180.png">
-<script src="./i18n-v4.10.js?v=4122" defer></script>
-<script src="./auth-guard-v4.12.js?v=4122"></script>
+<script src="./i18n-v4.10.js?v=41232" defer></script>
+<script src="./auth-guard-v4.12.js?v=41232"></script>
 </head>
 <body>
 <header>
-  <div class="version">V4.12.2</div>
+  <div class="version">V4.12.3.2</div>
   <h1>Independent Points 資產中心</h1>
   <p>會員資產報表與管理員彙總報表的統一入口</p>
 </header>
@@ -510,10 +510,10 @@ button{
   }
 
   $("memberBtn").addEventListener("click",()=>{
-    location.href="./member-assets-v4.12.html?v=4122";
+    location.href="./member-assets-v4.12.html?v=41232";
   });
   $("adminBtn").addEventListener("click",()=>{
-    location.href="./admin-assets-v4.12.html?v=4122";
+    location.href="./admin-assets-v4.12.html?v=41232";
   });
   $("refreshBtn").addEventListener("click",load);
   $("backBtn").addEventListener("click",()=>{
@@ -527,7 +527,7 @@ button{
 
 <script>
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js?v=4122",{updateViaCache:"none"}).catch(()=>{}));
+  window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js?v=41232",{updateViaCache:"none"}).catch(()=>{}));
 }
 </script>
 
