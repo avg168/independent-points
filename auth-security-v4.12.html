@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Independent Points V4.12.2-HF1｜帳戶安全與 MFA</title>
+<title>Independent Points V4.12.3.2｜帳戶安全與 MFA</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
 <style>
 :root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;color:#172033;background:#f4f7fb}
@@ -25,7 +25,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
 </head>
 <body>
 <header>
-  <div class="version">V4.12.2-HF1</div>
+  <div class="version">V4.12.3.2</div>
   <h1 id="title">帳戶安全與 MFA</h1>
   <p id="subtitle">每次登入重新確認身分；管理員使用驗證器 App 進行第二因素驗證。</p>
   <div class="langbar">
@@ -68,7 +68,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
     </div>
     <div id="enrollArea" class="hidden">
       <div class="note" id="enrollNote">第一次設定時，按下「建立 MFA」，再用 Google Authenticator、Microsoft Authenticator、1Password 等驗證器掃描 QR Code。</div>
-      <div class="note" style="margin-top:8px">MFA Hotfix 1：新設定不再使用固定名稱，避免舊的未完成設定造成衝突。</div>
+      <div class="note" style="margin-top:8px">MFA 已整合：新設定不使用固定 Friendly Name，並已完成管理員後端 AAL2 強制保護。</div>
       <button id="enrollBtn" class="primary" type="button" style="width:100%;margin-top:12px">建立 MFA</button>
       <div id="qrWrap" class="hidden">
         <img id="qrImg" alt="MFA QR Code">
@@ -94,7 +94,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       <button id="signOutBtn" class="danger full" type="button">登出此裝置</button>
     </div>
     <div class="note" id="rolloutNote">
-      本版先完成 MFA 設定與前端驗證。當管理員手機完成 MFA 設定並測試成功後，再進 V4.12.2 將管理員 Edge Functions 改為後端強制 AAL2，避免尚未設定 MFA 時直接鎖住管理員。
+      V4.12.3.2 已完成 MFA 前端驗證與管理員 Edge Functions 後端 AAL2 強制保護。管理員敏感 API 必須完成 MFA 後才能執行。
     </div>
   </section>
 </main>
@@ -120,7 +120,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       aal2:"這次登入已完成 MFA（AAL2）。",enrollNote:"第一次設定時，按下「建立 MFA」，再用 Google Authenticator、Microsoft Authenticator、1Password 等驗證器掃描 QR Code。",
       enroll:"建立 MFA",code:"輸入驗證器 6 位數代碼",enable:"驗證並啟用 MFA",challengeNote:"這個帳號已設定 MFA。每個新的登入工作階段都要完成一次第二因素驗證，才能進入管理員敏感功能。",
       challenge:"完成二次驗證",hSession:"工作階段安全",policy:"V4.12 使用 server-validated getUser() 重新確認登入身分；管理員頁面另檢查 MFA AAL2。",
-      signout:"登出此裝置",rollout:"本版先完成 MFA 設定與前端驗證。當管理員手機完成 MFA 設定並測試成功後，再進 V4.12.2 將管理員 Edge Functions 改為後端強制 AAL2，避免尚未設定 MFA 時直接鎖住管理員。",
+      signout:"登出此裝置",rollout:"V4.12.3.2 已完成 MFA 前端驗證與管理員 Edge Functions 後端 AAL2 強制保護。管理員敏感 API 必須完成 MFA 後才能執行。",
       enabled:"MFA 已成功啟用，這次工作階段已提升為 AAL2。",verified:"二次驗證完成，這次工作階段已提升為 AAL2。"
     },
     "zh-CN":{
@@ -136,7 +136,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       aal2:"这次登录已完成 MFA（AAL2）。",enrollNote:"第一次设置时，按下“建立 MFA”，再用 Google Authenticator、Microsoft Authenticator、1Password 等验证器扫描 QR Code。",
       enroll:"建立 MFA",code:"输入验证器 6 位数代码",enable:"验证并启用 MFA",challengeNote:"这个账号已设置 MFA。每个新的登录工作阶段都要完成一次第二因素验证，才能进入管理员敏感功能。",
       challenge:"完成二次验证",hSession:"工作阶段安全",policy:"V4.12 使用 server-validated getUser() 重新确认登录身份；管理员页面另检查 MFA AAL2。",
-      signout:"登出此设备",rollout:"本版先完成 MFA 设置与前端验证。管理员手机完成 MFA 设置并测试成功后，再进入 V4.12.2，将管理员 Edge Functions 改为后端强制 AAL2，避免尚未设置 MFA 时直接锁住管理员。",
+      signout:"登出此设备",rollout:"本版先完成 MFA 设置与前端验证。管理员手机完成 MFA 设置并测试成功后，再进入 V4.12.3.2，将管理员 Edge Functions 改为后端强制 AAL2，避免尚未设置 MFA 时直接锁住管理员。",
       enabled:"MFA 已成功启用，这次工作阶段已提升为 AAL2。",verified:"二次验证完成，这次工作阶段已提升为 AAL2。"
     },
     "en":{
@@ -152,7 +152,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       aal2:"This sign-in has completed MFA (AAL2).",enrollNote:"For first-time setup, tap “Set up MFA”, then scan the QR code with Google Authenticator, Microsoft Authenticator, 1Password, or another TOTP authenticator.",
       enroll:"Set up MFA",code:"Enter the 6-digit authenticator code",enable:"Verify & Enable MFA",challengeNote:"MFA is configured for this account. Each new sign-in session must complete the second factor before accessing administrator-sensitive features.",
       challenge:"Complete MFA Verification",hSession:"Session Security",policy:"V4.12 uses server-validated getUser() to revalidate sign-in identity; administrator pages also check MFA AAL2.",
-      signout:"Sign Out on This Device",rollout:"This release adds MFA enrollment and client-side verification first. After the administrator successfully configures and tests MFA on the phone, V4.12.2 can enforce AAL2 inside administrator Edge Functions without risking an administrator lockout.",
+      signout:"Sign Out on This Device",rollout:"V4.12.3.2 enforces AAL2 for administrator Edge Functions. Administrator-sensitive APIs require MFA before execution.",
       enabled:"MFA was enabled successfully. This session is now AAL2.",verified:"MFA verification completed. This session is now AAL2."
     }
   };
@@ -203,7 +203,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
     if(last) $("loginEmail").value=last;
   }catch(_){}
 
-  $("homeBtn").onclick=()=>location.href="./index.html?v=4122";
+  $("homeBtn").onclick=()=>location.href="./index.html?v=41232";
   $("recheckBtn").onclick=()=>refresh();
 
   async function refresh(){
@@ -305,7 +305,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
   $("signOutBtn").onclick=async()=>{
     if(!confirm(lang==="en"?"Sign out on this device?":"確定要登出此裝置嗎？"))return;
     await sb.auth.signOut();
-    location.href="./index.html?v=4122";
+    location.href="./index.html?v=41232";
   };
 
   applyLang();refresh().catch(e=>status("identityStatus","err",e.message||String(e)));
