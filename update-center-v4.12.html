@@ -29,9 +29,15 @@ pre{white-space:pre-wrap;word-break:break-word;background:#f6f8fb;border:1px sol
 <section class="panel"><h2>版本更新歷程</h2><div id="historyList"></div></section>
 <section class="panel"><h2>Service Worker / 快取</h2><div class="actions"><button id="updateSwBtn" class="blue">檢查 Service Worker 更新</button><button id="resetSwBtn" class="danger">重設舊版 Service Worker</button><button id="reloadBtn" class="light">重新載入</button><button id="copyDiagBtn" class="light">複製診斷資訊</button></div><div id="swStatus" class="status" style="margin-top:12px">尚未操作。</div></section>
 <section class="panel"><h2>異常回復</h2><div class="status warn">若新版本異常，先清除 IPT 快取並重新載入；若仍異常，再重新上傳指定回復版本，不需改動 Supabase、Owner、pendingOwner 或 paused 狀態。</div><pre id="rollbackSteps"></pre></section>
-<section class="panel"><h2>診斷資訊</h2><pre id="diag">尚未產生。</pre></section>
+<section class="panel">
+  <details id="diagDetails">
+    <summary style="cursor:pointer;font-weight:850;color:#17365d;font-size:1.12rem">進階診斷資訊</summary>
+    <pre id="diag" style="margin-top:12px">尚未產生。</pre>
+  </details>
+</section>
 </section></main>
 <script>
+/* V4.12.3.2 Version Update Recovery/Diagnostics Hotfix 9 */
 (() => {
   const SUPABASE_URL="https://uccexvgqmoxhgykkjdcy.supabase.co";
   const SUPABASE_KEY="sb_publishable_FBsN1DYTQMv2_bWhpbXHAA_qdAq7ri7";
@@ -53,6 +59,15 @@ pre{white-space:pre-wrap;word-break:break-word;background:#f6f8fb;border:1px sol
   }
   const esc=v=>String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
   const big=x=>BigInt(String(x||"0x0"));
+
+  function updateDiagnosticsLabel(){
+    const s=document.querySelector("#diagDetails summary");
+    if(s) s.textContent=L(
+      "進階診斷資訊",
+      "高级诊断信息",
+      "Advanced Diagnostics"
+    );
+  }
 
   function formatIPT6(rawValue, decimals){
     const raw = BigInt(rawValue);
@@ -80,13 +95,34 @@ pre{white-space:pre-wrap;word-break:break-word;background:#f6f8fb;border:1px sol
     const title=traditional?(x.title||""):L("版本紀錄","版本记录","Release");
     const notes=traditional?(x.notes||[]).join("；"):"";
     return `<div class="release"><div class="ver">${esc(x.version)}｜${esc(title)}</div><div class="meta">${esc(x.date||"")}｜${esc(x.channel||"production")}${x.rollback?L("｜回復版本","｜恢复版本"," | Rollback"):""}</div>${notes?`<div class="detail">${esc(notes)}</div>`:""}</div>`;
-  }).join("");$("fileList").innerHTML=(m.files||[]).map(f=>`<div class="file-row"><div><strong>${esc(f.name)}</strong><div class="hash">${esc(f.sha256)}</div></div><div>${esc(f.bytes)} B</div></div>`).join("");$("filesStatus").className="status ok";$("filesStatus").textContent=L(`正式發佈檔案 ${m.files?.length||0} 個。`,`正式发布文件 ${m.files?.length||0} 个。`,`Production release files: ${m.files?.length||0}.`);$("rollbackSteps").textContent=(r.rollback_steps||[]).map((x,i)=>`${i+1}. ${x}`).join("\n")}catch(e){$("versionStatus").className="status err";$("versionStatus").textContent="版本資訊載入失敗："+(e?.message||String(e));$("filesStatus").className="status err";$("filesStatus").textContent="發佈清單載入失敗。"}}
+  }).join("");$("fileList").innerHTML=(m.files||[]).map(f=>`<div class="file-row"><div><strong>${esc(f.name)}</strong><div class="hash">${esc(f.sha256)}</div></div><div>${esc(f.bytes)} B</div></div>`).join("");$("filesStatus").className="status ok";$("filesStatus").textContent=L(`正式發佈檔案 ${m.files?.length||0} 個。`,`正式发布文件 ${m.files?.length||0} 个。`,`Production release files: ${m.files?.length||0}.`);$("rollbackSteps").textContent=[
+      L(
+        `若 ${r.version||"V4.12.3.2"} 異常，先重新載入並清除 IPT 快取。`,
+        `若 ${r.version||"V4.12.3.2"} 异常，先重新加载并清除 IPT 缓存。`,
+        `If ${r.version||"V4.12.3.2"} has issues, reload the page and clear the IPT cache first.`
+      ),
+      L(
+        `仍異常時可回復 ${r.rollback_version||"V4.12.3.1"}。`,
+        `仍异常时可恢复 ${r.rollback_version||"V4.12.3.1"}。`,
+        `If the issue remains, roll back to ${r.rollback_version||"V4.12.3.1"}.`
+      ),
+      L(
+        "回復網頁版本時不修改 Supabase、Owner、pendingOwner 或 paused。",
+        "恢复网页版本时不要修改 Supabase、Owner、pendingOwner 或 paused。",
+        "When rolling back the web version, do not change Supabase, Owner, pendingOwner, or paused state."
+      )
+    ].map((x,i)=>`${i+1}. ${x}`).join("\n")}catch(e){$("versionStatus").className="status err";$("versionStatus").textContent="版本資訊載入失敗："+(e?.message||String(e));$("filesStatus").className="status err";$("filesStatus").textContent="發佈清單載入失敗。"}}
   async function runChecks(kind){const out=[];const target=kind==="pre"?$("preChecks"):$("postChecks");const state=kind==="pre"?diag.pre:diag.post;target.innerHTML=row(L("檢查中","检查中","Checking"),"",L("正在執行…","正在执行…","Running…"));const online=navigator.onLine!==false;out.push({title:L("網路連線","网络连接","Network Connection"),state:online?"ok":"err",detail:online?L("瀏覽器為 online","浏览器为 online","Browser is online"):L("瀏覽器目前離線","浏览器目前离线","Browser is offline")});try{const {data:{user},error}=await sb.auth.getUser();if(error)throw error;if(!user)throw new Error("沒有有效登入身分");const {data:aal,error:ae}=await sb.auth.mfa.getAuthenticatorAssuranceLevel();if(ae)throw ae;if(aal?.currentLevel!=="aal2")throw new Error("MFA 尚未達 AAL2");const {data:role,error:re}=await sb.from("member_roles").select("role").eq("user_id",user.id).maybeSingle();if(re)throw re;if(role?.role!=="admin")throw new Error("不是管理員");out.push({title:L("管理員 Session","管理员 Session","Admin Session"),state:"ok",detail:`${user.email||user.id} | ${aal.currentLevel}`})}catch(e){out.push({title:L("管理員 Session","管理员 Session","Admin Session"),state:"err",detail:e?.message||String(e)})}try{const r=await fetch("./release.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)throw new Error("HTTP "+r.status);const data=await r.json();out.push({title:L("正式版本資訊","正式版本信息","Production Version Info"),state:data.version==="V4.12.3.2"?"ok":"warn",detail:`release.json = ${data.version||L("未知","未知","Unknown")}`})}catch(e){out.push({title:L("正式版本資訊","正式版本信息","Production Version Info"),state:"err",detail:e?.message||String(e)})}let fileOk=0;const missing=[];for(const f of REQUIRED_FILES){try{const r=await fetch("./"+f+"?t="+Date.now(),{cache:"no-store"});if(r.ok)fileOk++;else missing.push(`${f}(${r.status})`)}catch(_){missing.push(f)}}out.push({title:L("正式檔案完整性","正式文件完整性","Production File Integrity"),state:missing.length?"err":"ok",detail:missing.length?L(`缺少：${missing.join(", ")}`,`缺少：${missing.join(", ")}`,`Missing: ${missing.join(", ")}`):L(`${fileOk}/${REQUIRED_FILES.length} 個必要檔案可讀`,`${fileOk}/${REQUIRED_FILES.length} 个必要文件可读`,`${fileOk}/${REQUIRED_FILES.length} required files readable`)});if("serviceWorker" in navigator){try{const reg=await navigator.serviceWorker.getRegistration();out.push({title:"Service Worker",state:reg?.active?"ok":"warn",detail:reg?.active?L(`已啟用｜${reg.scope}`,`已启用｜${reg.scope}`,`Active | ${reg.scope}`):L("未啟用或尚未接管頁面","未启用或尚未接管页面","Inactive or not controlling the page yet")})}catch(e){out.push({title:"Service Worker",state:"warn",detail:e?.message||String(e)})}}else out.push({title:"Service Worker",state:"warn",detail:L("目前瀏覽器不支援","目前浏览器不支持","Unsupported by this browser")});try{const block=await rpc("eth_blockNumber",[]);out.push({title:"Sepolia RPC",state:"ok",detail:L(`區塊高度 ${Number(big(block.result))}｜${block.url}`,`区块高度 ${Number(big(block.result))}｜${block.url}`,`Block height ${Number(big(block.result))} | ${block.url}`)})}catch(e){out.push({title:"Sepolia RPC",state:"err",detail:e?.message||String(e)})}try{const [s,p,d]=await Promise.all([rpc("eth_call",[{to:CONTRACT,data:"0x18160ddd"},"latest"]),rpc("eth_call",[{to:CONTRACT,data:"0x5c975abb"},"latest"]),rpc("eth_call",[{to:CONTRACT,data:"0x313ce567"},"latest"])]);const decimals=Number(big(d.result));const supply=formatIPT6(big(s.result),decimals);const paused=big(p.result)!==0n;out.push({title:L("IPT 合約","IPT 合约","IPT Contract"),state:"ok",detail:`totalSupply ${supply} IPT | decimals ${decimals} | paused ${paused}`})}catch(e){out.push({title:L("IPT 合約","IPT 合约","IPT Contract"),state:"err",detail:e?.message||String(e)})}target.innerHTML=out.map(x=>row(x.title,x.state,x.detail)).join("");state.time=new Date().toISOString();state.results=out;const errors=out.filter(x=>x.state==="err").length;const warns=out.filter(x=>x.state==="warn").length;const st=kind==="pre"?$("preStatus"):$("postStatus");st.className=errors?"status err":warns?"status warn":"status ok";st.textContent=errors?L(`檢查完成：${errors} 項失敗、${warns} 項注意。`,`检查完成：${errors} 项失败、${warns} 项注意。`,`Check complete: ${errors} failed, ${warns} warning(s).`):warns?L(`檢查完成：0 項失敗、${warns} 項注意。`,`检查完成：0 项失败、${warns} 项注意。`,`Check complete: 0 failed, ${warns} warning(s).`):L("全部通過。","全部通过。","All checks passed.");$("diag").textContent=JSON.stringify(diag,null,2)}
   $("preCheckBtn").addEventListener("click",()=>runChecks("pre"));$("postCheckBtn").addEventListener("click",()=>runChecks("post"));
   $("updateSwBtn").addEventListener("click",async()=>{$("swStatus").className="status";$("swStatus").textContent="正在檢查 Service Worker 更新…";try{const reg=await navigator.serviceWorker.getRegistration();if(!reg)throw new Error("尚未註冊 Service Worker");await reg.update();$("swStatus").className="status ok";$("swStatus").textContent=reg.waiting?"已下載新 Service Worker，重新載入後套用。":"已完成更新檢查。"}catch(e){$("swStatus").className="status warn";$("swStatus").textContent="更新檢查失敗："+(e?.message||String(e))}});
   $("resetSwBtn").addEventListener("click",async()=>{if(!confirm("確定要重設 Independent Points 的 Service Worker 與 IPT 快取嗎？登入資料不會因此刪除，但頁面會重新下載。"))return;$("swStatus").className="status";$("swStatus").textContent="正在重設…";try{if("serviceWorker" in navigator){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(r=>r.unregister()))}if("caches" in window){const keys=await caches.keys();await Promise.all(keys.filter(k=>k.startsWith("ipt-")).map(k=>caches.delete(k)))}$("swStatus").className="status ok";$("swStatus").textContent="已重設 Service Worker 與 IPT 快取。請按『重新載入』。"}catch(e){$("swStatus").className="status err";$("swStatus").textContent="重設失敗："+(e?.message||String(e))}});
   $("reloadBtn").addEventListener("click",()=>location.href="./?v=41232&t="+Date.now());$("homeBtn").addEventListener("click",()=>location.href="./index.html?v=41232");$("maintenanceBtn").addEventListener("click",()=>location.href="./maintenance-v4.12.html?v=41232");
   $("copyDiagBtn").addEventListener("click",async()=>{const t=$("diag").textContent;try{await navigator.clipboard.writeText(t)}catch(_){const ta=document.createElement("textarea");ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand("copy");ta.remove()}$("swStatus").className="status ok";$("swStatus").textContent="診斷資訊已複製。"});
+  window.addEventListener("ipt-language-change",()=>{
+    updateDiagnosticsLabel();
+    loadRelease().catch(()=>{});
+  });
+  updateDiagnosticsLabel();
   requireAdmin().then(()=>Promise.all([loadRelease(),runChecks("pre")])).catch(e=>{$("adminStatus").className="status err";$("adminStatus").textContent=e?.message||String(e)});
 })();
 </script></body></html>

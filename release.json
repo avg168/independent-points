@@ -16,8 +16,8 @@
     "Synchronize PWA cache and navigation query versions"
   ],
   "rollback_steps": [
-    "若 V4.6.1 異常，先重新載入並清除 IPT 快取。",
-    "仍異常時可回復 V4.6.0。",
+    "若 V4.12.3.2 異常，先重新載入並清除 IPT 快取。",
+    "仍異常時可回復 V4.12.3.1。",
     "回復網頁版本時不修改 Supabase、Owner、pendingOwner 或 paused。"
   ],
   "languages": [
