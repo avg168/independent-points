@@ -124,7 +124,7 @@ pre{
 </main>
 
 <script>
-/* V4.12.3.2 Maintenance Health Hotfix 1 */
+/* V4.12.3.2 Maintenance Health Hotfix 2 - dynamic trilingual status */
 (() => {
   const SUPABASE_URL="https://uccexvgqmoxhgykkjdcy.supabase.co";
   const SUPABASE_KEY="sb_publishable_FBsN1DYTQMv2_bWhpbXHAA_qdAq7ri7";
@@ -135,6 +135,23 @@ pre{
   });
   const $=id=>document.getElementById(id);
   const diag={version:"V4.12.3.2",time:new Date().toISOString(),checks:{}};
+
+  function lang(){
+    try{
+      return window.IPTI18N?.getLang?.()
+        || localStorage.getItem("ipt_language")
+        || "zh-TW";
+    }catch(_){
+      return "zh-TW";
+    }
+  }
+
+  function L(zhTW,zhCN,en){
+    const x=lang();
+    if(x==="en") return en;
+    if(x==="zh-CN") return zhCN;
+    return zhTW;
+  }
 
   function pill(id,state,text){
     const el=$(id); el.className="pill "+state; el.textContent=text;
@@ -183,36 +200,36 @@ pre{
       diag.release=data;
       if(data.version==="V4.12.3.2"){
         $("versionStatus").className="status ok";
-        $("versionStatus").textContent="目前已是正式最新版本。";
+        $("versionStatus").textContent=L("目前已是正式最新版本。","当前已是正式最新版本。","You are on the latest production release.");
       }else{
         $("versionStatus").className="status warn";
-        $("versionStatus").textContent=`目前 V4.12.3.2｜正式版本 ${data.version||"未知"}，建議重新整理或更新 App。`;
+        $("versionStatus").textContent=L(`目前 V4.12.3.2｜正式版本 ${data.version||"未知"}，建議重新整理或更新 App。`,`目前 V4.12.3.2｜正式版本 ${data.version||"未知"}，建议重新整理或更新 App。`,`Current page: V4.12.3.2 | Production release: ${data.version||"Unknown"}. Refresh or update the app.`);
       }
     }catch(e){
-      $("releaseVersion").textContent="無法讀取";
+      $("releaseVersion").textContent=L("無法讀取","无法读取","Unavailable");
       $("versionStatus").className="status warn";
-      $("versionStatus").textContent="無法讀取 release.json；可能是快取或網路問題。";
+      $("versionStatus").textContent=L("無法讀取 release.json；可能是快取或網路問題。","无法读取 release.json；可能是缓存或网络问题。","Unable to read release.json. This may be a cache or network issue.");
       diag.release_error=String(e);
     }
   }
 
   async function checkSw(){
     const standalone=window.matchMedia?.("(display-mode: standalone)")?.matches||false;
-    $("appMode").textContent=standalone?"已安裝 App":"瀏覽器模式";
+    $("appMode").textContent=standalone?L("已安裝 App","已安装 App","Installed App"):L("瀏覽器模式","浏览器模式","Browser Mode");
     diag.app_mode=standalone?"standalone":"browser";
 
     if(!("serviceWorker" in navigator)){
-      $("swState").textContent="不支援";
+      $("swState").textContent=L("不支援","不支持","Unsupported");
       diag.service_worker="unsupported";
       return;
     }
     try{
       const reg=await navigator.serviceWorker.getRegistration();
       if(!reg){
-        $("swState").textContent="未註冊";
+        $("swState").textContent=L("未註冊","未注册","Not Registered");
         diag.service_worker="not_registered";
       }else{
-        $("swState").textContent=reg.active?"已啟用":"已註冊";
+        $("swState").textContent=reg.active?L("已啟用","已启用","Active"):L("已註冊","已注册","Registered");
         diag.service_worker={
           active:!!reg.active,
           waiting:!!reg.waiting,
@@ -221,7 +238,7 @@ pre{
         };
       }
     }catch(e){
-      $("swState").textContent="檢查失敗";
+      $("swState").textContent=L("檢查失敗","检查失败","Check Failed");
       diag.service_worker_error=String(e);
     }
   }
@@ -236,37 +253,53 @@ pre{
       if(sessionError) throw sessionError;
 
       const session=sessionData?.session||null;
-      pill("supabasePill","ok","正常");
+      pill("supabasePill","ok",L("正常","正常","Normal"));
 
       if(!session){
-        $("supabaseDetail").textContent="Supabase 模組正常；目前已登出。";
+        $("supabaseDetail").textContent=L(
+          "Supabase 模組正常；目前已登出。",
+          "Supabase 模块正常；当前已登出。",
+          "Supabase is healthy; you are currently signed out."
+        );
         diag.checks.supabase={ok:true,session:false};
 
-        pill("memberPill","warn","已登出");
-        $("memberDetail").textContent="目前已登出；重新登入後可檢查會員資料。";
+        pill("memberPill","warn",L("已登出","已登出","Signed Out"));
+        $("memberDetail").textContent=L(
+          "目前已登出；重新登入後可檢查會員資料。",
+          "当前已登出；重新登录后可检查会员资料。",
+          "You are signed out. Sign in again to check member data."
+        );
         diag.checks.member={ok:true,signed_in:false};
       }else{
         const {data:{user},error:userError}=await sb.auth.getUser();
         if(userError||!user) throw userError||new Error("登入身分驗證失敗");
 
-        $("supabaseDetail").textContent="Supabase 可連線；登入 Session 正常。";
+        $("supabaseDetail").textContent=L(
+          "Supabase 可連線；登入 Session 正常。",
+          "Supabase 可连接；登录 Session 正常。",
+          "Supabase is reachable; the sign-in session is valid."
+        );
         diag.checks.supabase={ok:true,session:true};
 
         const {data:p,error:pe}=await sb.from("member_profiles")
           .select("member_number,display_name,status").eq("id",user.id).maybeSingle();
         if(pe) throw pe;
 
-        pill("memberPill",p?"ok":"warn",p?"正常":"找不到資料");
+        pill("memberPill",p?"ok":"warn",p?L("正常","正常","Normal"):L("找不到資料","找不到资料","Not Found"));
         $("memberDetail").textContent=p
           ?`${p.member_number}｜${p.display_name}｜${p.status}`
-          :"Session 正常，但找不到 member_profiles";
+          :L("Session 正常，但找不到 member_profiles","Session 正常，但找不到 member_profiles","Session is valid, but member_profiles was not found.");
         diag.checks.member={ok:!!p,signed_in:true,profile:p||null};
       }
     }catch(e){
-      pill("supabasePill","err","異常");
+      pill("supabasePill","err",L("異常","异常","Error"));
       $("supabaseDetail").textContent=String(e?.message||e);
-      pill("memberPill","err","無法檢查");
-      $("memberDetail").textContent="Supabase 登入／會員資料檢查失敗";
+      pill("memberPill","err",L("無法檢查","无法检查","Unavailable"));
+      $("memberDetail").textContent=L(
+        "Supabase 登入／會員資料檢查失敗",
+        "Supabase 登录／会员资料检查失败",
+        "Supabase sign-in/member data check failed."
+      );
       diag.checks.supabase={ok:false,error:String(e)};
       diag.checks.member={ok:false,error:String(e)};
     }
@@ -287,17 +320,24 @@ pre{
       const chain=await res.json().catch(()=>({}));
       if(!res.ok||!chain?.ok) throw new Error(chain?.error||("HTTP "+res.status));
 
-      pill("rpcPill","ok","正常");
-      $("rpcDetail").textContent=`區塊高度 ${chain.block_number}｜${chain.rpc}`;
+      pill("rpcPill","ok",L("正常","正常","Normal"));
+      $("rpcDetail").textContent=L(
+        `區塊高度 ${chain.block_number}｜${chain.rpc}`,
+        `区块高度 ${chain.block_number}｜${chain.rpc}`,
+        `Block height ${chain.block_number} | ${chain.rpc}`
+      );
       diag.checks.rpc={
         ok:true,
         height:chain.block_number,
         url:chain.rpc
       };
 
-      pill("contractPill","ok","正常");
-      $("contractDetail").textContent=
-        `totalSupply ${chain.total_supply} IPT｜decimals ${chain.decimals}｜paused ${chain.paused}`;
+      pill("contractPill","ok",L("正常","正常","Normal"));
+      $("contractDetail").textContent=L(
+        `totalSupply ${chain.total_supply} IPT｜decimals ${chain.decimals}｜paused ${chain.paused}`,
+        `totalSupply ${chain.total_supply} IPT｜decimals ${chain.decimals}｜paused ${chain.paused}`,
+        `totalSupply ${chain.total_supply} IPT | decimals ${chain.decimals} | paused ${chain.paused}`
+      );
       diag.checks.contract={
         ok:true,
         total_supply:chain.total_supply,
@@ -305,12 +345,20 @@ pre{
         paused:chain.paused
       };
     }catch(e){
-      pill("rpcPill","err","異常");
-      $("rpcDetail").textContent="Sepolia 後端健康檢查失敗："+String(e?.message||e);
+      pill("rpcPill","err",L("異常","异常","Error"));
+      $("rpcDetail").textContent=L(
+        "Sepolia 後端健康檢查失敗："+String(e?.message||e),
+        "Sepolia 后端健康检查失败："+String(e?.message||e),
+        "Sepolia backend health check failed: "+String(e?.message||e)
+      );
       diag.checks.rpc={ok:false,error:String(e)};
 
-      pill("contractPill","err","異常");
-      $("contractDetail").textContent="IPT 合約後端健康檢查失敗："+String(e?.message||e);
+      pill("contractPill","err",L("異常","异常","Error"));
+      $("contractDetail").textContent=L(
+        "IPT 合約後端健康檢查失敗："+String(e?.message||e),
+        "IPT 合约后端健康检查失败："+String(e?.message||e),
+        "IPT contract backend health check failed: "+String(e?.message||e)
+      );
       diag.checks.contract={ok:false,error:String(e)};
     }
 
@@ -366,6 +414,10 @@ pre{
       $("cacheStatus").className="status ok";
       $("cacheStatus").textContent="診斷資訊已複製。";
     }
+  });
+
+  window.addEventListener("ipt-language-change",()=>{
+    Promise.all([checkRelease(),checkSw()]).finally(health);
   });
 
   Promise.all([checkRelease(),checkSw()]).finally(health);
