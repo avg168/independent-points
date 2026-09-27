@@ -165,6 +165,15 @@ input{
     auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
   });
   const $=id=>document.getElementById(id);
+  function uiLang(){
+    try{return window.IPTI18N?.getLang?.()||localStorage.getItem("ipt_language")||"zh-TW"}catch(_){return "zh-TW"}
+  }
+  function L(zhTW,zhCN,en){
+    const x=uiLang();
+    if(x==="en") return en;
+    if(x==="zh-CN") return zhCN;
+    return zhTW;
+  }
   let members=[];
   let summary={};
 
@@ -394,7 +403,7 @@ input{
       renderMembers(members);
       renderWallets();
       $("contentArea").classList.remove("hidden");
-      status("ok",`V4.12.3.2 安全中心已載入｜管理員：${data.admin?.email||"已登入"}`);
+      status("ok",L(`V4.12.3.2 安全中心已載入｜管理員：${data.admin?.email||"已登入"}`,`V4.12.3.2 安全中心已加载｜管理员：${data.admin?.email||"已登录"}`,`V4.12.3.2 Security Center loaded | Admin: ${data.admin?.email||"Signed in"}`));
     }catch(e){
       $("contentArea").classList.add("hidden");
       status("err","載入失敗："+(e?.message||String(e)));
@@ -415,6 +424,7 @@ input{
   $("securityOpsBtn")?.addEventListener("click",()=>location.href="./security-ops-v4.12.html?v=41232");
   $("eventCenterBtn")?.addEventListener("click",()=>location.href="./event-center-v4.12.html?v=41232");
 
+  window.addEventListener("ipt-language-change",()=>load($("queryInput").value.trim()));
   load("");
 })();
 </script>
