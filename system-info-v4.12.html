@@ -310,13 +310,13 @@ button{
     <div class="row"><div class="v">全系統統一版本與導覽</div></div>
     <div class="row"><div class="v">收款 QR Code</div></div>
     <div class="row"><div class="v">首頁資產最後更新時間</div></div>
-    <div class="row"><div class="v">Mint / Pause / Ownership 風險提示與二次確認</div></div>
+    <div class="row"><div id="milestoneRiskText" class="v">Mint / Pause / Ownership 風險提示與二次確認</div></div>
     <div class="row"><div class="v">正式模組版本集中管理</div></div>
   </section>
 
   <button type="button" onclick="location.href='./index.html?v=41232'">返回 V4.12.3.2 首頁</button>
 <section class="panel">
-  <h2>維運</h2>
+  <h2 id="opsHeading">維運</h2>
   <div class="row"><div class="k">維運中心</div><div class="v">maintenance-v4.12.html</div></div>
 </section>
 <button type="button" onclick="location.href='./maintenance-v4.12.html?v=41232'" style="margin:0 14px 14px;width:calc(100% - 28px)">開啟維運中心</button>
@@ -343,6 +343,39 @@ button{
 </section>
 <button type="button" onclick="location.href='./event-center-v4.12.html?v=41232'" style="margin:0 14px 14px;width:calc(100% - 28px)">開啟事件與通知中心</button>
 </main>
+
+<script>
+/* V4.12.3.2 System Info local i18n Hotfix 10 */
+(() => {
+  function lang(){
+    try{
+      return window.IPTI18N?.getLang?.()
+        || localStorage.getItem("ipt_language")
+        || "zh-TW";
+    }catch(_){
+      return "zh-TW";
+    }
+  }
+  function setLocalI18n(){
+    const l=lang();
+    const ops=document.getElementById("opsHeading");
+    const risk=document.getElementById("milestoneRiskText");
+
+    if(ops){
+      ops.textContent=l==="en"?"Operations":l==="zh-CN"?"运维":"維運";
+    }
+    if(risk){
+      risk.textContent=l==="en"
+        ?"Mint / Pause / Ownership Risk Warnings & Secondary Confirmation"
+        :l==="zh-CN"
+          ?"Mint / Pause / Ownership 风险提示与二次确认"
+          :"Mint / Pause / Ownership 風險提示與二次確認";
+    }
+  }
+  window.addEventListener("ipt-language-change",setLocalI18n);
+  setLocalI18n();
+})();
+</script>
 
 <script>
 if ("serviceWorker" in navigator) {
