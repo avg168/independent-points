@@ -1,0 +1,16 @@
+User-agent: *
+Allow: /
+Disallow: /wallet-core-v4.12.html
+Disallow: /auth-security-v4.12.html
+Disallow: /device-security-v4.12.html
+Disallow: /asset-center-v4.12.html
+Disallow: /member-assets-v4.12.html
+Disallow: /admin-assets-v4.12.html
+Disallow: /admin-members-v4.12.html
+Disallow: /print-report-v4.12.html
+Disallow: /update-center-v4.12.html
+Disallow: /security-center-v4.12.html
+Disallow: /security-ops-v4.12.html
+Disallow: /event-center-v4.12.html
+
+Sitemap: https://avg168.github.io/independent-points/sitemap.xml
