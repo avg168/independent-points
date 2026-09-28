@@ -1,8 +1,9 @@
 <!doctype html>
-<html lang="zh-Hant">
+<html lang="zh-Hant" translate="no" class="notranslate">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="google" content="notranslate">
 <title>Independent Points V4.12.4｜受信任裝置</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
 <style>
@@ -17,7 +18,7 @@ h1{margin:0 0 8px;font-size:1.5rem}header p{margin:0;opacity:.9;line-height:1.6}
 button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding:10px 12px;font:inherit}button{font-weight:850;cursor:pointer}button.primary{background:#176c59;color:#fff;border-color:#176c59}button.blue{background:#2a5f91;color:#fff;border-color:#2a5f91}button.light{background:#fff;color:#29445f}button.danger{background:#a83b45;color:#fff;border-color:#a83b45}button:disabled{opacity:.45}
 .actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.note{font-size:.82rem;color:#64748b;line-height:1.65;margin-top:10px}
 .device{border:1px solid #dbe3ed;border-radius:14px;padding:12px;margin-top:10px;background:#f8fafc}.device-title{font-weight:900;color:#17365d}.device-meta{font-size:.78rem;color:#64748b;line-height:1.55;margin-top:5px;word-break:break-word}
-.langbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.langbar button{min-height:38px;padding:7px 10px}.hidden{display:none!important}
+.langbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.langbar button{min-height:38px;padding:7px 10px}.langbar button.active{background:#fff;color:#17365d;border-color:#fff}.hidden{display:none!important}
 @media(max-width:520px){.grid,.actions{grid-template-columns:1fr}}
 </style>
 </head>
@@ -70,7 +71,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
   </section>
 </main>
 <script>
-/* V4.12.4 Trusted Device Hotfix 19 */
+/* V4.12.4 Trusted Device Hotfix 19 + I18N Consistency Hotfix 20 */
 (() => {
   const URL="https://uccexvgqmoxhgykkjdcy.supabase.co";
   const KEY="sb_publishable_FBsN1DYTQMv2_bWhpbXHAA_qdAq7ri7";
@@ -145,8 +146,14 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
     return lang==="en"?"Current device":"目前裝置";
   }
   function applyLang(){
+    if(!["zh-TW","zh-CN","en"].includes(lang)) lang="zh-TW";
     localStorage.setItem("ipt_language",lang);
     document.documentElement.lang=lang==="en"?"en":(lang==="zh-CN"?"zh-Hans":"zh-Hant");
+    document.documentElement.setAttribute("translate","no");
+    document.querySelectorAll("[data-lang]").forEach(b=>{
+      b.classList.toggle("active",b.dataset.lang===lang);
+      b.setAttribute("aria-pressed",b.dataset.lang===lang?"true":"false");
+    });
     ["title","subtitle","hState","kProtection","kTrusted","kAal","kName","hManage","manageNote","hExplain","explain"].forEach(id=>$(id).textContent=T(id));
     $("enableBtn").textContent=T("enable"); $("trustBtn").textContent=T("trust"); $("mfaBtn").textContent=T("mfa");
     $("refreshBtn").textContent=T("refresh"); $("disableBtn").textContent=T("disable");
@@ -154,7 +161,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
     $("deviceNameInput").placeholder=T("devicePlaceholder");
     renderState(lastState);
   }
-  document.querySelectorAll("[data-lang]").forEach(b=>b.onclick=()=>{lang=b.dataset.lang;applyLang();});
+  document.querySelectorAll("[data-lang]").forEach(b=>b.onclick=async()=>{lang=b.dataset.lang;applyLang();if(lastState?.aal==="aal2"&&lastState?.protection_enabled){try{await loadDevices()}catch(_){}}});
 
   async function invoke(action,extra={}){
     const {data,error}=await sb.functions.invoke("device-security",{body:{
