@@ -114,7 +114,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
   </section>
 </main>
 <script>
-/* V4.12.4 Backup MFA FriendlyName Hotfix 16 */
+/* V4.12.4 Backup MFA FriendlyName Hotfix 16 + Signed-Out Redirect Hotfix 17 */
 (() => {
   const URL="https://uccexvgqmoxhgykkjdcy.supabase.co";
   const KEY="sb_publishable_FBsN1DYTQMv2_bWhpbXHAA_qdAq7ri7";
@@ -143,7 +143,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       backupWarning:"請把備援驗證器放在不同裝置或安全的不同位置；不要只存在同一支手機。",
       factorLabel:"驗證器",removeFactor:"移除",removeConfirm:"確定要移除此驗證器嗎？至少保留一個可用的驗證器。",
       lastFactor:"至少要保留一個已驗證 MFA，不能移除最後一個。",backupEnabled:"備援 MFA 已成功啟用。",
-      factorRemoved:"驗證器已移除。",removeFail:"移除失敗：",backupFail:"備援 MFA 建立失敗："
+      factorRemoved:"驗證器已移除。",removeFail:"移除失敗：",backupFail:"備援 MFA 建立失敗：",signoutFail:"登出失敗："
     },
     "zh-CN":{
       title:"账户安全与 MFA",subtitle:"每次登录重新确认身份；管理员使用验证器 App 进行第二因素验证。",
@@ -165,7 +165,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       backupWarning:"请把备用验证器放在不同设备或安全的不同位置；不要只存在同一支手机。",
       factorLabel:"验证器",removeFactor:"移除",removeConfirm:"确定要移除此验证器吗？至少保留一个可用的验证器。",
       lastFactor:"至少要保留一个已验证 MFA，不能移除最后一个。",backupEnabled:"备用 MFA 已成功启用。",
-      factorRemoved:"验证器已移除。",removeFail:"移除失败：",backupFail:"备用 MFA 建立失败："
+      factorRemoved:"验证器已移除。",removeFail:"移除失败：",backupFail:"备用 MFA 建立失败：",signoutFail:"登出失败："
     },
     "en":{
       title:"Account Security & MFA",subtitle:"Revalidate identity on every sign-in; administrators use an authenticator app as a second factor.",
@@ -187,7 +187,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       backupWarning:"Keep the backup authenticator on a different device or secure location. Do not store both factors only on the same phone.",
       factorLabel:"Authenticator",removeFactor:"Remove",removeConfirm:"Remove this authenticator? Keep at least one working authenticator.",
       lastFactor:"You must keep at least one verified MFA factor. The last factor cannot be removed.",backupEnabled:"Backup MFA was enabled successfully.",
-      factorRemoved:"Authenticator removed.",removeFail:"Removal failed: ",backupFail:"Backup MFA setup failed: "
+      factorRemoved:"Authenticator removed.",removeFail:"Removal failed: ",backupFail:"Backup MFA setup failed: ",signoutFail:"Sign-out failed: "
     }
   };
 
@@ -453,8 +453,27 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
 
   $("signOutBtn").onclick=async()=>{
     if(!confirm(lang==="en"?"Sign out on this device?":"確定要登出此裝置嗎？"))return;
-    await sb.auth.signOut();
-    location.href="./index.html?v=4124";
+    const btn=$("signOutBtn");
+    btn.disabled=true;
+    try{
+      const {error}=await sb.auth.signOut();
+      if(error) throw error;
+
+      // Remove same-tab sensitive caches after a successful sign-out.
+      try{
+        sessionStorage.setItem("ipt_just_signed_out","1");
+        sessionStorage.removeItem("ipt_print_report");
+        for(let i=localStorage.length-1;i>=0;i--){
+          const k=localStorage.key(i)||"";
+          if(k.startsWith("ipt_v411_asset_summary_")) localStorage.removeItem(k);
+        }
+      }catch(_){}
+
+      location.replace("./index.html?v=4124&signedout=1");
+    }catch(e){
+      status("identityStatus","err",T("signoutFail")+(e?.message||String(e)));
+      btn.disabled=false;
+    }
   };
 
   applyLang();refresh().catch(e=>status("identityStatus","err",e.message||String(e)));

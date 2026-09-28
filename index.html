@@ -346,6 +346,7 @@ button{
 
 <link rel="apple-touch-icon" href="./ipt-apple-touch-180.png">
 <script src="./i18n-v4.10.js?v=4124" defer></script>
+<!-- V4.12.4 Homepage Signed-Out Fail-Closed Hotfix 17 -->
 </head>
 <body>
 <header>
@@ -361,7 +362,7 @@ button{
     <div class="v432-nav-grid">
       <button id="v432HomeBtn" class="primary" type="button">🏠<br>首頁</button>
       <button id="v432AssetsBtn" type="button">📊<br>我的資產</button>
-      <button id="v432TransferBtn" type="button">↗️<br>IPT 轉帳</button>
+      <button id="v432TransferBtn" type="button" disabled>↗️<br>IPT 轉帳</button>
       <button id="v432ManageBtn" type="button">⚙️<br>管理中心</button>
     </div>
     <div class="v432-nav-note">這組導覽是一般頁面內容，不會被 Android 瀏覽器底部工具列蓋住。</div>
@@ -422,19 +423,19 @@ button{
         <div class="desc">餘額、轉入轉出、CSV、PDF 報表</div>
       </button>
 
-      <button id="balanceBtn" class="menu" type="button">
+      <button id="balanceBtn" class="menu" type="button" disabled>
         <div class="icon">💰</div>
         <div class="title">查看點數</div>
         <div class="desc">進入 IPT 錢包查看鏈上餘額</div>
       </button>
 
-      <button id="transferBtn" class="menu blue" type="button">
+      <button id="transferBtn" class="menu blue" type="button" disabled>
         <div class="icon">↗️</div>
         <div class="title">IPT 轉帳</div>
         <div class="desc">前置檢查後由 Trust Wallet 核准</div>
       </button>
 
-      <button id="receiveBtn" class="menu" type="button">
+      <button id="receiveBtn" class="menu" type="button" disabled>
         <div class="icon">📥</div>
         <div class="title">收款</div>
         <div class="desc">回到主錢包頁使用收款功能</div>
@@ -621,6 +622,39 @@ button{
   let assetSummaryLoading=false;
   let accountUiState="checking";
 
+  function setMemberActionsEnabled(enabled){
+    [
+      "myAssetBtn","balanceBtn","transferBtn","receiveBtn",
+      "historyBtn","assetCenterBtn","v432AssetsBtn","v432TransferBtn"
+    ].forEach(id=>{
+      const el=$(id);
+      if(el) el.disabled=!enabled;
+    });
+  }
+
+  function markSignedOut(){
+    currentUserId="";
+    accountUiState="signed_out";
+    document.body.classList.remove("is-admin");
+    $("profileBox").style.display="none";
+    $("assetSummarySection").style.display="none";
+    setMemberActionsEnabled(false);
+    renderAccountUiState();
+  }
+
+  function consumeSignedOutMarker(){
+    let marked=false;
+    try{
+      const q=new URLSearchParams(location.search);
+      marked=q.get("signedout")==="1" || sessionStorage.getItem("ipt_just_signed_out")==="1";
+      if(marked){
+        sessionStorage.removeItem("ipt_just_signed_out");
+        history.replaceState(null,"","./index.html?v=4124");
+      }
+    }catch(_){}
+    return marked;
+  }
+
   function renderAccountUiState(){
     if(accountUiState==="checking"){
       setStatus("",uiText(
@@ -633,6 +667,12 @@ button{
         "目前已登出，請重新登入。",
         "当前已登出，请重新登录。",
         "You are signed out. Please sign in again."
+      ));
+    }else if(accountUiState==="unavailable"){
+      setStatus("err",uiText(
+        "目前無法完成登入身分驗證。會員與錢包功能已暫時鎖定，請按「重新整理」重試。",
+        "目前无法完成登录身份验证。会员与钱包功能已暂时锁定，请按“重新整理”重试。",
+        "Sign-in verification is temporarily unavailable. Member and wallet features are locked. Tap “Refresh” to retry."
       ));
     }
   }
@@ -728,14 +768,32 @@ button{
     currentUserId="";
     $("profileBox").style.display="none";
     $("assetSummarySection").style.display="none";
-    $("myAssetBtn").disabled=true;
-    $("historyBtn").disabled=true;
-    $("assetCenterBtn").disabled=true;
+    setMemberActionsEnabled(false);
+
+    if(consumeSignedOutMarker()){
+      markSignedOut();
+      return;
+    }
+
     accountUiState="checking";
     renderAccountUiState();
 
     try{
       const client=await getSupabaseClient();
+
+      // Local session is used only to short-circuit a definite signed-out state.
+      // A present session is NEVER trusted as identity; getUser() still validates it with Supabase.
+      const {data:sessionData,error:sessionError}=await withTimeout(
+        client.auth.getSession(),
+        3000,
+        "本機登入狀態確認"
+      );
+      if(sessionError) throw sessionError;
+      if(!sessionData?.session){
+        markSignedOut();
+        return;
+      }
+
       const {data:{user},error}=await withTimeout(
         client.auth.getUser(),
         8000,
@@ -744,8 +802,7 @@ button{
       if(error) throw error;
 
       if(!user){
-        accountUiState="signed_out";
-        renderAccountUiState();
+        markSignedOut();
         return;
       }
 
@@ -795,13 +852,12 @@ button{
       $("profileBox").style.display="block";
 
       if(p.status!=="active"){
-        setStatus("err","會員目前為停權狀態，會員資產入口已停用。");
+        setMemberActionsEnabled(false);
+        setStatus("err","會員目前為停權狀態，會員與錢包功能已停用。");
         return;
       }
 
-      $("myAssetBtn").disabled=false;
-      $("historyBtn").disabled=false;
-      $("assetCenterBtn").disabled=false;
+      setMemberActionsEnabled(true);
       if(role==="admin") document.body.classList.add("is-admin");
 
       accountUiState="signed_in";
@@ -821,17 +877,12 @@ button{
       }
     }catch(err){
       console.error(err);
+      setMemberActionsEnabled(false);
       if(isSignedOutError(err)){
-        accountUiState="signed_out";
-        renderAccountUiState();
+        markSignedOut();
       }else{
-        const prefix=uiText("載入失敗：","加载失败：","Load failed: ");
-        const suffix=uiText(
-          "。請按「重新整理」重試。",
-          "。请按“重新整理”重试。",
-          ". Tap “Refresh” to try again."
-        );
-        setStatus("err",prefix+(err?.message||String(err))+suffix);
+        accountUiState="unavailable";
+        renderAccountUiState();
       }
     }
   }
@@ -870,7 +921,9 @@ button{
   $("v432AssetsBtn")?.addEventListener("click",()=>{
     if(!$("myAssetBtn")?.disabled) $("myAssetBtn").click();
   });
-  $("v432TransferBtn")?.addEventListener("click",()=>$("transferBtn")?.click());
+  $("v432TransferBtn")?.addEventListener("click",()=>{
+    if(!$("transferBtn")?.disabled) $("transferBtn")?.click();
+  });
   $("v432ManageBtn")?.addEventListener("click",()=>{
     const section=document.querySelector(".admin-panel");
     if(section && document.body.classList.contains("is-admin")){
@@ -895,11 +948,9 @@ button{
   const startupWatchdog=setTimeout(()=>{
     const box=$("statusBox");
     if(box && box.textContent.includes("正在確認登入狀態")){
-      setStatus("err",uiText(
-        "登入確認逾時。請按「重新整理」重試；若持續發生，請進入「會員登入／帳戶安全」重新驗證。",
-        "登录确认超时。请按“重新整理”重试；若持续发生，请进入“会员登录／账户安全”重新验证。",
-        "Sign-in verification timed out. Tap “Refresh” to retry. If it continues, open “Member Sign-in / Security” and verify again."
-      ));
+      setMemberActionsEnabled(false);
+      accountUiState="unavailable";
+      renderAccountUiState();
     }
   },12000);
 
