@@ -1,7 +1,7 @@
 {
   "product": "Independent Points",
   "version": "V4.12.4",
-  "build": "20260928-4124",
+  "build": "20260928-4124-hf23",
   "release_date": "2026-09-28",
   "channel": "production",
   "rollback_version": "V4.12.3.2",
@@ -10,6 +10,8 @@
   "chain_id": "11155111 / 0xaa36a7",
   "contract": "0xd3fb2480aadb8b168ec7e88a0e5c847d9750cb87",
   "notes": [
+    "Hotfix 23: synchronize production manifest, Trusted Device integrity checks and browser titles",
+    "Hotfix 23: refresh PWA cache name to ipt-v4.12.4-hf23",
     "Security acceptance production seal after Android/Chrome end-to-end verification",
     "Administrator sensitive pages require verified MFA AAL2",
     "Integrates trilingual dynamic-text fixes across production pages",
@@ -40,5 +42,7 @@
       "admin-assets",
       "admin-asset-detail"
     ]
-  }
+  },
+  "hotfix": 23,
+  "rollback_commit": "0a21d8e3e775d0dc018b7dfc88922b9cadf9e4e2"
 }

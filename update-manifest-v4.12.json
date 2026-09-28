@@ -1,17 +1,26 @@
 {
   "product": "Independent Points",
   "version": "V4.12.4",
-  "build": "20260928-4124",
+  "build": "20260928-4124-hf23",
   "release_date": "2026-09-28",
   "channel": "production",
+  "hotfix": 23,
   "checks": {
     "javascript": true,
     "server_validated_identity": true,
     "mfa_aal2_admin_gate": true,
     "admin_edge_aal2_enforced": true,
+    "trusted_device_page_required": true,
     "three_languages": true,
     "diagnostics_collapsed": true,
-    "android_chrome_acceptance": true
+    "android_chrome_acceptance": true,
+    "legacy_html_removed": 128,
+    "production_html_preserved": 15
+  },
+  "self_file": {
+    "name": "update-manifest-v4.12.json",
+    "hash_excluded": true,
+    "reason": "The manifest file is excluded from its own SHA-256 list to avoid a self-referential hash."
   },
   "files": [
     {
@@ -31,18 +40,23 @@
     },
     {
       "name": "auth-guard-v4.12.js",
-      "bytes": 7025,
-      "sha256": "779ca0afa6ad5683bd7612240aaaf2c62f5ec7c37343d3f0154ba8bb7134b01b"
+      "bytes": 12127,
+      "sha256": "77bd309c5c12af4bbab0aa8b463323a939419b4efb47f431be2f4e454d887e95"
     },
     {
       "name": "auth-security-v4.12.html",
-      "bytes": 21531,
-      "sha256": "ce2b69fa2d4945066466699c9641b36f4b4ecdce712b9079e9e6a280a9572bd3"
+      "bytes": 33299,
+      "sha256": "b5fe4c756fa54877c2c8820219d27b61ea240bf83cf285fe00fedbb407acda41"
+    },
+    {
+      "name": "device-security-v4.12.html",
+      "bytes": 17569,
+      "sha256": "ce9319685c1b6c032135880d008357114706c2349d780356912cebd5d445f34a"
     },
     {
       "name": "event-center-v4.12.html",
-      "bytes": 28091,
-      "sha256": "d6c016028b09e7be76770321fce801ba703c00fba44d2314ba4c4b1fb83cc9f9"
+      "bytes": 28094,
+      "sha256": "2d3c7fde2db3431413deee8dcedc658c45f7ba5d1e0c90434d91cc2066719479"
     },
     {
       "name": "i18n-v4.10.js",
@@ -51,8 +65,8 @@
     },
     {
       "name": "index.html",
-      "bytes": 39116,
-      "sha256": "d07a0e6adbc0dfe1ed45adedf4c4e1d1406b78d63d7734f9524b1f37e9dcd6f9"
+      "bytes": 42898,
+      "sha256": "216323f8423c39f5f7de3dbc8ab6b6c2a67747ae4c0f677df821fe79b91a49ad"
     },
     {
       "name": "ipt-apple-touch-180.png",
@@ -96,18 +110,18 @@
     },
     {
       "name": "release-history.json",
-      "bytes": 14916,
-      "sha256": "9285d01f5e78428500f839aaa1156104cd446a2bfef91d0969b57be09712676e"
+      "bytes": 15476,
+      "sha256": "bbb319e545c984a4c84a698e44f02c305ad7663ec4353d6d3fd1de7e2fbcdfe3"
     },
     {
       "name": "release.json",
-      "bytes": 1451,
-      "sha256": "8c65cd9ec858c7145f621abbb1149cf782f13b5a84a20bd520414b7987ba594a"
+      "bytes": 1700,
+      "sha256": "8a856626cce669ec096c6e2472666d4a3c9e3623894a18bdd48dfe03a2e11619"
     },
     {
       "name": "robots.txt",
-      "bytes": 88,
-      "sha256": "ec85751c1b2e59f67918dde48e57e0b3cd14dec02011e8a4db82c6b2a6506242"
+      "bytes": 518,
+      "sha256": "7cf1c76287c43bbc8ab7333c09de93acdfc417c63da766e0701bf1b293c89820"
     },
     {
       "name": "security-center-v4.12.html",
@@ -116,13 +130,18 @@
     },
     {
       "name": "security-ops-v4.12.html",
-      "bytes": 15390,
-      "sha256": "2e0a687ec8d69883fddac393c0ce092f06b459ad4d83c94fdd369c5d9dbd89bb"
+      "bytes": 15393,
+      "sha256": "5c73d8bb6db74c83434ca585b2fc13b92fc59c293e91c65f6ecdd19a5fc166f3"
     },
     {
       "name": "service-worker.js",
-      "bytes": 1444,
-      "sha256": "7235d2a9ce25b7fc96d7c303c42c6964412ae440e02d27fa5f9a153b1ca38a1f"
+      "bytes": 1481,
+      "sha256": "0cdea1a5e764092ba81bf8fb2505ac1bb3d6eec8cf37f22ceb6fcd260e1d06bd"
+    },
+    {
+      "name": "sitemap.xml",
+      "bytes": 187,
+      "sha256": "ed63ed7265888a4be3c48681507ed32023654e761571dc23c0c1ca98a8800984"
     },
     {
       "name": "system-info-v4.12.html",
@@ -131,18 +150,13 @@
     },
     {
       "name": "update-center-v4.12.html",
-      "bytes": 21326,
-      "sha256": "b275d35d77692e42a70b95e2a3299c07c2e31916a3b8e1303e71d79a261aafde"
-    },
-    {
-      "name": "V4.12.4-資安驗收封版報告.txt",
-      "bytes": 1846,
-      "sha256": "15753157ade6fa8bc5ad60e8c943d2633911c3a8d25bcf4854c9f338ffe513d2"
+      "bytes": 21355,
+      "sha256": "51354490367c57eae4d9c2dcd8d8024c5c72536bc806fab9c57be0f1d6bd8ed2"
     },
     {
       "name": "wallet-core-v4.12.html",
-      "bytes": 113222,
-      "sha256": "ce69347f25f2dcf992879ea13eabc105bbaf5609c879199baa15482cc2fee5f2"
+      "bytes": 113621,
+      "sha256": "11332876c63c2780fecd441584d93ead9bf69fdb89782817c204ec54526214c6"
     }
   ]
 }

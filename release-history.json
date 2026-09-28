@@ -4,6 +4,19 @@
     {
       "version": "V4.12.4",
       "date": "2026-09-28",
+      "channel": "hotfix-23-consistency",
+      "title": "Hotfix 23 封版一致性修正",
+      "notes": [
+        "重新同步正式發佈檔案清單與 SHA-256",
+        "將 device-security-v4.12.html 納入正式檔案完整性檢查",
+        "修正營運安全中心與事件通知中心瀏覽器標題為 V4.12.4",
+        "Service Worker 快取名稱更新為 ipt-v4.12.4-hf23",
+        "不修改 Supabase、會員資料、IPT 合約、Owner、pendingOwner 或 paused"
+      ]
+    },
+    {
+      "version": "V4.12.4",
+      "date": "2026-09-28",
       "channel": "production",
       "title": "資安驗收正式封版",
       "notes": [
