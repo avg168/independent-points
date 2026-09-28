@@ -1,5 +1,5 @@
 
-/* V4.12.4 Logout Wallet Fail-Closed Hotfix 14 */
+/* V4.12.4 Logout Wallet Fail-Closed Hotfix 14 + Trusted Device Hotfix 19 */
 (() => {
   "use strict";
   const SUPABASE_URL="https://uccexvgqmoxhgykkjdcy.supabase.co";
@@ -26,6 +26,33 @@
   }
   function t(zh,cn,en){
     const l=lang(); return l==="en"?en:(l==="zh-CN"?cn:zh);
+  }
+
+
+  function deviceToken(){
+    const key="ipt_trusted_device_token_v1";
+    try{
+      let token=localStorage.getItem(key)||"";
+      if(/^[A-Za-z0-9_-]{32,256}$/.test(token)) return token;
+      const b=new Uint8Array(32);
+      crypto.getRandomValues(b);
+      let raw="";
+      b.forEach(x=>raw+=String.fromCharCode(x));
+      token=btoa(raw).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+      localStorage.setItem(key,token);
+      return token;
+    }catch(_){
+      return "";
+    }
+  }
+
+  function deviceName(){
+    const ua=navigator.userAgent||"";
+    if(/Android/i.test(ua)) return "Android 手機";
+    if(/iPhone|iPad/i.test(ua)) return "iPhone / iPad";
+    if(/Windows/i.test(ua)) return "Windows 裝置";
+    if(/Macintosh|Mac OS X/i.test(ua)) return "Mac 裝置";
+    return "目前裝置";
   }
 
   function addStyles(){
@@ -114,6 +141,52 @@
         "./auth-security-v4.12.html?v=4124"
       );
       return;
+    }
+
+
+    // Trusted-device verification. Protection is optional; when enabled,
+    // a new session is allowed only after this browser/device has been trusted.
+    try{
+      const token=deviceToken();
+      const {data,error}=await sb.functions.invoke("device-security",{
+        body:{
+          action:"status",
+          device_token:token,
+          device_name:deviceName(),
+          user_agent:navigator.userAgent||""
+        }
+      });
+      if(error) throw error;
+
+      if(data?.allowed!==true){
+        if(path==="wallet-core-v4.12.html"){
+          document.documentElement.classList.add("ipt-auth-pending");
+        }
+        showOverlay(
+          t("新裝置需要驗證","新设备需要验证","New device verification required"),
+          t("這個帳號已啟用受信任裝置保護。請先到帳戶安全完成 MFA，再將這支裝置加入受信任裝置。","这个账号已启用受信任设备保护。请先到账户安全完成 MFA，再将这台设备加入受信任设备。","Trusted-device protection is enabled. Complete MFA in Account Security, then trust this device before continuing."),
+          t("前往帳戶安全","前往账户安全","Open Account Security"),
+          "./auth-security-v4.12.html?v=4124#trustedDeviceSection"
+        );
+        return;
+      }
+    }catch(deviceError){
+      try{
+        const {data:allowed,error:allowErr}=await sb.rpc("ipt_device_access_allowed");
+        if(allowErr) throw allowErr;
+        if(allowed!==true) throw deviceError;
+      }catch(_){
+        if(path==="wallet-core-v4.12.html"){
+          document.documentElement.classList.add("ipt-auth-pending");
+        }
+        showOverlay(
+          t("無法確認受信任裝置","无法确认受信任设备","Unable to verify trusted device"),
+          t("目前無法安全確認這個裝置的登入權限。為安全起見，此頁暫時鎖定。","目前无法安全确认这个设备的登录权限。为安全起见，此页暂时锁定。","This device could not be verified safely. This page remains locked."),
+          t("前往帳戶安全","前往账户安全","Open Account Security"),
+          "./auth-security-v4.12.html?v=4124#trustedDeviceSection"
+        );
+        return;
+      }
     }
 
     // Admin pages require MFA when a verified factor exists.

@@ -100,6 +100,18 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
     </div>
   </section>
 
+
+  <section class="panel" id="trustedDeviceSection">
+    <h2 id="hTrustedDevice">受信任裝置</h2>
+    <div class="status" id="trustedDeviceNote">
+      可選擇啟用受信任裝置保護。啟用後，同一支已信任手機可正常登入；新的手機必須先完成 MFA 才能加入。
+    </div>
+    <button id="trustedDeviceBtn" class="blue" type="button" style="width:100%;margin-top:12px">管理受信任裝置</button>
+    <div class="note" id="trustedDeviceHelp">
+      一般會員不強制啟用；若啟用，未信任的新裝置會被鎖住會員、錢包與管理功能。
+    </div>
+  </section>
+
   <section class="panel">
     <h2 id="hSession">工作階段安全</h2>
     <div class="status ok" id="sessionPolicy">
@@ -114,7 +126,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
   </section>
 </main>
 <script>
-/* V4.12.4 Backup MFA FriendlyName Hotfix 16 + Signed-Out Redirect Hotfix 17 */
+/* V4.12.4 Backup MFA FriendlyName Hotfix 16 + Signed-Out Redirect Hotfix 17 + Trusted Device Hotfix 19 */
 (() => {
   const URL="https://uccexvgqmoxhgykkjdcy.supabase.co";
   const KEY="sb_publishable_FBsN1DYTQMv2_bWhpbXHAA_qdAq7ri7";
@@ -143,7 +155,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       backupWarning:"請把備援驗證器放在不同裝置或安全的不同位置；不要只存在同一支手機。",
       factorLabel:"驗證器",removeFactor:"移除",removeConfirm:"確定要移除此驗證器嗎？至少保留一個可用的驗證器。",
       lastFactor:"至少要保留一個已驗證 MFA，不能移除最後一個。",backupEnabled:"備援 MFA 已成功啟用。",
-      factorRemoved:"驗證器已移除。",removeFail:"移除失敗：",backupFail:"備援 MFA 建立失敗：",signoutFail:"登出失敗："
+      factorRemoved:"驗證器已移除。",removeFail:"移除失敗：",backupFail:"備援 MFA 建立失敗：",signoutFail:"登出失敗：",hTrustedDevice:"受信任裝置",trustedDeviceNote:"可選擇啟用受信任裝置保護。啟用後，同一支已信任手機可正常登入；新的手機必須先完成 MFA 才能加入。",trustedDeviceManage:"管理受信任裝置",trustedDeviceHelp:"一般會員不強制啟用；若啟用，未信任的新裝置會被鎖住會員、錢包與管理功能。"
     },
     "zh-CN":{
       title:"账户安全与 MFA",subtitle:"每次登录重新确认身份；管理员使用验证器 App 进行第二因素验证。",
@@ -165,7 +177,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       backupWarning:"请把备用验证器放在不同设备或安全的不同位置；不要只存在同一支手机。",
       factorLabel:"验证器",removeFactor:"移除",removeConfirm:"确定要移除此验证器吗？至少保留一个可用的验证器。",
       lastFactor:"至少要保留一个已验证 MFA，不能移除最后一个。",backupEnabled:"备用 MFA 已成功启用。",
-      factorRemoved:"验证器已移除。",removeFail:"移除失败：",backupFail:"备用 MFA 建立失败：",signoutFail:"登出失败："
+      factorRemoved:"验证器已移除。",removeFail:"移除失败：",backupFail:"备用 MFA 建立失败：",signoutFail:"登出失败：",hTrustedDevice:"受信任设备",trustedDeviceNote:"可选择启用受信任设备保护。启用后，同一台已信任手机可正常登录；新的手机必须先完成 MFA 才能加入。",trustedDeviceManage:"管理受信任设备",trustedDeviceHelp:"普通会员不强制启用；若启用，未信任的新设备会被锁住会员、钱包与管理功能。"
     },
     "en":{
       title:"Account Security & MFA",subtitle:"Revalidate identity on every sign-in; administrators use an authenticator app as a second factor.",
@@ -187,7 +199,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       backupWarning:"Keep the backup authenticator on a different device or secure location. Do not store both factors only on the same phone.",
       factorLabel:"Authenticator",removeFactor:"Remove",removeConfirm:"Remove this authenticator? Keep at least one working authenticator.",
       lastFactor:"You must keep at least one verified MFA factor. The last factor cannot be removed.",backupEnabled:"Backup MFA was enabled successfully.",
-      factorRemoved:"Authenticator removed.",removeFail:"Removal failed: ",backupFail:"Backup MFA setup failed: ",signoutFail:"Sign-out failed: "
+      factorRemoved:"Authenticator removed.",removeFail:"Removal failed: ",backupFail:"Backup MFA setup failed: ",signoutFail:"Sign-out failed: ",hTrustedDevice:"Trusted Devices",trustedDeviceNote:"Trusted-device protection is optional. Once enabled, this trusted phone can sign in normally; a new phone must complete MFA before it can be trusted.",trustedDeviceManage:"Manage Trusted Devices",trustedDeviceHelp:"This is optional for regular members. When enabled, untrusted new devices are blocked from member, wallet, and administrator features."
     }
   };
 
@@ -196,7 +208,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
   function applyLang(){
     localStorage.setItem("ipt_language",lang);
     document.documentElement.lang=lang==="en"?"en":(lang==="zh-CN"?"zh-Hans":"zh-Hant");
-    ["title","subtitle","hLogin","loginNote","hIdentity","kEmail","kUser","kAal","kFactor","hMfa","enrollNote","challengeNote","hSession","sessionPolicy","rolloutNote"].forEach(id=>{
+    ["title","subtitle","hLogin","loginNote","hIdentity","kEmail","kUser","kAal","kFactor","hMfa","enrollNote","challengeNote","hTrustedDevice","trustedDeviceNote","trustedDeviceHelp","hSession","sessionPolicy","rolloutNote"].forEach(id=>{
       const map={sessionPolicy:"policy",rolloutNote:"rollout"}; if($(id)) $(id).textContent=T(map[id]||id);
     });
     $("loginEmail").placeholder=T("loginEmail");
@@ -205,6 +217,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
     $("recheckBtn").textContent=T("recheck"); $("homeBtn").textContent=T("home"); $("enrollBtn").textContent=T("enroll");
     $("enrollCode").placeholder=T("code"); $("verifyEnrollBtn").textContent=T("enable");
     $("challengeCode").placeholder=T("code"); $("challengeBtn").textContent=T("challenge"); $("signOutBtn").textContent=T("signout");
+    if($("trustedDeviceBtn")) $("trustedDeviceBtn").textContent=T("trustedDeviceManage");
     if($("backupTitle")) $("backupTitle").textContent=T("backupTitle");
     if($("backupNote")) $("backupNote").textContent=T("backupNote");
     if($("backupEnrollBtn")) $("backupEnrollBtn").textContent=T("backupEnroll");
@@ -246,6 +259,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
 
   $("homeBtn").onclick=()=>location.href="./index.html?v=4124";
   $("recheckBtn").onclick=()=>refresh();
+  $("trustedDeviceBtn").onclick=()=>location.href="./device-security-v4.12.html?v=4124hf19";
 
   function escFactorName(v){
     return String(v||"").replaceAll("&","&amp;").replaceAll("<","&lt;")

@@ -346,7 +346,7 @@ button{
 
 <link rel="apple-touch-icon" href="./ipt-apple-touch-180.png">
 <script src="./i18n-v4.10.js?v=4124" defer></script>
-<!-- V4.12.4 Homepage Signed-Out Fail-Closed Hotfix 17 -->
+<!-- V4.12.4 Homepage Signed-Out Fail-Closed Hotfix 17 + Trusted Device Hotfix 19 -->
 </head>
 <body>
 <header>
@@ -677,6 +677,33 @@ button{
     }
   }
 
+
+  function deviceToken(){
+    const key="ipt_trusted_device_token_v1";
+    try{
+      let token=localStorage.getItem(key)||"";
+      if(/^[A-Za-z0-9_-]{32,256}$/.test(token)) return token;
+      const b=new Uint8Array(32);
+      crypto.getRandomValues(b);
+      let raw="";
+      b.forEach(x=>raw+=String.fromCharCode(x));
+      token=btoa(raw).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+      localStorage.setItem(key,token);
+      return token;
+    }catch(_){
+      return "";
+    }
+  }
+
+  function deviceName(){
+    const ua=navigator.userAgent||"";
+    if(/Android/i.test(ua)) return "Android 手機";
+    if(/iPhone|iPad/i.test(ua)) return "iPhone / iPad";
+    if(/Windows/i.test(ua)) return "Windows 裝置";
+    if(/Macintosh|Mac OS X/i.test(ua)) return "Mac 裝置";
+    return "目前裝置";
+  }
+
   function go(url){ location.href=url; }
 
   function setStatus(kind,text){
@@ -763,6 +790,42 @@ button{
   }
 
 
+
+  async function checkTrustedDevice(client){
+    const token=deviceToken();
+    try{
+      const {data,error}=await withTimeout(
+        client.functions.invoke("device-security",{
+          body:{
+            action:"status",
+            device_token:token,
+            device_name:deviceName(),
+            user_agent:navigator.userAgent||""
+          }
+        }),
+        8000,
+        "受信任裝置檢查"
+      );
+      if(error) throw error;
+      if(!data?.ok) throw new Error(data?.error||"受信任裝置檢查失敗");
+      return data;
+    }catch(edgeError){
+      try{
+        const {data,error}=await client.rpc("ipt_device_access_allowed");
+        if(error) throw error;
+        return {
+          ok:true,
+          protection_enabled:data!==true,
+          allowed:data===true,
+          trusted_device:data===true,
+          fallback:true
+        };
+      }catch(_){
+        throw edgeError;
+      }
+    }
+  }
+
   async function load(){
     document.body.classList.remove("is-admin");
     currentUserId="";
@@ -803,6 +866,18 @@ button{
 
       if(!user){
         markSignedOut();
+        return;
+      }
+
+      const deviceState=await checkTrustedDevice(client);
+      if(deviceState?.allowed!==true){
+        setMemberActionsEnabled(false);
+        accountUiState="untrusted_device";
+        setStatus("err",uiText(
+          "偵測到尚未信任的新裝置。請進入「會員登入／帳戶安全」完成 MFA，再到「受信任裝置」信任這支手機。",
+          "检测到尚未信任的新设备。请进入“会员登录／账户安全”完成 MFA，再到“受信任设备”信任这台手机。",
+          "This is a new untrusted device. Complete MFA in Account Security, then trust this device in Trusted Devices."
+        ));
         return;
       }
 
