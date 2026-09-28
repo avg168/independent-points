@@ -1,4 +1,14 @@
-name: Safe IPT Repository Cleanup
+# Hotfix 22-1
+# IPT V4.12.4 舊版公開頁安全清理
+# 安全原則：
+# 1. 只能在 main 分支執行
+# 2. dry-run 必須剛好找到 128 個舊版 HTML
+# 3. 發現任何非預期 HTML 立即停止
+# 4. clean 前先建立 rollback 備份分支
+# 5. 清理後必須剛好保留 15 個正式 HTML
+# 6. cleanup-files.txt 只放 /tmp，不會被 commit
+
+name: Safe IPT V4.12 Legacy HTML Cleanup
 
 on:
   workflow_dispatch:
@@ -20,196 +30,420 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout main
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Verify protected files
+      - name: Verify main branch
         shell: bash
         run: |
           set -euo pipefail
 
-          protected=(
+          if [[ "${GITHUB_REF_NAME}" != "main" ]]; then
+            echo "ERROR: this cleanup workflow may run only from main."
+            echo "Current ref: ${GITHUB_REF_NAME}"
+            exit 1
+          fi
+
+          echo "Branch verified: main"
+
+      - name: Verify current production files
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          required=(
             "index.html"
-            "ipt-v311-member.html"
-            "ipt-v31-member.html"
-            "ipt-v30-member.html"
-            "ipt-v27-stable.html"
-            "README.md"
+            "wallet-core-v4.12.html"
+            "auth-security-v4.12.html"
+            "device-security-v4.12.html"
+            "asset-center-v4.12.html"
+            "member-assets-v4.12.html"
+            "admin-assets-v4.12.html"
+            "admin-members-v4.12.html"
+            "print-report-v4.12.html"
+            "system-info-v4.12.html"
+            "maintenance-v4.12.html"
+            "update-center-v4.12.html"
+            "security-center-v4.12.html"
+            "security-ops-v4.12.html"
+            "event-center-v4.12.html"
+            "auth-guard-v4.12.js"
+            "service-worker.js"
+            "release.json"
+            "release-history.json"
+            "update-manifest-v4.12.json"
+            "manifest.webmanifest"
+            "i18n-v4.10.js"
           )
 
-          echo "Checking protected files..."
-          for f in "${protected[@]}"; do
+          echo "Checking current production files..."
+
+          for f in "${required[@]}"; do
             if [[ ! -f "$f" ]]; then
-              echo "ERROR: protected file missing: $f"
+              echo "ERROR: required production file missing: $f"
               exit 1
             fi
           done
 
-          if [[ ! -d "contracts" ]]; then
-            echo "ERROR: protected directory missing: contracts/"
-            exit 1
-          fi
+          echo "Required production files are present."
 
-          echo "Protected files are present."
-
-      - name: Build cleanup list
+      - name: Build exact legacy HTML deletion plan
         id: plan
         shell: bash
         run: |
           set -euo pipefail
-          shopt -s nullglob
 
-          # Only legacy / test files are targeted.
-          # Current production and backup files are NOT matched by these patterns.
-          patterns=(
-            "app-loader-v*.js"
-            "app.js"
-            "confirmation-core.js"
-            "demo-core.js"
-            "demo.html"
-            "demo.js"
-            "pending-core.js"
-            "preflight-core.js"
-            "receipt-core.js"
-            "role-ui-v*.js"
-            "styles.css"
-            "tx-core.js"
-            "wallet-connect.html"
-            "wallet-connect.js"
-            "walletconnect-bridge*.js"
-
-            "ipt-contract-check-*.html"
-            "ipt-sepolia-deploy*.html"
-            "ipt-sepolia-transfer*.html"
-            "ipt-sepolia-walletconnect*.html"
-            "ipt-sepolia-gas-topup*.html"
-
-            "ipt-v13-stable.html"
-            "ipt-v132-stable.html"
-            "ipt-v2-direct.html"
-            "ipt-v21-direct.html"
-            "ipt-v22-transfer.html"
-            "ipt-v221-transfer.html"
-            "ipt-v222-transfer.html"
-            "ipt-v23-burn.html"
-            "ipt-v24-mint.html"
-            "ipt-v25-pause.html"
-            "ipt-v26-ownership.html"
-            "ipt-v261-ownership.html"
-          )
-
-          protected=(
+          keep=(
             "index.html"
-            "ipt-v311-member.html"
-            "ipt-v31-member.html"
-            "ipt-v30-member.html"
-            "ipt-v27-stable.html"
-            "README.md"
+            "wallet-core-v4.12.html"
+            "auth-security-v4.12.html"
+            "device-security-v4.12.html"
+            "asset-center-v4.12.html"
+            "member-assets-v4.12.html"
+            "admin-assets-v4.12.html"
+            "admin-members-v4.12.html"
+            "print-report-v4.12.html"
+            "system-info-v4.12.html"
+            "maintenance-v4.12.html"
+            "update-center-v4.12.html"
+            "security-center-v4.12.html"
+            "security-ops-v4.12.html"
+            "event-center-v4.12.html"
           )
 
-          is_protected() {
+          is_keep() {
             local candidate="$1"
-            for keep in "${protected[@]}"; do
-              [[ "$candidate" == "$keep" ]] && return 0
+
+            for k in "${keep[@]}"; do
+              if [[ "$candidate" == "$k" ]]; then
+                return 0
+              fi
             done
+
             return 1
           }
 
-          : > cleanup-files.txt
+          : > /tmp/cleanup-files.txt
 
-          for pattern in "${patterns[@]}"; do
-            for file in $pattern; do
-              [[ -f "$file" ]] || continue
-              if is_protected "$file"; then
-                echo "SKIP protected: $file"
-                continue
-              fi
-              echo "$file" >> cleanup-files.txt
-            done
-          done
+          while IFS= read -r f; do
+            [[ -n "$f" ]] || continue
 
-          sort -u -o cleanup-files.txt cleanup-files.txt
+            if ! is_keep "$f"; then
+              echo "$f" >> /tmp/cleanup-files.txt
+            fi
+          done < <(
+            find . \
+              -maxdepth 1 \
+              -type f \
+              -name '*.html' \
+              -printf '%f\n' \
+              | sort
+          )
 
-          echo "===== Files planned for deletion ====="
-          if [[ -s cleanup-files.txt ]]; then
-            cat cleanup-files.txt
-          else
-            echo "(No matching legacy files found)"
+          sort -u -o /tmp/cleanup-files.txt /tmp/cleanup-files.txt
+
+          allowed_re='^(admin-assets|admin-members|asset-center|event-center|maintenance|member-assets|print-report|security-center|security-ops|system-info|update-center|wallet-core)-v4\.(5|10(\.[0-9]+)?|11)\.html$'
+
+          bad=0
+
+          while IFS= read -r f; do
+            [[ -n "$f" ]] || continue
+
+            if [[ ! "$f" =~ $allowed_re ]]; then
+              echo "ERROR: unexpected HTML would be deleted: $f"
+              bad=1
+            fi
+          done < /tmp/cleanup-files.txt
+
+          if [[ "$bad" -ne 0 ]]; then
+            echo "ERROR: unexpected file detected."
+            echo "Cleanup stopped."
+            exit 1
           fi
 
-          count=$(wc -l < cleanup-files.txt | tr -d ' ')
+          count=$(wc -l < /tmp/cleanup-files.txt | tr -d ' ')
+
           echo "count=$count" >> "$GITHUB_OUTPUT"
 
+          if [[ "$count" -ne 128 ]]; then
+            echo "ERROR: expected exactly 128 legacy HTML files."
+            echo "Found: $count"
+            echo ""
+            echo "Repository changed since audit."
+            echo "Cleanup stopped instead of guessing."
+            echo ""
+            cat /tmp/cleanup-files.txt
+            exit 1
+          fi
+
+          echo "========================================"
+          echo "LEGACY HTML DELETE PLAN"
+          echo "Expected: 128"
+          echo "Matched : $count"
+          echo "========================================"
+
+          cat /tmp/cleanup-files.txt
+
           {
-            echo "## Safe cleanup preview"
+            echo "## V4.12 Legacy HTML Cleanup"
             echo ""
             echo "**Mode:** ${{ inputs.mode }}"
             echo ""
-            echo "**Files matched:** $count"
+            echo "**Legacy HTML matched:** $count"
+            echo ""
+            echo "**Production HTML preserved:** ${#keep[@]}"
+            echo ""
+            echo "### Planned deletion list"
             echo ""
             echo '```text'
-            if [[ -s cleanup-files.txt ]]; then
-              cat cleanup-files.txt
-            else
-              echo "(No matching legacy files found)"
-            fi
+            cat /tmp/cleanup-files.txt
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Stop after dry-run preview
+      - name: Dry-run safety stop
         if: ${{ inputs.mode == 'dry-run' }}
         shell: bash
         run: |
-          echo "DRY RUN ONLY — no files were deleted."
-          echo "Review the file list above. Re-run this workflow with mode=clean only when ready."
-
-      - name: Delete legacy files
-        if: ${{ inputs.mode == 'clean' }}
-        shell: bash
-        run: |
           set -euo pipefail
 
-          if [[ ! -s cleanup-files.txt ]]; then
-            echo "No legacy files to delete."
-            exit 0
+          count=$(wc -l < /tmp/cleanup-files.txt | tr -d ' ')
+
+          if [[ "$count" -ne 128 ]]; then
+            echo "ERROR: dry-run count is not 128."
+            exit 1
           fi
 
-          while IFS= read -r file; do
-            [[ -n "$file" ]] || continue
-            echo "Deleting: $file"
-            rm -f -- "$file"
-          done < cleanup-files.txt
+          echo "========================================"
+          echo "DRY RUN ONLY"
+          echo "========================================"
+          echo ""
+          echo "128 legacy HTML files were identified."
+          echo "NO FILES WERE DELETED."
+          echo ""
+          echo "Review the workflow summary before clean."
 
-      - name: Verify protected files after cleanup
+      - name: Create rollback backup branch
         if: ${{ inputs.mode == 'clean' }}
         shell: bash
         run: |
           set -euo pipefail
 
-          protected=(
+          count=$(wc -l < /tmp/cleanup-files.txt | tr -d ' ')
+
+          if [[ "$count" -ne 128 ]]; then
+            echo "ERROR: clean blocked because count is not 128."
+            exit 1
+          fi
+
+          backup_branch="backup-before-clean-v4124-${GITHUB_RUN_ID}"
+
+          echo "Creating rollback branch:"
+          echo "$backup_branch"
+
+          git push origin "HEAD:refs/heads/$backup_branch"
+
+          {
+            echo ""
+            echo "### Rollback backup"
+            echo ""
+            echo "**Backup branch:** \`$backup_branch\`"
+            echo ""
+            echo "Backup branch was created before deletion."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Delete exactly 128 legacy HTML files
+        if: ${{ inputs.mode == 'clean' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          count=$(wc -l < /tmp/cleanup-files.txt | tr -d ' ')
+
+          if [[ "$count" -ne 128 ]]; then
+            echo "ERROR: deletion blocked."
+            echo "Expected 128 files but found $count."
+            exit 1
+          fi
+
+          deleted=0
+
+          while IFS= read -r f; do
+            [[ -n "$f" ]] || continue
+
+            if [[ ! -f "$f" ]]; then
+              echo "ERROR: planned file disappeared before deletion: $f"
+              exit 1
+            fi
+
+            echo "Deleting: $f"
+
+            rm -f -- "$f"
+
+            deleted=$((deleted + 1))
+          done < /tmp/cleanup-files.txt
+
+          if [[ "$deleted" -ne 128 ]]; then
+            echo "ERROR: expected to delete 128 files."
+            echo "Deleted: $deleted"
+            exit 1
+          fi
+
+          echo "Deleted exactly 128 legacy HTML files."
+
+      - name: Replace sitemap with public home only
+        if: ${{ inputs.mode == 'clean' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          cat > sitemap.xml <<'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+            <url>
+              <loc>https://avg168.github.io/independent-points/</loc>
+            </url>
+          </urlset>
+          EOF
+
+          echo "sitemap.xml updated."
+
+      - name: Update robots crawler guidance
+        if: ${{ inputs.mode == 'clean' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          cat > robots.txt <<'EOF'
+          User-agent: *
+          Allow: /
+          Disallow: /wallet-core-v4.12.html
+          Disallow: /auth-security-v4.12.html
+          Disallow: /device-security-v4.12.html
+          Disallow: /asset-center-v4.12.html
+          Disallow: /member-assets-v4.12.html
+          Disallow: /admin-assets-v4.12.html
+          Disallow: /admin-members-v4.12.html
+          Disallow: /print-report-v4.12.html
+          Disallow: /update-center-v4.12.html
+          Disallow: /security-center-v4.12.html
+          Disallow: /security-ops-v4.12.html
+          Disallow: /event-center-v4.12.html
+
+          Sitemap: https://avg168.github.io/independent-points/sitemap.xml
+          EOF
+
+          echo "robots.txt updated."
+
+      - name: Verify all legacy files are gone
+        if: ${{ inputs.mode == 'clean' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          failed=0
+
+          while IFS= read -r f; do
+            [[ -n "$f" ]] || continue
+
+            if [[ -e "$f" ]]; then
+              echo "ERROR: legacy file still exists: $f"
+              failed=1
+            fi
+          done < /tmp/cleanup-files.txt
+
+          if [[ "$failed" -ne 0 ]]; then
+            echo "ERROR: legacy cleanup verification failed."
+            exit 1
+          fi
+
+          echo "All 128 planned legacy files are gone."
+
+      - name: Verify production HTML files remain
+        if: ${{ inputs.mode == 'clean' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          production=(
             "index.html"
-            "ipt-v311-member.html"
-            "ipt-v31-member.html"
-            "ipt-v30-member.html"
-            "ipt-v27-stable.html"
-            "README.md"
+            "wallet-core-v4.12.html"
+            "auth-security-v4.12.html"
+            "device-security-v4.12.html"
+            "asset-center-v4.12.html"
+            "member-assets-v4.12.html"
+            "admin-assets-v4.12.html"
+            "admin-members-v4.12.html"
+            "print-report-v4.12.html"
+            "system-info-v4.12.html"
+            "maintenance-v4.12.html"
+            "update-center-v4.12.html"
+            "security-center-v4.12.html"
+            "security-ops-v4.12.html"
+            "event-center-v4.12.html"
           )
 
-          for f in "${protected[@]}"; do
-            [[ -f "$f" ]] || {
-              echo "ERROR: protected file disappeared: $f"
+          for f in "${production[@]}"; do
+            if [[ ! -f "$f" ]]; then
+              echo "ERROR: production file missing after cleanup: $f"
               exit 1
-            }
+            fi
           done
 
-          [[ -d "contracts" ]] || {
-            echo "ERROR: protected contracts/ directory disappeared"
-            exit 1
-          }
+          remain=$(
+            find . \
+              -maxdepth 1 \
+              -type f \
+              -name '*.html' \
+              | wc -l \
+              | tr -d ' '
+          )
 
-          echo "Protected files and contracts/ are safe."
+          if [[ "$remain" -ne 15 ]]; then
+            echo "ERROR: expected 15 production HTML files after cleanup."
+            echo "Found: $remain"
+            exit 1
+          fi
+
+          echo "========================================"
+          echo "CLEANUP VERIFICATION PASS"
+          echo "========================================"
+          echo "15 production HTML files remain."
+
+      - name: Show pending Git changes
+        if: ${{ inputs.mode == 'clean' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "===== git status ====="
+          git status --short
+
+          echo ""
+          echo "===== deleted HTML count ====="
+
+          git status --short \
+            | awk '$1 == "D" && $2 ~ /\.html$/ {count++} END {print count+0}'
+
+      - name: Verify Git deletion count
+        if: ${{ inputs.mode == 'clean' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git_deleted=$(
+            git status --short \
+              | awk '$1 == "D" && $2 ~ /\.html$/ {count++} END {print count+0}'
+          )
+
+          if [[ "$git_deleted" -ne 128 ]]; then
+            echo "ERROR: Git does not show exactly 128 deleted HTML files."
+            echo "Git deleted HTML count: $git_deleted"
+            exit 1
+          fi
+
+          echo "Git confirms exactly 128 HTML deletions."
 
       - name: Commit cleanup
         if: ${{ inputs.mode == 'clean' }}
@@ -217,31 +451,29 @@ jobs:
         run: |
           set -euo pipefail
 
-          if git diff --quiet; then
-            echo "No changes to commit."
-            exit 0
-          fi
-
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           git add -A
-          git commit -m "chore: safely remove legacy IPT test files"
-          git push
+
+          if git diff --cached --quiet; then
+            echo "ERROR: no cleanup changes found to commit."
+            exit 1
+          fi
+
+          git commit \
+            -m "security: remove 128 legacy public HTML pages"
+
+          git push origin main
 
           {
             echo ""
             echo "## Cleanup completed"
             echo ""
-            echo "Legacy files were removed and committed."
-            echo ""
-            echo "Protected files retained:"
-            echo "- index.html"
-            echo "- ipt-v311-member.html"
-            echo "- ipt-v31-member.html"
-            echo "- ipt-v30-member.html"
-            echo "- ipt-v27-stable.html"
-            echo "- README.md"
-            echo "- contracts/"
-            echo "- .github/workflows/"
+            echo "- 128 legacy HTML pages removed from main"
+            echo "- 15 V4.12 production HTML pages preserved"
+            echo "- rollback branch created before deletion"
+            echo "- sitemap.xml contains public home only"
+            echo "- robots.txt updated"
+            echo "- temporary cleanup list was stored only in /tmp"
           } >> "$GITHUB_STEP_SUMMARY"
