@@ -1,13 +1,21 @@
 <!doctype html>
 <html lang="zh-Hant">
 <head>
+<script>
+document.documentElement.classList.add("ipt-auth-pending");
+</script>
+<style>
+html.ipt-auth-pending body > *:not(#iptAuthGuardOverlay){
+  display:none!important;
+}
+</style>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
-<script src="./auth-guard-v4.12.js?v=4124hf13"></script>
+<script src="./auth-guard-v4.12.js?v=4124hf14"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Independent Points V4.12.4 CORE｜錢包核心</title>
-<!-- V4.12.4 Logout Wallet Guard Hotfix 13 -->
+<!-- V4.12.4 Logout Wallet Fail-Closed Hotfix 14 -->
 <style>
 :root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;color:#172033}
 *{box-sizing:border-box}

@@ -1,5 +1,5 @@
 
-/* V4.12.4 Logout Wallet Guard Hotfix 13 */
+/* V4.12.4 Logout Wallet Fail-Closed Hotfix 14 */
 (() => {
   "use strict";
   const SUPABASE_URL="https://uccexvgqmoxhgykkjdcy.supabase.co";
@@ -73,7 +73,20 @@
 
   async function run(){
     if(!MEMBER_PAGES.has(path)) return;
-    if(!window.supabase?.createClient) return;
+
+    if(path==="wallet-core-v4.12.html"){
+      document.documentElement.classList.add("ipt-auth-pending");
+    }
+
+    if(!window.supabase?.createClient){
+      showOverlay(
+        t("無法驗證會員登入","无法验证会员登录","Unable to verify sign-in"),
+        t("登入驗證元件未能載入。為安全起見，錢包功能保持鎖定。請返回帳戶安全重新登入。","登录验证组件未能加载。为安全起见，钱包功能保持锁定。请返回账户安全重新登录。","The sign-in verification component could not load. Wallet features remain locked for safety. Return to Account Security and sign in again."),
+        t("前往帳戶安全","前往账户安全","Open Account Security"),
+        "./auth-security-v4.12.html?v=4124"
+      );
+      return;
+    }
 
     const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{
       auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
@@ -149,12 +162,18 @@
       }
     }
 
+    if(path==="wallet-core-v4.12.html"){
+      document.documentElement.classList.remove("ipt-auth-pending");
+    }
     hideOverlay();
 
     if(!window.__iptV412AuthGuardSubscribed){
       window.__iptV412AuthGuardSubscribed=true;
       sb.auth.onAuthStateChange((event)=>{
         if(event==="SIGNED_OUT"){
+          if(path==="wallet-core-v4.12.html"){
+            document.documentElement.classList.add("ipt-auth-pending");
+          }
           run().catch(console.error);
         }
       });
