@@ -80,8 +80,23 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
 
     <div id="challengeArea" class="hidden">
       <div class="note" id="challengeNote">這個帳號已設定 MFA。每個新的登入工作階段都要完成一次第二因素驗證，才能進入管理員敏感功能。</div>
+      <select id="challengeFactorSelect" class="hidden" style="width:100%;margin-top:12px;min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding:10px 12px;font:inherit"></select>
       <input id="challengeCode" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="輸入驗證器 6 位數代碼" style="width:100%;margin-top:12px">
       <button id="challengeBtn" class="primary" type="button" style="width:100%;margin-top:10px">完成二次驗證</button>
+    </div>
+
+    <div id="backupArea" class="hidden" style="margin-top:16px;border-top:1px solid #e5eaf0;padding-top:16px">
+      <h3 id="backupTitle" style="margin:0 0 8px;color:#17365d">備援驗證器</h3>
+      <div class="note" id="backupNote">建議新增第二個 TOTP 驗證器，放在不同裝置或不同驗證器 App。主要手機遺失時，可用備援驗證器完成 AAL2。</div>
+      <div id="verifiedFactorList" style="margin-top:12px"></div>
+      <button id="backupEnrollBtn" class="blue" type="button" style="width:100%;margin-top:12px">新增備援驗證器</button>
+      <div id="backupQrWrap" class="hidden" style="margin-top:14px;text-align:center">
+        <img id="backupQrImg" alt="Backup MFA QR Code" style="max-width:260px;width:100%;height:auto;background:white;padding:10px;border-radius:14px;border:1px solid #dbe3ed">
+        <div id="backupSecret" class="secret"></div>
+        <input id="backupCode" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="輸入備援驗證器 6 位數代碼" style="width:100%;margin-top:12px">
+        <button id="verifyBackupBtn" class="primary" type="button" style="width:100%;margin-top:10px">驗證並啟用備援 MFA</button>
+      </div>
+      <div class="status warn" id="backupWarning" style="margin-top:12px">請把備援驗證器放在不同裝置或安全的不同位置；不要只存在同一支手機。</div>
     </div>
   </section>
 
@@ -99,12 +114,13 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
   </section>
 </main>
 <script>
+/* V4.12.4 Backup MFA Hotfix 15 */
 (() => {
   const URL="https://uccexvgqmoxhgykkjdcy.supabase.co";
   const KEY="sb_publishable_FBsN1DYTQMv2_bWhpbXHAA_qdAq7ri7";
   const sb=window.supabase.createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
   const $=id=>document.getElementById(id);
-  let factorId="", enrollFactorId="", staleFactorIds=[], lang=localStorage.getItem("ipt_language")||"zh-TW";
+  let factorId="", enrollFactorId="", backupEnrollFactorId="", staleFactorIds=[], verifiedFactors=[], lang=localStorage.getItem("ipt_language")||"zh-TW";
 
   const S={
     "zh-TW":{
@@ -121,7 +137,13 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       enroll:"建立 MFA",code:"輸入驗證器 6 位數代碼",enable:"驗證並啟用 MFA",challengeNote:"這個帳號已設定 MFA。每個新的登入工作階段都要完成一次第二因素驗證，才能進入管理員敏感功能。",
       challenge:"完成二次驗證",hSession:"工作階段安全",policy:"V4.12 使用 server-validated getUser() 重新確認登入身分；管理員頁面另檢查 MFA AAL2。",
       signout:"登出此裝置",rollout:"V4.12.4 已完成 MFA 前端驗證與管理員 Edge Functions 後端 AAL2 強制保護。管理員敏感 API 必須完成 MFA 後才能執行。",
-      enabled:"MFA 已成功啟用，這次工作階段已提升為 AAL2。",verified:"二次驗證完成，這次工作階段已提升為 AAL2。"
+      enabled:"MFA 已成功啟用，這次工作階段已提升為 AAL2。",verified:"二次驗證完成，這次工作階段已提升為 AAL2。",
+      chooseFactor:"選擇驗證器",backupTitle:"備援驗證器",backupNote:"建議新增第二個 TOTP 驗證器，放在不同裝置或不同驗證器 App。主要手機遺失時，可用備援驗證器完成 AAL2。",
+      backupEnroll:"新增備援驗證器",backupCode:"輸入備援驗證器 6 位數代碼",backupVerify:"驗證並啟用備援 MFA",
+      backupWarning:"請把備援驗證器放在不同裝置或安全的不同位置；不要只存在同一支手機。",
+      factorLabel:"驗證器",removeFactor:"移除",removeConfirm:"確定要移除此驗證器嗎？至少保留一個可用的驗證器。",
+      lastFactor:"至少要保留一個已驗證 MFA，不能移除最後一個。",backupEnabled:"備援 MFA 已成功啟用。",
+      factorRemoved:"驗證器已移除。",removeFail:"移除失敗：",backupFail:"備援 MFA 建立失敗："
     },
     "zh-CN":{
       title:"账户安全与 MFA",subtitle:"每次登录重新确认身份；管理员使用验证器 App 进行第二因素验证。",
@@ -137,7 +159,13 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       enroll:"建立 MFA",code:"输入验证器 6 位数代码",enable:"验证并启用 MFA",challengeNote:"这个账号已设置 MFA。每个新的登录工作阶段都要完成一次第二因素验证，才能进入管理员敏感功能。",
       challenge:"完成二次验证",hSession:"工作阶段安全",policy:"V4.12 使用 server-validated getUser() 重新确认登录身份；管理员页面另检查 MFA AAL2。",
       signout:"登出此设备",rollout:"本版先完成 MFA 设置与前端验证。管理员手机完成 MFA 设置并测试成功后，再进入 V4.12.4，将管理员 Edge Functions 改为后端强制 AAL2，避免尚未设置 MFA 时直接锁住管理员。",
-      enabled:"MFA 已成功启用，这次工作阶段已提升为 AAL2。",verified:"二次验证完成，这次工作阶段已提升为 AAL2。"
+      enabled:"MFA 已成功启用，这次工作阶段已提升为 AAL2。",verified:"二次验证完成，这次工作阶段已提升为 AAL2。",
+      chooseFactor:"选择验证器",backupTitle:"备用验证器",backupNote:"建议新增第二个 TOTP 验证器，放在不同设备或不同验证器 App。主要手机遗失时，可用备用验证器完成 AAL2。",
+      backupEnroll:"新增备用验证器",backupCode:"输入备用验证器 6 位数代码",backupVerify:"验证并启用备用 MFA",
+      backupWarning:"请把备用验证器放在不同设备或安全的不同位置；不要只存在同一支手机。",
+      factorLabel:"验证器",removeFactor:"移除",removeConfirm:"确定要移除此验证器吗？至少保留一个可用的验证器。",
+      lastFactor:"至少要保留一个已验证 MFA，不能移除最后一个。",backupEnabled:"备用 MFA 已成功启用。",
+      factorRemoved:"验证器已移除。",removeFail:"移除失败：",backupFail:"备用 MFA 建立失败："
     },
     "en":{
       title:"Account Security & MFA",subtitle:"Revalidate identity on every sign-in; administrators use an authenticator app as a second factor.",
@@ -153,7 +181,13 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       enroll:"Set up MFA",code:"Enter the 6-digit authenticator code",enable:"Verify & Enable MFA",challengeNote:"MFA is configured for this account. Each new sign-in session must complete the second factor before accessing administrator-sensitive features.",
       challenge:"Complete MFA Verification",hSession:"Session Security",policy:"V4.12 uses server-validated getUser() to revalidate sign-in identity; administrator pages also check MFA AAL2.",
       signout:"Sign Out on This Device",rollout:"V4.12.4 enforces AAL2 for administrator Edge Functions. Administrator-sensitive APIs require MFA before execution.",
-      enabled:"MFA was enabled successfully. This session is now AAL2.",verified:"MFA verification completed. This session is now AAL2."
+      enabled:"MFA was enabled successfully. This session is now AAL2.",verified:"MFA verification completed. This session is now AAL2.",
+      chooseFactor:"Choose authenticator",backupTitle:"Backup Authenticator",backupNote:"Add a second TOTP authenticator on a different device or authenticator app. If your primary phone is lost, the backup factor can still complete AAL2.",
+      backupEnroll:"Add Backup Authenticator",backupCode:"Enter the 6-digit backup authenticator code",backupVerify:"Verify & Enable Backup MFA",
+      backupWarning:"Keep the backup authenticator on a different device or secure location. Do not store both factors only on the same phone.",
+      factorLabel:"Authenticator",removeFactor:"Remove",removeConfirm:"Remove this authenticator? Keep at least one working authenticator.",
+      lastFactor:"You must keep at least one verified MFA factor. The last factor cannot be removed.",backupEnabled:"Backup MFA was enabled successfully.",
+      factorRemoved:"Authenticator removed.",removeFail:"Removal failed: ",backupFail:"Backup MFA setup failed: "
     }
   };
 
@@ -171,6 +205,13 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
     $("recheckBtn").textContent=T("recheck"); $("homeBtn").textContent=T("home"); $("enrollBtn").textContent=T("enroll");
     $("enrollCode").placeholder=T("code"); $("verifyEnrollBtn").textContent=T("enable");
     $("challengeCode").placeholder=T("code"); $("challengeBtn").textContent=T("challenge"); $("signOutBtn").textContent=T("signout");
+    if($("backupTitle")) $("backupTitle").textContent=T("backupTitle");
+    if($("backupNote")) $("backupNote").textContent=T("backupNote");
+    if($("backupEnrollBtn")) $("backupEnrollBtn").textContent=T("backupEnroll");
+    if($("backupCode")) $("backupCode").placeholder=T("backupCode");
+    if($("verifyBackupBtn")) $("verifyBackupBtn").textContent=T("backupVerify");
+    if($("backupWarning")) $("backupWarning").textContent=T("backupWarning");
+    renderVerifiedFactorList();
   }
 
   document.querySelectorAll("[data-lang]").forEach(b=>b.onclick=()=>{lang=b.dataset.lang;applyLang();refresh()});
@@ -206,11 +247,53 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
   $("homeBtn").onclick=()=>location.href="./index.html?v=4124";
   $("recheckBtn").onclick=()=>refresh();
 
+  function renderChallengeFactorSelect(){
+    const sel=$("challengeFactorSelect");
+    if(!sel) return;
+    sel.innerHTML=verifiedFactors.map((f,i)=>`<option value="${f.id}">${T("factorLabel")} ${i+1}</option>`).join("");
+    if(factorId) sel.value=factorId;
+    sel.classList.toggle("hidden",verifiedFactors.length<=1);
+  }
+
+  function renderVerifiedFactorList(){
+    const box=$("verifiedFactorList");
+    if(!box) return;
+    if(!verifiedFactors.length){
+      box.innerHTML="";
+      return;
+    }
+    box.innerHTML=verifiedFactors.map((f,i)=>`
+      <div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;border:1px solid #e1e7ef;border-radius:12px;padding:10px;margin-top:8px;background:#f8fafc">
+        <div><strong>${T("factorLabel")} ${i+1}</strong><div class="note" style="margin-top:3px">TOTP · verified</div></div>
+        <button class="light removeVerifiedFactorBtn" data-factor-id="${f.id}" type="button" ${verifiedFactors.length<=1?"disabled":""} style="min-height:40px;padding:7px 10px">${T("removeFactor")}</button>
+      </div>
+    `).join("");
+    box.querySelectorAll(".removeVerifiedFactorBtn").forEach(btn=>{
+      btn.onclick=()=>removeVerifiedFactor(btn.dataset.factorId);
+    });
+  }
+
+  async function removeVerifiedFactor(id){
+    if(verifiedFactors.length<=1){
+      status("mfaStatus","warn",T("lastFactor"));
+      return;
+    }
+    if(!confirm(T("removeConfirm"))) return;
+    try{
+      const {error}=await sb.auth.mfa.unenroll({factorId:id});
+      if(error) throw error;
+      status("mfaStatus","ok",T("factorRemoved"));
+      await refresh();
+    }catch(e){
+      status("mfaStatus","err",T("removeFail")+(e?.message||String(e)));
+    }
+  }
+
   async function refresh(){
     applyLang();
     status("identityStatus","",T("checking"));
     status("mfaStatus","",T("reading"));
-    $("enrollArea").classList.add("hidden"); $("challengeArea").classList.add("hidden"); $("staleArea").classList.add("hidden"); staleFactorIds=[];
+    $("enrollArea").classList.add("hidden"); $("challengeArea").classList.add("hidden"); $("staleArea").classList.add("hidden"); $("backupArea").classList.add("hidden"); staleFactorIds=[];
     const {data:{user},error:userErr}=await sb.auth.getUser();
     if(userErr||!user){
       status("loginStatus","warn",T("loginReady"));
@@ -228,12 +311,16 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
     const allTotp=(factors?.totp||[]);
     const verified=allTotp.filter(x=>x.status==="verified");
     const unverified=allTotp.filter(x=>x.status!=="verified");
+    verifiedFactors=verified;
     staleFactorIds=unverified.map(x=>x.id).filter(Boolean);
     $("factorCount").textContent=String(verified.length);
     factorId=verified[0]?.id||"";
+    renderChallengeFactorSelect();
+    renderVerifiedFactorList();
 
     if(verified.length && aal?.currentLevel==="aal2"){
       status("mfaStatus","ok",T("aal2"));
+      $("backupArea").classList.remove("hidden");
     }else if(verified.length){
       status("mfaStatus","warn",T("hasFactor"));
       $("challengeArea").classList.remove("hidden");
@@ -262,6 +349,50 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       status("mfaStatus","err",T("clearFail")+(e?.message||String(e)));
     }finally{
       $("clearStaleBtn").disabled=false;
+    }
+  };
+
+  $("backupEnrollBtn").onclick=async()=>{
+    $("backupEnrollBtn").disabled=true;
+    try{
+      const {data:aal,error:aalErr}=await sb.auth.mfa.getAuthenticatorAssuranceLevel();
+      if(aalErr) throw aalErr;
+      if(aal?.currentLevel!=="aal2") throw new Error("AAL2 required");
+      const {data,error}=await sb.auth.mfa.enroll({factorType:"totp"});
+      if(error) throw error;
+      backupEnrollFactorId=data.id;
+      $("backupQrImg").src=data.totp.qr_code;
+      $("backupSecret").textContent="Secret: "+data.totp.secret;
+      $("backupQrWrap").classList.remove("hidden");
+    }catch(e){
+      status("mfaStatus","err",T("backupFail")+(e?.message||String(e)));
+    }finally{
+      $("backupEnrollBtn").disabled=false;
+    }
+  };
+
+  $("verifyBackupBtn").onclick=async()=>{
+    const code=$("backupCode").value.trim();
+    if(!backupEnrollFactorId||!code) return;
+    $("verifyBackupBtn").disabled=true;
+    try{
+      const {data:ch,error:ce}=await sb.auth.mfa.challenge({factorId:backupEnrollFactorId});
+      if(ce) throw ce;
+      const {error:ve}=await sb.auth.mfa.verify({
+        factorId:backupEnrollFactorId,
+        challengeId:ch.id,
+        code
+      });
+      if(ve) throw ve;
+      status("mfaStatus","ok",T("backupEnabled"));
+      $("backupCode").value="";
+      $("backupQrWrap").classList.add("hidden");
+      backupEnrollFactorId="";
+      await refresh();
+    }catch(e){
+      status("mfaStatus","err",T("backupFail")+(e?.message||String(e)));
+    }finally{
+      $("verifyBackupBtn").disabled=false;
     }
   };
 
@@ -295,8 +426,10 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
     if(!factorId||!code)return;
     $("challengeBtn").disabled=true;
     try{
-      const {data:ch,error:ce}=await sb.auth.mfa.challenge({factorId});if(ce)throw ce;
-      const {error:ve}=await sb.auth.mfa.verify({factorId,challengeId:ch.id,code});if(ve)throw ve;
+      const selectedFactorId=$("challengeFactorSelect")?.value||factorId;
+      if(!selectedFactorId) throw new Error("No verified MFA factor available");
+      const {data:ch,error:ce}=await sb.auth.mfa.challenge({factorId:selectedFactorId});if(ce)throw ce;
+      const {error:ve}=await sb.auth.mfa.verify({factorId:selectedFactorId,challengeId:ch.id,code});if(ve)throw ve;
       status("mfaStatus","ok",T("verified"));$("challengeCode").value="";await refresh();
     }catch(e){status("mfaStatus","err",e.message||String(e))}
     finally{$("challengeBtn").disabled=false}
