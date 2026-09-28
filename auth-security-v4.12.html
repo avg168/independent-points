@@ -114,7 +114,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
   </section>
 </main>
 <script>
-/* V4.12.4 Backup MFA Hotfix 15 */
+/* V4.12.4 Backup MFA FriendlyName Hotfix 16 */
 (() => {
   const URL="https://uccexvgqmoxhgykkjdcy.supabase.co";
   const KEY="sb_publishable_FBsN1DYTQMv2_bWhpbXHAA_qdAq7ri7";
@@ -247,10 +247,18 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
   $("homeBtn").onclick=()=>location.href="./index.html?v=4124";
   $("recheckBtn").onclick=()=>refresh();
 
+  function escFactorName(v){
+    return String(v||"").replaceAll("&","&amp;").replaceAll("<","&lt;")
+      .replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
+  }
+
   function renderChallengeFactorSelect(){
     const sel=$("challengeFactorSelect");
     if(!sel) return;
-    sel.innerHTML=verifiedFactors.map((f,i)=>`<option value="${f.id}">${T("factorLabel")} ${i+1}</option>`).join("");
+    sel.innerHTML=verifiedFactors.map((f,i)=>{
+      const label=f.friendly_name||`${T("factorLabel")} ${i+1}`;
+      return `<option value="${f.id}">${escFactorName(label)}</option>`;
+    }).join("");
     if(factorId) sel.value=factorId;
     sel.classList.toggle("hidden",verifiedFactors.length<=1);
   }
@@ -264,7 +272,10 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
     }
     box.innerHTML=verifiedFactors.map((f,i)=>`
       <div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;border:1px solid #e1e7ef;border-radius:12px;padding:10px;margin-top:8px;background:#f8fafc">
-        <div><strong>${T("factorLabel")} ${i+1}</strong><div class="note" style="margin-top:3px">TOTP · verified</div></div>
+        <div>
+          <strong>${escFactorName(f.friendly_name)||`${T("factorLabel")} ${i+1}`}</strong>
+          <div class="note" style="margin-top:3px">TOTP · verified</div>
+        </div>
         <button class="light removeVerifiedFactorBtn" data-factor-id="${f.id}" type="button" ${verifiedFactors.length<=1?"disabled":""} style="min-height:40px;padding:7px 10px">${T("removeFactor")}</button>
       </div>
     `).join("");
@@ -358,14 +369,19 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       const {data:aal,error:aalErr}=await sb.auth.mfa.getAuthenticatorAssuranceLevel();
       if(aalErr) throw aalErr;
       if(aal?.currentLevel!=="aal2") throw new Error("AAL2 required");
-      const {data,error}=await sb.auth.mfa.enroll({factorType:"totp"});
+      const backupFriendlyName=`IPT Backup ${Date.now()}`;
+      const {data,error}=await sb.auth.mfa.enroll({
+        factorType:"totp",
+        friendlyName:backupFriendlyName
+      });
       if(error) throw error;
       backupEnrollFactorId=data.id;
       $("backupQrImg").src=data.totp.qr_code;
       $("backupSecret").textContent="Secret: "+data.totp.secret;
       $("backupQrWrap").classList.remove("hidden");
     }catch(e){
-      status("mfaStatus","err",T("backupFail")+(e?.message||String(e)));
+      const msg=e?.message||String(e);
+      status("mfaStatus","err",T("backupFail")+msg);
     }finally{
       $("backupEnrollBtn").disabled=false;
     }
