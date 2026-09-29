@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Independent Points V4.14.0｜平台 IPT 提領申請測試</title>
+<title>Independent Points V4.14.0 HF1｜平台 IPT 提領申請測試</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
 <style>
 :root{
@@ -93,7 +93,7 @@ h2{margin:0 0 12px;font-size:1.15rem}
 </div>
 
 <header>
-  <span class="badge">V4.14.0 STAGING｜提領申請層</span>
+  <span class="badge">V4.14.0 HF1 STAGING｜提領申請層</span>
   <h1>平台 IPT → Trust Wallet</h1>
   <p>這一版只做申請、鎖定與取消；不會 Mint、不會送鏈、不會呼叫 Trust Wallet 簽署。</p>
 </header>
@@ -126,6 +126,19 @@ h2{margin:0 0 12px;font-size:1.15rem}
     <div class="note">
       提領只能送到會員本人已驗證的 Primary Wallet；此頁不能臨時輸入其他 0x 地址。
     </div>
+  </section>
+
+  <section>
+    <h2>提領安全驗證</h2>
+    <div class="row">
+      <div>
+        <div class="title">目前 MFA 驗證等級</div>
+        <div class="meta">提領屬於高風險資產操作，必須完成 AAL2。</div>
+      </div>
+      <div id="mfaLevel" class="chip">檢查中</div>
+    </div>
+    <button id="mfaBtn" class="btn light hidden" type="button">前往帳戶安全完成 MFA</button>
+    <div id="mfaStatus" class="status info">正在確認 MFA 狀態。</div>
   </section>
 
   <section>
@@ -177,6 +190,8 @@ h2{margin:0 0 12px;font-size:1.15rem}
 
   let data=null;
   let busy=false;
+  let mfaReady=false;
+  let lastRequestError="";
 
   function deviceToken(){
     const key="ipt_trusted_device_token_v1";
@@ -243,6 +258,43 @@ h2{margin:0 0 12px;font-size:1.15rem}
     $("authOverlay").classList.add("hidden");
   }
 
+  async function checkMfa(){
+    try{
+      const [{data:aal,error:aalErr},{data:factors,error:fErr}]=await Promise.all([
+        sb.auth.mfa.getAuthenticatorAssuranceLevel(),
+        sb.auth.mfa.listFactors()
+      ]);
+      if(aalErr) throw aalErr;
+      if(fErr) throw fErr;
+
+      const verified=(factors?.totp||[]).filter(x=>x.status==="verified");
+      const level=aal?.currentLevel||"aal1";
+      mfaReady=verified.length>0 && level==="aal2";
+
+      $("mfaLevel").textContent=level.toUpperCase();
+      $("mfaLevel").className="chip "+(mfaReady?"":"pending");
+
+      if(mfaReady){
+        $("mfaStatus").className="status ok";
+        $("mfaStatus").textContent="MFA AAL2 已完成，可以建立提領申請。";
+        $("mfaBtn").classList.add("hidden");
+      }else if(!verified.length){
+        $("mfaStatus").className="status warn";
+        $("mfaStatus").textContent="尚未設定 TOTP MFA。提領前必須先設定並完成 MFA。";
+        $("mfaBtn").classList.remove("hidden");
+      }else{
+        $("mfaStatus").className="status warn";
+        $("mfaStatus").textContent="目前工作階段仍是 AAL1。請先完成本次 MFA AAL2 驗證。";
+        $("mfaBtn").classList.remove("hidden");
+      }
+    }catch(e){
+      mfaReady=false;
+      $("mfaStatus").className="status err";
+      $("mfaStatus").textContent="無法確認 MFA 狀態："+(e?.message||String(e));
+      $("mfaBtn").classList.remove("hidden");
+    }
+  }
+
   function render(){
     const available=Number(data?.platform_ipt?.available_units||0);
     const locked=Number(data?.platform_ipt?.locked_units||0);
@@ -267,9 +319,15 @@ h2{margin:0 0 12px;font-size:1.15rem}
     const verified=!!data?.chain_wallet?.canonical_verified;
     const valid=Number.isSafeInteger(units)&&units>0;
 
-    $("requestBtn").disabled=busy || !verified || !valid || units>available;
+    $("requestBtn").disabled=busy || !mfaReady || !verified || !valid || units>available;
 
-    if(!verified){
+    if(lastRequestError){
+      $("requestStatus").className="status err";
+      $("requestStatus").textContent=lastRequestError;
+    }else if(!mfaReady){
+      $("requestStatus").className="status warn";
+      $("requestStatus").textContent="提領前必須完成 MFA AAL2。請先到上方完成安全驗證。";
+    }else if(!verified){
       $("requestStatus").className="status warn";
       $("requestStatus").textContent="目前沒有已驗證的 Sepolia Primary Wallet，不能建立提領申請。";
     }else if(!valid){
@@ -328,6 +386,7 @@ h2{margin:0 0 12px;font-size:1.15rem}
       if(error) throw error;
       if(res?.error) throw new Error(res.error);
       data=res;
+      await checkMfa();
       render();
     }catch(e){
       console.error(e);
@@ -340,8 +399,14 @@ h2{margin:0 0 12px;font-size:1.15rem}
   }
 
   async function requestWithdrawal(){
+    lastRequestError="";
     const units=parseIptUnits($("withdrawAmount").value);
     const available=Number(data?.platform_ipt?.available_units||0);
+    if(!mfaReady){
+      lastRequestError="目前工作階段不是 AAL2。請先完成 MFA 再申請提領。";
+      renderRequestState();
+      return;
+    }
     if(!Number.isSafeInteger(units)||units<=0) return;
     if(units>available){
       alert("可用平台 IPT 不足。");
@@ -377,6 +442,7 @@ h2{margin:0 0 12px;font-size:1.15rem}
       if(res?.error) throw new Error(res.error);
 
       clearPending();
+      lastRequestError="";
       $("requestStatus").className="status ok";
       $("requestStatus").textContent="提領申請已建立。此筆 IPT 現在是 locked，尚未上鏈。";
       busy=false;
@@ -384,12 +450,12 @@ h2{margin:0 0 12px;font-size:1.15rem}
     }catch(e){
       console.error(e);
       const msg=e?.message||String(e);
-      $("requestStatus").className="status err";
-      $("requestStatus").textContent=
-        "申請尚未完成："+msg+
-        "。若系統要求 MFA，請完成 AAL2 後再回來；同一請求會使用防重複識別碼。";
+      lastRequestError=
+        "申請未建立："+msg+
+        "。目前沒有扣款或鎖定；若需要 MFA，請完成 AAL2 後再試。";
       busy=false;
       await loadSummary();
+      renderRequestState();
     }finally{
       busy=false;
       renderRequestState();
@@ -454,7 +520,10 @@ h2{margin:0 0 12px;font-size:1.15rem}
   $("authBtn").addEventListener("click",()=>{
     location.href="https://avg168.github.io/independent-points/staging/auth-security-v4.13.4.2.html";
   });
-  $("withdrawAmount").addEventListener("input",renderRequestState);
+  $("mfaBtn").addEventListener("click",()=>{
+    location.href="https://avg168.github.io/independent-points/staging/auth-security-v4.13.4.2.html";
+  });
+  $("withdrawAmount").addEventListener("input",()=>{lastRequestError="";renderRequestState()});
   $("requestBtn").addEventListener("click",requestWithdrawal);
 
   boot();
