@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Independent Points V4.14.0 HF4｜提領 MFA 驗證</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
+<style>
+:root{
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;
+  color:#172033;background:#f4f7fb
+}
+*{box-sizing:border-box}
+body{margin:0;background:#f4f7fb}
+header{
+  background:#10243d;color:#fff;padding:26px 18px 30px;
+  border-radius:0 0 28px 28px
+}
+.badge{
+  display:inline-block;padding:5px 10px;border-radius:999px;
+  background:rgba(255,255,255,.14);font-size:.78rem;font-weight:900
+}
+h1{margin:10px 0 6px;font-size:1.55rem}
+header p{margin:0;line-height:1.6;opacity:.9}
+main{max-width:680px;margin:auto;padding:16px 14px 60px}
+.card{
+  background:#fff;border:1px solid #dbe3ed;border-radius:18px;
+  padding:18px;box-shadow:0 4px 18px rgba(24,42,68,.05)
+}
+.status{padding:13px 14px;border-radius:13px;line-height:1.6;margin:12px 0}
+.info{background:#eef4ff;border-left:5px solid #3777d6}
+.ok{background:#eaf8f0;border-left:5px solid #18866d}
+.warn{background:#fff6df;border-left:5px solid #d49a0a}
+.err{background:#ffecec;border-left:5px solid #c93030}
+label{display:block;font-weight:850;margin:12px 0 7px}
+input,select,button{
+  width:100%;min-height:50px;border-radius:12px;border:1px solid #cbd5e1;
+  padding:11px 12px;font:inherit
+}
+button{font-weight:900;cursor:pointer}
+.primary{background:#176c59;color:#fff;border-color:#176c59}
+.light{background:#fff;color:#29445f}
+.note{font-size:.84rem;color:#64748b;line-height:1.65;margin-top:10px}
+.hidden{display:none!important}
+.meta{
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  word-break:break-all;font-size:.82rem;color:#64748b
+}
+</style>
+</head>
+<body>
+<header>
+  <span class="badge">V4.14.0 HF4｜提領安全驗證</span>
+  <h1>完成 MFA AAL2</h1>
+  <p>提領上鏈屬高風險資產操作，必須用目前這個 Session 完成 TOTP 驗證。</p>
+</header>
+
+<main>
+  <section class="card">
+    <div id="identityStatus" class="status info">正在確認目前登入帳號…</div>
+    <div id="userMeta" class="meta"></div>
+
+    <div id="aalStatus" class="status info">正在讀取目前 Access Token 的 AAL…</div>
+
+    <div id="challengeArea" class="hidden">
+      <label for="factorSelect">驗證器</label>
+      <select id="factorSelect"></select>
+
+      <label for="code">6 位數 TOTP 驗證碼</label>
+      <input id="code" inputmode="numeric" autocomplete="one-time-code"
+             maxlength="8" placeholder="輸入驗證器代碼">
+
+      <button id="verifyBtn" class="primary" type="button" style="margin-top:12px">
+        完成 MFA 並返回提領頁
+      </button>
+    </div>
+
+    <button id="backBtn" class="light" type="button" style="margin-top:12px">
+      返回提領頁
+    </button>
+
+    <div class="note">
+      驗證成功後，系統會重新取得 Session，並用新的 Access Token 再確認一次 AAL2。
+      只有確認成功才會返回提領頁。
+    </div>
+  </section>
+</main>
+
+<script>
+(() => {
+  "use strict";
+
+  const URL="https://uccexvgqmoxhgykkjdcy.supabase.co";
+  const KEY="sb_publishable_FBsN1DYTQMv2_bWhpbXHAA_qdAq7ri7";
+  const RETURN_URL="https://avg168.github.io/independent-points/staging/withdrawal-v4.14.0-hf4.html?v=4140hf4";
+
+  const sb=window.supabase.createClient(URL,KEY,{
+    auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
+  });
+  const $=id=>document.getElementById(id);
+
+  let factors=[];
+
+  function esc(v){
+    return String(v||"").replaceAll("&","&amp;").replaceAll("<","&lt;")
+      .replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
+  }
+
+  function decodeJwtPayload(token){
+    const part=String(token||"").split(".")[1]||"";
+    if(!part) throw new Error("Access Token 格式不正確");
+    const b64=part.replace(/-/g,"+").replace(/_/g,"/");
+    const padded=b64+"=".repeat((4-b64.length%4)%4);
+    const json=decodeURIComponent(
+      atob(padded).split("").map(c=>"%"+c.charCodeAt(0).toString(16).padStart(2,"0")).join("")
+    );
+    return JSON.parse(json);
+  }
+
+  async function currentAal(){
+    const {data:{session},error:sessionErr}=await sb.auth.getSession();
+    if(sessionErr) throw sessionErr;
+    if(!session?.access_token) throw new Error("沒有有效 Access Token");
+
+    const {data,error}=await sb.auth.mfa.getAuthenticatorAssuranceLevel(session.access_token);
+    if(error) throw error;
+
+    return {
+      level:data?.currentLevel||"aal1",
+      session
+    };
+  }
+
+  async function boot(){
+    try{
+      const {data:{user},error:userErr}=await sb.auth.getUser();
+      if(userErr||!user){
+        $("identityStatus").className="status err";
+        $("identityStatus").textContent="目前沒有有效會員登入。請先回帳戶安全登入。";
+        return;
+      }
+
+      $("identityStatus").className="status ok";
+      $("identityStatus").textContent="會員身分已由伺服器確認。";
+      $("userMeta").textContent="User ID："+user.id;
+
+      const [{data:f,error:fErr},aal]=await Promise.all([
+        sb.auth.mfa.listFactors(),
+        currentAal()
+      ]);
+      if(fErr) throw fErr;
+
+      factors=(f?.totp||[]).filter(x=>x.status==="verified");
+
+      if(aal.level==="aal2"){
+        $("aalStatus").className="status ok";
+        $("aalStatus").textContent="目前 Access Token 已是 AAL2，即將返回提領頁。";
+        setTimeout(()=>location.replace(RETURN_URL),900);
+        return;
+      }
+
+      $("aalStatus").className="status warn";
+      $("aalStatus").textContent="目前 Access Token 是 AAL1。請完成一次 TOTP 驗證。";
+
+      if(!factors.length){
+        $("aalStatus").className="status err";
+        $("aalStatus").textContent="這個帳號沒有 verified TOTP 驗證器，請先到帳戶安全設定 MFA。";
+        return;
+      }
+
+      $("factorSelect").innerHTML=factors.map((f,i)=>
+        `<option value="${f.id}">${esc(f.friendly_name)||`驗證器 ${i+1}`}</option>`
+      ).join("");
+
+      $("challengeArea").classList.remove("hidden");
+    }catch(e){
+      console.error(e);
+      $("aalStatus").className="status err";
+      $("aalStatus").textContent="讀取 MFA 狀態失敗："+(e?.message||String(e));
+    }
+  }
+
+  $("verifyBtn").addEventListener("click",async()=>{
+    const factorId=$("factorSelect").value;
+    const code=$("code").value.trim();
+
+    if(!factorId||!/^\d{6,8}$/.test(code)){
+      $("aalStatus").className="status warn";
+      $("aalStatus").textContent="請輸入正確的驗證器代碼。";
+      return;
+    }
+
+    $("verifyBtn").disabled=true;
+    $("aalStatus").className="status info";
+    $("aalStatus").textContent="正在驗證 TOTP 並更新 Session…";
+
+    try{
+      const {data:challenge,error:challengeErr}=await sb.auth.mfa.challenge({factorId});
+      if(challengeErr) throw challengeErr;
+
+      const {data:verified,error:verifyErr}=await sb.auth.mfa.verify({
+        factorId,
+        challengeId:challenge.id,
+        code
+      });
+      if(verifyErr) throw verifyErr;
+      if(!verified?.access_token||!verified?.refresh_token){
+        throw new Error("MFA verify 沒有回傳新的 Session Token");
+      }
+
+      const verifyClaims=decodeJwtPayload(verified.access_token);
+      if(verifyClaims.aal!=="aal2"){
+        throw new Error("MFA verify 回傳的 Access Token 不是 aal2");
+      }
+
+      // mfa.verify() already saves the new session internally.
+      // setSession again with the exact returned tokens to make persistence explicit.
+      const {data:setData,error:setErr}=await sb.auth.setSession({
+        access_token:verified.access_token,
+        refresh_token:verified.refresh_token
+      });
+      if(setErr) throw setErr;
+
+      const persistedToken=setData?.session?.access_token||verified.access_token;
+      const persistedClaims=decodeJwtPayload(persistedToken);
+      if(persistedClaims.aal!=="aal2"){
+        throw new Error("寫回瀏覽器後的 Access Token 不是 aal2");
+      }
+
+      const {data:aal,error:aalErr}=await sb.auth.mfa.getAuthenticatorAssuranceLevel(persistedToken);
+      if(aalErr) throw aalErr;
+      if(aal?.currentLevel!=="aal2"){
+        throw new Error("Supabase 仍未確認新的 Access Token 為 AAL2");
+      }
+
+      $("aalStatus").className="status ok";
+      $("aalStatus").textContent="MFA AAL2 已完成，新 Access Token 已明確寫回。正在返回提領頁…";
+      $("code").value="";
+      setTimeout(()=>location.replace(RETURN_URL),900);
+    }catch(e){
+      console.error(e);
+      $("aalStatus").className="status err";
+      $("aalStatus").textContent="MFA 驗證失敗："+(e?.message||String(e));
+    }finally{
+      $("verifyBtn").disabled=false;
+    }
+  });
+
+  $("backBtn").addEventListener("click",()=>location.href=RETURN_URL);
+
+  boot();
+})();
+</script>
+</body>
+</html>

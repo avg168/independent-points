@@ -1,0 +1,616 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Independent Points V4.14.0 HF4｜平台 IPT 提領申請測試</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
+<style>
+:root{
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;
+  color:#172033;background:#f4f7fb;
+  --navy:#10243d;--blue:#1765d8;--green:#18866d;--line:#dbe3ed;
+  --muted:#687486;--bg:#f4f7fb
+}
+*{box-sizing:border-box;min-width:0}
+html,body{width:100%;max-width:100%;overflow-x:hidden}
+body{margin:0;background:var(--bg);padding-bottom:36px}
+button,input{font:inherit}
+button{touch-action:manipulation;-webkit-tap-highlight-color:transparent;cursor:pointer}
+button:disabled{opacity:.45;cursor:not-allowed}
+header{
+  background:linear-gradient(145deg,#10243d,#174e87);
+  color:#fff;padding:24px 18px 28px;border-radius:0 0 28px 28px
+}
+.badge{
+  display:inline-flex;padding:5px 10px;border-radius:999px;
+  background:rgba(255,255,255,.14);font-size:.78rem;font-weight:900
+}
+header h1{margin:10px 0 6px;font-size:1.55rem}
+header p{margin:0;line-height:1.6;opacity:.9}
+main{max-width:720px;margin:auto;padding:14px 12px}
+section{
+  background:#fff;border:1px solid var(--line);border-radius:18px;
+  padding:16px;margin:12px 0;box-shadow:0 3px 14px rgba(24,42,68,.04)
+}
+h2{margin:0 0 12px;font-size:1.15rem}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.card{padding:14px;border:1px solid var(--line);border-radius:15px;background:#f8fafc}
+.card .k{font-size:.8rem;color:var(--muted);font-weight:800}
+.card .v{font-size:1.7rem;font-weight:900;margin-top:6px}
+.card.available{background:#edf7ff}
+.card.locked{background:#fff8e8}
+.btn{width:100%;border:0;border-radius:13px;padding:13px 10px;font-weight:850;min-height:48px}
+.primary{background:var(--blue);color:#fff}
+.success{background:var(--green);color:#fff}
+.light{background:#eef3f8;color:#17365d}
+.danger{background:#fff0f0;color:#9b2727;border:1px solid #efcccc}
+.status{padding:12px 13px;border-radius:12px;line-height:1.55;margin:10px 0}
+.info{background:#eef4ff;border-left:5px solid #3777d6}
+.ok{background:#eaf8f0;border-left:5px solid #18866d}
+.warn{background:#fff6df;border-left:5px solid #d49a0a}
+.err{background:#ffecec;border-left:5px solid #c93030}
+.field label{display:block;font-weight:850;margin:10px 0 7px}
+.field input{
+  width:100%;border:1px solid #cbd6e2;border-radius:12px;
+  padding:14px;background:#fff;font-size:1.05rem
+}
+.wallet{
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  word-break:break-word;overflow-wrap:anywhere
+}
+.note{font-size:.85rem;color:var(--muted);line-height:1.65}
+.row{
+  display:grid;grid-template-columns:1fr auto;gap:10px;
+  padding:11px 0;border-bottom:1px solid #edf0f4
+}
+.row:last-child{border-bottom:0}
+.row .title{font-weight:850}
+.row .meta{font-size:.78rem;color:var(--muted);margin-top:4px;line-height:1.45}
+.amount{font-weight:900;text-align:right}
+.chip{
+  display:inline-block;padding:4px 8px;border-radius:999px;
+  font-size:.72rem;font-weight:850;background:#eef3f8;color:#29445f
+}
+.pending{background:#fff3d7;color:#7e5a08}
+.cancelled{background:#eef3f8;color:#526170}
+#authOverlay{
+  position:fixed;inset:0;background:rgba(11,26,45,.96);z-index:99999;
+  display:flex;align-items:center;justify-content:center;padding:20px
+}
+#authCard{width:min(430px,100%);background:#fff;border-radius:20px;padding:20px}
+.hidden{display:none!important}
+@media(max-width:480px){.grid2{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div id="authOverlay">
+  <div id="authCard">
+    <h2>正在驗證會員登入</h2>
+    <p id="authMsg">正在確認會員身分與受信任裝置，請稍候。</p>
+    <button id="authBtn" class="btn primary hidden" type="button">前往帳戶安全</button>
+  </div>
+</div>
+
+<header>
+  <span class="badge">V4.14.0 HF4 STAGING｜提領申請層</span>
+  <h1>平台 IPT → Trust Wallet</h1>
+  <p>這一版只做申請、鎖定與取消；不會 Mint、不會送鏈、不會呼叫 Trust Wallet 簽署。</p>
+</header>
+
+<main>
+  <section>
+    <h2>平台 IPT</h2>
+    <div class="grid2">
+      <div class="card available">
+        <div class="k">可用</div>
+        <div id="availableBalance" class="v">— IPT</div>
+      </div>
+      <div class="card locked">
+        <div class="k">鎖定</div>
+        <div id="lockedBalance" class="v">— IPT</div>
+      </div>
+    </div>
+    <div id="balanceStatus" class="status info">尚未讀取。</div>
+  </section>
+
+  <section>
+    <h2>鏈上收款錢包</h2>
+    <div class="row">
+      <div>
+        <div class="title">Ethereum Sepolia 主錢包</div>
+        <div id="chainWalletAddress" class="meta wallet">—</div>
+      </div>
+      <div id="chainWalletVerified" class="chip">尚未確認</div>
+    </div>
+    <div class="note">
+      提領只能送到會員本人已驗證的 Primary Wallet；此頁不能臨時輸入其他 0x 地址。
+    </div>
+  </section>
+
+  <section>
+    <h2>提領安全驗證</h2>
+    <div class="row">
+      <div>
+        <div class="title">目前 MFA 驗證等級</div>
+        <div class="meta">提領屬於高風險資產操作，必須完成 AAL2。</div>
+      </div>
+      <div id="mfaLevel" class="chip">檢查中</div>
+    </div>
+    <button id="mfaBtn" class="btn light hidden" type="button">前往帳戶安全完成 MFA</button>
+    <div id="mfaStatus" class="status info">正在確認 MFA 狀態。</div>
+  </section>
+
+  <section>
+    <h2>申請提領</h2>
+    <div class="status warn">
+      這一版申請成功後只會把 IPT 從「可用」移到「鎖定」。不會上鏈，也不會增加鏈上 IPT。
+    </div>
+
+    <div class="field">
+      <label for="withdrawAmount">提領數量（平台 IPT）</label>
+      <input id="withdrawAmount" type="text" inputmode="decimal" value="10.00" autocomplete="off">
+    </div>
+
+    <button id="requestBtn" class="btn primary" type="button" disabled>申請提領並鎖定</button>
+    <div id="requestStatus" class="status info">
+      提領申請屬高風險操作，後端會要求 Trusted Device + TOTP MFA + AAL2。
+    </div>
+  </section>
+
+  <section>
+    <h2>提領申請紀錄</h2>
+    <div id="withdrawalList" class="note">尚未讀取。</div>
+  </section>
+
+  <section>
+    <h2>本版安全範圍</h2>
+    <div class="status ok">
+      ✓ 不保存 Owner 私鑰<br>
+      ✓ 不自動 Mint<br>
+      ✓ 不送 Sepolia 交易<br>
+      ✓ pending 可由會員取消並全額解鎖
+    </div>
+    <p class="note">
+      真正的 Trust Wallet Owner Mint 與鏈上確認會留到 V4.14.1，等本版鎖定／取消驗收通過後才開發。
+    </p>
+  </section>
+</main>
+
+<script>
+(() => {
+  "use strict";
+
+  const URL="https://uccexvgqmoxhgykkjdcy.supabase.co";
+  const KEY="sb_publishable_FBsN1DYTQMv2_bWhpbXHAA_qdAq7ri7";
+  const WITHDRAWAL_URL=URL+"/functions/v1/platform-withdrawal";
+  const sb=window.supabase.createClient(URL,KEY,{
+    auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
+  });
+  const $=id=>document.getElementById(id);
+
+  let data=null;
+  let busy=false;
+  let mfaReady=false;
+  let lastRequestError="";
+
+  function deviceToken(){
+    const key="ipt_trusted_device_token_v1";
+    try{
+      let token=localStorage.getItem(key)||"";
+      if(/^[A-Za-z0-9_-]{32,256}$/.test(token)) return token;
+      const bytes=new Uint8Array(32);
+      crypto.getRandomValues(bytes);
+      token=Array.from(bytes,b=>b.toString(16).padStart(2,"0")).join("");
+      localStorage.setItem(key,token);
+      return token;
+    }catch(_){return ""}
+  }
+
+  function deviceName(){
+    const ua=navigator.userAgent||"";
+    if(/Android/i.test(ua)) return "Android 裝置";
+    if(/iPhone|iPad|iPod/i.test(ua)) return "iPhone / iPad";
+    return "瀏覽器裝置";
+  }
+
+  function fmtUnits(units){
+    return (Number(units||0)/100).toLocaleString("zh-TW",{
+      minimumFractionDigits:2,maximumFractionDigits:2
+    });
+  }
+
+  function fmtTime(v){
+    if(!v) return "";
+    try{return new Date(v).toLocaleString("zh-TW",{hour12:false})}catch(_){return String(v)}
+  }
+
+  function parseIptUnits(v){
+    const raw=String(v||"").trim().replace(/,/g,"");
+    if(!/^\d+(?:\.\d{1,2})?$/.test(raw)) return null;
+    const [whole,frac=""]=raw.split(".");
+    const units=Number(whole)*100+Number((frac+"00").slice(0,2));
+    return Number.isSafeInteger(units)&&units>0?units:null;
+  }
+
+  function pendingKey(units){
+    const k="ipt_v4140_pending_withdrawal";
+    try{
+      const old=JSON.parse(sessionStorage.getItem(k)||"null");
+      if(old && Number(old.units)===units && typeof old.key==="string" && old.key.length>=16){
+        return old.key;
+      }
+    }catch(_){}
+    const key="iptwithdraw_"+Date.now()+"_"+crypto.randomUUID();
+    try{sessionStorage.setItem(k,JSON.stringify({units,key}))}catch(_){}
+    return key;
+  }
+
+  function clearPending(){
+    try{sessionStorage.removeItem("ipt_v4140_pending_withdrawal")}catch(_){}
+  }
+
+  function showAuth(msg){
+    $("authMsg").textContent=msg;
+    $("authBtn").classList.remove("hidden");
+  }
+
+  function hideAuth(){
+    $("authOverlay").classList.add("hidden");
+  }
+
+  function decodeJwtPayload(token){
+    const part=String(token||"").split(".")[1]||"";
+    if(!part) throw new Error("Access Token 格式不正確");
+    const b64=part.replace(/-/g,"+").replace(/_/g,"/");
+    const padded=b64+"=".repeat((4-b64.length%4)%4);
+    const json=decodeURIComponent(
+      atob(padded).split("").map(c=>"%"+c.charCodeAt(0).toString(16).padStart(2,"0")).join("")
+    );
+    return JSON.parse(json);
+  }
+
+  async function currentAccessToken(requireAal2=false){
+    const {data:{session},error}=await sb.auth.getSession();
+    if(error) throw error;
+    if(!session?.access_token) throw new Error("沒有有效 Access Token");
+
+    const token=session.access_token;
+    const claims=decodeJwtPayload(token);
+    const now=Math.floor(Date.now()/1000);
+
+    if(Number(claims.exp||0)<=now){
+      throw new Error("Access Token 已過期，請重新登入");
+    }
+
+    if(requireAal2 && claims.aal!=="aal2"){
+      throw new Error("目前送出的 JWT 仍是 "+String(claims.aal||"aal1")+"，不是 aal2");
+    }
+
+    return {token,claims,session};
+  }
+
+  async function currentAal2Token(){
+    const current=await currentAccessToken(true);
+
+    // Server-validated AAL check for this exact JWT.
+    const {data:aal,error}=await sb.auth.mfa.getAuthenticatorAssuranceLevel(current.token);
+    if(error) throw error;
+    if(aal?.currentLevel!=="aal2"){
+      throw new Error("Supabase 驗證這顆 JWT 仍不是 AAL2");
+    }
+
+    return current;
+  }
+
+  async function callWithdrawal(body,{requireAal2=false}={}){
+    const current=requireAal2
+      ? await currentAal2Token()
+      : await currentAccessToken(false);
+
+    const resp=await fetch(WITHDRAWAL_URL,{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        "apikey":KEY,
+        "Authorization":"Bearer "+current.token
+      },
+      body:JSON.stringify(body)
+    });
+
+    const text=await resp.text();
+    let payload={};
+    try{ payload=text?JSON.parse(text):{}; }
+    catch(_){ payload={error:text||("HTTP "+resp.status)}; }
+
+    if(!resp.ok){
+      const parts=[
+        payload?.error||("HTTP "+resp.status),
+        payload?.code?("code="+payload.code):"",
+        payload?.current_level?("current_level="+payload.current_level):""
+      ].filter(Boolean);
+      throw new Error(parts.join("｜"));
+    }
+
+    if(payload?.error) throw new Error(payload.error);
+    return payload;
+  }
+
+  async function checkMfa(){
+    try{
+      const current=await currentAccessToken(false);
+      const level=String(current.claims?.aal||"aal1");
+      mfaReady=false;
+
+      if(level==="aal2"){
+        const {data:aal,error}=await sb.auth.mfa.getAuthenticatorAssuranceLevel(current.token);
+        if(error) throw error;
+        mfaReady=aal?.currentLevel==="aal2";
+      }
+
+      $("mfaLevel").textContent=(mfaReady?"AAL2":level.toUpperCase());
+      $("mfaLevel").className="chip "+(mfaReady?"":"pending");
+
+      if(mfaReady){
+        $("mfaStatus").className="status ok";
+        $("mfaStatus").textContent="目前真正要送出的 JWT 已確認為 AAL2，可以建立提領申請。";
+        $("mfaBtn").classList.add("hidden");
+      }else{
+        $("mfaStatus").className="status warn";
+        $("mfaStatus").textContent="目前真正要送出的 JWT 不是 AAL2。請先完成專用 TOTP 驗證。";
+        $("mfaBtn").classList.remove("hidden");
+      }
+
+      return mfaReady;
+    }catch(e){
+      mfaReady=false;
+      $("mfaStatus").className="status err";
+      $("mfaStatus").textContent="無法確認目前 JWT AAL："+(e?.message||String(e));
+      $("mfaBtn").classList.remove("hidden");
+      return false;
+    }
+  }
+
+  function render(){
+    const available=Number(data?.platform_ipt?.available_units||0);
+    const locked=Number(data?.platform_ipt?.locked_units||0);
+    $("availableBalance").textContent=fmtUnits(available)+" IPT";
+    $("lockedBalance").textContent=fmtUnits(locked)+" IPT";
+    $("balanceStatus").className="status ok";
+    $("balanceStatus").textContent="平台 IPT 已更新。鎖定餘額不能再用於平台轉帳或再次提領。";
+
+    const cw=data?.chain_wallet;
+    $("chainWalletAddress").textContent=cw?.wallet_address||"尚未綁定 Sepolia Primary Wallet";
+    const verified=!!cw?.canonical_verified;
+    $("chainWalletVerified").textContent=verified?"已驗證":"未驗證";
+    $("chainWalletVerified").className="chip "+(verified?"":"pending");
+
+    renderRequestState();
+    renderWithdrawals();
+  }
+
+  function renderRequestState(){
+    const units=parseIptUnits($("withdrawAmount").value);
+    const available=Number(data?.platform_ipt?.available_units||0);
+    const verified=!!data?.chain_wallet?.canonical_verified;
+    const valid=Number.isSafeInteger(units)&&units>0;
+
+    $("requestBtn").disabled=busy || !mfaReady || !verified || !valid || units>available;
+
+    if(lastRequestError){
+      $("requestStatus").className="status err";
+      $("requestStatus").textContent=lastRequestError;
+    }else if(!mfaReady){
+      $("requestStatus").className="status warn";
+      $("requestStatus").textContent="提領前必須完成 MFA AAL2。請先到上方完成安全驗證。";
+    }else if(!verified){
+      $("requestStatus").className="status warn";
+      $("requestStatus").textContent="目前沒有已驗證的 Sepolia Primary Wallet，不能建立提領申請。";
+    }else if(!valid){
+      $("requestStatus").className="status warn";
+      $("requestStatus").textContent="請輸入大於 0、最多兩位小數的 IPT 數量。";
+    }else if(units>available){
+      $("requestStatus").className="status warn";
+      $("requestStatus").textContent="可用平台 IPT 不足。目前可用 "+fmtUnits(available)+" IPT。";
+    }else{
+      $("requestStatus").className="status info";
+      $("requestStatus").textContent=
+        "將申請 "+fmtUnits(units)+" IPT，成功後改為鎖定，等待後續管理員／鏈上流程。";
+    }
+  }
+
+  function renderWithdrawals(){
+    const rows=data?.withdrawals||[];
+    if(!rows.length){
+      $("withdrawalList").innerHTML='<div class="note">目前沒有提領申請。</div>';
+      return;
+    }
+
+    $("withdrawalList").innerHTML=rows.map(w=>{
+      const canCancel=w.status==="pending";
+      const chipClass=w.status==="pending"?"pending":(w.status==="cancelled"?"cancelled":"");
+      return `<div class="row">
+        <div>
+          <div class="title">${fmtUnits(w.ipt_units)} IPT
+            <span class="chip ${chipClass}">${w.status}</span>
+          </div>
+          <div class="meta">
+            ${fmtTime(w.requested_at)}<br>
+            ${w.wallet_address}<br>
+            ID：${w.id}
+          </div>
+        </div>
+        <div>
+          ${canCancel?`<button class="btn danger cancelBtn" data-id="${w.id}" type="button">取消</button>`:""}
+        </div>
+      </div>`;
+    }).join("");
+
+    document.querySelectorAll(".cancelBtn").forEach(btn=>{
+      btn.addEventListener("click",()=>cancelWithdrawal(btn.dataset.id));
+    });
+  }
+
+  async function loadSummary(){
+    if(busy) return;
+    busy=true;
+    $("requestBtn").disabled=true;
+    try{
+      const res=await callWithdrawal({action:"summary"});
+      data=res;
+      await checkMfa();
+      render();
+    }catch(e){
+      console.error(e);
+      $("balanceStatus").className="status err";
+      $("balanceStatus").textContent="讀取提領資料失敗："+(e?.message||String(e));
+    }finally{
+      busy=false;
+      renderRequestState();
+    }
+  }
+
+  async function requestWithdrawal(){
+    lastRequestError="";
+
+    try{
+      await currentAal2Token();
+    }catch(e){
+      lastRequestError="送出前 JWT 驗證失敗："+(e?.message||String(e));
+      await checkMfa();
+      renderRequestState();
+      return;
+    }
+
+    const units=parseIptUnits($("withdrawAmount").value);
+    const available=Number(data?.platform_ipt?.available_units||0);
+    if(!Number.isSafeInteger(units)||units<=0) return;
+    if(units>available){
+      alert("可用平台 IPT 不足。");
+      return;
+    }
+    if(!data?.chain_wallet?.canonical_verified){
+      alert("需要已驗證的 Sepolia Primary Wallet。");
+      return;
+    }
+
+    const amount=fmtUnits(units);
+    const address=data.chain_wallet.wallet_address;
+    if(!confirm(
+      `確認建立提領申請？\n\n`+
+      `數量：${amount} 平台 IPT\n`+
+      `目的錢包：${address}\n`+
+      `網路：Ethereum Sepolia\n\n`+
+      `此步只會鎖定平台 IPT，不會 Mint、不會送出鏈上交易。`
+    )) return;
+
+    busy=true;
+    $("requestBtn").disabled=true;
+    $("requestStatus").className="status info";
+    $("requestStatus").textContent="正在建立提領申請並鎖定平台 IPT…";
+
+    const key=pendingKey(units);
+
+    try{
+      // Re-check after confirmation.
+      await currentAal2Token();
+
+      // HF4: database-level MFA enforcement.
+      // Postgres validates auth.uid(), auth.jwt()->>'aal' = 'aal2',
+      // Trusted Device, then calls the original atomic lock function.
+      const {data:rpcResult,error:rpcError}=await sb.rpc(
+        "platform_request_ipt_withdrawal_member",
+        {
+          p_ipt_units:units,
+          p_idempotency_key:key
+        }
+      );
+      if(rpcError) throw rpcError;
+      const res={ok:true,version:"V4.14.0-HF4",result:rpcResult};
+
+      clearPending();
+      lastRequestError="";
+      $("requestStatus").className="status ok";
+      $("requestStatus").textContent="提領申請已建立。資料庫已確認 AAL2，此筆 IPT 現在是 locked，尚未上鏈。";
+      busy=false;
+      await loadSummary();
+    }catch(e){
+      console.error(e);
+      const msg=e?.message||String(e);
+      lastRequestError=
+        "申請未建立："+msg+
+        "。目前沒有扣款或鎖定；若需要 MFA，請完成 AAL2 後再試。";
+      busy=false;
+      await loadSummary();
+      renderRequestState();
+    }finally{
+      busy=false;
+      renderRequestState();
+    }
+  }
+
+  async function cancelWithdrawal(id){
+    if(!confirm("確認取消這筆 pending 提領？鎖定的 IPT 會立即回到可用餘額。")) return;
+
+    busy=true;
+    try{
+      const res=await callWithdrawal({action:"cancel",withdrawal_id:id});
+
+      $("requestStatus").className="status ok";
+      $("requestStatus").textContent="提領申請已取消，鎖定 IPT 已回到可用餘額。";
+      busy=false;
+      await loadSummary();
+    }catch(e){
+      console.error(e);
+      $("requestStatus").className="status err";
+      $("requestStatus").textContent="取消失敗："+(e?.message||String(e));
+    }finally{
+      busy=false;
+      renderRequestState();
+    }
+  }
+
+  async function boot(){
+    try{
+      const {data:{user},error:userErr}=await sb.auth.getUser();
+      if(userErr||!user){
+        showAuth("需要會員登入才能查看提領申請。");
+        return;
+      }
+
+      const {data:allowed,error:deviceErr}=await sb.functions.invoke("device-security",{
+        body:{
+          action:"status",
+          device_token:deviceToken(),
+          device_name:deviceName(),
+          user_agent:navigator.userAgent||""
+        }
+      });
+      if(deviceErr) throw deviceErr;
+      if(allowed?.allowed!==true){
+        showAuth("這個裝置尚未通過受信任裝置驗證。");
+        return;
+      }
+
+      hideAuth();
+      await loadSummary();
+    }catch(e){
+      console.error(e);
+      showAuth("目前無法安全確認登入狀態："+(e?.message||String(e)));
+    }
+  }
+
+  $("authBtn").addEventListener("click",()=>{
+    location.href="https://avg168.github.io/independent-points/staging/auth-security-v4.13.4.2.html";
+  });
+  $("mfaBtn").addEventListener("click",()=>{
+    location.href="https://avg168.github.io/independent-points/staging/withdrawal-mfa-v4.14.0-hf4.html?v=4140hf4";
+  });
+  $("withdrawAmount").addEventListener("input",()=>{lastRequestError="";renderRequestState()});
+  $("requestBtn").addEventListener("click",requestWithdrawal);
+
+  boot();
+})();
+</script>
+</body>
+</html>
