@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="zh-Hant" translate="no" class="notranslate">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="google" content="notranslate">
+<title>Independent Points V4.13.4.2｜受信任裝置</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
+<style>
+:root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;color:#172033;background:#f4f7fb}
+*{box-sizing:border-box;min-width:0}body{margin:0;background:#f4f7fb}header{background:#10243d;color:#fff;padding:24px 18px 30px;border-radius:0 0 26px 26px}
+.badge{display:inline-block;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.78rem;font-weight:800;margin-bottom:9px}
+h1{margin:0 0 8px;font-size:1.5rem}header p{margin:0;opacity:.9;line-height:1.6}main{max-width:760px;margin:auto;padding:16px 14px 72px}
+.panel{background:#fff;border:1px solid #dde5ef;border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:0 4px 18px rgba(24,42,68,.05)}
+.panel h2{margin:0 0 12px;color:#17365d;font-size:1.12rem}.status{border-radius:12px;padding:12px 14px;line-height:1.6;background:#edf4ff;color:#27456f;border:1px solid #ccddf5}
+.status.ok{background:#ebf8f2;color:#17694f;border-color:#bee5d6}.status.warn{background:#fff7df;color:#7e5a08;border-color:#efd996}.status.err{background:#fff0f0;color:#922c2c;border-color:#efc8c8}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.card{background:#f8fafc;border:1px solid #e1e7ef;border-radius:14px;padding:13px}.k{font-size:.78rem;color:#64748b}.v{font-weight:850;margin-top:5px;word-break:break-word}
+button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding:10px 12px;font:inherit}button{font-weight:850;cursor:pointer}button.primary{background:#176c59;color:#fff;border-color:#176c59}button.blue{background:#2a5f91;color:#fff;border-color:#2a5f91}button.light{background:#fff;color:#29445f}button.danger{background:#a83b45;color:#fff;border-color:#a83b45}button:disabled{opacity:.45}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.note{font-size:.82rem;color:#64748b;line-height:1.65;margin-top:10px}
+.device{border:1px solid #dbe3ed;border-radius:14px;padding:12px;margin-top:10px;background:#f8fafc}.device-title{font-weight:900;color:#17365d}.device-meta{font-size:.78rem;color:#64748b;line-height:1.55;margin-top:5px;word-break:break-word}
+.langbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.langbar button{min-height:38px;padding:7px 10px}.langbar button.active{background:#fff;color:#17365d;border-color:#fff}.hidden{display:none!important}
+.return-panel{border:2px solid #b9d6c9;background:#f0faf5}
+.return-dest{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.75rem;word-break:break-all;color:#64748b;margin-top:8px}
+@media(max-width:520px){.grid,.actions{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div class="badge">V4.13.4.2 · Hotfix 19</div>
+  <h1 id="title">受信任裝置</h1>
+  <p id="subtitle">用已驗證的手機／瀏覽器降低密碼被盜後的帳戶風險。</p>
+  <div class="langbar">
+    <button type="button" data-lang="zh-TW">繁中</button>
+    <button type="button" data-lang="zh-CN">简中</button>
+    <button type="button" data-lang="en">English</button>
+  </div>
+</header>
+<main>
+  <section class="panel return-panel hidden" id="paymentReturnPanel">
+    <h2>返回平台 IPT 付款</h2>
+    <div id="paymentReturnStatus" class="status">正在確認這個裝置…</div>
+    <div id="paymentReturnDest" class="return-dest"></div>
+    <button id="paymentReturnBtn" class="primary hidden" type="button" style="width:100%;margin-top:12px">返回付款頁</button>
+    <button id="paymentLoginBtn" class="blue hidden" type="button" style="width:100%;margin-top:12px">返回登入／MFA</button>
+  </section>
+  <section class="panel">
+    <h2 id="hState">目前裝置狀態</h2>
+    <div id="state" class="status">正在檢查…</div>
+    <div class="grid" style="margin-top:12px">
+      <div class="card"><div class="k" id="kProtection">裝置保護</div><div id="protection" class="v">—</div></div>
+      <div class="card"><div class="k" id="kTrusted">目前裝置</div><div id="trusted" class="v">—</div></div>
+      <div class="card"><div class="k" id="kAal">驗證等級</div><div id="aal" class="v">—</div></div>
+      <div class="card"><div class="k" id="kName">裝置名稱</div><div id="nameValue" class="v">—</div></div>
+    </div>
+    <input id="deviceNameInput" maxlength="100" style="width:100%;margin-top:12px" placeholder="例如：我的 ASUS 手機">
+    <div class="actions">
+      <button id="enableBtn" class="primary hidden" type="button">啟用並信任這支裝置</button>
+      <button id="trustBtn" class="primary hidden" type="button">信任這支裝置</button>
+      <button id="mfaBtn" class="blue hidden" type="button">前往完成 MFA</button>
+      <button id="refreshBtn" class="light" type="button">重新檢查</button>
+    </div>
+  </section>
+
+  <section id="managePanel" class="panel hidden">
+    <h2 id="hManage">已信任裝置管理</h2>
+    <div id="manageNote" class="status">完成 AAL2 後可以查看與移除已信任裝置。</div>
+    <div id="deviceList"></div>
+    <button id="disableBtn" class="danger" type="button" style="width:100%;margin-top:12px">停用受信任裝置保護</button>
+  </section>
+
+  <section class="panel">
+    <h2 id="hExplain">保護方式</h2>
+    <div id="explain" class="note" style="margin-top:0">
+      一般會員可自行選擇是否啟用。啟用後，已信任的手機可照常使用；新手機登入後必須先完成 MFA，才能加入受信任裝置。單純知道 Email 與密碼不足以通過新裝置保護。
+    </div>
+    <div class="actions">
+      <button id="securityBtn" class="blue" type="button">帳戶安全／MFA</button>
+      <button id="homeBtn" class="light" type="button">返回首頁</button>
+    </div>
+  </section>
+</main>
+<script>
+/* V4.13.4.2 Trusted Device Hotfix 19 + I18N Consistency Hotfix 20 */
+(() => {
+  const URL="https://uccexvgqmoxhgykkjdcy.supabase.co";
+  const KEY="sb_publishable_FBsN1DYTQMv2_bWhpbXHAA_qdAq7ri7";
+  const sb=window.supabase.createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+  const $=id=>document.getElementById(id);
+  let lang=localStorage.getItem("ipt_language")||"zh-TW";
+  let lastState=null;
+
+  const RETURN_PATH="/independent-points/staging/wallet-dual-v4.13.4.2.html";
+  let returnTimer=0;
+
+  function safeNext(){
+    const raw=new URLSearchParams(location.search).get("next")||"";
+    if(!raw) return "";
+    try{
+      const u=new URL(raw,location.origin);
+      if(u.origin!==location.origin) return "";
+      if(u.pathname!==RETURN_PATH) return "";
+      return u.pathname+u.search+u.hash;
+    }catch(_){
+      return "";
+    }
+  }
+
+  function nextParam(){
+    const n=safeNext();
+    return n?"?next="+encodeURIComponent(n):"";
+  }
+
+  function renderPaymentReturn(){
+    const panel=$("paymentReturnPanel");
+    const next=safeNext();
+    if(!panel) return;
+
+    clearTimeout(returnTimer);
+    if(!next){
+      panel.classList.add("hidden");
+      return;
+    }
+
+    panel.classList.remove("hidden");
+    $("paymentReturnDest").textContent=next;
+    $("paymentReturnBtn").classList.add("hidden");
+    $("paymentLoginBtn").classList.add("hidden");
+
+    if(!lastState){
+      $("paymentReturnStatus").className="status warn";
+      $("paymentReturnStatus").textContent="請先完成會員登入。";
+      $("paymentLoginBtn").classList.remove("hidden");
+      return;
+    }
+
+    if(lastState.protection_enabled && !lastState.trusted_device){
+      $("paymentReturnStatus").className="status warn";
+      $("paymentReturnStatus").textContent=
+        lastState.aal==="aal2"
+          ?"MFA 已完成，請按下「信任這支裝置」。"
+          :"請先完成 MFA，再信任這支裝置。";
+      $("paymentLoginBtn").classList.remove("hidden");
+      return;
+    }
+
+    $("paymentReturnStatus").className="status ok";
+    $("paymentReturnStatus").textContent="這個裝置已可使用會員與錢包功能，即將返回付款頁。";
+    $("paymentReturnBtn").classList.remove("hidden");
+    returnTimer=setTimeout(()=>location.replace(next),900);
+  }
+
+  const S={
+    "zh-TW":{
+      title:"受信任裝置",subtitle:"用已驗證的手機／瀏覽器降低密碼被盜後的帳戶風險。",
+      hState:"目前裝置狀態",kProtection:"裝置保護",kTrusted:"目前裝置",kAal:"驗證等級",kName:"裝置名稱",
+      enabled:"已啟用",disabled:"未啟用",trusted:"已信任",untrusted:"未信任",checking:"正在檢查…",
+      signedOut:"目前已登出。請先登入會員。",readyOff:"目前尚未啟用受信任裝置保護。一般會員可自行選擇是否啟用。",
+      readyTrusted:"這支裝置已信任，可以正常使用會員與錢包功能。",
+      readyUntrusted:"這是一支尚未信任的新裝置。請先完成 MFA，再信任這支裝置。",
+      enable:"啟用並信任這支裝置",trust:"信任這支裝置",mfa:"前往完成 MFA",refresh:"重新檢查",
+      hManage:"已信任裝置管理",manageNote:"完成 AAL2 後可以查看與移除已信任裝置。",disable:"停用受信任裝置保護",
+      hExplain:"保護方式",explain:"一般會員可自行選擇是否啟用。啟用後，已信任的手機可照常使用；新手機登入後必須先完成 MFA，才能加入受信任裝置。單純知道 Email 與密碼不足以通過新裝置保護。",
+      security:"帳戶安全／MFA",home:"返回首頁",remove:"移除",current:"目前裝置",revoked:"已移除",
+      devicePlaceholder:"例如：我的 ASUS 手機",enableOk:"已啟用受信任裝置保護。",trustOk:"這支裝置已加入受信任裝置。",
+      disableOk:"受信任裝置保護已停用。",removeConfirm:"確定要移除此受信任裝置嗎？",failed:"操作失敗："
+    },
+    "zh-CN":{
+      title:"受信任设备",subtitle:"用已验证的手机／浏览器降低密码被盗后的账户风险。",
+      hState:"当前设备状态",kProtection:"设备保护",kTrusted:"当前设备",kAal:"验证等级",kName:"设备名称",
+      enabled:"已启用",disabled:"未启用",trusted:"已信任",untrusted:"未信任",checking:"正在检查…",
+      signedOut:"当前已登出。请先登录会员。",readyOff:"目前尚未启用受信任设备保护。普通会员可自行选择是否启用。",
+      readyTrusted:"这台设备已信任，可以正常使用会员与钱包功能。",
+      readyUntrusted:"这是一台尚未信任的新设备。请先完成 MFA，再信任这台设备。",
+      enable:"启用并信任这台设备",trust:"信任这台设备",mfa:"前往完成 MFA",refresh:"重新检查",
+      hManage:"已信任设备管理",manageNote:"完成 AAL2 后可以查看与移除已信任设备。",disable:"停用受信任设备保护",
+      hExplain:"保护方式",explain:"普通会员可自行选择是否启用。启用后，已信任的手机可照常使用；新手机登录后必须先完成 MFA，才能加入受信任设备。单纯知道 Email 与密码不足以通过新设备保护。",
+      security:"账户安全／MFA",home:"返回首页",remove:"移除",current:"当前设备",revoked:"已移除",
+      devicePlaceholder:"例如：我的 Android 手机",enableOk:"已启用受信任设备保护。",trustOk:"这台设备已加入受信任设备。",
+      disableOk:"受信任设备保护已停用。",removeConfirm:"确定要移除此受信任设备吗？",failed:"操作失败："
+    },
+    "en":{
+      title:"Trusted Devices",subtitle:"Use a verified phone/browser to reduce account takeover risk after password theft.",
+      hState:"Current Device Status",kProtection:"Device Protection",kTrusted:"Current Device",kAal:"Assurance Level",kName:"Device Name",
+      enabled:"Enabled",disabled:"Disabled",trusted:"Trusted",untrusted:"Untrusted",checking:"Checking…",
+      signedOut:"You are signed out. Sign in first.",readyOff:"Trusted-device protection is not enabled. Regular members may enable it optionally.",
+      readyTrusted:"This device is trusted and may use member and wallet features normally.",
+      readyUntrusted:"This is a new untrusted device. Complete MFA, then trust this device.",
+      enable:"Enable & Trust This Device",trust:"Trust This Device",mfa:"Complete MFA",refresh:"Refresh",
+      hManage:"Trusted Device Management",manageNote:"Complete AAL2 to view and remove trusted devices.",disable:"Disable Trusted-Device Protection",
+      hExplain:"How It Works",explain:"This is optional for regular members. Once enabled, trusted phones work normally; a new phone must complete MFA before it can become trusted. Knowing only the email and password is not enough to pass new-device protection.",
+      security:"Account Security / MFA",home:"Back to Home",remove:"Remove",current:"Current Device",revoked:"Removed",
+      devicePlaceholder:"Example: My Android phone",enableOk:"Trusted-device protection is enabled.",trustOk:"This device is now trusted.",
+      disableOk:"Trusted-device protection is disabled.",removeConfirm:"Remove this trusted device?",failed:"Action failed: "
+    }
+  };
+  const T=k=>(S[lang]||S["zh-TW"])[k]||k;
+
+  function deviceToken(){
+    const key="ipt_trusted_device_token_v1";
+    try{
+      let token=localStorage.getItem(key)||"";
+      if(/^[A-Za-z0-9_-]{32,256}$/.test(token)) return token;
+      const b=new Uint8Array(32); crypto.getRandomValues(b);
+      let raw=""; b.forEach(x=>raw+=String.fromCharCode(x));
+      token=btoa(raw).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+      localStorage.setItem(key,token); return token;
+    }catch(_){return ""}
+  }
+  function defaultName(){
+    const ua=navigator.userAgent||"";
+    if(/Android/i.test(ua)) return lang==="en"?"Android phone":"Android 手機";
+    if(/iPhone|iPad/i.test(ua)) return "iPhone / iPad";
+    if(/Windows/i.test(ua)) return "Windows";
+    if(/Macintosh|Mac OS X/i.test(ua)) return "Mac";
+    return lang==="en"?"Current device":"目前裝置";
+  }
+  function applyLang(){
+    if(!["zh-TW","zh-CN","en"].includes(lang)) lang="zh-TW";
+    localStorage.setItem("ipt_language",lang);
+    document.documentElement.lang=lang==="en"?"en":(lang==="zh-CN"?"zh-Hans":"zh-Hant");
+    document.documentElement.setAttribute("translate","no");
+    document.querySelectorAll("[data-lang]").forEach(b=>{
+      b.classList.toggle("active",b.dataset.lang===lang);
+      b.setAttribute("aria-pressed",b.dataset.lang===lang?"true":"false");
+    });
+    ["title","subtitle","hState","kProtection","kTrusted","kAal","kName","hManage","manageNote","hExplain","explain"].forEach(id=>$(id).textContent=T(id));
+    $("enableBtn").textContent=T("enable"); $("trustBtn").textContent=T("trust"); $("mfaBtn").textContent=T("mfa");
+    $("refreshBtn").textContent=T("refresh"); $("disableBtn").textContent=T("disable");
+    $("securityBtn").textContent=T("security"); $("homeBtn").textContent=T("home");
+    $("deviceNameInput").placeholder=T("devicePlaceholder");
+    renderState(lastState);
+  }
+  document.querySelectorAll("[data-lang]").forEach(b=>b.onclick=async()=>{lang=b.dataset.lang;applyLang();if(lastState?.aal==="aal2"&&lastState?.protection_enabled){try{await loadDevices()}catch(_){}}});
+
+  async function invoke(action,extra={}){
+    const {data,error}=await sb.functions.invoke("device-security",{body:{
+      action,device_token:deviceToken(),device_name:$("deviceNameInput").value.trim()||defaultName(),
+      user_agent:navigator.userAgent||"",...extra
+    }});
+    if(error) throw error;
+    if(!data?.ok) throw new Error(data?.error||"Request failed");
+    return data;
+  }
+
+  function renderState(s){
+    if(!s) return;
+    $("protection").textContent=s.protection_enabled?T("enabled"):T("disabled");
+    $("trusted").textContent=s.trusted_device?T("trusted"):T("untrusted");
+    $("aal").textContent=s.aal||"—";
+    $("nameValue").textContent=s.current_device?.device_name||$("deviceNameInput").value||defaultName();
+    $("enableBtn").classList.add("hidden"); $("trustBtn").classList.add("hidden"); $("mfaBtn").classList.add("hidden");
+    $("managePanel").classList.add("hidden");
+
+    if(!s.protection_enabled){
+      $("state").className="status"; $("state").textContent=T("readyOff");
+      if(s.aal==="aal2") $("enableBtn").classList.remove("hidden"); else $("mfaBtn").classList.remove("hidden");
+    }else if(s.trusted_device){
+      $("state").className="status ok"; $("state").textContent=T("readyTrusted");
+      if(s.aal==="aal2") $("managePanel").classList.remove("hidden");
+    }else{
+      $("state").className="status err"; $("state").textContent=T("readyUntrusted");
+      if(s.aal==="aal2") $("trustBtn").classList.remove("hidden"); else $("mfaBtn").classList.remove("hidden");
+    }
+    renderPaymentReturn();
+  }
+
+  function fmtTime(v){if(!v)return"—";const d=new Date(v);return Number.isNaN(d.getTime())?"—":d.toLocaleString(lang==="en"?"en-US":"zh-TW",{hour12:false})}
+  function esc(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
+
+  async function loadDevices(){
+    if(lastState?.aal!=="aal2") return;
+    const data=await invoke("list");
+    const list=data.devices||[];
+    $("deviceList").innerHTML=list.length?list.map(d=>`
+      <div class="device">
+        <div class="device-title">${esc(d.device_name)} ${d.is_current?`· ${esc(T("current"))}`:""} ${d.revoked_at?`· ${esc(T("revoked"))}`:""}</div>
+        <div class="device-meta">${esc(d.user_agent||"")}<br>${esc(fmtTime(d.last_seen_at))}</div>
+        ${d.revoked_at?"":`<button class="danger revokeBtn" data-id="${esc(d.id)}" type="button" style="width:100%;margin-top:10px">${esc(T("remove"))}</button>`}
+      </div>`).join(""):`<div class="note">—</div>`;
+    document.querySelectorAll(".revokeBtn").forEach(btn=>btn.onclick=async()=>{
+      if(!confirm(T("removeConfirm"))) return;
+      try{await invoke("revoke_device",{device_id:btn.dataset.id});await refresh()}
+      catch(e){$("state").className="status err";$("state").textContent=T("failed")+(e?.message||String(e))}
+    });
+  }
+
+  async function refresh(){
+    $("state").className="status"; $("state").textContent=T("checking");
+    const {data:{user},error}=await sb.auth.getUser();
+    if(error||!user){
+      lastState=null;
+      $("state").className="status warn"; $("state").textContent=T("signedOut");
+      ["protection","trusted","aal","nameValue"].forEach(id=>$(id).textContent="—");
+      ["enableBtn","trustBtn","mfaBtn"].forEach(id=>$(id).classList.add("hidden"));
+      $("managePanel").classList.add("hidden");
+      renderPaymentReturn();
+      return;
+    }
+    if(!$("deviceNameInput").value) $("deviceNameInput").value=defaultName();
+    lastState=await invoke("status");
+    renderState(lastState);
+    if(lastState.aal==="aal2" && lastState.protection_enabled) await loadDevices();
+  }
+
+  $("enableBtn").onclick=async()=>{try{await invoke("enable_and_trust");await refresh()}catch(e){$("state").className="status err";$("state").textContent=T("failed")+(e?.message||String(e))}};
+  $("trustBtn").onclick=async()=>{try{await invoke("trust_current");await refresh()}catch(e){$("state").className="status err";$("state").textContent=T("failed")+(e?.message||String(e))}};
+  $("disableBtn").onclick=async()=>{try{await invoke("disable");await refresh()}catch(e){$("state").className="status err";$("state").textContent=T("failed")+(e?.message||String(e))}};
+  $("mfaBtn").onclick=()=>location.href="./auth-security-v4.13.4.2.html"+nextParam()+"#trustedDeviceSection";
+  $("refreshBtn").onclick=refresh;
+  $("securityBtn").onclick=()=>location.href="./auth-security-v4.13.4.2.html"+nextParam()+"#trustedDeviceSection";
+  $("homeBtn").onclick=()=>location.href="../index.html?v=4124";
+  $("paymentReturnBtn").onclick=()=>{
+    const next=safeNext();
+    if(next) location.replace(next);
+  };
+  $("paymentLoginBtn").onclick=()=>{
+    location.href="./auth-security-v4.13.4.2.html"+nextParam()+"#trustedDeviceSection";
+  };
+  applyLang();
+  refresh().catch(e=>{$("state").className="status err";$("state").textContent=T("failed")+(e?.message||String(e))});
+})();
+</script>
+</body>
+</html>
