@@ -27,7 +27,7 @@ button{width:100%;border:0;border-radius:14px;padding:16px 14px;font:inherit;fon
 </head>
 <body>
 <header>
-  <span class="badge">V4.13.4.2｜公開收款確認</span>
+  <span class="badge">V4.13.4.2 HF1｜公開收款確認</span>
   <h1>Independent Points</h1>
   <p>先確認收款人，再登入自己的會員帳號完成平台 IPT 付款。</p>
 </header>
@@ -90,7 +90,16 @@ button{width:100%;border:0;border-radius:14px;padding:16px 14px;font:inherit;fon
   $("payBtn").addEventListener("click",()=>{
     if(!recipient||!validToken(token)) return;
     const next="/independent-points/staging/wallet-dual-v4.13.4.2.html?t="+
-      encodeURIComponent(token)+"&v=41342";
+      encodeURIComponent(token)+"&v=41342hf1";
+
+    // Android/LINE/in-app browsers may occasionally lose nested query params.
+    // Keep a same-origin localStorage fallback so login/MFA can still return.
+    try{
+      localStorage.setItem("ipt_pending_pay_token_v41342",token);
+      localStorage.setItem("ipt_pending_pay_next_v41342",next);
+      localStorage.setItem("ipt_pending_pay_saved_at_v41342",String(Date.now()));
+    }catch(_){}
+
     location.href=
       "https://avg168.github.io/independent-points/staging/auth-security-v4.13.4.2.html?next="+
       encodeURIComponent(next);

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Independent Points V4.13.4.2｜付款登入與 MFA</title>
+<title>Independent Points V4.13.4.2 HF1｜付款登入與 MFA</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
 <style>
 :root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;color:#172033;background:#f4f7fb}
@@ -28,7 +28,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
 </head>
 <body>
 <header>
-  <div class="version">V4.13.4.2 STAGING</div>
+  <div class="version">V4.13.4.2 HF1 STAGING</div>
   <h1 id="title">帳戶安全與 MFA</h1>
   <p id="subtitle">每次登入重新確認身分；管理員使用驗證器 App 進行第二因素驗證。</p>
   <div class="langbar">
@@ -151,8 +151,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
   const RETURN_PATH="/independent-points/staging/wallet-dual-v4.13.4.2.html";
   let returnTimer=0;
 
-  function safeNext(){
-    const raw=new URLSearchParams(location.search).get("next")||"";
+  function validateNext(raw){
     if(!raw) return "";
     try{
       const u=new URL(raw,location.origin);
@@ -162,6 +161,28 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
     }catch(_){
       return "";
     }
+  }
+
+  function safeNext(){
+    // Primary: URL query parameter.
+    const fromUrl=validateNext(new URLSearchParams(location.search).get("next")||"");
+    if(fromUrl) return fromUrl;
+
+    // Fallback: same-origin storage, for Android/in-app browsers that lose next=.
+    try{
+      const savedAt=Number(localStorage.getItem("ipt_pending_pay_saved_at_v41342")||0);
+      if(savedAt && Date.now()-savedAt <= 30*60*1000){
+        const saved=validateNext(localStorage.getItem("ipt_pending_pay_next_v41342")||"");
+        if(saved) return saved;
+
+        const token=String(localStorage.getItem("ipt_pending_pay_token_v41342")||"");
+        if(/^[A-Za-z0-9_-]{43}$/.test(token)){
+          return RETURN_PATH+"?t="+encodeURIComponent(token)+"&v=41342hf1";
+        }
+      }
+    }catch(_){}
+
+    return "";
   }
 
   function nextParam(){
