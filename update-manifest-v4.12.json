@@ -1,7 +1,7 @@
 {
   "product": "Independent Points",
   "version": "V4.14.2",
-  "build": "20260930-4142-hf1",
+  "build": "20260930-4142-hf2",
   "release_date": "2026-09-30",
   "channel": "production",
   "checks": {
@@ -23,7 +23,9 @@
     "responsive_long_identifiers": true,
     "legacy_html_removed": 128,
     "official_home_return_absolute_url": true,
-    "pwa_cache_hotfix_1": true
+    "pwa_cache_hotfix_1": true,
+    "v4142_three_language_new_pages": true,
+    "language_storage_sync": true
   },
   "self_file": {
     "name": "update-manifest-v4.12.json",
@@ -33,8 +35,8 @@
   "files": [
     {
       "name": "V4.14.2-正式封版驗收報告.txt",
-      "bytes": 1863,
-      "sha256": "7c11d072add50e675566aa8f36b02dad23fd864c40a4a6bad3a2f81fcd00c016"
+      "bytes": 2199,
+      "sha256": "4435422ae9c5203de6b262f21b329004962396b6967b8ab5b6c8137beffb12dc"
     },
     {
       "name": "admin-assets-v4.12.html",
@@ -83,13 +85,13 @@
     },
     {
       "name": "i18n-v4.10.js",
-      "bytes": 113989,
-      "sha256": "0a1fb55260bf889bde03db474778e357a8778df83a05c5958136e06213b2067f"
+      "bytes": 141722,
+      "sha256": "32da66270d6e911ad0b98fe44fbb902d40a053a221fc83169aee3ec6e68ca14a"
     },
     {
       "name": "index.html",
-      "bytes": 43704,
-      "sha256": "619637326f6313d7e5dff4761395a6762d4e3005868453c14c8d460984f4ab42"
+      "bytes": 43707,
+      "sha256": "f7a4cbacdf047c4edcd5b3dc7ef5319f08626da1c8c6193ef85690a21e235ff4"
     },
     {
       "name": "ipt-apple-touch-180.png",
@@ -128,8 +130,8 @@
     },
     {
       "name": "pay-v4.14.2.html",
-      "bytes": 5215,
-      "sha256": "1f6ca7b6480e5f093a697d6c8b77d437473ad8e53deae833a331d5a64f100232"
+      "bytes": 5313,
+      "sha256": "0f0f54bbadac21691987fb1749164dc9054b21d5279d8d69297a4e59a4ff60bf"
     },
     {
       "name": "print-report-v4.12.html",
@@ -138,13 +140,13 @@
     },
     {
       "name": "release-history.json",
-      "bytes": 16828,
-      "sha256": "910d16164e382059bf50e58fd5868d1f36e4e01a9dd2f228d5a7a812cfad907d"
+      "bytes": 17343,
+      "sha256": "4280537e1c54f02dc7ee0041471f4b932b5533feaa3ed1b03490bd363045dbf8"
     },
     {
       "name": "release.json",
-      "bytes": 2733,
-      "sha256": "35661671c8c97733e9291cf82ce740fa5036f2c6873ab7d5e962d2ac9c9d27bf"
+      "bytes": 3220,
+      "sha256": "71d693c9a8335d0127c62a8844124260daf933159d3248cc99c354ea54e5dcae"
     },
     {
       "name": "robots.txt",
@@ -164,7 +166,7 @@
     {
       "name": "service-worker.js",
       "bytes": 1695,
-      "sha256": "6fe8aaf154d3f8e3a544fb02b94e3984d35282d9668b9fdff0ed7fa791a65085"
+      "sha256": "a0349f05b34bfcbd86147b48612ea79fc1e897a545feaf9034202e64390e1064"
     },
     {
       "name": "system-info-v4.12.html",
@@ -183,24 +185,24 @@
     },
     {
       "name": "wallet-dual-v4.14.2.html",
-      "bytes": 41501,
-      "sha256": "0b0d369369f29f15af7b836ea9163ab9a0da7180db22d3d6dcfcf5a19cf40d3a"
+      "bytes": 41599,
+      "sha256": "d05ed3db04408deb6a0d5b8108c8c53f441e7b340dedbfc98fa9a806e1502d33"
     },
     {
       "name": "withdrawal-admin-v4.14.2.html",
-      "bytes": 22408,
-      "sha256": "a3e2fb943bbaa0983d9f84e171791b85e9f424cbe68af3662d7a713465a72013"
+      "bytes": 22506,
+      "sha256": "ab254636cd4e62313bac15da625409e324d1c07ceffb2ae0d830cffbe5707f49"
     },
     {
       "name": "withdrawal-mfa-v4.14.2.html",
-      "bytes": 9907,
-      "sha256": "fdfd2d020061faa8e9193c6761d23c5ec9f08acb479bb2a22ae564f8232ae963"
+      "bytes": 10005,
+      "sha256": "2eee09058932a68e0e504207f6c6fb8131acc48ac30af37cfffd802177cf8ce5"
     },
     {
       "name": "withdrawal-v4.14.2.html",
-      "bytes": 22126,
-      "sha256": "50c9ef8f508175c5b9a73b2185e3ae647a2672146bc3055c3c4b690e69deccef"
+      "bytes": 22224,
+      "sha256": "892f6dc6f28991bcb7d24ebe3c0c4aea31cdd5acefe0f1acb426509201d48ab4"
     }
   ],
-  "hotfix": 1
+  "hotfix": 2
 }

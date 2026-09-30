@@ -1,7 +1,7 @@
 {
   "product": "Independent Points",
   "version": "V4.14.2",
-  "build": "20260930-4142-hf1",
+  "build": "20260930-4142-hf2",
   "release_date": "2026-09-30",
   "channel": "production",
   "rollback_version": "V4.12.4",
@@ -26,6 +26,10 @@
     }
   },
   "notes": [
+    "Hotfix 2: connect V4.14.2 dual-mode wallet, payment, withdrawal, withdrawal MFA and admin withdrawal pages to the shared zh-TW / zh-CN / English language engine",
+    "Hotfix 2: translate the new Home entries for Dual-mode Platform Wallet and Withdrawal Review",
+    "Hotfix 2: keep language selection synchronized through the existing ipt_language localStorage setting",
+    "Hotfix 2: no changes to balances, withdrawals, Mint, Sepolia verification or Supabase settlement logic",
     "Hotfix 1: fix dual-mode wallet 'Back to official home' navigation to absolute V4.14.2 production URL",
     "Hotfix 1: refresh PWA cache to ipt-v4.14.2-hf1 to avoid serving the stale return-home link",
     "Formalizes dual-mode wallet: platform IPT (off-chain) + Trust Wallet IPT (on-chain)",
@@ -57,5 +61,5 @@
   ],
   "manifest_filename": "update-manifest-v4.12.json",
   "manifest_filename_note": "Legacy filename retained for compatibility; manifest content is V4.14.2.",
-  "hotfix": 1
+  "hotfix": 2
 }

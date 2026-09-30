@@ -4,6 +4,18 @@
     {
       "version": "V4.14.2",
       "date": "2026-09-30",
+      "channel": "hotfix-2-i18n",
+      "title": "Hotfix 2 V4.14.2 三語系整合",
+      "notes": [
+        "雙模式平台錢包、公開收款、平台 IPT 提領、提領 MFA、管理員提領頁接入共用三語系",
+        "首頁新增功能入口補齊繁中／簡中／English",
+        "沿用 ipt_language 設定，跨正式頁面同步語言",
+        "不修改資產、提領、Mint、Sepolia 或 Supabase 結算邏輯"
+      ]
+    },
+    {
+      "version": "V4.14.2",
+      "date": "2026-09-30",
       "channel": "hotfix-1-home-navigation",
       "title": "Hotfix 1 正式首頁返回連結修正",
       "notes": [
