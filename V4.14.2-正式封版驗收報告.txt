@@ -1,7 +1,7 @@
 Independent Points V4.14.2｜正式封版驗收報告
 
 正式封版日期：2026-09-30
-Build：20260930-4142-hf3
+Build：20260930-4142-hf4
 Network：Ethereum Sepolia (11155111 / 0xaa36a7)
 Contract：0xd3fb2480aadb8b168ec7e88a0e5c847d9750cb87
 
@@ -58,3 +58,9 @@ Contract：0xd3fb2480aadb8b168ec7e88a0e5c847d9750cb87
 - 简中同步補齊
 - 語言切換時重新渲染動態交易資料
 - 不修改任何資產或鏈上交易邏輯
+
+九、Hotfix 4
+- 修正目前Available 中英混合文字
+- 補齊 e.g. IPT-00100002 / e.g. 30.00 / Up to 200 characters
+- 字典載入後重新 apply 並觸發動態資料 rerender
+- 不修改資產或鏈上交易邏輯

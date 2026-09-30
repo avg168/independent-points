@@ -4,6 +4,18 @@
     {
       "version": "V4.14.2",
       "date": "2026-09-30",
+      "channel": "hotfix-4-i18n-final-cleanup",
+      "title": "Hotfix 4 三語系翻譯收尾",
+      "notes": [
+        "修正目前Available 中英混合顯示",
+        "補齊會員編號、金額與備註 placeholder 的 English／简中",
+        "HF4 字典載入後強制重新套用靜態翻譯並重新渲染動態資料",
+        "不修改任何平台資產、提領、Mint、合約或 Sepolia 邏輯"
+      ]
+    },
+    {
+      "version": "V4.14.2",
+      "date": "2026-09-30",
       "channel": "hotfix-3-dynamic-i18n",
       "title": "Hotfix 3 雙模式錢包動態三語補齊",
       "notes": [

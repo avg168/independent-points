@@ -1,7 +1,7 @@
 {
   "product": "Independent Points",
   "version": "V4.14.2",
-  "build": "20260930-4142-hf3",
+  "build": "20260930-4142-hf4",
   "release_date": "2026-09-30",
   "channel": "production",
   "rollback_version": "V4.12.4",
@@ -26,6 +26,9 @@
     }
   },
   "notes": [
+    "Hotfix 4: complete English/Simplified Chinese placeholders and short labels in the dual-mode wallet",
+    "Hotfix 4: fix mixed text such as '目前Available' by adding exact translations and reapplying from original text",
+    "Hotfix 4: force dynamic wallet rerender after late i18n dictionary installation",
     "Hotfix 3: complete dynamic multilingual labels in the dual-mode wallet ledger and on-chain wallet section",
     "Hotfix 3: translate P → IPT conversion, P credit, platform IPT transfer, counterparty, status and transaction ID",
     "Hotfix 3: re-render dynamic wallet data immediately when zh-TW / zh-CN / English changes",
@@ -64,5 +67,5 @@
   ],
   "manifest_filename": "update-manifest-v4.12.json",
   "manifest_filename_note": "Legacy filename retained for compatibility; manifest content is V4.14.2.",
-  "hotfix": 3
+  "hotfix": 4
 }

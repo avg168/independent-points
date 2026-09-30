@@ -1,7 +1,7 @@
 {
   "product": "Independent Points",
   "version": "V4.14.2",
-  "build": "20260930-4142-hf3",
+  "build": "20260930-4142-hf4",
   "release_date": "2026-09-30",
   "channel": "production",
   "checks": {
@@ -27,7 +27,10 @@
     "v4142_three_language_new_pages": true,
     "language_storage_sync": true,
     "dynamic_wallet_i18n_complete": true,
-    "wallet_language_rerender": true
+    "wallet_language_rerender": true,
+    "i18n_placeholder_complete": true,
+    "i18n_mixed_label_fixed": true,
+    "i18n_post_dictionary_rerender": true
   },
   "self_file": {
     "name": "update-manifest-v4.12.json",
@@ -37,8 +40,8 @@
   "files": [
     {
       "name": "V4.14.2-正式封版驗收報告.txt",
-      "bytes": 2475,
-      "sha256": "6d6e3acd9ce2ab96921ef6079c82b2522d1b251c911347e7c71a26d2f66fee74"
+      "bytes": 2697,
+      "sha256": "8e2aa22cb48e8f8432116207524bf7650820f161cb861fe3ca2cb5ab9c1dc998"
     },
     {
       "name": "admin-assets-v4.12.html",
@@ -87,8 +90,8 @@
     },
     {
       "name": "i18n-v4.10.js",
-      "bytes": 143408,
-      "sha256": "54f9d783d9b5ff1406dd7724134c52f28afdcb0e86cdd7cfb189e3f12b847d02"
+      "bytes": 144954,
+      "sha256": "46d292e073b758cc0851dad402158713f27b3dd0a9516d448fac1fcc1f36d8b7"
     },
     {
       "name": "index.html",
@@ -142,13 +145,13 @@
     },
     {
       "name": "release-history.json",
-      "bytes": 17848,
-      "sha256": "2ada2d34fc5ee83eeb86631a53d932304527853a26a39a6397ade64ff3039dc4"
+      "bytes": 18341,
+      "sha256": "71afd486960beba71088ee03e5eb5560e83629a03a7ad65a27c5e3b4b37ec230"
     },
     {
       "name": "release.json",
-      "bytes": 3551,
-      "sha256": "acde2316acbd0096cc24932248b2cf4543e8cf9379db680163b88ef29b92e817"
+      "bytes": 3866,
+      "sha256": "cb17acc795d55652b7bedcf93717d50f38f4caf1f26ae5f56f87b1cb5d1377b4"
     },
     {
       "name": "robots.txt",
@@ -168,7 +171,7 @@
     {
       "name": "service-worker.js",
       "bytes": 1695,
-      "sha256": "751dbcaf09af7d3ae0f7e6ef4c77db89308c6bd04aba6b3305a5cefc2799fa27"
+      "sha256": "8449d7a30c1b643fc7bcd739986a42c2de5753df82223f4ea9f06a64677acb75"
     },
     {
       "name": "system-info-v4.12.html",
@@ -188,7 +191,7 @@
     {
       "name": "wallet-dual-v4.14.2.html",
       "bytes": 42196,
-      "sha256": "9eb2c145bf3ba7fb7022f84fe5ae30c2e083ddf7999ad8960ec8ed8614591211"
+      "sha256": "aa04acb5605fba2bcbb7482f5eae344fb74f4455d70d7eb1f7dde3c6f90e851b"
     },
     {
       "name": "withdrawal-admin-v4.14.2.html",
@@ -206,5 +209,5 @@
       "sha256": "892f6dc6f28991bcb7d24ebe3c0c4aea31cdd5acefe0f1acb426509201d48ab4"
     }
   ],
-  "hotfix": 3
+  "hotfix": 4
 }

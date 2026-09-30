@@ -484,3 +484,49 @@
     install();
   }
 })();
+
+
+/* V4.14.2 HF4 multilingual final cleanup */
+;(() => {
+  function install(){
+    const api=window.IPTI18N;
+    if(!api?.dictionaries){
+      setTimeout(install,50);
+      return;
+    }
+
+    Object.assign(api.dictionaries["zh-CN"],{
+      "V4.14.2 HF4｜雙模式錢包":"V4.14.2 HF4｜双模式钱包",
+      "目前可用":"当前可用",
+      "例如 IPT-00100002":"例如 IPT-00100002",
+      "例如 30.00":"例如 30.00",
+      "最多 200 字":"最多 200 字",
+      "Trust Wallet／鏈上 IPT":"Trust Wallet／链上 IPT",
+      "綁定錢包":"绑定钱包"
+    });
+
+    Object.assign(api.dictionaries.en,{
+      "V4.14.2 HF4｜雙模式錢包":"V4.14.2 HF4 | Dual-Mode Wallet",
+      "目前可用":"Available",
+      "例如 IPT-00100002":"e.g. IPT-00100002",
+      "例如 30.00":"e.g. 30.00",
+      "最多 200 字":"Up to 200 characters",
+      "Trust Wallet／鏈上 IPT":"Trust Wallet / On-chain IPT",
+      "綁定錢包":"Linked Wallet"
+    });
+
+    // Re-apply after late dictionary additions so partially translated labels
+    // such as "目前Available" are replaced from their stored original text.
+    api.apply?.(document);
+
+    // Force dynamic wallet sections to re-render with the completed dictionary.
+    const lang=api.getLang?.() || localStorage.getItem("ipt_language") || "zh-TW";
+    window.dispatchEvent(new CustomEvent("ipt-language-change",{detail:{lang}}));
+  }
+
+  if(document.readyState==="loading"){
+    window.addEventListener("DOMContentLoaded",install,{once:true});
+  }else{
+    install();
+  }
+})();
