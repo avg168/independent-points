@@ -161,7 +161,7 @@ h2{margin:0 0 12px;font-size:1.12rem}
   header{padding:22px 16px 26px}
 }
 </style>
-<script src="https://avg168.github.io/independent-points/i18n-v4.10.js?v=4142hf2" defer></script>
+<script src="https://avg168.github.io/independent-points/i18n-v4.10.js?v=4142hf3" defer></script>
 </head>
 <body>
 <div id="authOverlay">
@@ -173,7 +173,7 @@ h2{margin:0 0 12px;font-size:1.12rem}
 </div>
 
 <header>
-  <span class="badge">V4.14.2 HF2｜雙模式錢包</span>
+  <span class="badge">V4.14.2 HF3｜雙模式錢包</span>
   <h1>Independent Points</h1>
   <p>平台錢包 Off-chain ＋ Trust Wallet On-chain，同一頁分開顯示、分開記帳。</p>
   <div class="top-actions">
@@ -362,6 +362,9 @@ h2{margin:0 0 12px;font-size:1.12rem}
   const SUPABASE_KEY = "sb_publishable_FBsN1DYTQMv2_bWhpbXHAA_qdAq7ri7";
 
   const $ = (id) => document.getElementById(id);
+  const tr = (text) => window.IPTI18N?.t?.(text) || text;
+  const activeLang = () => window.IPTI18N?.getLang?.() || localStorage.getItem("ipt_language") || "zh-TW";
+  const numberLocale = () => activeLang()==="en" ? "en-US" : (activeLang()==="zh-CN" ? "zh-CN" : "zh-TW");
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
     auth: { persistSession:true, autoRefreshToken:true, detectSessionInUrl:true }
   });
@@ -493,10 +496,10 @@ h2{margin:0 0 12px;font-size:1.12rem}
     $("convertBtn").disabled=loading || !valid || p>available;
     if(valid && p>available){
       $("convertStatus").className="status warn";
-      $("convertStatus").textContent="P 餘額不足。目前可用 "+available.toLocaleString("zh-TW")+" P。";
+      $("convertStatus").textContent="P 餘額不足。目前可用 "+available.toLocaleString(numberLocale())+" P。";
     }else if(valid){
       $("convertStatus").className="status info";
-      $("convertStatus").textContent="將使用 "+p.toLocaleString("zh-TW")+" P，兌換 "+ipt.toFixed(2)+" 平台 IPT。";
+      $("convertStatus").textContent="將使用 "+p.toLocaleString(numberLocale())+" P，兌換 "+ipt.toFixed(2)+" 平台 IPT。";
     }else{
       $("convertStatus").className="status warn";
       $("convertStatus").textContent="兌換數量必須是 120 P 的整數倍。";
@@ -602,7 +605,7 @@ h2{margin:0 0 12px;font-size:1.12rem}
     else $("historyAllBtn").classList.add("active");
 
     if(!rows.length){
-      $("platformTransferHistory").innerHTML='<div class="note">目前沒有符合條件的平台 IPT 轉帳紀錄。</div>';
+      $("platformTransferHistory").innerHTML=`<div class="note">${tr("目前沒有符合條件的平台 IPT 轉帳紀錄。")}</div>`;
       return;
     }
 
@@ -610,7 +613,7 @@ h2{margin:0 0 12px;font-size:1.12rem}
       const outgoing=t.from_user_id===me;
       const counterparty=outgoing?t.to_member_number:t.from_member_number;
       const amount=formatIptUnits(t.ipt_units);
-      const title=outgoing?"轉出":"轉入";
+      const title=tr(outgoing?"轉出":"轉入");
       const sign=outgoing?"-":"+";
       const cls=outgoing?"debit":"credit";
       return `<div class="tx-card">
@@ -619,12 +622,12 @@ h2{margin:0 0 12px;font-size:1.12rem}
             <div class="tx-title">${title}｜${counterparty}</div>
             <div class="tx-meta">
               ${fmtTime(t.created_at)}<br>
-              狀態：completed
+              ${tr("狀態")}：completed
             </div>
           </div>
           <div class="tx-amount ${cls}">${sign}${amount} IPT</div>
         </div>
-        <div class="tx-id">交易編號：${t.transaction_id}</div>
+        <div class="tx-id">${tr("交易編號")}：${t.transaction_id}</div>
       </div>`;
     }).join("");
   }
@@ -632,7 +635,7 @@ h2{margin:0 0 12px;font-size:1.12rem}
   function renderPlatform(){
     const p=Number(platformData?.balances?.p?.available_units||0);
     const iptUnits=Number(platformData?.balances?.platform_ipt?.available_units||0);
-    $("pBalance").textContent=p.toLocaleString("zh-TW")+" P";
+    $("pBalance").textContent=p.toLocaleString(numberLocale())+" P";
     $("platformIptBalance").textContent=formatIptUnits(iptUnits)+" IPT";
     $("transferAvailable").textContent=formatIptUnits(iptUnits)+" IPT";
     renderPreview();
@@ -643,20 +646,20 @@ h2{margin:0 0 12px;font-size:1.12rem}
 
     const rows=(platformData?.ledger||[]).slice(0,12);
     if(!rows.length){
-      $("ledgerList").innerHTML='<div class="note">目前沒有平台帳本紀錄。</div>';
+      $("ledgerList").innerHTML=`<div class="note">${tr("目前沒有平台帳本紀錄。")}</div>`;
       return;
     }
     $("ledgerList").innerHTML=rows.map(r=>{
       const isIpt=r.asset_code==="IPT";
-      const amount=isIpt ? formatIptUnits(r.amount_units)+" IPT" : Number(r.amount_units||0).toLocaleString("zh-TW")+" P";
+      const amount=isIpt ? formatIptUnits(r.amount_units)+" IPT" : Number(r.amount_units||0).toLocaleString(numberLocale())+" P";
       const sign=r.direction==="credit"?"+":"-";
       const cls=r.direction==="credit"?"credit":"debit";
-      const label=r.reference_type==="p_ipt_conversion"?"P → IPT 兌換":
-                  r.reference_type==="platform_p_credit"?"P 發放":
-                  r.reference_type==="platform_ipt_transfer"?"平台 IPT 轉帳":
-                  (r.entry_type||"交易");
+      const label=r.reference_type==="p_ipt_conversion"?tr("P → IPT 兌換"):
+                  r.reference_type==="platform_p_credit"?tr("P 發放"):
+                  r.reference_type==="platform_ipt_transfer"?tr("平台 IPT 轉帳"):
+                  tr(r.entry_type||"交易");
       const counterparty=r?.metadata?.counterparty_member_number
-        ? `｜對方 ${r.metadata.counterparty_member_number}` : "";
+        ? `｜${tr("對方")} ${r.metadata.counterparty_member_number}` : "";
       return `<div class="ledger-row">
         <div>
           <div class="ledger-title">${label}</div>
@@ -671,11 +674,11 @@ h2{margin:0 0 12px;font-size:1.12rem}
     const m=chainData?.member||{};
     const a=chainData?.asset||{};
     $("chainIptBalance").textContent=formatChain(m.ipt_balance)+" IPT";
-    $("walletAddress").textContent=m.wallet_address||"尚未綁定 Trust Wallet";
-    $("walletVerified").textContent=m.wallet_verified?"已驗證":"未驗證";
+    $("walletAddress").textContent=m.wallet_address||tr("尚未綁定 Trust Wallet");
+    $("walletVerified").textContent=tr(m.wallet_verified?"已驗證":"未驗證");
     $("walletVerified").style.background=m.wallet_verified?"#e8f7ef":"#fff3d7";
     $("walletVerified").style.color=m.wallet_verified?"#17694f":"#7e5a08";
-    $("chainTxCount").textContent=Number(a.total_transactions||0).toLocaleString("zh-TW");
+    $("chainTxCount").textContent=Number(a.total_transactions||0).toLocaleString(numberLocale());
   }
 
   function renderTotal(){
@@ -1091,6 +1094,15 @@ h2{margin:0 0 12px;font-size:1.12rem}
   $("historyAllBtn").addEventListener("click",()=>{historyFilter="all";renderTransferHistory()});
   $("historyOutBtn").addEventListener("click",()=>{historyFilter="out";renderTransferHistory()});
   $("historyInBtn").addEventListener("click",()=>{historyFilter="in";renderTransferHistory()});
+
+  window.addEventListener("ipt-language-change",()=>{
+    try{
+      renderPlatform();
+      renderChain();
+      renderTotal();
+      renderTransferState();
+    }catch(e){ console.warn("HF3 i18n rerender",e); }
+  });
 
   $("chainBalanceBtn").addEventListener("click",()=>location.href="./wallet-core-v4.12.html?go=balance");
   $("withdrawPlatformBtn").addEventListener("click",()=>{

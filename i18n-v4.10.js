@@ -438,3 +438,49 @@
     Object.assign(window.IPTI18N.dictionaries["en"],en);
   }
 })();
+
+
+/* V4.14.2 HF3 dynamic wallet terminology additions */
+;(() => {
+  function install(){
+    const api=window.IPTI18N;
+    if(!api?.dictionaries){
+      setTimeout(install,50);
+      return;
+    }
+    Object.assign(api.dictionaries["zh-CN"],{
+      "V4.14.2 HF3｜雙模式錢包":"V4.14.2 HF3｜双模式钱包",
+      "Trust Wallet／鏈上 IPT":"Trust Wallet／链上 IPT",
+      "綁定錢包":"绑定钱包",
+      "P → IPT 兌換":"P → IPT 兑换",
+      "P 發放":"P 发放",
+      "平台 IPT 轉帳":"平台 IPT 转账",
+      "交易":"交易",
+      "對方":"对方",
+      "狀態":"状态",
+      "交易編號":"交易编号",
+      "目前沒有平台帳本紀錄。":"目前没有平台账本记录。",
+      "目前沒有符合條件的平台 IPT 轉帳紀錄。":"目前没有符合条件的平台 IPT 转账记录。"
+    });
+    Object.assign(api.dictionaries.en,{
+      "V4.14.2 HF3｜雙模式錢包":"V4.14.2 HF3 | Dual-Mode Wallet",
+      "Trust Wallet／鏈上 IPT":"Trust Wallet / On-chain IPT",
+      "綁定錢包":"Linked Wallet",
+      "P → IPT 兌換":"P → IPT Conversion",
+      "P 發放":"P Credit",
+      "平台 IPT 轉帳":"Platform IPT Transfer",
+      "交易":"Transaction",
+      "對方":"Counterparty",
+      "狀態":"Status",
+      "交易編號":"Transaction ID",
+      "目前沒有平台帳本紀錄。":"No platform ledger records yet.",
+      "目前沒有符合條件的平台 IPT 轉帳紀錄。":"No matching Platform IPT transfer records."
+    });
+    api.apply?.(document);
+  }
+  if(document.readyState==="loading"){
+    window.addEventListener("DOMContentLoaded",install,{once:true});
+  }else{
+    install();
+  }
+})();

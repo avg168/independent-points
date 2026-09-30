@@ -4,6 +4,18 @@
     {
       "version": "V4.14.2",
       "date": "2026-09-30",
+      "channel": "hotfix-3-dynamic-i18n",
+      "title": "Hotfix 3 雙模式錢包動態三語補齊",
+      "notes": [
+        "補齊平台帳本動態標籤的繁中／简中／English",
+        "補齊 Trust Wallet／鏈上 IPT 與綁定錢包標題翻譯",
+        "語言切換後立即重新渲染交易紀錄、帳本與鏈上錢包狀態",
+        "不修改 Supabase 資產、提領、Mint、合約或 Sepolia 交易"
+      ]
+    },
+    {
+      "version": "V4.14.2",
+      "date": "2026-09-30",
       "channel": "hotfix-2-i18n",
       "title": "Hotfix 2 V4.14.2 三語系整合",
       "notes": [

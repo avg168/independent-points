@@ -1,7 +1,7 @@
 {
   "product": "Independent Points",
   "version": "V4.14.2",
-  "build": "20260930-4142-hf2",
+  "build": "20260930-4142-hf3",
   "release_date": "2026-09-30",
   "channel": "production",
   "rollback_version": "V4.12.4",
@@ -26,6 +26,9 @@
     }
   },
   "notes": [
+    "Hotfix 3: complete dynamic multilingual labels in the dual-mode wallet ledger and on-chain wallet section",
+    "Hotfix 3: translate P → IPT conversion, P credit, platform IPT transfer, counterparty, status and transaction ID",
+    "Hotfix 3: re-render dynamic wallet data immediately when zh-TW / zh-CN / English changes",
     "Hotfix 2: connect V4.14.2 dual-mode wallet, payment, withdrawal, withdrawal MFA and admin withdrawal pages to the shared zh-TW / zh-CN / English language engine",
     "Hotfix 2: translate the new Home entries for Dual-mode Platform Wallet and Withdrawal Review",
     "Hotfix 2: keep language selection synchronized through the existing ipt_language localStorage setting",
@@ -61,5 +64,5 @@
   ],
   "manifest_filename": "update-manifest-v4.12.json",
   "manifest_filename_note": "Legacy filename retained for compatibility; manifest content is V4.14.2.",
-  "hotfix": 2
+  "hotfix": 3
 }

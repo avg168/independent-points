@@ -1,7 +1,7 @@
 Independent Points V4.14.2｜正式封版驗收報告
 
 正式封版日期：2026-09-30
-Build：20260930-4142-hf2
+Build：20260930-4142-hf3
 Network：Ethereum Sepolia (11155111 / 0xaa36a7)
 Contract：0xd3fb2480aadb8b168ec7e88a0e5c847d9750cb87
 
@@ -51,3 +51,10 @@ Contract：0xd3fb2480aadb8b168ec7e88a0e5c847d9750cb87
 - 首頁新增「雙模式平台錢包／提領審核」翻譯
 - 雙模式錢包、公開收款、提領、提領 MFA、管理員提領頁跟隨 ipt_language
 - 不修改資產、提領、Mint、Sepolia 或 Supabase 結算邏輯
+
+八、Hotfix 3
+- 補齊雙模式錢包動態帳本與鏈上區塊三語翻譯
+- English：P → IPT Conversion / P Credit / Platform IPT Transfer / Counterparty
+- 简中同步補齊
+- 語言切換時重新渲染動態交易資料
+- 不修改任何資產或鏈上交易邏輯
