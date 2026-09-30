@@ -1,7 +1,7 @@
 Independent Points V4.14.2｜正式封版驗收報告
 
 正式封版日期：2026-09-30
-Build：20260930-4142
+Build：20260930-4142-hf1
 Network：Ethereum Sepolia (11155111 / 0xaa36a7)
 Contract：0xd3fb2480aadb8b168ec7e88a0e5c847d9750cb87
 
@@ -39,3 +39,9 @@ Contract：0xd3fb2480aadb8b168ec7e88a0e5c847d9750cb87
 五、回滾
 - 前端可回 V4.12.4
 - V4.14.x Supabase migrations、已完成提領紀錄與鏈上交易不可刪除或倒退
+
+六、Hotfix 1
+- 修正雙模式錢包「返回正式首頁」舊版相對網址造成的 404 風險
+- 返回首頁固定為：https://avg168.github.io/independent-points/?v=4142
+- PWA Service Worker 快取更新為 ipt-v4.14.2-hf1
+- 不修改資產、提領、合約或鏈上資料
