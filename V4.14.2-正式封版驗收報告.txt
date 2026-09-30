@@ -1,0 +1,41 @@
+Independent Points V4.14.2｜正式封版驗收報告
+
+正式封版日期：2026-09-30
+Build：20260930-4142
+Network：Ethereum Sepolia (11155111 / 0xaa36a7)
+Contract：0xd3fb2480aadb8b168ec7e88a0e5c847d9750cb87
+
+一、正式功能
+- 雙模式錢包：平台 IPT Off-chain + Trust Wallet IPT On-chain
+- P 點數：120 P = 100.00 平台 IPT
+- 平台 IPT 會員互轉（不上鏈、無 Gas）
+- 平台 QR 收款／公開收款確認／登入後返回付款
+- 平台 IPT 提領申請、鎖定、取消
+- 管理員核准／拒絕
+- Trust Wallet Owner Mint
+- 後端獨立 Sepolia 鏈上驗證與最終結算
+
+二、端到端提領驗收
+- 數量：10.00 IPT
+- tx：0x45d7de62bbf8ee42d66c70de114c2a5be3927818bd9a495a41c3db0d174df15a
+- Block：11811222
+- 驗收時 confirmations：13
+- 狀態：requested → approved → tx_submitted → chain_confirmed → completed
+- Ledger：withdrawal debit 10.00 IPT
+
+三、安全原則
+- 會員提領要求有效登入、MFA AAL2、Trusted Device
+- 管理員提領審核要求 admin + AAL2 + Trusted Device
+- Owner 私鑰僅存在 Trust Wallet
+- Supabase / GitHub / Edge Function 不保存 Owner 私鑰
+- 平台 locked IPT 只有鏈上證明驗證成功後才正式結算
+- receipt status = 0 時才走失敗解鎖；未確認交易不自動誤解鎖
+
+四、手機驗收
+- Android Chrome：通過
+- Trust Wallet DApp Browser：通過
+- 長錢包地址／合約地址／tx hash／UUID：不得超出版面，通過
+
+五、回滾
+- 前端可回 V4.12.4
+- V4.14.x Supabase migrations、已完成提領紀錄與鏈上交易不可刪除或倒退

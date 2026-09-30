@@ -13,4 +13,18 @@ Disallow: /security-center-v4.12.html
 Disallow: /security-ops-v4.12.html
 Disallow: /event-center-v4.12.html
 
+Disallow: /wallet-dual-v4.14.2.html
+
+Disallow: /auth-security-v4.14.2.html
+
+Disallow: /device-security-v4.14.2.html
+
+Disallow: /pay-v4.14.2.html
+
+Disallow: /withdrawal-v4.14.2.html
+
+Disallow: /withdrawal-mfa-v4.14.2.html
+
+Disallow: /withdrawal-admin-v4.14.2.html
+
 Sitemap: https://avg168.github.io/independent-points/sitemap.xml
