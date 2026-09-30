@@ -1,48 +1,58 @@
 {
   "product": "Independent Points",
-  "version": "V4.12.4",
-  "build": "20260928-4124-hf23",
-  "release_date": "2026-09-28",
+  "version": "V4.14.2",
+  "build": "20260930-4142",
+  "release_date": "2026-09-30",
   "channel": "production",
-  "rollback_version": "V4.12.3.2",
-  "fallback_version": "V4.12.3.2",
+  "rollback_version": "V4.12.4",
+  "fallback_version": "V4.12.4",
   "network": "Ethereum Sepolia",
   "chain_id": "11155111 / 0xaa36a7",
   "contract": "0xd3fb2480aadb8b168ec7e88a0e5c847d9750cb87",
-  "notes": [
-    "Hotfix 23: synchronize production manifest, Trusted Device integrity checks and browser titles",
-    "Hotfix 23: refresh PWA cache name to ipt-v4.12.4-hf23",
-    "Security acceptance production seal after Android/Chrome end-to-end verification",
-    "Administrator sensitive pages require verified MFA AAL2",
-    "Integrates trilingual dynamic-text fixes across production pages",
-    "Maintenance and Version Update diagnostics are collapsed by default",
-    "Keeps member names, emails, wallet addresses and hashes as original data",
-    "Keeps tested Sepolia, Supabase and PWA production behavior"
+  "platform_ipt_rate": "120 P = 100.00 platform IPT",
+  "backend_migrations": [
+    "v4130_platform_wallet_core",
+    "v4131_p_source",
+    "v4133_platform_ipt_transfer",
+    "v41342_public_payment_links",
+    "v4140_withdrawal_request_layer",
+    "v4140_hf4_direct_aal2_withdrawal_rpc",
+    "v4141_admin_chain_settlement"
   ],
+  "edge_functions": {
+    "withdrawal-chain-verify": {
+      "version": 1,
+      "verify_jwt": true
+    }
+  },
+  "notes": [
+    "Formalizes dual-mode wallet: platform IPT (off-chain) + Trust Wallet IPT (on-chain)",
+    "Formalizes 120P -> 100 platform IPT conversion, member-to-member platform IPT transfer and QR receive/payment flow",
+    "Formalizes platform IPT withdrawal request, lock/cancel, admin approval/rejection and Trust Wallet Owner Mint",
+    "Server independently verifies Sepolia mint calldata, receipt, ERC-20 mint Transfer event and confirmations before final settlement",
+    "Owner private key remains only in Trust Wallet; no server-side private key storage",
+    "Android Trust Wallet DApp Browser signing flow accepted end-to-end",
+    "Responsive hardening prevents wallet addresses, transaction hashes and UUIDs from overflowing mobile layouts",
+    "V4.12 security centers and proven chain wallet core remain available under stable filenames"
+  ],
+  "acceptance": {
+    "withdrawal_end_to_end": true,
+    "accepted_block": 11811222,
+    "accepted_tx": "0x45d7de62bbf8ee42d66c70de114c2a5be3927818bd9a495a41c3db0d174df15a",
+    "android_chrome": true,
+    "trust_wallet_dapp_browser": true,
+    "responsive_long_identifiers": true
+  },
   "rollback_steps": [
-    "若 V4.12.4 異常，先重新載入並清除 IPT 快取。",
-    "仍異常時可回復 V4.12.3.2。",
-    "回復網頁版本時不修改 Supabase、Owner、pendingOwner 或 paused。"
+    "若 V4.14.2 前端異常，先重新載入並清除 IPT 快取。",
+    "仍異常時，前端可回復 V4.12.4；已完成的 V4.14.x Supabase migrations 與鏈上交易紀錄不得回滾或刪除。",
+    "回復前端版本時不修改 Supabase 會員資產、IPT 合約、Owner、pendingOwner、paused 或既有 tx hash。"
   ],
   "languages": [
     "zh-TW",
     "zh-CN",
     "en"
   ],
-  "i18n_engine": "i18n-v4.10.js",
-  "security": {
-    "server_validated_get_user": true,
-    "mfa_totp_ui": true,
-    "admin_client_aal2_gate": true,
-    "admin_edge_aal2_enforced": true,
-    "protected_admin_functions": [
-      "admin-members",
-      "admin-member-detail",
-      "admin-member-actions",
-      "admin-assets",
-      "admin-asset-detail"
-    ]
-  },
-  "hotfix": 23,
-  "rollback_commit": "0a21d8e3e775d0dc018b7dfc88922b9cadf9e4e2"
+  "manifest_filename": "update-manifest-v4.12.json",
+  "manifest_filename_note": "Legacy filename retained for compatibility; manifest content is V4.14.2."
 }

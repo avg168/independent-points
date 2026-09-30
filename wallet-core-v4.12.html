@@ -11,11 +11,11 @@ html.ipt-auth-pending body > *:not(#iptAuthGuardOverlay){
 </style>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
-<script src="./auth-guard-v4.12.js?v=4124hf19"></script>
+<script src="./auth-guard-v4.12.js?v=4142hf19"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Independent Points V4.12.4 CORE｜錢包核心</title>
-<!-- V4.12.4 Logout Wallet Fail-Closed Hotfix 14 -->
+<title>Independent Points V4.14.2 CORE｜錢包核心</title>
+<!-- V4.14.2 Logout Wallet Fail-Closed Hotfix 14 -->
 <style>
 :root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;color:#172033}
 *{box-sizing:border-box}
@@ -284,7 +284,7 @@ body{
 }
 
 
-/* ===== V4.12.4 Android bottom-navigation fix ===== */
+/* ===== V4.14.2 Android bottom-navigation fix ===== */
 .v43-bottom-nav{
   position:fixed!important;
   left:50%!important;
@@ -351,7 +351,7 @@ body{
 }
 
 
-/* ===== V4.12.4 reliable in-page navigation ===== */
+/* ===== V4.14.2 reliable in-page navigation ===== */
 .v43-bottom-nav{
   display:none!important;
 }
@@ -458,7 +458,7 @@ body.v41-route.route-ownership.show-ownership #securityGuardSection{display:bloc
 
 </style>
 
-<link rel="manifest" href="./manifest.webmanifest?v=4124">
+<link rel="manifest" href="./manifest.webmanifest?v=4142">
 <meta name="theme-color" content="#10243d">
 <meta name="application-name" content="Independent Points">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -468,20 +468,20 @@ body.v41-route.route-ownership.show-ownership #securityGuardSection{display:bloc
 <link rel="icon" type="image/svg+xml" href="./ipt-icon-192.png">
 
 <link rel="apple-touch-icon" href="./ipt-apple-touch-180.png">
-<script src="./i18n-v4.10.js?v=4124" defer></script>
+<script src="./i18n-v4.10.js?v=4142" defer></script>
 </head>
 <body>
 <div class="v42-sticky-nav">
-  <button id="v42BackHomeBtn" class="v42-back" type="button">← V4.12.4 首頁</button>
+  <button id="v42BackHomeBtn" class="v42-back" type="button">← V4.14.2 首頁</button>
   <button id="v42ReadNowBtn" class="v42-read" type="button">重新讀取鏈上資料</button>
 </div>
 <header>
   <div class="v43-product-tag">正式鏈上操作模組</div><div class="v43-module-note">Ethereum Sepolia｜Trust Wallet / WalletConnect</div>
-  <div id="versionBadge" style="display:inline-block;margin-bottom:10px;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.78rem;font-weight:800;letter-spacing:.04em">V4.12.4 CORE</div>
+  <div id="versionBadge" style="display:inline-block;margin-bottom:10px;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.78rem;font-weight:800;letter-spacing:.04em">V4.14.2 CORE</div>
   <h1 id="v41RouteTitle">Independent Points</h1>
   <p id="v41RouteSubtitle">會員點數錢包｜Ethereum Sepolia</p>
   <div class="v41-head-actions">
-    <button id="v41HomeBtn" class="v41-home" type="button">返回 V4.12.4 首頁</button>
+    <button id="v41HomeBtn" class="v41-home" type="button">返回 V4.14.2 首頁</button>
     <button id="v41TopReadBtn" class="v41-refresh" type="button">重新讀取鏈上資料</button>
   </div>
 </header>
@@ -882,7 +882,7 @@ async function initWC() {
     events: ["chainChanged","accountsChanged"],
     optionalEvents: ["connect","disconnect","message"],
     metadata: {
-      name: "Independent Points V4.12.4",
+      name: "Independent Points V4.14.2",
       description: "Independent Points member wallet on Ethereum Sepolia",
       url: "https://avg168.github.io",
       icons: []
@@ -3247,7 +3247,7 @@ $("openHistoryBtn")?.addEventListener("click", () => {
 
 
 
-// ===== V4.12.4 phone-safe formal operations security guard =====
+// ===== V4.14.2 phone-safe formal operations security guard =====
 const V48_EVENT_KEY = "ipt_v48_security_events";
 const V48_LAST_WALLET_KEY = "ipt_v48_last_wallet";
 const V48_GUARD_UNTIL_KEY = "ipt_v48_guard_until";
@@ -3410,7 +3410,7 @@ $("armSecurityGuardBtn")?.addEventListener("click",async()=>{
 });
 
 $("openSecurityOpsBtn")?.addEventListener("click",()=>{
-  location.href="./security-ops-v4.12.html?v=4124";
+  location.href="./security-ops-v4.12.html?v=4142";
 });
 
 // Capture high-risk sends before the existing transaction handlers.
@@ -3515,7 +3515,7 @@ v48RenderGuardLocal();
   }
 
   $("v41HomeBtn")?.addEventListener("click", () => {
-    location.href = "./index.html?v=4124";
+    location.href = "./index.html?v=4142";
   });
 
   $("v41TopReadBtn")?.addEventListener("click", () => {
@@ -3611,7 +3611,7 @@ v48RenderGuardLocal();
 (() => {
   const $ = (id) => document.getElementById(id);
 
-  $("v42BackHomeBtn")?.addEventListener("click",()=>location.href="./index.html?v=4124");
+  $("v42BackHomeBtn")?.addEventListener("click",()=>location.href="./index.html?v=4142");
   $("v42ReadNowBtn")?.addEventListener("click",()=>{
     const b=$("readBtn");
     if(b && !b.disabled){ b.click(); return; }
@@ -3667,7 +3667,7 @@ v48RenderGuardLocal();
 
 <script>
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js?v=4124",{updateViaCache:"none"}).catch(()=>{}));
+  window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js?v=4142",{updateViaCache:"none"}).catch(()=>{}));
 }
 </script>
 

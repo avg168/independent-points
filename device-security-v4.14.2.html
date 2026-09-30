@@ -19,12 +19,14 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
 .actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.note{font-size:.82rem;color:#64748b;line-height:1.65;margin-top:10px}
 .device{border:1px solid #dbe3ed;border-radius:14px;padding:12px;margin-top:10px;background:#f8fafc}.device-title{font-weight:900;color:#17365d}.device-meta{font-size:.78rem;color:#64748b;line-height:1.55;margin-top:5px;word-break:break-word}
 .langbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.langbar button{min-height:38px;padding:7px 10px}.langbar button.active{background:#fff;color:#17365d;border-color:#fff}.hidden{display:none!important}
+.return-panel{border:2px solid #b9d6c9;background:#f0faf5}
+.return-dest{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.75rem;word-break:break-all;color:#64748b;margin-top:8px}
 @media(max-width:520px){.grid,.actions{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <header>
-  <div class="badge">V4.14.2 · Hotfix 19</div>
+  <div class="badge">V4.14.2｜正式受信任裝置</div>
   <h1 id="title">受信任裝置</h1>
   <p id="subtitle">用已驗證的手機／瀏覽器降低密碼被盜後的帳戶風險。</p>
   <div class="langbar">
@@ -34,6 +36,13 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
   </div>
 </header>
 <main>
+  <section class="panel return-panel hidden" id="paymentReturnPanel">
+    <h2>返回平台 IPT 付款</h2>
+    <div id="paymentReturnStatus" class="status">正在確認這個裝置…</div>
+    <div id="paymentReturnDest" class="return-dest"></div>
+    <button id="paymentReturnBtn" class="primary hidden" type="button" style="width:100%;margin-top:12px">返回付款頁</button>
+    <button id="paymentLoginBtn" class="blue hidden" type="button" style="width:100%;margin-top:12px">返回登入／MFA</button>
+  </section>
   <section class="panel">
     <h2 id="hState">目前裝置狀態</h2>
     <div id="state" class="status">正在檢查…</div>
@@ -71,7 +80,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
   </section>
 </main>
 <script>
-/* V4.14.2 Trusted Device Hotfix 19 + I18N Consistency Hotfix 20 */
+/* V4.14.2 Trusted Device Production */
 (() => {
   const URL="https://uccexvgqmoxhgykkjdcy.supabase.co";
   const KEY="sb_publishable_FBsN1DYTQMv2_bWhpbXHAA_qdAq7ri7";
@@ -79,6 +88,85 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
   const $=id=>document.getElementById(id);
   let lang=localStorage.getItem("ipt_language")||"zh-TW";
   let lastState=null;
+
+  const RETURN_PATH="/independent-points/wallet-dual-v4.14.2.html";
+  let returnTimer=0;
+
+  function validateNext(raw){
+    if(!raw) return "";
+    try{
+      const u=new URL(raw,location.origin);
+      if(u.origin!==location.origin) return "";
+      if(u.pathname!==RETURN_PATH) return "";
+      return u.pathname+u.search+u.hash;
+    }catch(_){
+      return "";
+    }
+  }
+
+  function safeNext(){
+    const fromUrl=validateNext(new URLSearchParams(location.search).get("next")||"");
+    if(fromUrl) return fromUrl;
+
+    try{
+      const savedAt=Number(localStorage.getItem("ipt_pending_pay_saved_at_v41342")||0);
+      if(savedAt && Date.now()-savedAt <= 30*60*1000){
+        const saved=validateNext(localStorage.getItem("ipt_pending_pay_next_v41342")||"");
+        if(saved) return saved;
+
+        const token=String(localStorage.getItem("ipt_pending_pay_token_v41342")||"");
+        if(/^[A-Za-z0-9_-]{43}$/.test(token)){
+          return RETURN_PATH+"?t="+encodeURIComponent(token)+"&v=4142";
+        }
+      }
+    }catch(_){}
+
+    return "";
+  }
+
+  function nextParam(){
+    const n=safeNext();
+    return n?"?next="+encodeURIComponent(n):"";
+  }
+
+  function renderPaymentReturn(){
+    const panel=$("paymentReturnPanel");
+    const next=safeNext();
+    if(!panel) return;
+
+    clearTimeout(returnTimer);
+    if(!next){
+      panel.classList.add("hidden");
+      return;
+    }
+
+    panel.classList.remove("hidden");
+    $("paymentReturnDest").textContent=next;
+    $("paymentReturnBtn").classList.add("hidden");
+    $("paymentLoginBtn").classList.add("hidden");
+
+    if(!lastState){
+      $("paymentReturnStatus").className="status warn";
+      $("paymentReturnStatus").textContent="請先完成會員登入。";
+      $("paymentLoginBtn").classList.remove("hidden");
+      return;
+    }
+
+    if(lastState.protection_enabled && !lastState.trusted_device){
+      $("paymentReturnStatus").className="status warn";
+      $("paymentReturnStatus").textContent=
+        lastState.aal==="aal2"
+          ?"MFA 已完成，請按下「信任這支裝置」。"
+          :"請先完成 MFA，再信任這支裝置。";
+      $("paymentLoginBtn").classList.remove("hidden");
+      return;
+    }
+
+    $("paymentReturnStatus").className="status ok";
+    $("paymentReturnStatus").textContent="這個裝置已可使用會員與錢包功能，即將返回付款頁。";
+    $("paymentReturnBtn").classList.remove("hidden");
+    returnTimer=setTimeout(()=>location.replace(next),900);
+  }
 
   const S={
     "zh-TW":{
@@ -192,6 +280,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       $("state").className="status err"; $("state").textContent=T("readyUntrusted");
       if(s.aal==="aal2") $("trustBtn").classList.remove("hidden"); else $("mfaBtn").classList.remove("hidden");
     }
+    renderPaymentReturn();
   }
 
   function fmtTime(v){if(!v)return"—";const d=new Date(v);return Number.isNaN(d.getTime())?"—":d.toLocaleString(lang==="en"?"en-US":"zh-TW",{hour12:false})}
@@ -223,6 +312,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       ["protection","trusted","aal","nameValue"].forEach(id=>$(id).textContent="—");
       ["enableBtn","trustBtn","mfaBtn"].forEach(id=>$(id).classList.add("hidden"));
       $("managePanel").classList.add("hidden");
+      renderPaymentReturn();
       return;
     }
     if(!$("deviceNameInput").value) $("deviceNameInput").value=defaultName();
@@ -234,10 +324,17 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
   $("enableBtn").onclick=async()=>{try{await invoke("enable_and_trust");await refresh()}catch(e){$("state").className="status err";$("state").textContent=T("failed")+(e?.message||String(e))}};
   $("trustBtn").onclick=async()=>{try{await invoke("trust_current");await refresh()}catch(e){$("state").className="status err";$("state").textContent=T("failed")+(e?.message||String(e))}};
   $("disableBtn").onclick=async()=>{try{await invoke("disable");await refresh()}catch(e){$("state").className="status err";$("state").textContent=T("failed")+(e?.message||String(e))}};
-  $("mfaBtn").onclick=()=>location.href="./auth-security-v4.12.html?v=4142#trustedDeviceSection";
+  $("mfaBtn").onclick=()=>location.href="./auth-security-v4.14.2.html"+nextParam()+"#trustedDeviceSection";
   $("refreshBtn").onclick=refresh;
-  $("securityBtn").onclick=()=>location.href="./auth-security-v4.12.html?v=4142#trustedDeviceSection";
-  $("homeBtn").onclick=()=>location.href="./index.html?v=4142";
+  $("securityBtn").onclick=()=>location.href="./auth-security-v4.14.2.html"+nextParam()+"#trustedDeviceSection";
+  $("homeBtn").onclick=()=>location.href="../index.html?v=4124";
+  $("paymentReturnBtn").onclick=()=>{
+    const next=safeNext();
+    if(next) location.replace(next);
+  };
+  $("paymentLoginBtn").onclick=()=>{
+    location.href="./auth-security-v4.14.2.html"+nextParam()+"#trustedDeviceSection";
+  };
   applyLang();
   refresh().catch(e=>{$("state").className="status err";$("state").textContent=T("failed")+(e?.message||String(e))});
 })();

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Independent Points V4.14.2｜帳戶安全與 MFA</title>
+<title>Independent Points V4.14.2｜付款登入與 MFA</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
 <style>
 :root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;color:#172033;background:#f4f7fb}
@@ -17,6 +17,9 @@ main{max-width:760px;margin:auto;padding:16px 14px 72px}.panel{background:#fff;b
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.card{background:#f8fafc;border:1px solid #e1e7ef;border-radius:14px;padding:13px}.k{font-size:.78rem;color:#64748b}.v{font-weight:850;margin-top:5px;word-break:break-all}
 button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding:10px 12px;font:inherit}button{font-weight:850;cursor:pointer}button.primary{background:#176c59;color:#fff;border-color:#176c59}button.blue{background:#2a5f91;color:#fff;border-color:#2a5f91}button.light{background:#fff;color:#29445f}button.danger{background:#a83b45;color:#fff;border-color:#a83b45}
 .actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.full{grid-column:1/-1}.note{font-size:.82rem;color:#64748b;line-height:1.65;margin-top:10px}.hidden{display:none!important}
+.return-panel{border:2px solid #b9d6c9;background:#f0faf5}
+.return-actions{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
+.return-dest{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.75rem;word-break:break-all;color:#64748b;margin-top:8px}
 #qrWrap{margin-top:14px;text-align:center}#qrWrap img{max-width:260px;width:100%;height:auto;background:white;padding:10px;border-radius:14px;border:1px solid #dbe3ed}
 .secret{word-break:break-all;background:#f8fafc;border:1px solid #e1e7ef;border-radius:12px;padding:10px;margin-top:10px;font-family:ui-monospace,monospace;font-size:.82rem}
 .langbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.langbar button{min-height:38px;padding:7px 10px}
@@ -25,7 +28,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
 </head>
 <body>
 <header>
-  <div class="version">V4.14.2</div>
+  <div class="version">V4.14.2｜正式付款登入與 MFA</div>
   <h1 id="title">帳戶安全與 MFA</h1>
   <p id="subtitle">每次登入重新確認身分；管理員使用驗證器 App 進行第二因素驗證。</p>
   <div class="langbar">
@@ -44,6 +47,17 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
     <button id="loginSubmitBtn" class="primary" type="button" style="width:100%;margin-top:10px">登入</button>
     <div class="note" id="loginNote">Supabase 會員登入與 Trust Wallet 連線是兩件不同的事。登入成功後才會建立會員 Auth Session。</div>
   </section>
+
+  <section class="panel return-panel hidden" id="paymentReturnPanel">
+    <h2>返回平台 IPT 付款</h2>
+    <div id="paymentReturnStatus" class="status">正在確認登入、MFA 與受信任裝置…</div>
+    <div id="paymentReturnDest" class="return-dest"></div>
+    <div class="return-actions">
+      <button id="paymentReturnBtn" class="primary hidden" type="button">返回付款頁</button>
+      <button id="paymentDeviceBtn" class="blue hidden" type="button">完成受信任裝置驗證</button>
+    </div>
+  </section>
+
   <section class="panel">
     <h2 id="hIdentity">登入身分驗證</h2>
     <div id="identityStatus" class="status">正在向伺服器重新驗證目前登入身分…</div>
@@ -121,18 +135,155 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       <button id="signOutBtn" class="danger full" type="button">登出此裝置</button>
     </div>
     <div class="note" id="rolloutNote">
-      V4.14.2 已完成 MFA 前端驗證與管理員 Edge Functions 後端 AAL2 強制保護。管理員敏感 API 必須完成 MFA 後才能執行。
+      V4.12.4 已完成 MFA 前端驗證與管理員 Edge Functions 後端 AAL2 強制保護。管理員敏感 API 必須完成 MFA 後才能執行。
     </div>
   </section>
 </main>
 <script>
-/* V4.14.2 Backup MFA FriendlyName Hotfix 16 + Signed-Out Redirect Hotfix 17 + Trusted Device Hotfix 19 */
+/* V4.12.4 Backup MFA FriendlyName Hotfix 16 + Signed-Out Redirect Hotfix 17 + Trusted Device Hotfix 19 */
 (() => {
   const URL="https://uccexvgqmoxhgykkjdcy.supabase.co";
   const KEY="sb_publishable_FBsN1DYTQMv2_bWhpbXHAA_qdAq7ri7";
   const sb=window.supabase.createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
   const $=id=>document.getElementById(id);
   let factorId="", enrollFactorId="", backupEnrollFactorId="", staleFactorIds=[], verifiedFactors=[], lang=localStorage.getItem("ipt_language")||"zh-TW";
+
+  const RETURN_PATH="/independent-points/wallet-dual-v4.14.2.html";
+  let returnTimer=0;
+
+  function validateNext(raw){
+    if(!raw) return "";
+    try{
+      const u=new URL(raw,location.origin);
+      if(u.origin!==location.origin) return "";
+      if(u.pathname!==RETURN_PATH) return "";
+      return u.pathname+u.search+u.hash;
+    }catch(_){
+      return "";
+    }
+  }
+
+  function safeNext(){
+    // Primary: URL query parameter.
+    const fromUrl=validateNext(new URLSearchParams(location.search).get("next")||"");
+    if(fromUrl) return fromUrl;
+
+    // Fallback: same-origin storage, for Android/in-app browsers that lose next=.
+    try{
+      const savedAt=Number(localStorage.getItem("ipt_pending_pay_saved_at_v41342")||0);
+      if(savedAt && Date.now()-savedAt <= 30*60*1000){
+        const saved=validateNext(localStorage.getItem("ipt_pending_pay_next_v41342")||"");
+        if(saved) return saved;
+
+        const token=String(localStorage.getItem("ipt_pending_pay_token_v41342")||"");
+        if(/^[A-Za-z0-9_-]{43}$/.test(token)){
+          return RETURN_PATH+"?t="+encodeURIComponent(token)+"&v=4142";
+        }
+      }
+    }catch(_){}
+
+    return "";
+  }
+
+  function nextParam(){
+    const n=safeNext();
+    return n?"?next="+encodeURIComponent(n):"";
+  }
+
+  function deviceToken(){
+    const key="ipt_trusted_device_token_v1";
+    try{
+      let token=localStorage.getItem(key)||"";
+      if(/^[A-Za-z0-9_-]{32,256}$/.test(token)) return token;
+      const bytes=new Uint8Array(32);
+      crypto.getRandomValues(bytes);
+      token=Array.from(bytes,b=>b.toString(16).padStart(2,"0")).join("");
+      localStorage.setItem(key,token);
+      return token;
+    }catch(_){
+      return "";
+    }
+  }
+
+  function deviceName(){
+    const ua=navigator.userAgent||"";
+    if(/Android/i.test(ua)) return "Android 裝置";
+    if(/iPhone|iPad|iPod/i.test(ua)) return "iPhone / iPad";
+    return "瀏覽器裝置";
+  }
+
+  function setReturnState(kind,text){
+    const box=$("paymentReturnStatus");
+    if(!box) return;
+    box.className="status"+(kind?" "+kind:"");
+    box.textContent=text;
+  }
+
+  async function updatePaymentReturn(autoReturn=true){
+    const next=safeNext();
+    const panel=$("paymentReturnPanel");
+    if(!panel) return;
+    clearTimeout(returnTimer);
+
+    if(!next){
+      panel.classList.add("hidden");
+      return;
+    }
+
+    panel.classList.remove("hidden");
+    $("paymentReturnDest").textContent=next;
+    $("paymentReturnBtn").classList.add("hidden");
+    $("paymentDeviceBtn").classList.add("hidden");
+
+    const {data:{user},error:userErr}=await sb.auth.getUser();
+    if(userErr||!user){
+      setReturnState("warn","請先完成會員登入。登入成功後會繼續檢查 MFA 與受信任裝置。");
+      return;
+    }
+
+    const [{data:aal,error:aalErr},{data:factors,error:fErr}]=await Promise.all([
+      sb.auth.mfa.getAuthenticatorAssuranceLevel(),
+      sb.auth.mfa.listFactors()
+    ]);
+    if(aalErr||fErr){
+      setReturnState("err","目前無法確認 MFA 狀態，請稍後重新驗證。");
+      return;
+    }
+
+    const verified=(factors?.totp||[]).filter(x=>x.status==="verified");
+    if(verified.length && aal?.currentLevel!=="aal2"){
+      setReturnState("warn","此帳號已設定 MFA。請先完成本次登入的第二因素驗證。");
+      return;
+    }
+
+    try{
+      const {data,error}=await sb.functions.invoke("device-security",{
+        body:{
+          action:"status",
+          device_token:deviceToken(),
+          device_name:deviceName(),
+          user_agent:navigator.userAgent||""
+        }
+      });
+      if(error) throw error;
+
+      if(data?.allowed!==true){
+        setReturnState("warn","登入已完成，但這個瀏覽器尚未通過受信任裝置驗證。");
+        $("paymentDeviceBtn").classList.remove("hidden");
+        return;
+      }
+    }catch(e){
+      setReturnState("err","目前無法確認受信任裝置狀態："+(e?.message||String(e)));
+      return;
+    }
+
+    setReturnState("ok","登入、安全驗證都已完成，即將返回原本的付款頁。");
+    $("paymentReturnBtn").classList.remove("hidden");
+
+    if(autoReturn){
+      returnTimer=setTimeout(()=>location.replace(next),900);
+    }
+  }
 
   const S={
     "zh-TW":{
@@ -148,7 +299,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       aal2:"這次登入已完成 MFA（AAL2）。",enrollNote:"第一次設定時，按下「建立 MFA」，再用 Google Authenticator、Microsoft Authenticator、1Password 等驗證器掃描 QR Code。",
       enroll:"建立 MFA",code:"輸入驗證器 6 位數代碼",enable:"驗證並啟用 MFA",challengeNote:"這個帳號已設定 MFA。每個新的登入工作階段都要完成一次第二因素驗證，才能進入管理員敏感功能。",
       challenge:"完成二次驗證",hSession:"工作階段安全",policy:"V4.12 使用 server-validated getUser() 重新確認登入身分；管理員頁面另檢查 MFA AAL2。",
-      signout:"登出此裝置",rollout:"V4.14.2 已完成 MFA 前端驗證與管理員 Edge Functions 後端 AAL2 強制保護。管理員敏感 API 必須完成 MFA 後才能執行。",
+      signout:"登出此裝置",rollout:"V4.12.4 已完成 MFA 前端驗證與管理員 Edge Functions 後端 AAL2 強制保護。管理員敏感 API 必須完成 MFA 後才能執行。",
       enabled:"MFA 已成功啟用，這次工作階段已提升為 AAL2。",verified:"二次驗證完成，這次工作階段已提升為 AAL2。",
       chooseFactor:"選擇驗證器",backupTitle:"備援驗證器",backupNote:"建議新增第二個 TOTP 驗證器，放在不同裝置或不同驗證器 App。主要手機遺失時，可用備援驗證器完成 AAL2。",
       backupEnroll:"新增備援驗證器",backupCode:"輸入備援驗證器 6 位數代碼",backupVerify:"驗證並啟用備援 MFA",
@@ -170,7 +321,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       aal2:"这次登录已完成 MFA（AAL2）。",enrollNote:"第一次设置时，按下“建立 MFA”，再用 Google Authenticator、Microsoft Authenticator、1Password 等验证器扫描 QR Code。",
       enroll:"建立 MFA",code:"输入验证器 6 位数代码",enable:"验证并启用 MFA",challengeNote:"这个账号已设置 MFA。每个新的登录工作阶段都要完成一次第二因素验证，才能进入管理员敏感功能。",
       challenge:"完成二次验证",hSession:"工作阶段安全",policy:"V4.12 使用 server-validated getUser() 重新确认登录身份；管理员页面另检查 MFA AAL2。",
-      signout:"登出此设备",rollout:"本版先完成 MFA 设置与前端验证。管理员手机完成 MFA 设置并测试成功后，再进入 V4.14.2，将管理员 Edge Functions 改为后端强制 AAL2，避免尚未设置 MFA 时直接锁住管理员。",
+      signout:"登出此设备",rollout:"本版先完成 MFA 设置与前端验证。管理员手机完成 MFA 设置并测试成功后，再进入 V4.12.4，将管理员 Edge Functions 改为后端强制 AAL2，避免尚未设置 MFA 时直接锁住管理员。",
       enabled:"MFA 已成功启用，这次工作阶段已提升为 AAL2。",verified:"二次验证完成，这次工作阶段已提升为 AAL2。",
       chooseFactor:"选择验证器",backupTitle:"备用验证器",backupNote:"建议新增第二个 TOTP 验证器，放在不同设备或不同验证器 App。主要手机遗失时，可用备用验证器完成 AAL2。",
       backupEnroll:"新增备用验证器",backupCode:"输入备用验证器 6 位数代码",backupVerify:"验证并启用备用 MFA",
@@ -192,7 +343,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       aal2:"This sign-in has completed MFA (AAL2).",enrollNote:"For first-time setup, tap “Set up MFA”, then scan the QR code with Google Authenticator, Microsoft Authenticator, 1Password, or another TOTP authenticator.",
       enroll:"Set up MFA",code:"Enter the 6-digit authenticator code",enable:"Verify & Enable MFA",challengeNote:"MFA is configured for this account. Each new sign-in session must complete the second factor before accessing administrator-sensitive features.",
       challenge:"Complete MFA Verification",hSession:"Session Security",policy:"V4.12 uses server-validated getUser() to revalidate sign-in identity; administrator pages also check MFA AAL2.",
-      signout:"Sign Out on This Device",rollout:"V4.14.2 enforces AAL2 for administrator Edge Functions. Administrator-sensitive APIs require MFA before execution.",
+      signout:"Sign Out on This Device",rollout:"V4.12.4 enforces AAL2 for administrator Edge Functions. Administrator-sensitive APIs require MFA before execution.",
       enabled:"MFA was enabled successfully. This session is now AAL2.",verified:"MFA verification completed. This session is now AAL2.",
       chooseFactor:"Choose authenticator",backupTitle:"Backup Authenticator",backupNote:"Add a second TOTP authenticator on a different device or authenticator app. If your primary phone is lost, the backup factor can still complete AAL2.",
       backupEnroll:"Add Backup Authenticator",backupCode:"Enter the 6-digit backup authenticator code",backupVerify:"Verify & Enable Backup MFA",
@@ -257,9 +408,16 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
     if(last) $("loginEmail").value=last;
   }catch(_){}
 
-  $("homeBtn").onclick=()=>location.href="./index.html?v=4142";
+  $("homeBtn").onclick=()=>location.href="../index.html?v=4124";
   $("recheckBtn").onclick=()=>refresh();
-  $("trustedDeviceBtn").onclick=()=>location.href="./device-security-v4.12.html?v=4142hf19";
+  $("trustedDeviceBtn").onclick=()=>location.href="./device-security-v4.14.2.html"+nextParam();
+  $("paymentReturnBtn").onclick=()=>{
+    const next=safeNext();
+    if(next) location.replace(next);
+  };
+  $("paymentDeviceBtn").onclick=()=>{
+    location.href="./device-security-v4.14.2.html"+nextParam();
+  };
 
   function escFactorName(v){
     return String(v||"").replaceAll("&","&amp;").replaceAll("<","&lt;")
@@ -323,7 +481,9 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
     if(userErr||!user){
       status("loginStatus","warn",T("loginReady"));
       $("email").textContent="—";$("uid").textContent="—";$("aal").textContent="—";$("factorCount").textContent="0";
-      status("identityStatus","err",T("invalid"));status("mfaStatus","warn",T("noFactor"));return;
+      status("identityStatus","err",T("invalid"));status("mfaStatus","warn",T("noFactor"));
+      await updatePaymentReturn(false);
+      return;
     }
     status("loginStatus","ok",T("loginOk"));
     $("email").textContent=user.email||"—";$("uid").textContent=user.id||"—";status("identityStatus","ok",T("valid"));
@@ -356,6 +516,8 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       status("mfaStatus","warn",T("noFactor"));
       $("enrollArea").classList.remove("hidden");
     }
+
+    await updatePaymentReturn(true);
   }
 
 
@@ -483,7 +645,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
         }
       }catch(_){}
 
-      location.replace("./index.html?v=4142&signedout=1");
+      location.replace("../index.html?v=4124&signedout=1");
     }catch(e){
       status("identityStatus","err",T("signoutFail")+(e?.message||String(e)));
       btn.disabled=false;

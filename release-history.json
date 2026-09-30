@@ -2,6 +2,20 @@
   "product": "Independent Points",
   "releases": [
     {
+      "version": "V4.14.2",
+      "date": "2026-09-30",
+      "channel": "production",
+      "title": "雙模式平台錢包與安全提領正式封版",
+      "notes": [
+        "雙模式資產：平台 IPT Off-chain + Trust Wallet IPT On-chain 分帳顯示",
+        "120P 兌 100 平台 IPT、平台會員互轉、QR 收款與登入後自動返回付款流程正式化",
+        "平台 IPT 提領：AAL2 + Trusted Device → 鎖定 → 管理員核准 → Trust Wallet Owner Mint → Sepolia 後端驗證 → completed",
+        "完成第一筆 10.00 IPT 端到端鏈上驗收，Block 11811222",
+        "Owner 私鑰僅由 Trust Wallet 持有，伺服器不保存私鑰",
+        "修正 Android Chrome / Trust Wallet DApp Browser 簽名流程與長地址、tx hash、UUID 手機版面溢出"
+      ]
+    },
+    {
       "version": "V4.12.4",
       "date": "2026-09-28",
       "channel": "hotfix-23-consistency",

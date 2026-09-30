@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Independent Points V4.12.4｜營運安全中心</title>
+<title>Independent Points V4.14.2｜營運安全中心</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
 <style>
 :root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;color:#172033;background:#f4f7fb}
@@ -34,12 +34,12 @@ button.danger{background:#a83b45;color:#fff;border-color:#a83b45}
 .hidden{display:none!important}
 @media(min-width:760px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
 </style>
-<script src="./i18n-v4.10.js?v=4124" defer></script>
-<script src="./auth-guard-v4.12.js?v=4124"></script>
+<script src="./i18n-v4.10.js?v=4142" defer></script>
+<script src="./auth-guard-v4.12.js?v=4142"></script>
 </head>
 <body>
 <header>
-  <div class="badge">V4.12.4</div>
+  <div class="badge">V4.14.2</div>
   <h1>營運安全中心</h1>
   <p>正式營運狀態、高風險操作保護、錢包切換紀錄、管理員稽核與快速維運入口。</p>
 </header>
@@ -105,7 +105,7 @@ button.danger{background:#a83b45;color:#fff;border-color:#a83b45}
   </div>
 </main>
 <script>
-/* V4.12.4 Production Seal */
+/* V4.14.2 Production Seal */
 (() => {
   const tr=(s)=>window.IPTI18N?.t?window.IPTI18N.t(s):s;
   const SUPABASE_URL="https://uccexvgqmoxhgykkjdcy.supabase.co";
@@ -267,20 +267,20 @@ button.danger{background:#a83b45;color:#fff;border-color:#a83b45}
     if(!confirm("確定要清除這台裝置上的營運安全紀錄嗎？這不會刪除 Supabase 稽核或鏈上交易。"))return;
     localStorage.removeItem(EVENT_KEY); renderEvents();
   });
-  $("homeBtn").addEventListener("click",()=>location.href="./index.html?v=4124");
+  $("homeBtn").addEventListener("click",()=>location.href="./index.html?v=4142");
   $("refreshBtn").addEventListener("click",load);
   $("walletCoreBtn").addEventListener("click",()=>location.href="./wallet-core-v4.12.html");
-  $("securityCenterBtn").addEventListener("click",()=>location.href="./security-center-v4.12.html?v=4124");
-  $("maintenanceBtn").addEventListener("click",()=>location.href="./maintenance-v4.12.html?v=4124");
-  $("updateCenterBtn").addEventListener("click",()=>location.href="./update-center-v4.12.html?v=4124");
-  $("systemInfoBtn").addEventListener("click",()=>location.href="./system-info-v4.12.html?v=4124");
-  $("eventCenterBtn")?.addEventListener("click",()=>location.href="./event-center-v4.12.html?v=4124");
+  $("securityCenterBtn").addEventListener("click",()=>location.href="./security-center-v4.12.html?v=4142");
+  $("maintenanceBtn").addEventListener("click",()=>location.href="./maintenance-v4.12.html?v=4142");
+  $("updateCenterBtn").addEventListener("click",()=>location.href="./update-center-v4.12.html?v=4142");
+  $("systemInfoBtn").addEventListener("click",()=>location.href="./system-info-v4.12.html?v=4142");
+  $("eventCenterBtn")?.addEventListener("click",()=>location.href="./event-center-v4.12.html?v=4142");
   load();
 })();
 </script>
 <script>
 if("serviceWorker" in navigator){
-  window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js?v=4124",{updateViaCache:"none"}).catch(()=>{}));
+  window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js?v=4142",{updateViaCache:"none"}).catch(()=>{}));
 }
 </script>
 </body>

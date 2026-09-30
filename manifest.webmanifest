@@ -3,7 +3,7 @@
   "name": "Independent Points",
   "short_name": "IPT",
   "description": "Independent Points 會員點數錢包與 IPT 資產管理系統",
-  "start_url": "./?source=pwa&v=4124",
+  "start_url": "./?source=pwa&v=4142",
   "scope": "./",
   "display": "standalone",
   "display_override": [
@@ -48,7 +48,20 @@
     {
       "name": "我的資產",
       "short_name": "資產",
-      "url": "./member-assets-v4.12.html?v=4124",
+      "url": "./member-assets-v4.12.html?v=4142",
+      "icons": [
+        {
+          "src": "./ipt-icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "雙模式平台錢包",
+      "short_name": "平台錢包",
+      "description": "P、平台 IPT、會員互轉、QR 收款與提領",
+      "url": "./wallet-dual-v4.14.2.html?v=4142",
       "icons": [
         {
           "src": "./ipt-icon-192.png",
@@ -72,7 +85,7 @@
     {
       "name": "維運中心",
       "short_name": "維運",
-      "url": "./maintenance-v4.12.html?v=4124",
+      "url": "./maintenance-v4.12.html?v=4142",
       "icons": [
         {
           "src": "./ipt-icon-192.png",
@@ -84,7 +97,7 @@
     {
       "name": "安全與權限",
       "short_name": "安全",
-      "url": "./security-center-v4.12.html?v=4124",
+      "url": "./security-center-v4.12.html?v=4142",
       "icons": [
         {
           "src": "./ipt-icon-192.png",
@@ -96,7 +109,7 @@
     {
       "name": "營運安全",
       "short_name": "安全",
-      "url": "./security-ops-v4.12.html?v=4124",
+      "url": "./security-ops-v4.12.html?v=4142",
       "icons": [
         {
           "src": "./ipt-icon-192.png",
@@ -108,7 +121,7 @@
     {
       "name": "事件與通知",
       "short_name": "通知",
-      "url": "./event-center-v4.12.html?v=4124",
+      "url": "./event-center-v4.12.html?v=4142",
       "icons": [
         {
           "src": "./ipt-icon-192.png",
@@ -121,7 +134,7 @@
       "name": "帳戶安全",
       "short_name": "帳戶安全",
       "description": "登入驗證與 MFA",
-      "url": "./auth-security-v4.12.html?v=4124",
+      "url": "./auth-security-v4.12.html?v=4142",
       "icons": [
         {
           "src": "./ipt-icon-192.png",

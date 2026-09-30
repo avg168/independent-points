@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Independent Points V4.12.4｜營運事件與通知中心</title>
+<title>Independent Points V4.14.2｜營運事件與通知中心</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
 <style>
 :root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;color:#172033;background:#f4f7fb}
@@ -50,13 +50,13 @@ button.warn{background:#a46a08;color:#fff;border-color:#a46a08}button.danger{bac
 .fallback-toast .m{font-size:.86rem;line-height:1.5;margin-top:5px;opacity:.92}
 
 </style>
-<script src="./i18n-v4.10.js?v=4124" defer></script>
-<script src="./auth-guard-v4.12.js?v=4124"></script>
+<script src="./i18n-v4.10.js?v=4142" defer></script>
+<script src="./auth-guard-v4.12.js?v=4142"></script>
 </head>
 <body>
 <div id="fallbackToast" class="fallback-toast"><div id="fallbackToastTitle" class="t"></div><div id="fallbackToastMsg" class="m"></div></div>
 <header>
-  <div class="badge">V4.12.4</div>
+  <div class="badge">V4.14.2</div>
   <h1>營運事件與通知中心</h1>
   <p>集中查看安全事件、錢包切換、管理員異動、鏈上營運狀態與裝置通知。</p>
 </header>
@@ -256,7 +256,7 @@ button.warn{background:#a46a08;color:#fff;border-color:#a46a08}button.danger{bac
     try{
       if("serviceWorker" in navigator){
         const reg=await navigator.serviceWorker.ready;
-        await reg.showNotification(title,{body,tag,icon:"./ipt-icon-192.png",badge:"./ipt-icon-192.png",data:{url:"./event-center-v4.12.html?v=4124"}});
+        await reg.showNotification(title,{body,tag,icon:"./ipt-icon-192.png",badge:"./ipt-icon-192.png",data:{url:"./event-center-v4.12.html?v=4142"}});
       }else{
         new Notification(title,{body,tag,icon:"./ipt-icon-192.png"});
       }
@@ -402,9 +402,9 @@ button.warn{background:#a46a08;color:#fff;border-color:#a46a08}button.danger{bac
   $("testNotifyBtn").addEventListener("click",async()=>{
     let ok=false;
     if(notificationSupported() && Notification.permission==="granted"){
-      ok=await notify("IPT 測試通知","V4.12.4 營運事件與通知中心運作正常。","ipt-v491-test");
+      ok=await notify("IPT 測試通知","V4.14.2 營運事件與通知中心運作正常。","ipt-v491-test");
     }else{
-      ok=fallbackAlert("IPT 測試提醒","V4.12.4 頁面內提醒運作正常。");
+      ok=fallbackAlert("IPT 測試提醒","V4.14.2 頁面內提醒運作正常。");
     }
     $("notifyStatus").className=ok?"status ok":"status warn";
     $("notifyStatus").textContent=ok
@@ -421,17 +421,17 @@ button.warn{background:#a46a08;color:#fff;border-color:#a46a08}button.danger{bac
   });
   ["searchInput","sourceFilter","severityFilter","readFilter"].forEach(id=>$(id).addEventListener(id==="searchInput"?"input":"change",render));
   $("loadAllAuditBtn").addEventListener("click",loadAllAuditFallback);
-  $("homeBtn").addEventListener("click",()=>location.href="./index.html?v=4124");
+  $("homeBtn").addEventListener("click",()=>location.href="./index.html?v=4142");
   $("refreshBtn").addEventListener("click",load);
-  $("securityOpsBtn").addEventListener("click",()=>location.href="./security-ops-v4.12.html?v=4124");
-  $("securityCenterBtn").addEventListener("click",()=>location.href="./security-center-v4.12.html?v=4124");
-  $("maintenanceBtn").addEventListener("click",()=>location.href="./maintenance-v4.12.html?v=4124");
-  $("updateCenterBtn").addEventListener("click",()=>location.href="./update-center-v4.12.html?v=4124");
+  $("securityOpsBtn").addEventListener("click",()=>location.href="./security-ops-v4.12.html?v=4142");
+  $("securityCenterBtn").addEventListener("click",()=>location.href="./security-center-v4.12.html?v=4142");
+  $("maintenanceBtn").addEventListener("click",()=>location.href="./maintenance-v4.12.html?v=4142");
+  $("updateCenterBtn").addEventListener("click",()=>location.href="./update-center-v4.12.html?v=4142");
   updateNotifyStatus();load();
 })();
 </script>
 <script>
-if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js?v=4124",{updateViaCache:"none"}).catch(()=>{}))}
+if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js?v=4142",{updateViaCache:"none"}).catch(()=>{}))}
 </script>
 </body>
 </html>

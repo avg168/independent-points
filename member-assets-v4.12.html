@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>Independent Points V4.12.4｜我的資產報表</title>
+  <title>Independent Points V4.14.2｜我的資產報表</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
   <style>
     :root{
@@ -118,7 +118,7 @@
       .actions{grid-template-columns:repeat(4,auto);justify-content:start}
     }
   
-/* V4.12.4 Android mobile viewport lock */
+/* V4.14.2 Android mobile viewport lock */
 html,body{
   width:100%;
   max-width:100%;
@@ -278,7 +278,7 @@ body{
 }
 
 
-/* ===== V4.12.4 Android bottom-navigation fix ===== */
+/* ===== V4.14.2 Android bottom-navigation fix ===== */
 .v43-bottom-nav{
   position:fixed!important;
   left:50%!important;
@@ -345,7 +345,7 @@ body{
 }
 
 
-/* ===== V4.12.4 reliable in-page navigation ===== */
+/* ===== V4.14.2 reliable in-page navigation ===== */
 .v43-bottom-nav{
   display:none!important;
 }
@@ -433,7 +433,7 @@ button{
 
 </style>
 
-<link rel="manifest" href="./manifest.webmanifest?v=4124">
+<link rel="manifest" href="./manifest.webmanifest?v=4142">
 <meta name="theme-color" content="#10243d">
 <meta name="application-name" content="Independent Points">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -443,12 +443,12 @@ button{
 <link rel="icon" type="image/svg+xml" href="./ipt-icon-192.png">
 
 <link rel="apple-touch-icon" href="./ipt-apple-touch-180.png">
-<script src="./i18n-v4.10.js?v=4124" defer></script>
-<script src="./auth-guard-v4.12.js?v=4124"></script>
+<script src="./i18n-v4.10.js?v=4142" defer></script>
+<script src="./auth-guard-v4.12.js?v=4142"></script>
 </head>
 <body>
 <header>
-  <div class="version">V4.12.4</div>
+  <div class="version">V4.14.2</div>
   <h1>我的資產報表</h1>
   <p>我的 IPT 資產 × 報表篩選 × CSV 匯出 × 列印／PDF</p>
 </header>
@@ -880,7 +880,7 @@ button{
     const m=loadedData.member||{};
     const f=currentFilterLabel();
     const rows=[
-      ["Independent Points","我的資產報表","V4.12.4"],
+      ["Independent Points","我的資產報表","V4.14.2"],
       ["會員編號",m.member_number||""],
       ["暱稱",m.display_name||""],
       ["Email",m.email||""],
@@ -929,7 +929,7 @@ button{
     const f=currentFilterLabel();
     const report={
       kind:"member",
-      version:"V4.12.4",
+      version:"V4.14.2",
       title:"我的資產報表",
       generated_at:new Date().toISOString(),
       member:{
@@ -953,7 +953,7 @@ button{
 
     sessionStorage.setItem("ipt_print_report",JSON.stringify(report));
     setExportStatus("正在開啟列印／PDF 預覽…","ok");
-    location.href="./print-report-v4.12.html?v=4124";
+    location.href="./print-report-v4.12.html?v=4142";
   }
 
   async function loadMyAssets(){
@@ -996,7 +996,7 @@ button{
       $("txSection").classList.remove("hidden");
 
       setStatus("ok",
-        `V4.12.4 已載入｜${m.member_number||""}｜${m.display_name||""}`);
+        `V4.14.2 已載入｜${m.member_number||""}｜${m.display_name||""}`);
       $("refreshBtn").disabled=false;
 
     }catch(err){
@@ -1011,7 +1011,7 @@ button{
   $("refreshBtn").addEventListener("click",loadMyAssets);
   $("exportCsvBtn").addEventListener("click",(e)=>{e.preventDefault();exportMemberCsv();});
   $("printBtn").addEventListener("click",(e)=>{e.preventDefault();printMemberReport();});
-  $("assetCenterBtn").addEventListener("click",()=>{location.href="./asset-center-v4.12.html?v=4124";});
+  $("assetCenterBtn").addEventListener("click",()=>{location.href="./asset-center-v4.12.html?v=4142";});
   $("applyFilterBtn").addEventListener("click",(e)=>{e.preventDefault();applyFilters();});
   $("clearFilterBtn").addEventListener("click",(e)=>{e.preventDefault();clearFilters();});
   $("backBtn").addEventListener("click",()=>{
@@ -1028,7 +1028,7 @@ button{
 
 <script>
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js?v=4124",{updateViaCache:"none"}).catch(()=>{}));
+  window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js?v=4142",{updateViaCache:"none"}).catch(()=>{}));
 }
 </script>
 
