@@ -1,7 +1,7 @@
 {
   "product": "Independent Points",
   "version": "V4.14.2",
-  "build": "20260930-4142",
+  "build": "20260930-4142-hf1",
   "release_date": "2026-09-30",
   "channel": "production",
   "checks": {
@@ -21,7 +21,9 @@
     "android_chrome_acceptance": true,
     "trust_wallet_dapp_browser_acceptance": true,
     "responsive_long_identifiers": true,
-    "legacy_html_removed": 128
+    "legacy_html_removed": 128,
+    "official_home_return_absolute_url": true,
+    "pwa_cache_hotfix_1": true
   },
   "self_file": {
     "name": "update-manifest-v4.12.json",
@@ -31,8 +33,8 @@
   "files": [
     {
       "name": "V4.14.2-正式封版驗收報告.txt",
-      "bytes": 1575,
-      "sha256": "3491a596b2580ff46da3c7a7ef5af664381a05381608b60dc41cd98178e66de3"
+      "bytes": 1863,
+      "sha256": "7c11d072add50e675566aa8f36b02dad23fd864c40a4a6bad3a2f81fcd00c016"
     },
     {
       "name": "admin-assets-v4.12.html",
@@ -136,13 +138,13 @@
     },
     {
       "name": "release-history.json",
-      "bytes": 16297,
-      "sha256": "2a2e8297f61f7fdd6a6d80ba55a8c12f1d6def848e2e6d436678bee3658cca8c"
+      "bytes": 16828,
+      "sha256": "910d16164e382059bf50e58fd5868d1f36e4e01a9dd2f228d5a7a812cfad907d"
     },
     {
       "name": "release.json",
-      "bytes": 2508,
-      "sha256": "6973bea40a1875941d035d4a10ffe20e0d00d8e1b46ba74f9d098b6f7baaaa98"
+      "bytes": 2733,
+      "sha256": "35661671c8c97733e9291cf82ce740fa5036f2c6873ab7d5e962d2ac9c9d27bf"
     },
     {
       "name": "robots.txt",
@@ -161,8 +163,8 @@
     },
     {
       "name": "service-worker.js",
-      "bytes": 1691,
-      "sha256": "a3c68db309a7f82d631d41ad06e571d67ea669995a86eaa3f9083e7933d0f987"
+      "bytes": 1695,
+      "sha256": "6fe8aaf154d3f8e3a544fb02b94e3984d35282d9668b9fdff0ed7fa791a65085"
     },
     {
       "name": "system-info-v4.12.html",
@@ -181,8 +183,8 @@
     },
     {
       "name": "wallet-dual-v4.14.2.html",
-      "bytes": 41465,
-      "sha256": "498b37fcdf1d121833a93913fa68c0c4b83566f4693b026be140152cb636894d"
+      "bytes": 41501,
+      "sha256": "0b0d369369f29f15af7b836ea9163ab9a0da7180db22d3d6dcfcf5a19cf40d3a"
     },
     {
       "name": "withdrawal-admin-v4.14.2.html",
@@ -199,5 +201,6 @@
       "bytes": 22126,
       "sha256": "50c9ef8f508175c5b9a73b2185e3ae647a2672146bc3055c3c4b690e69deccef"
     }
-  ]
+  ],
+  "hotfix": 1
 }

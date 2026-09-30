@@ -4,6 +4,18 @@
     {
       "version": "V4.14.2",
       "date": "2026-09-30",
+      "channel": "hotfix-1-home-navigation",
+      "title": "Hotfix 1 正式首頁返回連結修正",
+      "notes": [
+        "修正雙模式錢包「返回正式首頁」仍使用舊版 ?v=4124 相對網址",
+        "改為 https://avg168.github.io/independent-points/?v=4142 絕對正式網址",
+        "Service Worker 快取名稱更新為 ipt-v4.14.2-hf1",
+        "不修改 Supabase 資產、提領狀態、IPT 合約、Owner 或鏈上交易"
+      ]
+    },
+    {
+      "version": "V4.14.2",
+      "date": "2026-09-30",
       "channel": "production",
       "title": "雙模式平台錢包與安全提領正式封版",
       "notes": [

@@ -1,7 +1,7 @@
 {
   "product": "Independent Points",
   "version": "V4.14.2",
-  "build": "20260930-4142",
+  "build": "20260930-4142-hf1",
   "release_date": "2026-09-30",
   "channel": "production",
   "rollback_version": "V4.12.4",
@@ -26,6 +26,8 @@
     }
   },
   "notes": [
+    "Hotfix 1: fix dual-mode wallet 'Back to official home' navigation to absolute V4.14.2 production URL",
+    "Hotfix 1: refresh PWA cache to ipt-v4.14.2-hf1 to avoid serving the stale return-home link",
     "Formalizes dual-mode wallet: platform IPT (off-chain) + Trust Wallet IPT (on-chain)",
     "Formalizes 120P -> 100 platform IPT conversion, member-to-member platform IPT transfer and QR receive/payment flow",
     "Formalizes platform IPT withdrawal request, lock/cancel, admin approval/rejection and Trust Wallet Owner Mint",
@@ -54,5 +56,6 @@
     "en"
   ],
   "manifest_filename": "update-manifest-v4.12.json",
-  "manifest_filename_note": "Legacy filename retained for compatibility; manifest content is V4.14.2."
+  "manifest_filename_note": "Legacy filename retained for compatibility; manifest content is V4.14.2.",
+  "hotfix": 1
 }
