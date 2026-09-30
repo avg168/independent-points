@@ -4,6 +4,19 @@
     {
       "version": "V4.14.2",
       "date": "2026-09-30",
+      "channel": "hotfix-5-production-security-cleanup",
+      "title": "Hotfix 5 正式收款 QR 與營運資安收尾",
+      "notes": [
+        "platform-payment-link Edge Function v2 改為正式 pay-v4.14.2.html",
+        "既有 cached token 保留，但 receive_url 強制改成正式付款頁",
+        "Service Worker 快取更新為 ipt-v4.14.2-hf5",
+        "新增 member_trusted_sessions.device_id 外鍵索引",
+        "staging／backup branch 尚未刪除，等待獨立確認"
+      ]
+    },
+    {
+      "version": "V4.14.2",
+      "date": "2026-09-30",
       "channel": "hotfix-4-i18n-final-cleanup",
       "title": "Hotfix 4 三語系翻譯收尾",
       "notes": [

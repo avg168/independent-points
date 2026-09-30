@@ -161,7 +161,7 @@ h2{margin:0 0 12px;font-size:1.12rem}
   header{padding:22px 16px 26px}
 }
 </style>
-<script src="https://avg168.github.io/independent-points/i18n-v4.10.js?v=4142hf4" defer></script>
+<script src="https://avg168.github.io/independent-points/i18n-v4.10.js?v=4142hf5" defer></script>
 </head>
 <body>
 <div id="authOverlay">
@@ -173,7 +173,7 @@ h2{margin:0 0 12px;font-size:1.12rem}
 </div>
 
 <header>
-  <span class="badge">V4.14.2 HF4｜雙模式錢包</span>
+  <span class="badge">V4.14.2 HF5｜雙模式錢包</span>
   <h1>Independent Points</h1>
   <p>平台錢包 Off-chain ＋ Trust Wallet On-chain，同一頁分開顯示、分開記帳。</p>
   <div class="top-actions">
@@ -506,6 +506,11 @@ h2{margin:0 0 12px;font-size:1.12rem}
     }
   }
 
+  function officialPaymentUrl(token){
+    return "https://avg168.github.io/independent-points/pay-v4.14.2.html?t="+
+      encodeURIComponent(String(token||""));
+  }
+
   function paymentLinkCacheKey(){
     const uid=String(platformData?.member?.id||"");
     return uid?"ipt_payment_link_v41342_"+uid:"";
@@ -517,9 +522,15 @@ h2{margin:0 0 12px;font-size:1.12rem}
     try{
       const x=JSON.parse(localStorage.getItem(key)||"null");
       if(!x?.token || !/^[A-Za-z0-9_-]{43}$/.test(x.token)) return null;
-      if(!x?.receive_url || !x?.expires_at) return null;
+      if(!x?.expires_at) return null;
       if(new Date(x.expires_at).getTime() < Date.now()+5*60*1000) return null;
-      return x;
+      const normalized={
+        token:x.token,
+        receive_url:officialPaymentUrl(x.token),
+        expires_at:x.expires_at
+      };
+      localStorage.setItem(key,JSON.stringify(normalized));
+      return normalized;
     }catch(_){return null}
   }
 
@@ -529,7 +540,7 @@ h2{margin:0 0 12px;font-size:1.12rem}
     try{
       localStorage.setItem(key,JSON.stringify({
         token:x.token,
-        receive_url:x.receive_url,
+        receive_url:officialPaymentUrl(x.token),
         expires_at:x.expires_at
       }));
     }catch(_){}
@@ -551,11 +562,15 @@ h2{margin:0 0 12px;font-size:1.12rem}
     if(data?.error) throw new Error(data.error);
     if(!data?.token || !data?.receive_url) throw new Error("無法建立收款連結");
 
-    paymentLinkToken=data.token;
-    paymentLinkUrl=data.receive_url;
-    paymentLinkExpiresAt=data.expires_at||"";
-    saveCachedPaymentLink(data);
-    return data;
+    const normalized={
+      ...data,
+      receive_url:officialPaymentUrl(data.token)
+    };
+    paymentLinkToken=normalized.token;
+    paymentLinkUrl=normalized.receive_url;
+    paymentLinkExpiresAt=normalized.expires_at||"";
+    saveCachedPaymentLink(normalized);
+    return normalized;
   }
 
   async function renderReceive(){

@@ -1,7 +1,7 @@
 Independent Points V4.14.2｜正式封版驗收報告
 
 正式封版日期：2026-09-30
-Build：20260930-4142-hf4
+Build：20260930-4142-hf5
 Network：Ethereum Sepolia (11155111 / 0xaa36a7)
 Contract：0xd3fb2480aadb8b168ec7e88a0e5c847d9750cb87
 
@@ -64,3 +64,11 @@ Contract：0xd3fb2480aadb8b168ec7e88a0e5c847d9750cb87
 - 補齊 e.g. IPT-00100002 / e.g. 30.00 / Up to 200 characters
 - 字典載入後重新 apply 並觸發動態資料 rerender
 - 不修改資產或鏈上交易邏輯
+
+十、Hotfix 5｜正式營運資安收尾（第一階段）
+- platform-payment-link Edge Function：v2
+- 正式收款 URL：https://avg168.github.io/independent-points/pay-v4.14.2.html
+- 舊 localStorage token 保留，但 receive_url 強制改成正式付款頁
+- 新增 member_trusted_sessions(device_id) 外鍵索引
+- 未刪除 staging／backup branches
+- 不修改 IPT 資產、提領、Mint、合約或既有 Sepolia 交易
