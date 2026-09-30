@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Independent Points V4.14.2｜提領審核與鏈上 Mint</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
+<style>
+:root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;color:#172033;background:#f4f7fb}
+*{box-sizing:border-box;min-width:0}html,body{width:100%;max-width:100%;overflow-x:hidden}body{margin:0;background:#f4f7fb;padding-bottom:60px}
+header{background:linear-gradient(145deg,#10243d,#174e87);color:#fff;padding:26px 20px 30px;border-radius:0 0 28px 28px}.badge{display:inline-block;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.78rem;font-weight:900}
+h1{margin:10px 0 6px;font-size:1.55rem}header p{margin:0;line-height:1.6;opacity:.9}main{max-width:760px;margin:auto;padding:14px}
+section,.item{background:#fff;border:1px solid #dbe3ed;border-radius:18px;padding:16px;margin:12px 0;box-shadow:0 4px 18px rgba(24,42,68,.04)}h2{margin:0 0 12px;font-size:1.15rem}
+.status{padding:12px 14px;border-radius:12px;line-height:1.6;margin:10px 0}.info{background:#eef4ff;border-left:5px solid #3777d6}.ok{background:#eaf8f0;border-left:5px solid #18866d}.warn{background:#fff6df;border-left:5px solid #d49a0a}.err{background:#ffecec;border-left:5px solid #c93030}
+button,input,textarea,select{font:inherit}button{width:100%;min-height:48px;border:0;border-radius:13px;padding:12px;font-weight:900;touch-action:manipulation}.primary{background:#1765d8;color:#fff}.green{background:#18866d;color:#fff}.gray{background:#e8eef7;color:#17365d}.danger{background:#a83b45;color:#fff}button:disabled{opacity:.45}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.k{font-size:.78rem;color:#687486;font-weight:800}.v{font-weight:900;margin-top:4px;word-break:break-all}.meta{font-size:.82rem;color:#687486;line-height:1.55;margin-top:5px;word-break:break-all}
+.chip{display:inline-block;padding:4px 8px;border-radius:999px;background:#eef3f8;font-size:.72rem;font-weight:900}.pending{background:#fff3d7;color:#7e5a08}.approved{background:#e9f2ff;color:#205ea8}.tx_submitted{background:#eee9ff;color:#5b3ea8}.completed{background:#eaf8f0;color:#17694f}.failed,.rejected{background:#ffecec;color:#922c2c}
+input,textarea{width:100%;border:1px solid #cbd6e2;border-radius:12px;padding:12px;margin-top:8px}.wallet{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;word-break:break-all}.hidden{display:none!important}.selected{outline:3px solid #8ab6ef}@media(max-width:520px){.grid2,.actions{grid-template-columns:1fr}}
+</style>
+
+<style id="v4142-layout-hotfix">
+/* V4.14.2 responsive hardening:
+   long wallet addresses / tx hashes / UUIDs must never push cards wider than viewport. */
+html,body{
+  width:100%;
+  max-width:100%;
+  overflow-x:hidden;
+}
+*,*::before,*::after{
+  box-sizing:border-box;
+}
+main,section,.panel,.item,.card,.status,.grid,.grid2,.actions,
+.grid>*,.grid2>*,.actions>*{
+  min-width:0;
+  max-width:100%;
+}
+.wallet,.addr,.mono,.hash,.uuid,.meta,.v,code,pre,
+[data-wallet],[data-hash],[data-id]{
+  max-width:100%;
+  overflow-wrap:anywhere;
+  word-break:break-word;
+  white-space:normal;
+}
+.wallet,.addr,.mono,.hash,.uuid{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:clamp(.76rem,3.1vw,.92rem);
+  line-height:1.55;
+}
+input,textarea,select,button{
+  max-width:100%;
+  min-width:0;
+}
+pre{
+  overflow-x:auto;
+}
+@media(max-width:520px){
+  .grid,.grid2,.actions{
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+}
+</style>
+
+</head>
+<body>
+<header>
+  <span class="badge">V4.14.2 STAGING｜管理員提領審核</span>
+  <h1>平台 IPT → Trust Wallet</h1>
+  <p>審核後由 Owner Trust Wallet 親自 Mint；鏈上證明通過後，平台鎖定 IPT 才正式結算。</p>
+</header>
+<main>
+<section>
+  <h2>管理員安全狀態</h2>
+  <div id="adminStatus" class="status info">正在確認 Admin + MFA AAL2 + Trusted Device…</div>
+  <button id="reloadBtn" class="gray" type="button">重新整理提領佇列</button>
+</section>
+<section>
+  <h2>提領佇列</h2>
+  <div id="queue">尚未讀取。</div>
+</section>
+<section id="mintPanel" class="hidden">
+  <h2>Trust Wallet Owner Mint</h2>
+  <div class="status warn">Mint 會真正增加 Sepolia 鏈上 IPT。只有 approved 申請才能進入此區；平台 locked IPT 在鏈上證明通過前不會正式扣除。</div>
+  <div class="grid2">
+    <div><div class="k">提領 ID</div><div id="selId" class="v"></div></div>
+    <div><div class="k">數量</div><div id="selAmount" class="v"></div></div>
+    <div><div class="k">會員</div><div id="selMember" class="v"></div></div>
+    <div><div class="k">目的錢包</div><div id="selWallet" class="v wallet"></div></div>
+  </div>
+  <button id="openTrustDappBtn" class="green" type="button" style="margin-top:12px">用 Trust Wallet 開啟此頁（推薦）</button>
+  <div class="meta" style="margin:8px 0 14px">
+    Android Chrome 若無法叫出簽名視窗，可改用 Trust Wallet 內建 DApp Browser。
+    在 Trust Wallet 內開啟後，系統會優先使用錢包直接注入的 Ethereum Provider。
+  </div>
+
+  <button id="connectBtn" class="primary" type="button" style="margin-top:12px">連接 Trust Wallet Owner</button>
+  <div id="walletStatus" class="status info">尚未連接 Trust Wallet。</div>
+  <div id="signModeStatus" class="status info">簽名模式：尚未判定。</div>
+  <button id="preflightBtn" class="gray" type="button" disabled>先檢查 Mint</button>
+  <div id="preflightStatus" class="status info">必須先連接 Owner 並選擇 approved 申請。</div>
+  <button id="mintBtn" class="green" type="button" disabled>由 Trust Wallet 核准 Mint</button>
+</section>
+<section id="verifyPanel" class="hidden">
+  <h2>鏈上交易驗證</h2>
+  <div id="verifyMeta" class="status info"></div>
+  <input id="txHashInput" class="wallet" placeholder="0x... 交易雜湊">
+  <button id="registerTxBtn" class="gray" type="button" style="margin-top:10px">登記 tx hash</button>
+  <button id="verifyChainBtn" class="primary" type="button" style="margin-top:10px">後端驗證鏈上結果</button>
+  <div id="chainStatus" class="status info">至少 2 個 confirmations 後才會完成平台結算。</div>
+</section>
+</main>
+<script type="module">
+import { EthereumProvider } from "https://esm.sh/@walletconnect/ethereum-provider@2.25.0?bundle";
+import { JsonRpcProvider, Contract, Interface } from "https://esm.sh/ethers@6.15.0?bundle";
+
+const URL="https://uccexvgqmoxhgykkjdcy.supabase.co";
+const KEY="sb_publishable_FBsN1DYTQMv2_bWhpbXHAA_qdAq7ri7";
+const PROJECT_ID="80a61b62ea34b975d7d27a037fc55fa8";
+const CHAIN_ID=11155111;
+const CONTRACT_ADDRESS="0xd3fb2480aadb8b168ec7e88a0e5c847d9750cb87";
+const VERIFY_URL=URL+"/functions/v1/withdrawal-chain-verify";
+const READ_RPCS=["https://ethereum-sepolia-rpc.publicnode.com","https://ethereum-sepolia.publicnode.com","https://rpc.sepolia.org"];
+const ABI=["function owner() view returns (address)","function paused() view returns (bool)","function totalSupply() view returns (uint256)","function cap() view returns (uint256)","function mint(address to,uint256 units)"];
+const MINT_IFACE=new Interface(["function mint(address to,uint256 units)"]);
+const sb=window.supabase.createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+const $=id=>document.getElementById(id);
+const same=(a,b)=>String(a||"").toLowerCase()===String(b||"").toLowerCase();
+const fmt=u=>(Number(u||0)/100).toLocaleString("zh-TW",{minimumFractionDigits:2,maximumFractionDigits:2});
+let rows=[],selected=null,wc=null,account="",mintReady=false;
+let walletMode="none";
+let activeWalletProvider=null;
+let mintData="";
+let mintGasLimit=0n;
+let mintRequestPending=false;
+function status(id,kind,text){const e=$(id);e.className="status "+kind;e.textContent=text;}
+async function adminToken(){const {data:{session},error}=await sb.auth.getSession();if(error)throw error;if(!session?.access_token)throw new Error("沒有有效登入 Session");return session.access_token;}
+
+async function loadQueue(){
+  status("adminStatus","info","正在確認 Admin + MFA AAL2 + Trusted Device…");
+  const {data,error}=await sb.rpc("platform_admin_list_ipt_withdrawals",{p_limit:100});
+  if(error)throw error;
+  rows=data?.withdrawals||[];
+  status("adminStatus","ok","管理員安全驗證通過。可審核提領申請。");
+  renderQueue();
+}
+function renderQueue(){
+  if(!rows.length){$("queue").innerHTML='<div class="meta">目前沒有提領申請。</div>';return;}
+  $("queue").innerHTML=rows.map(w=>`<div class="item ${selected?.id===w.id?"selected":""}" data-id="${w.id}"><div><b>${w.display_name||"IPT 會員"}｜${w.member_number}</b> <span class="chip ${w.status}">${w.status}</span></div><div class="meta">${fmt(w.ipt_units)} IPT<br>${w.wallet_address}<br>${new Date(w.requested_at).toLocaleString("zh-TW",{hour12:false})}<br>ID：${w.id}${w.tx_hash?`<br>tx：${w.tx_hash}`:""}</div><div class="actions">${w.status==="pending"?`<button class="green approveBtn" data-id="${w.id}" type="button">核准</button><button class="danger rejectBtn" data-id="${w.id}" type="button">拒絕並解鎖</button>`:""}${w.status==="approved"?`<button class="primary mintSelectBtn" data-id="${w.id}" type="button">準備 Mint</button>`:""}${w.status==="tx_submitted"?`<button class="primary verifySelectBtn" data-id="${w.id}" type="button">驗證鏈上交易</button>`:""}</div></div>`).join("");
+  document.querySelectorAll(".approveBtn").forEach(b=>b.onclick=()=>review(b.dataset.id,"approve"));
+  document.querySelectorAll(".rejectBtn").forEach(b=>b.onclick=()=>review(b.dataset.id,"reject"));
+  document.querySelectorAll(".mintSelectBtn").forEach(b=>b.onclick=()=>selectMint(b.dataset.id));
+  document.querySelectorAll(".verifySelectBtn").forEach(b=>b.onclick=()=>selectVerify(b.dataset.id));
+}
+async function review(id,decision){
+  const w=rows.find(x=>x.id===id);if(!w)return;
+  const message=decision==="approve"?`核准 ${w.display_name} 提領 ${fmt(w.ipt_units)} IPT？\n核准後會員不能自行取消，等待 Owner Mint。`:`拒絕這筆 ${fmt(w.ipt_units)} IPT 提領？\n鎖定 IPT 會立即退回會員可用餘額。`;
+  if(!confirm(message))return;
+  const {error}=await sb.rpc("platform_admin_review_ipt_withdrawal",{p_withdrawal_id:id,p_decision:decision,p_note:decision==="approve"?"V4.14.1 STAGING approved":"V4.14.1 STAGING rejected"});
+  if(error)throw error;await loadQueue();
+}
+function selectMint(id){
+  selected=rows.find(x=>x.id===id)||null;if(!selected||selected.status!=="approved")return;
+  mintReady=false;$("mintBtn").disabled=true;$("mintPanel").classList.remove("hidden");$("verifyPanel").classList.add("hidden");
+  $("selId").textContent=selected.id;$("selAmount").textContent=fmt(selected.ipt_units)+" IPT";$("selMember").textContent=(selected.display_name||"")+" / "+selected.member_number;$("selWallet").textContent=selected.wallet_address;
+  $("mintPanel").scrollIntoView({behavior:"smooth",block:"start"});renderQueue();
+}
+function selectVerify(id){
+  selected=rows.find(x=>x.id===id)||null;if(!selected)return;
+  $("verifyPanel").classList.remove("hidden");$("mintPanel").classList.add("hidden");$("txHashInput").value=selected.tx_hash||"";$("verifyMeta").textContent=`${selected.display_name}｜${fmt(selected.ipt_units)} IPT｜${selected.wallet_address}`;$("verifyPanel").scrollIntoView({behavior:"smooth",block:"start"});renderQueue();
+}
+function trustInjectedProvider(){
+  const direct=window.trustwallet?.ethereum;
+  if(direct && typeof direct.request==="function") return direct;
+
+  const eth=window.ethereum;
+  if(eth && typeof eth.request==="function" && (eth.isTrust || eth.isTrustWallet)) return eth;
+
+  return null;
+}
+
+function chainHex(){
+  return "0x"+BigInt(CHAIN_ID).toString(16);
+}
+
+async function chainIdFromProvider(provider){
+  const value=await provider.request({method:"eth_chainId"});
+  return Number(BigInt(value));
+}
+
+async function ensureSepolia(provider){
+  let cid=await chainIdFromProvider(provider);
+  if(cid===CHAIN_ID) return cid;
+
+  try{
+    await provider.request({
+      method:"wallet_switchEthereumChain",
+      params:[{chainId:chainHex()}]
+    });
+  }catch(e){
+    throw new Error("請先把 Trust Wallet 切換到 Ethereum Sepolia。"+(e?.message?" "+e.message:""));
+  }
+
+  cid=await chainIdFromProvider(provider);
+  if(cid!==CHAIN_ID) throw new Error("Trust Wallet 仍不是 Ethereum Sepolia");
+  return cid;
+}
+
+function mintInflightKey(){
+  return selected?.id ? "ipt_mint_inflight_"+selected.id : "";
+}
+
+function markMintInflight(){
+  try{
+    const key=mintInflightKey();
+    if(key) sessionStorage.setItem(key,String(Date.now()));
+  }catch(_){}
+}
+
+function clearMintInflight(){
+  try{
+    const key=mintInflightKey();
+    if(key) sessionStorage.removeItem(key);
+  }catch(_){}
+}
+
+function recentMintInflight(){
+  try{
+    const key=mintInflightKey();
+    if(!key) return false;
+    const ts=Number(sessionStorage.getItem(key)||0);
+    return ts>0 && Date.now()-ts<5*60*1000;
+  }catch(_){
+    return false;
+  }
+}
+
+async function initWC(){
+  if(wc)return wc;
+  wc=await EthereumProvider.init({projectId:PROJECT_ID,chains:[CHAIN_ID],showQrModal:true,methods:["eth_sendTransaction","personal_sign"],optionalMethods:["eth_accounts","eth_requestAccounts","eth_chainId","wallet_switchEthereumChain"],events:["chainChanged","accountsChanged"],optionalEvents:["connect","disconnect","message"],metadata:{name:"Independent Points V4.14.1",description:"Admin withdrawal mint on Ethereum Sepolia",url:"https://avg168.github.io",icons:[]},qrModalOptions:{themeMode:"light"}});
+  wc.on("accountsChanged",a=>{account=a?.[0]||"";mintReady=false;$("mintBtn").disabled=true;});
+  wc.on("chainChanged",()=>{mintReady=false;$("mintBtn").disabled=true;});return wc;
+}
+$("openTrustDappBtn").onclick=()=>{
+  const target=location.origin+location.pathname+"?v=41411hf1";
+  const deepLink="https://link.trustwallet.com/open_url?coin_id=60&url="+encodeURIComponent(target);
+  location.href=deepLink;
+};
+
+$("connectBtn").onclick=async()=>{
+  try{
+    mintReady=false;
+    $("mintBtn").disabled=true;
+
+    const injected=trustInjectedProvider();
+
+    if(injected){
+      activeWalletProvider=injected;
+      walletMode="trust-injected";
+
+      const accounts=await injected.request({method:"eth_requestAccounts"});
+      account=accounts?.[0]||"";
+      const cid=await ensureSepolia(injected);
+
+      status("walletStatus","ok",`錢包：${account||"未知"}｜Chain：${cid}｜Sepolia`);
+      status("signModeStatus","ok","簽名模式：Trust Wallet DApp Browser 直接簽名（推薦）。");
+      $("preflightBtn").disabled=!(account&&cid===CHAIN_ID&&selected?.status==="approved");
+      return;
+    }
+
+    await initWC();
+    if(!wc.session) await wc.connect();
+
+    activeWalletProvider=wc;
+    walletMode="walletconnect";
+    account=wc.accounts?.[0]||"";
+
+    const cid=await ensureSepolia(wc);
+    const methods=wc.session?.namespaces?.eip155?.methods||[];
+
+    if(!methods.includes("eth_sendTransaction")){
+      throw new Error("目前 WalletConnect Session 沒有 eth_sendTransaction 權限，請重新連線。");
+    }
+
+    status("walletStatus","ok",`錢包：${account||"未知"}｜Chain：${cid}｜Sepolia`);
+    status("signModeStatus","warn","簽名模式：Chrome + WalletConnect。送出後請立刻手動切到 Trust Wallet 查看交易確認。");
+    $("preflightBtn").disabled=!(account&&cid===CHAIN_ID&&selected?.status==="approved");
+  }catch(e){
+    activeWalletProvider=null;
+    walletMode="none";
+    status("walletStatus","err","Trust Wallet 連線失敗："+(e?.message||String(e)));
+    status("signModeStatus","err","簽名模式：未建立。");
+  }
+};
+async function workingReadProvider(){let last=null;for(const rpc of READ_RPCS){try{const p=new JsonRpcProvider(rpc);const n=await p.getNetwork();if(Number(n.chainId)===CHAIN_ID)return p;}catch(e){last=e}}throw last||new Error("Sepolia RPC 無法使用");}
+$("preflightBtn").onclick=async()=>{
+  try{
+    mintReady=false;
+    mintData="";
+    mintGasLimit=0n;
+    $("mintBtn").disabled=true;
+
+    if(!selected||selected.status!=="approved") throw new Error("請先選擇 approved 提領");
+    if(!activeWalletProvider||!account) throw new Error("Trust Wallet 尚未連線");
+    if(await chainIdFromProvider(activeWalletProvider)!==CHAIN_ID) throw new Error("目前不是 Ethereum Sepolia");
+
+    const rp=await workingReadProvider();
+    const c=new Contract(CONTRACT_ADDRESS,ABI,rp);
+    const [owner,paused,totalSupply,cap,code]=await Promise.all([
+      c.owner(),c.paused(),c.totalSupply(),c.cap(),rp.getCode(CONTRACT_ADDRESS)
+    ]);
+
+    if(!code||code==="0x") throw new Error("IPT 合約不存在");
+    if(!same(owner,account)) throw new Error("目前連線錢包不是 IPT Owner");
+    if(paused) throw new Error("IPT 合約目前 paused");
+
+    const units=BigInt(selected.ipt_units);
+    if(totalSupply+units>cap) throw new Error("Mint 後會超過 IPT cap");
+
+    mintData=MINT_IFACE.encodeFunctionData("mint",[selected.wallet_address,units]);
+    const gas=await rp.estimateGas({
+      from:account,to:CONTRACT_ADDRESS,data:mintData,value:0n
+    });
+    mintGasLimit=(gas*120n+99n)/100n;
+
+    mintReady=true;
+    $("mintBtn").disabled=false;
+
+    status("preflightStatus","ok",
+      `Mint 前檢查通過｜Owner：${owner}｜收款：${selected.wallet_address}｜數量：${fmt(selected.ipt_units)} IPT｜預估 Gas：${gas}｜建議 Gas Limit：${mintGasLimit}｜模式：${walletMode==="trust-injected"?"Trust DApp Browser":"WalletConnect"}`
+    );
+  }catch(e){
+    status("preflightStatus","err","Mint 前檢查失敗："+(e?.message||String(e)));
+  }
+};
+$("mintBtn").onclick=async()=>{
+  if(!mintReady||!selected||!activeWalletProvider) return;
+
+  if(recentMintInflight()){
+    status("preflightStatus","warn","防重複保護：這筆 Mint 在 5 分鐘內已送出過簽名請求。請先到 Trust Wallet 確認是否有待處理交易，不要重複送出。");
+    return;
+  }
+
+  if(!confirm(
+    `這會真正 Mint Sepolia IPT。\n\n會員：${selected.display_name}\n數量：${fmt(selected.ipt_units)} IPT\n地址：${selected.wallet_address}\n\n確定建立 Trust Wallet 簽名請求？`
+  )) return;
+
+  $("mintBtn").disabled=true;
+  mintRequestPending=true;
+  markMintInflight();
+
+  try{
+    if(await chainIdFromProvider(activeWalletProvider)!==CHAIN_ID){
+      throw new Error("送出前網路已不是 Ethereum Sepolia");
+    }
+
+    const txRequest={
+      from:account,
+      to:CONTRACT_ADDRESS,
+      data:mintData,
+      value:"0x0",
+      gas:"0x"+mintGasLimit.toString(16)
+    };
+
+    if(walletMode==="walletconnect"){
+      status("preflightStatus","warn",
+        "WalletConnect 簽名請求正在送出。現在請用 Android 最近使用 App 手動切到 Trust Wallet，查看待確認交易；不要再次按 Mint。"
+      );
+    }else{
+      status("preflightStatus","info",
+        "正在要求 Trust Wallet 顯示 Mint 交易確認…"
+      );
+    }
+
+    // Direct EIP-1193 request. Avoid ethers BrowserProvider on Android WalletConnect.
+    const hash=String(await activeWalletProvider.request({
+      method:"eth_sendTransaction",
+      params:[txRequest]
+    })||"");
+
+    if(!/^0x[0-9a-fA-F]{64}$/.test(hash)){
+      throw new Error("Trust Wallet 未回傳有效 tx hash");
+    }
+
+    clearMintInflight();
+    mintRequestPending=false;
+
+    const {error}=await sb.rpc("platform_admin_submit_ipt_withdrawal_tx",{
+      p_withdrawal_id:selected.id,
+      p_tx_hash:hash
+    });
+    if(error) throw error;
+
+    $("txHashInput").value=hash;
+    status("chainStatus","ok","Trust Wallet 已送出 Mint，tx hash 已登記。現在等待鏈上確認。");
+
+    await loadQueue();
+    const refreshed=rows.find(x=>x.id===selected.id);
+    if(refreshed) selected=refreshed;
+    selectVerify(selected.id);
+  }catch(e){
+    mintRequestPending=false;
+
+    const msg=e?.message||String(e);
+    const rejected=/reject|denied|cancel/i.test(msg);
+
+    if(rejected){
+      clearMintInflight();
+      status("preflightStatus","warn","Trust Wallet 已取消／拒絕交易。本次沒有送出 Mint。");
+      $("mintBtn").disabled=false;
+    }else{
+      status("preflightStatus","err",
+        "Mint 尚未取得 tx hash："+msg+"。請先確認 Trust Wallet 是否有待處理交易；5 分鐘內不要重複送出。"
+      );
+    }
+  }
+};
+$("registerTxBtn").onclick=async()=>{if(!selected)return;const hash=$("txHashInput").value.trim();try{const {error}=await sb.rpc("platform_admin_submit_ipt_withdrawal_tx",{p_withdrawal_id:selected.id,p_tx_hash:hash});if(error)throw error;status("chainStatus","ok","tx hash 已登記，但平台尚未結算。請執行後端鏈上驗證。");await loadQueue();}catch(e){status("chainStatus","err","登記失敗："+(e?.message||String(e)));}};
+$("verifyChainBtn").onclick=async()=>{if(!selected)return;$("verifyChainBtn").disabled=true;status("chainStatus","info","後端正在獨立查詢 Sepolia RPC、Mint calldata、receipt 與 Transfer 事件…");try{const token=await adminToken();const resp=await fetch(VERIFY_URL,{method:"POST",headers:{"Content-Type":"application/json","apikey":KEY,"Authorization":"Bearer "+token},body:JSON.stringify({withdrawal_id:selected.id})});const body=await resp.json().catch(()=>({}));if(resp.status===202){status("chainStatus","warn",`鏈上尚在確認：${body.status||"pending"}｜confirmations ${body.confirmations??0}/${body.min_confirmations??2}`);return;}if(!resp.ok)throw new Error(body?.error||("HTTP "+resp.status));status("chainStatus","ok",`鏈上驗證完成，平台結算成功。tx：${body.tx_hash}｜block：${body.block_number}｜confirmations：${body.confirmations}`);await loadQueue();}catch(e){status("chainStatus","err","鏈上驗證失敗："+(e?.message||String(e)));}finally{$("verifyChainBtn").disabled=false;}};
+$("reloadBtn").onclick=()=>loadQueue().catch(e=>status("adminStatus","err",e?.message||String(e)));
+loadQueue().catch(e=>status("adminStatus","err","管理員驗證失敗："+(e?.message||String(e))+"。請確認登入、Admin 角色、MFA AAL2 與 Trusted Device。"));
+</script>
+</body>
+</html>
