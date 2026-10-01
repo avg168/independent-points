@@ -1,7 +1,7 @@
 Independent Points V4.14.2｜正式封版驗收報告
 
 正式封版日期：2026-09-30
-Build：20261002-4142-hf6
+Build：20261002-4142-hf7
 Network：Ethereum Sepolia (11155111 / 0xaa36a7)
 Contract：0xd3fb2480aadb8b168ec7e88a0e5c847d9750cb87
 
@@ -83,3 +83,13 @@ Contract：0xd3fb2480aadb8b168ec7e88a0e5c847d9750cb87
 - JSON 檔解析：通過
 - JavaScript 語法檢查：0 錯誤
 - 不修改登入、MFA、Trusted Device、IPT 資產、提領、Mint、Supabase 結算或 Sepolia 合約
+
+十二、Hotfix 7｜會員變更密碼
+- 帳戶安全頁新增會員變更密碼功能
+- 必須輸入目前密碼、新密碼、再次確認新密碼
+- 新密碼前端最低 8 個字元；Supabase 後端仍會套用專案實際密碼政策
+- 目前密碼先以獨立、非持久化 Supabase Auth Client 驗證
+- 若帳號已有 TOTP MFA，本次登入必須先完成 AAL2
+- 密碼更新使用 Supabase Auth updateUser()
+- 成功後嘗試登出其他裝置的 refresh sessions，目前裝置保留登入
+- 不修改平台 IPT、P 點、提領、Mint、會員資產表或 Sepolia 合約

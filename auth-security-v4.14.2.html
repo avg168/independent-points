@@ -28,7 +28,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
 </head>
 <body>
 <header>
-  <div class="version">V4.14.2｜正式付款登入與 MFA</div>
+  <div class="version">V4.14.2｜正式登入、密碼與 MFA</div>
   <h1 id="title">帳戶安全與 MFA</h1>
   <p id="subtitle">每次登入重新確認身分；管理員使用驗證器 App 進行第二因素驗證。</p>
   <div class="langbar">
@@ -70,6 +70,18 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
     <div class="actions">
       <button id="recheckBtn" class="blue" type="button">重新驗證登入身分</button>
       <button id="homeBtn" class="light" type="button">返回首頁</button>
+    </div>
+  </section>
+
+  <section class="panel" id="passwordPanel">
+    <h2 id="hPassword">變更會員密碼</h2>
+    <div id="passwordStatus" class="status">登入後可變更密碼。為安全起見，必須先輸入目前密碼。</div>
+    <input id="currentPassword" type="password" autocomplete="current-password" placeholder="目前密碼" style="width:100%;margin-top:12px">
+    <input id="newPassword" type="password" autocomplete="new-password" placeholder="新密碼" style="width:100%;margin-top:10px">
+    <input id="confirmPassword" type="password" autocomplete="new-password" placeholder="再次輸入新密碼" style="width:100%;margin-top:10px">
+    <button id="changePasswordBtn" class="primary" type="button" disabled style="width:100%;margin-top:10px">變更密碼</button>
+    <div class="note" id="passwordNote">
+      新密碼至少 8 個字元。若帳號已設定 MFA，本次登入必須先完成 AAL2。變更成功後會登出其他裝置的更新權杖，目前這支手機保持登入。
     </div>
   </section>
 
@@ -140,7 +152,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
   </section>
 </main>
 <script>
-/* V4.12.4 Backup MFA FriendlyName Hotfix 16 + Signed-Out Redirect Hotfix 17 + Trusted Device Hotfix 19 */
+/* V4.14.2 HF7: Member password change + existing MFA / trusted-device security */
 (() => {
   const URL="https://uccexvgqmoxhgykkjdcy.supabase.co";
   const KEY="sb_publishable_FBsN1DYTQMv2_bWhpbXHAA_qdAq7ri7";
@@ -306,7 +318,15 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       backupWarning:"請把備援驗證器放在不同裝置或安全的不同位置；不要只存在同一支手機。",
       factorLabel:"驗證器",removeFactor:"移除",removeConfirm:"確定要移除此驗證器嗎？至少保留一個可用的驗證器。",
       lastFactor:"至少要保留一個已驗證 MFA，不能移除最後一個。",backupEnabled:"備援 MFA 已成功啟用。",
-      factorRemoved:"驗證器已移除。",removeFail:"移除失敗：",backupFail:"備援 MFA 建立失敗：",signoutFail:"登出失敗：",hTrustedDevice:"受信任裝置",trustedDeviceNote:"可選擇啟用受信任裝置保護。啟用後，同一支已信任手機可正常登入；新的手機必須先完成 MFA 才能加入。",trustedDeviceManage:"管理受信任裝置",trustedDeviceHelp:"一般會員不強制啟用；若啟用，未信任的新裝置會被鎖住會員、錢包與管理功能。"
+      factorRemoved:"驗證器已移除。",removeFail:"移除失敗：",backupFail:"備援 MFA 建立失敗：",signoutFail:"登出失敗：",hTrustedDevice:"受信任裝置",trustedDeviceNote:"可選擇啟用受信任裝置保護。啟用後，同一支已信任手機可正常登入；新的手機必須先完成 MFA 才能加入。",trustedDeviceManage:"管理受信任裝置",trustedDeviceHelp:"一般會員不強制啟用；若啟用，未信任的新裝置會被鎖住會員、錢包與管理功能。",
+      hPassword:"變更會員密碼",passwordReady:"請輸入目前密碼與新密碼。",passwordLoginRequired:"請先登入會員帳號，才能變更密碼。",
+      currentPassword:"目前密碼",newPassword:"新密碼",confirmPassword:"再次輸入新密碼",changePassword:"變更密碼",
+      passwordNote:"新密碼至少 8 個字元。若帳號已設定 MFA，本次登入必須先完成 AAL2。變更成功後會登出其他裝置的更新權杖，目前這支手機保持登入。",
+      passwordMissing:"請完整輸入目前密碼、新密碼與確認密碼。",passwordTooShort:"新密碼至少需要 8 個字元。",passwordMismatch:"兩次輸入的新密碼不一致。",
+      passwordSame:"新密碼不能與目前密碼相同。",passwordMfaRequired:"此帳號已設定 MFA，請先完成本次登入的二次驗證（AAL2）。",
+      passwordCurrentWrong:"目前密碼驗證失敗：",passwordChanging:"正在驗證目前密碼並更新…",
+      passwordChanged:"密碼已成功變更。其他裝置需要重新登入。",passwordChangedSessionWarn:"密碼已變更，但無法立即登出其他裝置：",
+      passwordChangeFail:"密碼變更失敗："
     },
     "zh-CN":{
       title:"账户安全与 MFA",subtitle:"每次登录重新确认身份；管理员使用验证器 App 进行第二因素验证。",
@@ -328,7 +348,15 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       backupWarning:"请把备用验证器放在不同设备或安全的不同位置；不要只存在同一支手机。",
       factorLabel:"验证器",removeFactor:"移除",removeConfirm:"确定要移除此验证器吗？至少保留一个可用的验证器。",
       lastFactor:"至少要保留一个已验证 MFA，不能移除最后一个。",backupEnabled:"备用 MFA 已成功启用。",
-      factorRemoved:"验证器已移除。",removeFail:"移除失败：",backupFail:"备用 MFA 建立失败：",signoutFail:"登出失败：",hTrustedDevice:"受信任设备",trustedDeviceNote:"可选择启用受信任设备保护。启用后，同一台已信任手机可正常登录；新的手机必须先完成 MFA 才能加入。",trustedDeviceManage:"管理受信任设备",trustedDeviceHelp:"普通会员不强制启用；若启用，未信任的新设备会被锁住会员、钱包与管理功能。"
+      factorRemoved:"验证器已移除。",removeFail:"移除失败：",backupFail:"备用 MFA 建立失败：",signoutFail:"登出失败：",hTrustedDevice:"受信任设备",trustedDeviceNote:"可选择启用受信任设备保护。启用后，同一台已信任手机可正常登录；新的手机必须先完成 MFA 才能加入。",trustedDeviceManage:"管理受信任设备",trustedDeviceHelp:"普通会员不强制启用；若启用，未信任的新设备会被锁住会员、钱包与管理功能。",
+      hPassword:"变更会员密码",passwordReady:"请输入当前密码与新密码。",passwordLoginRequired:"请先登录会员账号，才能变更密码。",
+      currentPassword:"当前密码",newPassword:"新密码",confirmPassword:"再次输入新密码",changePassword:"变更密码",
+      passwordNote:"新密码至少 8 个字符。若账号已设置 MFA，本次登录必须先完成 AAL2。变更成功后会登出其他设备的刷新会话，当前这台设备保持登录。",
+      passwordMissing:"请完整输入当前密码、新密码与确认密码。",passwordTooShort:"新密码至少需要 8 个字符。",passwordMismatch:"两次输入的新密码不一致。",
+      passwordSame:"新密码不能与当前密码相同。",passwordMfaRequired:"此账号已设置 MFA，请先完成本次登录的二次验证（AAL2）。",
+      passwordCurrentWrong:"当前密码验证失败：",passwordChanging:"正在验证当前密码并更新…",
+      passwordChanged:"密码已成功变更。其他设备需要重新登录。",passwordChangedSessionWarn:"密码已变更，但无法立即登出其他设备：",
+      passwordChangeFail:"密码变更失败："
     },
     "en":{
       title:"Account Security & MFA",subtitle:"Revalidate identity on every sign-in; administrators use an authenticator app as a second factor.",
@@ -350,7 +378,15 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       backupWarning:"Keep the backup authenticator on a different device or secure location. Do not store both factors only on the same phone.",
       factorLabel:"Authenticator",removeFactor:"Remove",removeConfirm:"Remove this authenticator? Keep at least one working authenticator.",
       lastFactor:"You must keep at least one verified MFA factor. The last factor cannot be removed.",backupEnabled:"Backup MFA was enabled successfully.",
-      factorRemoved:"Authenticator removed.",removeFail:"Removal failed: ",backupFail:"Backup MFA setup failed: ",signoutFail:"Sign-out failed: ",hTrustedDevice:"Trusted Devices",trustedDeviceNote:"Trusted-device protection is optional. Once enabled, this trusted phone can sign in normally; a new phone must complete MFA before it can be trusted.",trustedDeviceManage:"Manage Trusted Devices",trustedDeviceHelp:"This is optional for regular members. When enabled, untrusted new devices are blocked from member, wallet, and administrator features."
+      factorRemoved:"Authenticator removed.",removeFail:"Removal failed: ",backupFail:"Backup MFA setup failed: ",signoutFail:"Sign-out failed: ",hTrustedDevice:"Trusted Devices",trustedDeviceNote:"Trusted-device protection is optional. Once enabled, this trusted phone can sign in normally; a new phone must complete MFA before it can be trusted.",trustedDeviceManage:"Manage Trusted Devices",trustedDeviceHelp:"This is optional for regular members. When enabled, untrusted new devices are blocked from member, wallet, and administrator features.",
+      hPassword:"Change Member Password",passwordReady:"Enter your current password and a new password.",passwordLoginRequired:"Sign in to your member account before changing the password.",
+      currentPassword:"Current password",newPassword:"New password",confirmPassword:"Confirm new password",changePassword:"Change Password",
+      passwordNote:"The new password must be at least 8 characters. If MFA is configured, this sign-in must first reach AAL2. After a successful change, refresh sessions on other devices are signed out while this device stays signed in.",
+      passwordMissing:"Enter the current password, new password, and confirmation.",passwordTooShort:"The new password must be at least 8 characters.",passwordMismatch:"The two new-password entries do not match.",
+      passwordSame:"The new password must be different from the current password.",passwordMfaRequired:"MFA is configured for this account. Complete AAL2 verification for this sign-in first.",
+      passwordCurrentWrong:"Current-password verification failed: ",passwordChanging:"Verifying the current password and updating…",
+      passwordChanged:"Password changed successfully. Other devices must sign in again.",passwordChangedSessionWarn:"Password changed, but other sessions could not be signed out immediately: ",
+      passwordChangeFail:"Password change failed: "
     }
   };
 
@@ -359,12 +395,16 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
   function applyLang(){
     localStorage.setItem("ipt_language",lang);
     document.documentElement.lang=lang==="en"?"en":(lang==="zh-CN"?"zh-Hans":"zh-Hant");
-    ["title","subtitle","hLogin","loginNote","hIdentity","kEmail","kUser","kAal","kFactor","hMfa","enrollNote","challengeNote","hTrustedDevice","trustedDeviceNote","trustedDeviceHelp","hSession","sessionPolicy","rolloutNote"].forEach(id=>{
+    ["title","subtitle","hLogin","loginNote","hIdentity","kEmail","kUser","kAal","kFactor","hPassword","passwordNote","hMfa","enrollNote","challengeNote","hTrustedDevice","trustedDeviceNote","trustedDeviceHelp","hSession","sessionPolicy","rolloutNote"].forEach(id=>{
       const map={sessionPolicy:"policy",rolloutNote:"rollout"}; if($(id)) $(id).textContent=T(map[id]||id);
     });
     $("loginEmail").placeholder=T("loginEmail");
     $("loginPassword").placeholder=T("loginPassword");
     $("loginSubmitBtn").textContent=T("loginSubmit");
+    if($("currentPassword")) $("currentPassword").placeholder=T("currentPassword");
+    if($("newPassword")) $("newPassword").placeholder=T("newPassword");
+    if($("confirmPassword")) $("confirmPassword").placeholder=T("confirmPassword");
+    if($("changePasswordBtn")) $("changePasswordBtn").textContent=T("changePassword");
     $("recheckBtn").textContent=T("recheck"); $("homeBtn").textContent=T("home"); $("enrollBtn").textContent=T("enroll");
     $("enrollCode").placeholder=T("code"); $("verifyEnrollBtn").textContent=T("enable");
     $("challengeCode").placeholder=T("code"); $("challengeBtn").textContent=T("challenge"); $("signOutBtn").textContent=T("signout");
@@ -407,6 +447,84 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
     const last=localStorage.getItem("ipt_last_login_email");
     if(last) $("loginEmail").value=last;
   }catch(_){}
+
+  $("changePasswordBtn").onclick=async()=>{
+    const btn=$("changePasswordBtn");
+    const current=$("currentPassword").value;
+    const next=$("newPassword").value;
+    const confirmNext=$("confirmPassword").value;
+
+    if(!current||!next||!confirmNext){
+      status("passwordStatus","warn",T("passwordMissing"));
+      return;
+    }
+    if(next.length<8){
+      status("passwordStatus","warn",T("passwordTooShort"));
+      return;
+    }
+    if(next!==confirmNext){
+      status("passwordStatus","warn",T("passwordMismatch"));
+      return;
+    }
+    if(next===current){
+      status("passwordStatus","warn",T("passwordSame"));
+      return;
+    }
+
+    btn.disabled=true;
+    status("passwordStatus","",T("passwordChanging"));
+
+    try{
+      const {data:{user},error:userErr}=await sb.auth.getUser();
+      if(userErr||!user?.email) throw new Error(T("passwordLoginRequired"));
+
+      // If this account has MFA, require AAL2 before a password change.
+      const [{data:aal,error:aalErr},{data:factors,error:fErr}]=await Promise.all([
+        sb.auth.mfa.getAuthenticatorAssuranceLevel(),
+        sb.auth.mfa.listFactors()
+      ]);
+      if(aalErr||fErr) throw (aalErr||fErr);
+      const verifiedTotp=(factors?.totp||[]).filter(x=>x.status==="verified");
+      if(verifiedTotp.length && aal?.currentLevel!=="aal2"){
+        throw new Error(T("passwordMfaRequired"));
+      }
+
+      // Verify the current password in an isolated, non-persistent Auth client.
+      // This does not replace or downgrade the main browser session.
+      const verifier=window.supabase.createClient(URL,KEY,{
+        auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}
+      });
+      const {error:verifyErr}=await verifier.auth.signInWithPassword({
+        email:user.email,
+        password:current
+      });
+      if(verifyErr) throw new Error(T("passwordCurrentWrong")+(verifyErr.message||String(verifyErr)));
+
+      // Ask Supabase Auth to validate the current password again when supported
+      // by the project's password-security configuration.
+      const {error:updateErr}=await sb.auth.updateUser({
+        current_password:current,
+        password:next
+      });
+      if(updateErr) throw updateErr;
+
+      $("currentPassword").value="";
+      $("newPassword").value="";
+      $("confirmPassword").value="";
+
+      // Revoke refresh sessions on other devices, while keeping this device.
+      const {error:othersErr}=await sb.auth.signOut({scope:"others"});
+      if(othersErr){
+        status("passwordStatus","warn",T("passwordChangedSessionWarn")+(othersErr.message||String(othersErr)));
+      }else{
+        status("passwordStatus","ok",T("passwordChanged"));
+      }
+    }catch(e){
+      status("passwordStatus","err",T("passwordChangeFail")+(e?.message||String(e)));
+    }finally{
+      btn.disabled=false;
+    }
+  };
 
   $("homeBtn").onclick=()=>location.href="https://avg168.github.io/independent-points/?v=4142hf6";
   $("recheckBtn").onclick=()=>refresh();
@@ -477,15 +595,19 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
     status("identityStatus","",T("checking"));
     status("mfaStatus","",T("reading"));
     $("enrollArea").classList.add("hidden"); $("challengeArea").classList.add("hidden"); $("staleArea").classList.add("hidden"); $("backupArea").classList.add("hidden"); staleFactorIds=[];
+    if($("changePasswordBtn")) $("changePasswordBtn").disabled=true;
     const {data:{user},error:userErr}=await sb.auth.getUser();
     if(userErr||!user){
       status("loginStatus","warn",T("loginReady"));
+      if($("passwordStatus")) status("passwordStatus","warn",T("passwordLoginRequired"));
       $("email").textContent="—";$("uid").textContent="—";$("aal").textContent="—";$("factorCount").textContent="0";
       status("identityStatus","err",T("invalid"));status("mfaStatus","warn",T("noFactor"));
       await updatePaymentReturn(false);
       return;
     }
     status("loginStatus","ok",T("loginOk"));
+    if($("changePasswordBtn")) $("changePasswordBtn").disabled=false;
+    if($("passwordStatus")) status("passwordStatus","",T("passwordReady"));
     $("email").textContent=user.email||"—";$("uid").textContent=user.id||"—";status("identityStatus","ok",T("valid"));
 
     const [{data:aal,error:aalErr},{data:factors,error:fErr}]=await Promise.all([

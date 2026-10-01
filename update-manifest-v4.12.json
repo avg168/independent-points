@@ -1,7 +1,7 @@
 {
   "product": "Independent Points",
   "version": "V4.14.2",
-  "build": "20261002-4142-hf6",
+  "build": "20261002-4142-hf7",
   "release_date": "2026-10-02",
   "channel": "production",
   "checks": {
@@ -39,7 +39,11 @@
     "auth_security_signout_home_absolute_url": true,
     "device_security_home_absolute_url": true,
     "hf6_recovery_drill_sha256_34_of_34": true,
-    "hf6_recovery_drill_js_syntax": true
+    "hf6_recovery_drill_js_syntax": true,
+    "member_password_change_ui": true,
+    "member_password_current_password_verification": true,
+    "member_password_mfa_aal2_when_configured": true,
+    "member_password_other_sessions_revoked": true
   },
   "self_file": {
     "name": "update-manifest-v4.12.json",
@@ -49,8 +53,8 @@
   "files": [
     {
       "name": "V4.14.2-正式封版驗收報告.txt",
-      "bytes": 3757,
-      "sha256": "168a01c37020282666e15282d90ecac8b86865df14f190f9cdbdc11d1b90d6a4"
+      "bytes": 4343,
+      "sha256": "1f86d4e19bfa0ef38197378b83dae0b47369d9fd67bf0bd08e2f874ba78b9488"
     },
     {
       "name": "admin-assets-v4.12.html",
@@ -79,8 +83,8 @@
     },
     {
       "name": "auth-security-v4.14.2.html",
-      "bytes": 38724,
-      "sha256": "e2ff2874e2eb7330c208b53cbf4b9ca4b73dec22217b6d9316e747b9244a8af3"
+      "bytes": 46961,
+      "sha256": "a7c81c3325a3dc78d63a2ef1ea96ccd650755d39470e36395716dbb2d23700d2"
     },
     {
       "name": "device-security-v4.12.html",
@@ -154,13 +158,13 @@
     },
     {
       "name": "release-history.json",
-      "bytes": 19579,
-      "sha256": "015f1ff8bcc33124ca6b2f1ac088d85b23a0d6820efc209188a4adae7aa2f580"
+      "bytes": 20160,
+      "sha256": "513b5641e7109532eddaea1f0ea52ec4c86650340ea70877383610d65732afa4"
     },
     {
       "name": "release.json",
-      "bytes": 4662,
-      "sha256": "1941bfa6ccac3a10e47f58efcad552eed093699267ee663a017d24a5385123b3"
+      "bytes": 5222,
+      "sha256": "ee9bf22e588e1c03e5900e4e1cc67f86c1485cb1e5bee3cfe6dd3161a405c3a6"
     },
     {
       "name": "robots.txt",
@@ -180,7 +184,7 @@
     {
       "name": "service-worker.js",
       "bytes": 1695,
-      "sha256": "3e281ef5faca95cff5286d907c0d4309d0288654ac26a2940085a8a1c2f586b1"
+      "sha256": "7c11e998c47e8cf75112931dd14565da66b4a0bb84eced615f31a6c9ef9172f8"
     },
     {
       "name": "system-info-v4.12.html",
@@ -218,5 +222,5 @@
       "sha256": "892f6dc6f28991bcb7d24ebe3c0c4aea31cdd5acefe0f1acb426509201d48ab4"
     }
   ],
-  "hotfix": 6
+  "hotfix": 7
 }

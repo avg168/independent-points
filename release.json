@@ -1,7 +1,7 @@
 {
   "product": "Independent Points",
   "version": "V4.14.2",
-  "build": "20261002-4142-hf6",
+  "build": "20261002-4142-hf7",
   "release_date": "2026-10-02",
   "channel": "production",
   "rollback_version": "V4.12.4",
@@ -26,6 +26,11 @@
     }
   },
   "notes": [
+    "Hotfix 7: add member password-change UI to auth-security-v4.14.2.html",
+    "Hotfix 7: require current-password verification in an isolated non-persistent Supabase Auth client before password update",
+    "Hotfix 7: require AAL2 before password change when the account has verified TOTP MFA",
+    "Hotfix 7: revoke refresh sessions on other devices after a successful password change while keeping the current device signed in",
+    "Hotfix 7: no changes to wallet balances, transfers, withdrawals, Mint, Supabase settlement tables, or the IPT contract",
     "Hotfix 6: fix Account Security V4.14.2 return-home and post-signout navigation to the absolute production URL",
     "Hotfix 6: fix Trusted Device V4.14.2 return-home navigation to the absolute production URL",
     "Hotfix 6: recovery drill verified 34/34 production SHA256 files, JSON validity, and JavaScript syntax",
@@ -75,5 +80,5 @@
   ],
   "manifest_filename": "update-manifest-v4.12.json",
   "manifest_filename_note": "Legacy filename retained for compatibility; manifest content is V4.14.2.",
-  "hotfix": 6
+  "hotfix": 7
 }

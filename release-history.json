@@ -4,6 +4,19 @@
     {
       "version": "V4.14.2",
       "date": "2026-10-02",
+      "channel": "hotfix-7-member-password-change",
+      "title": "Hotfix 7 會員變更密碼",
+      "notes": [
+        "帳戶安全頁新增目前密碼、新密碼、再次確認新密碼",
+        "更新前先以獨立非持久化 Auth Client 驗證目前密碼",
+        "若帳號已有 TOTP MFA，必須先完成 AAL2",
+        "成功後登出其他裝置的 refresh sessions，目前裝置保留登入",
+        "不修改平台 IPT、P 點、提領、Mint、會員資產表或鏈上合約"
+      ]
+    },
+    {
+      "version": "V4.14.2",
+      "date": "2026-10-02",
       "channel": "hotfix-6-security-home-navigation",
       "title": "Hotfix 6 安全頁返回正式首頁修正",
       "notes": [
