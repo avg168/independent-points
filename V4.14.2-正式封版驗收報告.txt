@@ -1,7 +1,7 @@
 Independent Points V4.14.2｜正式封版驗收報告
 
 正式封版日期：2026-09-30
-Build：20260930-4142-hf5
+Build：20261002-4142-hf6
 Network：Ethereum Sepolia (11155111 / 0xaa36a7)
 Contract：0xd3fb2480aadb8b168ec7e88a0e5c847d9750cb87
 
@@ -72,3 +72,14 @@ Contract：0xd3fb2480aadb8b168ec7e88a0e5c847d9750cb87
 - 新增 member_trusted_sessions(device_id) 外鍵索引
 - 未刪除 staging／backup branches
 - 不修改 IPT 資產、提領、Mint、合約或既有 Sepolia 交易
+
+十一、Hotfix 6｜安全頁返回首頁與復原演練
+- auth-security-v4.14.2.html：返回正式首頁改為絕對網址
+- auth-security-v4.14.2.html：登出後返回正式首頁改為絕對網址
+- device-security-v4.14.2.html：返回正式首頁改為絕對網址
+- 正式首頁：https://avg168.github.io/independent-points/?v=4142hf6
+- 舊 ../index.html?v=4124 路徑已從上述正式安全頁移除
+- 復原演練：production 34/34 SHA256 通過
+- JSON 檔解析：通過
+- JavaScript 語法檢查：0 錯誤
+- 不修改登入、MFA、Trusted Device、IPT 資產、提領、Mint、Supabase 結算或 Sepolia 合約

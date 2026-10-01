@@ -1,8 +1,8 @@
 {
   "product": "Independent Points",
   "version": "V4.14.2",
-  "build": "20260930-4142-hf5",
-  "release_date": "2026-09-30",
+  "build": "20261002-4142-hf6",
+  "release_date": "2026-10-02",
   "channel": "production",
   "checks": {
     "javascript": true,
@@ -34,7 +34,12 @@
     "production_payment_qr_url": true,
     "cached_payment_url_normalized": true,
     "trusted_session_device_index": true,
-    "destructive_cleanup_deferred": true
+    "destructive_cleanup_deferred": true,
+    "auth_security_home_absolute_url": true,
+    "auth_security_signout_home_absolute_url": true,
+    "device_security_home_absolute_url": true,
+    "hf6_recovery_drill_sha256_34_of_34": true,
+    "hf6_recovery_drill_js_syntax": true
   },
   "self_file": {
     "name": "update-manifest-v4.12.json",
@@ -44,8 +49,8 @@
   "files": [
     {
       "name": "V4.14.2-正式封版驗收報告.txt",
-      "bytes": 3128,
-      "sha256": "7375e6c016c8a9779f006a9188f0d15e60c21a2c510d5998dd41f2390ccb6f8e"
+      "bytes": 3757,
+      "sha256": "168a01c37020282666e15282d90ecac8b86865df14f190f9cdbdc11d1b90d6a4"
     },
     {
       "name": "admin-assets-v4.12.html",
@@ -74,8 +79,8 @@
     },
     {
       "name": "auth-security-v4.14.2.html",
-      "bytes": 38656,
-      "sha256": "478114fb64c86e9c67d91e463c3e7a78167f765ce7ca0a4f0757c89c51f06a95"
+      "bytes": 38724,
+      "sha256": "e2ff2874e2eb7330c208b53cbf4b9ca4b73dec22217b6d9316e747b9244a8af3"
     },
     {
       "name": "device-security-v4.12.html",
@@ -84,8 +89,8 @@
     },
     {
       "name": "device-security-v4.14.2.html",
-      "bytes": 21064,
-      "sha256": "acc3d2a6e1a54efe7cb0a3efe5af79bf98ac8024c294b29bad2e6d3133d8ad5b"
+      "bytes": 21098,
+      "sha256": "5731fb6385fb2677d3dfac14e2bfc0fc976ef14cead67c7bb7e513cdf4bcda76"
     },
     {
       "name": "event-center-v4.12.html",
@@ -149,13 +154,13 @@
     },
     {
       "name": "release-history.json",
-      "bytes": 18912,
-      "sha256": "151c14fcb9f3589f3561041e3a16460918b964de822fbcd532f3459547bac0fb"
+      "bytes": 19579,
+      "sha256": "015f1ff8bcc33124ca6b2f1ac088d85b23a0d6820efc209188a4adae7aa2f580"
     },
     {
       "name": "release.json",
-      "bytes": 4188,
-      "sha256": "614670e84e6f4df251bca5841d7016ed5544a2c091e1addd0806f57e22935895"
+      "bytes": 4662,
+      "sha256": "1941bfa6ccac3a10e47f58efcad552eed093699267ee663a017d24a5385123b3"
     },
     {
       "name": "robots.txt",
@@ -175,7 +180,7 @@
     {
       "name": "service-worker.js",
       "bytes": 1695,
-      "sha256": "c4a349be6c56fb4c31d565d23af336734a6b402692d69ee3fba6c5569a0c9bdc"
+      "sha256": "3e281ef5faca95cff5286d907c0d4309d0288654ac26a2940085a8a1c2f586b1"
     },
     {
       "name": "system-info-v4.12.html",
@@ -213,5 +218,5 @@
       "sha256": "892f6dc6f28991bcb7d24ebe3c0c4aea31cdd5acefe0f1acb426509201d48ab4"
     }
   ],
-  "hotfix": 5
+  "hotfix": 6
 }

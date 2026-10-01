@@ -1,8 +1,8 @@
 {
   "product": "Independent Points",
   "version": "V4.14.2",
-  "build": "20260930-4142-hf5",
-  "release_date": "2026-09-30",
+  "build": "20261002-4142-hf6",
+  "release_date": "2026-10-02",
   "channel": "production",
   "rollback_version": "V4.12.4",
   "fallback_version": "V4.12.4",
@@ -26,6 +26,10 @@
     }
   },
   "notes": [
+    "Hotfix 6: fix Account Security V4.14.2 return-home and post-signout navigation to the absolute production URL",
+    "Hotfix 6: fix Trusted Device V4.14.2 return-home navigation to the absolute production URL",
+    "Hotfix 6: recovery drill verified 34/34 production SHA256 files, JSON validity, and JavaScript syntax",
+    "Hotfix 6: no changes to authentication logic, MFA, trusted-device logic, balances, withdrawals, Mint, Supabase settlement, or the IPT contract",
     "Hotfix 5: production receiving QR links are forced to pay-v4.14.2.html",
     "Hotfix 5: cached payment-link tokens are preserved while stale staging URLs are normalized to production",
     "Hotfix 5: platform-payment-link Edge Function upgraded to v2",
@@ -71,5 +75,5 @@
   ],
   "manifest_filename": "update-manifest-v4.12.json",
   "manifest_filename_note": "Legacy filename retained for compatibility; manifest content is V4.14.2.",
-  "hotfix": 5
+  "hotfix": 6
 }

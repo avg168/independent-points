@@ -3,6 +3,19 @@
   "releases": [
     {
       "version": "V4.14.2",
+      "date": "2026-10-02",
+      "channel": "hotfix-6-security-home-navigation",
+      "title": "Hotfix 6 安全頁返回正式首頁修正",
+      "notes": [
+        "auth-security-v4.14.2.html：返回首頁改為正式絕對網址",
+        "auth-security-v4.14.2.html：登出後返回首頁改為正式絕對網址",
+        "device-security-v4.14.2.html：返回首頁改為正式絕對網址",
+        "HF6 復原演練：34/34 正式檔 SHA256 通過、JSON 解析通過、JavaScript 語法 0 錯誤",
+        "不修改登入、MFA、Trusted Device、資產、提領、Mint、Supabase 或鏈上合約邏輯"
+      ]
+    },
+    {
+      "version": "V4.14.2",
       "date": "2026-09-30",
       "channel": "hotfix-5-production-security-cleanup",
       "title": "Hotfix 5 正式收款 QR 與營運資安收尾",
