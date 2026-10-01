@@ -4,6 +4,18 @@
     {
       "version": "V4.14.2",
       "date": "2026-10-02",
+      "channel": "hotfix-8-local-signout",
+      "title": "Hotfix 8 登出此裝置改為本機登出",
+      "notes": [
+        "修正「登出此裝置」原本使用 Supabase 預設 global signOut() 的問題",
+        "改為 signOut({scope:'local'})，只登出目前瀏覽器／裝置",
+        "HF7 改密碼成功後的 signOut({scope:'others'}) 保持不變",
+        "不修改 MFA、受信任裝置、平台 IPT、P 點、提領、Mint 或 Sepolia 合約"
+      ]
+    },
+    {
+      "version": "V4.14.2",
+      "date": "2026-10-02",
       "channel": "hotfix-7-member-password-change",
       "title": "Hotfix 7 會員變更密碼",
       "notes": [

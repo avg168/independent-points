@@ -1,7 +1,7 @@
 Independent Points V4.14.2｜正式封版驗收報告
 
 正式封版日期：2026-09-30
-Build：20261002-4142-hf7
+Build：20261002-4142-hf8
 Network：Ethereum Sepolia (11155111 / 0xaa36a7)
 Contract：0xd3fb2480aadb8b168ec7e88a0e5c847d9750cb87
 
@@ -93,3 +93,10 @@ Contract：0xd3fb2480aadb8b168ec7e88a0e5c847d9750cb87
 - 密碼更新使用 Supabase Auth updateUser()
 - 成功後嘗試登出其他裝置的 refresh sessions，目前裝置保留登入
 - 不修改平台 IPT、P 點、提領、Mint、會員資產表或 Sepolia 合約
+
+十三、Hotfix 8｜登出此裝置本機化
+- 問題：按鈕標示「登出此裝置」，但原程式使用 sb.auth.signOut()，Supabase 預設為 global scope
+- 修正：改為 sb.auth.signOut({scope:"local"})
+- 結果：只登出目前瀏覽器／裝置，不再把其他裝置 Session 一起登出
+- HF7 密碼變更成功後仍使用 scope:"others"，只撤銷其他裝置 refresh sessions
+- 不修改 MFA、受信任裝置、平台 IPT、P 點、提領、Mint、結算資料或 Sepolia 合約

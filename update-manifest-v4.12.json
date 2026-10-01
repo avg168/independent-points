@@ -1,7 +1,7 @@
 {
   "product": "Independent Points",
   "version": "V4.14.2",
-  "build": "20261002-4142-hf7",
+  "build": "20261002-4142-hf8",
   "release_date": "2026-10-02",
   "channel": "production",
   "checks": {
@@ -43,7 +43,9 @@
     "member_password_change_ui": true,
     "member_password_current_password_verification": true,
     "member_password_mfa_aal2_when_configured": true,
-    "member_password_other_sessions_revoked": true
+    "member_password_other_sessions_revoked": true,
+    "signout_this_device_local_scope": true,
+    "password_change_other_sessions_scope_others": true
   },
   "self_file": {
     "name": "update-manifest-v4.12.json",
@@ -53,8 +55,8 @@
   "files": [
     {
       "name": "V4.14.2-正式封版驗收報告.txt",
-      "bytes": 4343,
-      "sha256": "1f86d4e19bfa0ef38197378b83dae0b47369d9fd67bf0bd08e2f874ba78b9488"
+      "bytes": 4845,
+      "sha256": "850859531dbd1619431a6a2c437c4b7ae1327e3bf52bb077edbb1fd480ce2fc2"
     },
     {
       "name": "admin-assets-v4.12.html",
@@ -84,7 +86,7 @@
     {
       "name": "auth-security-v4.14.2.html",
       "bytes": 46961,
-      "sha256": "a7c81c3325a3dc78d63a2ef1ea96ccd650755d39470e36395716dbb2d23700d2"
+      "sha256": "241545a9beee62e8f08727af3484c177739a4bbdf86cd13e3f51de2b2baf06f7"
     },
     {
       "name": "device-security-v4.12.html",
@@ -158,13 +160,13 @@
     },
     {
       "name": "release-history.json",
-      "bytes": 20160,
-      "sha256": "513b5641e7109532eddaea1f0ea52ec4c86650340ea70877383610d65732afa4"
+      "bytes": 20705,
+      "sha256": "1ceccb8ed8a1a72c19033282f8bbbfec45b2ccbe55f83feef39a1f9f4636a3f6"
     },
     {
       "name": "release.json",
-      "bytes": 5222,
-      "sha256": "ee9bf22e588e1c03e5900e4e1cc67f86c1485cb1e5bee3cfe6dd3161a405c3a6"
+      "bytes": 5694,
+      "sha256": "fe1b4c0d36ee81564b6a333fc7f83c371a4509fca7f491a4cf30c3f8cc694d3d"
     },
     {
       "name": "robots.txt",
@@ -184,7 +186,7 @@
     {
       "name": "service-worker.js",
       "bytes": 1695,
-      "sha256": "7c11e998c47e8cf75112931dd14565da66b4a0bb84eced615f31a6c9ef9172f8"
+      "sha256": "8113141bedad4239df99b1b64dea2e8576f591d1629cb95388d1bc83db60992e"
     },
     {
       "name": "system-info-v4.12.html",
@@ -222,5 +224,5 @@
       "sha256": "892f6dc6f28991bcb7d24ebe3c0c4aea31cdd5acefe0f1acb426509201d48ab4"
     }
   ],
-  "hotfix": 7
+  "hotfix": 8
 }

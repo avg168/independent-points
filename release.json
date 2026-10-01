@@ -1,7 +1,7 @@
 {
   "product": "Independent Points",
   "version": "V4.14.2",
-  "build": "20261002-4142-hf7",
+  "build": "20261002-4142-hf8",
   "release_date": "2026-10-02",
   "channel": "production",
   "rollback_version": "V4.12.4",
@@ -26,6 +26,10 @@
     }
   },
   "notes": [
+    "Hotfix 8: fix 'Sign out this device' to use Supabase Auth local scope instead of the global default",
+    "Hotfix 8: prevent the current-device sign-out button from revoking sessions on other devices",
+    "Hotfix 8: keep HF7 member password change behavior unchanged; password-change success still revokes other sessions with scope=others",
+    "Hotfix 8: no changes to MFA, trusted-device data, balances, withdrawals, Mint, settlement tables, or the IPT contract",
     "Hotfix 7: add member password-change UI to auth-security-v4.14.2.html",
     "Hotfix 7: require current-password verification in an isolated non-persistent Supabase Auth client before password update",
     "Hotfix 7: require AAL2 before password change when the account has verified TOTP MFA",
@@ -80,5 +84,5 @@
   ],
   "manifest_filename": "update-manifest-v4.12.json",
   "manifest_filename_note": "Legacy filename retained for compatibility; manifest content is V4.14.2.",
-  "hotfix": 7
+  "hotfix": 8
 }

@@ -152,7 +152,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
   </section>
 </main>
 <script>
-/* V4.14.2 HF7: Member password change + existing MFA / trusted-device security */
+/* V4.14.2 HF8: local-only sign-out + HF7 member password change */
 (() => {
   const URL="https://uccexvgqmoxhgykkjdcy.supabase.co";
   const KEY="sb_publishable_FBsN1DYTQMv2_bWhpbXHAA_qdAq7ri7";
@@ -526,7 +526,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
     }
   };
 
-  $("homeBtn").onclick=()=>location.href="https://avg168.github.io/independent-points/?v=4142hf6";
+  $("homeBtn").onclick=()=>location.href="https://avg168.github.io/independent-points/?v=4142hf8";
   $("recheckBtn").onclick=()=>refresh();
   $("trustedDeviceBtn").onclick=()=>location.href="./device-security-v4.14.2.html"+nextParam();
   $("paymentReturnBtn").onclick=()=>{
@@ -754,7 +754,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
     const btn=$("signOutBtn");
     btn.disabled=true;
     try{
-      const {error}=await sb.auth.signOut();
+      const {error}=await sb.auth.signOut({scope:"local"});
       if(error) throw error;
 
       // Remove same-tab sensitive caches after a successful sign-out.
@@ -767,7 +767,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
         }
       }catch(_){}
 
-      location.replace("https://avg168.github.io/independent-points/?v=4142hf6&signedout=1");
+      location.replace("https://avg168.github.io/independent-points/?v=4142hf8&signedout=1");
     }catch(e){
       status("identityStatus","err",T("signoutFail")+(e?.message||String(e)));
       btn.disabled=false;
