@@ -4,6 +4,19 @@
     {
       "version": "V4.14.2",
       "date": "2026-10-02",
+      "channel": "hotfix-9-resilient-supabase-bootstrap",
+      "title": "Hotfix 9 安全頁 Supabase 啟動備援",
+      "notes": [
+        "帳戶安全與受信任裝置頁改為多來源 Supabase JS 啟動",
+        "jsDelivr 失敗時自動切換 unpkg，再嘗試官方套件入口",
+        "初始化錯誤直接顯示在頁面，不再永久停在「正在讀取」",
+        "語系 localStorage 讀取改為容錯",
+        "不修改會員資產、密碼值、MFA factor、受信任裝置資料、提領或鏈上資料"
+      ]
+    },
+    {
+      "version": "V4.14.2",
+      "date": "2026-10-02",
       "channel": "hotfix-8-local-signout",
       "title": "Hotfix 8 登出此裝置改為本機登出",
       "notes": [

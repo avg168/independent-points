@@ -5,7 +5,54 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="google" content="notranslate">
 <title>Independent Points V4.14.2｜受信任裝置</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
+<script>
+window.IPT_SUPABASE_READY=(async()=>{
+  if(window.supabase?.createClient) return window.supabase;
+
+  const sources=[
+    "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js",
+    "https://unpkg.com/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js",
+    "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4"
+  ];
+
+  let lastError=null;
+
+  for(const src of sources){
+    try{
+      await new Promise((resolve,reject)=>{
+        const tag=document.createElement("script");
+        let done=false;
+        const finish=(err)=>{
+          if(done) return;
+          done=true;
+          clearTimeout(timer);
+          if(err){
+            try{tag.remove()}catch(_){}
+            reject(err);
+          }else{
+            resolve();
+          }
+        };
+        const timer=setTimeout(()=>finish(new Error("Supabase JS 載入逾時")),5000);
+        tag.src=src;
+        tag.async=true;
+        tag.crossOrigin="anonymous";
+        tag.onload=()=>{
+          if(window.supabase?.createClient) finish();
+          else finish(new Error("Supabase JS 已下載但未建立 createClient"));
+        };
+        tag.onerror=()=>finish(new Error("Supabase JS 載入失敗"));
+        document.head.appendChild(tag);
+      });
+      if(window.supabase?.createClient) return window.supabase;
+    }catch(e){
+      lastError=e;
+    }
+  }
+
+  throw lastError||new Error("Supabase JS 無法載入");
+})();
+</script>
 <style>
 :root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;color:#172033;background:#f4f7fb}
 *{box-sizing:border-box;min-width:0}body{margin:0;background:#f4f7fb}header{background:#10243d;color:#fff;padding:24px 18px 30px;border-radius:0 0 26px 26px}
@@ -81,12 +128,15 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
 </main>
 <script>
 /* V4.14.2 Trusted Device Production */
-(() => {
+(async () => {
+  try{
+    await window.IPT_SUPABASE_READY;
   const URL="https://uccexvgqmoxhgykkjdcy.supabase.co";
   const KEY="sb_publishable_FBsN1DYTQMv2_bWhpbXHAA_qdAq7ri7";
   const sb=window.supabase.createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
   const $=id=>document.getElementById(id);
-  let lang=localStorage.getItem("ipt_language")||"zh-TW";
+  let lang="zh-TW";
+  try{lang=localStorage.getItem("ipt_language")||"zh-TW"}catch(_){}
   let lastState=null;
 
   const RETURN_PATH="/independent-points/wallet-dual-v4.14.2.html";
@@ -327,7 +377,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
   $("mfaBtn").onclick=()=>location.href="./auth-security-v4.14.2.html"+nextParam()+"#trustedDeviceSection";
   $("refreshBtn").onclick=refresh;
   $("securityBtn").onclick=()=>location.href="./auth-security-v4.14.2.html"+nextParam()+"#trustedDeviceSection";
-  $("homeBtn").onclick=()=>location.href="https://avg168.github.io/independent-points/?v=4142hf6";
+  $("homeBtn").onclick=()=>location.href="https://avg168.github.io/independent-points/?v=4142hf9";
   $("paymentReturnBtn").onclick=()=>{
     const next=safeNext();
     if(next) location.replace(next);
@@ -336,7 +386,16 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
     location.href="./auth-security-v4.14.2.html"+nextParam()+"#trustedDeviceSection";
   };
   applyLang();
-  refresh().catch(e=>{$("state").className="status err";$("state").textContent=T("failed")+(e?.message||String(e))});
+    await refresh();
+  }catch(e){
+    console.error("[IPT HF9 device bootstrap]",e);
+    const langSafe=(()=>{try{return localStorage.getItem("ipt_language")||"zh-TW"}catch(_){return "zh-TW"}})();
+    const prefix=langSafe==="en"
+      ?"Startup failed: "
+      :(langSafe==="zh-CN"?"启动失败：":"啟動失敗：");
+    const el=document.getElementById("state");
+    if(el){el.className="status err";el.textContent=prefix+(e?.message||String(e));}
+  }
 })();
 </script>
 </body>

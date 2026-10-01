@@ -4,7 +4,54 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Independent Points V4.14.2｜付款登入與 MFA</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
+<script>
+window.IPT_SUPABASE_READY=(async()=>{
+  if(window.supabase?.createClient) return window.supabase;
+
+  const sources=[
+    "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js",
+    "https://unpkg.com/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js",
+    "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4"
+  ];
+
+  let lastError=null;
+
+  for(const src of sources){
+    try{
+      await new Promise((resolve,reject)=>{
+        const tag=document.createElement("script");
+        let done=false;
+        const finish=(err)=>{
+          if(done) return;
+          done=true;
+          clearTimeout(timer);
+          if(err){
+            try{tag.remove()}catch(_){}
+            reject(err);
+          }else{
+            resolve();
+          }
+        };
+        const timer=setTimeout(()=>finish(new Error("Supabase JS 載入逾時")),5000);
+        tag.src=src;
+        tag.async=true;
+        tag.crossOrigin="anonymous";
+        tag.onload=()=>{
+          if(window.supabase?.createClient) finish();
+          else finish(new Error("Supabase JS 已下載但未建立 createClient"));
+        };
+        tag.onerror=()=>finish(new Error("Supabase JS 載入失敗"));
+        document.head.appendChild(tag);
+      });
+      if(window.supabase?.createClient) return window.supabase;
+    }catch(e){
+      lastError=e;
+    }
+  }
+
+  throw lastError||new Error("Supabase JS 無法載入");
+})();
+</script>
 <style>
 :root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;color:#172033;background:#f4f7fb}
 *{box-sizing:border-box;min-width:0}html,body{width:100%;max-width:100%;overflow-x:hidden}body{margin:0;background:#f4f7fb}
@@ -152,13 +199,16 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
   </section>
 </main>
 <script>
-/* V4.14.2 HF8: local-only sign-out + HF7 member password change */
-(() => {
+/* V4.14.2 HF9: resilient Supabase bootstrap + startup error boundary */
+(async () => {
+  try{
+    await window.IPT_SUPABASE_READY;
   const URL="https://uccexvgqmoxhgykkjdcy.supabase.co";
   const KEY="sb_publishable_FBsN1DYTQMv2_bWhpbXHAA_qdAq7ri7";
   const sb=window.supabase.createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
   const $=id=>document.getElementById(id);
-  let factorId="", enrollFactorId="", backupEnrollFactorId="", staleFactorIds=[], verifiedFactors=[], lang=localStorage.getItem("ipt_language")||"zh-TW";
+  let factorId="", enrollFactorId="", backupEnrollFactorId="", staleFactorIds=[], verifiedFactors=[], lang="zh-TW";
+  try{lang=localStorage.getItem("ipt_language")||"zh-TW"}catch(_){}
 
   const RETURN_PATH="/independent-points/wallet-dual-v4.14.2.html";
   let returnTimer=0;
@@ -526,7 +576,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
     }
   };
 
-  $("homeBtn").onclick=()=>location.href="https://avg168.github.io/independent-points/?v=4142hf8";
+  $("homeBtn").onclick=()=>location.href="https://avg168.github.io/independent-points/?v=4142hf9";
   $("recheckBtn").onclick=()=>refresh();
   $("trustedDeviceBtn").onclick=()=>location.href="./device-security-v4.14.2.html"+nextParam();
   $("paymentReturnBtn").onclick=()=>{
@@ -767,14 +817,27 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
         }
       }catch(_){}
 
-      location.replace("https://avg168.github.io/independent-points/?v=4142hf8&signedout=1");
+      location.replace("https://avg168.github.io/independent-points/?v=4142hf9&signedout=1");
     }catch(e){
       status("identityStatus","err",T("signoutFail")+(e?.message||String(e)));
       btn.disabled=false;
     }
   };
 
-  applyLang();refresh().catch(e=>status("identityStatus","err",e.message||String(e)));
+  applyLang();
+    await refresh();
+  }catch(e){
+    console.error("[IPT HF9 auth bootstrap]",e);
+    const langSafe=(()=>{try{return localStorage.getItem("ipt_language")||"zh-TW"}catch(_){return "zh-TW"}})();
+    const prefix=langSafe==="en"
+      ?"Startup failed: "
+      :(langSafe==="zh-CN"?"启动失败：":"啟動失敗：");
+    const msg=prefix+(e?.message||String(e));
+    ["identityStatus","mfaStatus","passwordStatus","loginStatus"].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el){el.className="status err";el.textContent=msg;}
+    });
+  }
 })();
 </script>
 </body></html>

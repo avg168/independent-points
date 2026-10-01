@@ -1,7 +1,7 @@
 Independent Points V4.14.2｜正式封版驗收報告
 
 正式封版日期：2026-09-30
-Build：20261002-4142-hf8
+Build：20261002-4142-hf9
 Network：Ethereum Sepolia (11155111 / 0xaa36a7)
 Contract：0xd3fb2480aadb8b168ec7e88a0e5c847d9750cb87
 
@@ -100,3 +100,11 @@ Contract：0xd3fb2480aadb8b168ec7e88a0e5c847d9750cb87
 - 結果：只登出目前瀏覽器／裝置，不再把其他裝置 Session 一起登出
 - HF7 密碼變更成功後仍使用 scope:"others"，只撤銷其他裝置 refresh sessions
 - 不修改 MFA、受信任裝置、平台 IPT、P 點、提領、Mint、結算資料或 Sepolia 合約
+
+十四、Hotfix 9｜安全頁啟動備援
+- 現象：頁面靜態內容正常，但 MFA / 受信任裝置永久停在「正在讀取」，同時間 Supabase 後端 0 筆請求
+- 補強：Supabase JS 採 jsDelivr exact → unpkg exact → jsDelivr package entry 三段備援
+- 補強：整個安全頁初始化加入錯誤邊界
+- 補強：若啟動失敗，頁面直接顯示錯誤原因，不再無限 loading
+- 補強：localStorage 語系讀取加入 try/catch
+- 不修改會員資產、密碼值、MFA factor、受信任裝置資料、提領、Mint、結算或 Sepolia 合約

@@ -1,7 +1,7 @@
 {
   "product": "Independent Points",
   "version": "V4.14.2",
-  "build": "20261002-4142-hf8",
+  "build": "20261002-4142-hf9",
   "release_date": "2026-10-02",
   "channel": "production",
   "rollback_version": "V4.12.4",
@@ -26,6 +26,11 @@
     }
   },
   "notes": [
+    "Hotfix 9: add resilient Supabase JS bootstrap for Account Security and Trusted Device pages",
+    "Hotfix 9: try jsDelivr exact UMD, then unpkg exact UMD, then jsDelivr package entry",
+    "Hotfix 9: show explicit startup errors instead of leaving MFA/device status on an endless loading state",
+    "Hotfix 9: harden language localStorage reads so storage exceptions do not abort page initialization",
+    "Hotfix 9: no changes to member assets, password values, MFA factors, trusted-device records, withdrawals, Mint, settlement, or the IPT contract",
     "Hotfix 8: fix 'Sign out this device' to use Supabase Auth local scope instead of the global default",
     "Hotfix 8: prevent the current-device sign-out button from revoking sessions on other devices",
     "Hotfix 8: keep HF7 member password change behavior unchanged; password-change success still revokes other sessions with scope=others",
@@ -84,5 +89,5 @@
   ],
   "manifest_filename": "update-manifest-v4.12.json",
   "manifest_filename_note": "Legacy filename retained for compatibility; manifest content is V4.14.2.",
-  "hotfix": 8
+  "hotfix": 9
 }
