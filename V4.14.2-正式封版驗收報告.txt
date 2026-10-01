@@ -1,7 +1,7 @@
 Independent Points V4.14.2｜正式封版驗收報告
 
 正式封版日期：2026-09-30
-Build：20261002-4142-hf9
+Build：20261002-4142-hf10
 Network：Ethereum Sepolia (11155111 / 0xaa36a7)
 Contract：0xd3fb2480aadb8b168ec7e88a0e5c847d9750cb87
 
@@ -108,3 +108,12 @@ Contract：0xd3fb2480aadb8b168ec7e88a0e5c847d9750cb87
 - 補強：若啟動失敗，頁面直接顯示錯誤原因，不再無限 loading
 - 補強：localStorage 語系讀取加入 try/catch
 - 不修改會員資產、密碼值、MFA factor、受信任裝置資料、提領、Mint、結算或 Sepolia 合約
+
+十五、Hotfix 10｜變更密碼固定入口
+- 將「變更會員密碼」區塊固定放在「會員登入」正下方
+- 登入身分驗證區新增「前往變更密碼」快捷按鈕
+- 有效 Auth Session 確認後明確確保 passwordPanel 顯示
+- 保留 HF9 Supabase JS 多來源啟動備援
+- 保留 HF8 signOut({scope:"local"})
+- 保留 HF7 目前密碼驗證、AAL2 條件與 signOut({scope:"others"})
+- 不修改 MFA、受信任裝置、平台 IPT、P 點、提領、Mint、結算或 Sepolia 合約

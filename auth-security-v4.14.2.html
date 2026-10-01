@@ -95,6 +95,21 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
     <div class="note" id="loginNote">Supabase 會員登入與 Trust Wallet 連線是兩件不同的事。登入成功後才會建立會員 Auth Session。</div>
   </section>
 
+
+  <section class="panel" id="passwordPanel">
+    <h2 id="hPassword">變更會員密碼</h2>
+    <div id="passwordStatus" class="status">登入後可變更密碼。為安全起見，必須先輸入目前密碼。</div>
+    <input id="currentPassword" type="password" autocomplete="current-password" placeholder="目前密碼" style="width:100%;margin-top:12px">
+    <input id="newPassword" type="password" autocomplete="new-password" placeholder="新密碼" style="width:100%;margin-top:10px">
+    <input id="confirmPassword" type="password" autocomplete="new-password" placeholder="再次輸入新密碼" style="width:100%;margin-top:10px">
+    <button id="changePasswordBtn" class="primary" type="button" disabled style="width:100%;margin-top:10px">變更密碼</button>
+    <div class="note" id="passwordNote">
+      新密碼至少 8 個字元。若帳號已設定 MFA，本次登入必須先完成 AAL2。變更成功後會登出其他裝置的更新權杖，目前這支手機保持登入。
+    </div>
+  </section>
+
+
+
   <section class="panel return-panel hidden" id="paymentReturnPanel">
     <h2>返回平台 IPT 付款</h2>
     <div id="paymentReturnStatus" class="status">正在確認登入、MFA 與受信任裝置…</div>
@@ -115,23 +130,11 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       <div class="card"><div class="k" id="kFactor">已驗證 MFA</div><div id="factorCount" class="v">—</div></div>
     </div>
     <div class="actions">
+      <button id="passwordJumpBtn" class="primary full" type="button">前往變更密碼</button>
       <button id="recheckBtn" class="blue" type="button">重新驗證登入身分</button>
       <button id="homeBtn" class="light" type="button">返回首頁</button>
     </div>
   </section>
-
-  <section class="panel" id="passwordPanel">
-    <h2 id="hPassword">變更會員密碼</h2>
-    <div id="passwordStatus" class="status">登入後可變更密碼。為安全起見，必須先輸入目前密碼。</div>
-    <input id="currentPassword" type="password" autocomplete="current-password" placeholder="目前密碼" style="width:100%;margin-top:12px">
-    <input id="newPassword" type="password" autocomplete="new-password" placeholder="新密碼" style="width:100%;margin-top:10px">
-    <input id="confirmPassword" type="password" autocomplete="new-password" placeholder="再次輸入新密碼" style="width:100%;margin-top:10px">
-    <button id="changePasswordBtn" class="primary" type="button" disabled style="width:100%;margin-top:10px">變更密碼</button>
-    <div class="note" id="passwordNote">
-      新密碼至少 8 個字元。若帳號已設定 MFA，本次登入必須先完成 AAL2。變更成功後會登出其他裝置的更新權杖，目前這支手機保持登入。
-    </div>
-  </section>
-
   <section class="panel">
     <h2 id="hMfa">驗證器 App（TOTP）</h2>
     <div id="mfaStatus" class="status">正在讀取 MFA 狀態…</div>
@@ -199,7 +202,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
   </section>
 </main>
 <script>
-/* V4.14.2 HF9: resilient Supabase bootstrap + startup error boundary */
+/* V4.14.2 HF10: password panel placed directly below login + HF9 resilient bootstrap */
 (async () => {
   try{
     await window.IPT_SUPABASE_READY;
@@ -370,7 +373,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       lastFactor:"至少要保留一個已驗證 MFA，不能移除最後一個。",backupEnabled:"備援 MFA 已成功啟用。",
       factorRemoved:"驗證器已移除。",removeFail:"移除失敗：",backupFail:"備援 MFA 建立失敗：",signoutFail:"登出失敗：",hTrustedDevice:"受信任裝置",trustedDeviceNote:"可選擇啟用受信任裝置保護。啟用後，同一支已信任手機可正常登入；新的手機必須先完成 MFA 才能加入。",trustedDeviceManage:"管理受信任裝置",trustedDeviceHelp:"一般會員不強制啟用；若啟用，未信任的新裝置會被鎖住會員、錢包與管理功能。",
       hPassword:"變更會員密碼",passwordReady:"請輸入目前密碼與新密碼。",passwordLoginRequired:"請先登入會員帳號，才能變更密碼。",
-      currentPassword:"目前密碼",newPassword:"新密碼",confirmPassword:"再次輸入新密碼",changePassword:"變更密碼",
+      currentPassword:"目前密碼",newPassword:"新密碼",confirmPassword:"再次輸入新密碼",changePassword:"變更密碼",passwordJump:"前往變更密碼",
       passwordNote:"新密碼至少 8 個字元。若帳號已設定 MFA，本次登入必須先完成 AAL2。變更成功後會登出其他裝置的更新權杖，目前這支手機保持登入。",
       passwordMissing:"請完整輸入目前密碼、新密碼與確認密碼。",passwordTooShort:"新密碼至少需要 8 個字元。",passwordMismatch:"兩次輸入的新密碼不一致。",
       passwordSame:"新密碼不能與目前密碼相同。",passwordMfaRequired:"此帳號已設定 MFA，請先完成本次登入的二次驗證（AAL2）。",
@@ -400,7 +403,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       lastFactor:"至少要保留一个已验证 MFA，不能移除最后一个。",backupEnabled:"备用 MFA 已成功启用。",
       factorRemoved:"验证器已移除。",removeFail:"移除失败：",backupFail:"备用 MFA 建立失败：",signoutFail:"登出失败：",hTrustedDevice:"受信任设备",trustedDeviceNote:"可选择启用受信任设备保护。启用后，同一台已信任手机可正常登录；新的手机必须先完成 MFA 才能加入。",trustedDeviceManage:"管理受信任设备",trustedDeviceHelp:"普通会员不强制启用；若启用，未信任的新设备会被锁住会员、钱包与管理功能。",
       hPassword:"变更会员密码",passwordReady:"请输入当前密码与新密码。",passwordLoginRequired:"请先登录会员账号，才能变更密码。",
-      currentPassword:"当前密码",newPassword:"新密码",confirmPassword:"再次输入新密码",changePassword:"变更密码",
+      currentPassword:"当前密码",newPassword:"新密码",confirmPassword:"再次输入新密码",changePassword:"变更密码",passwordJump:"前往变更密码",
       passwordNote:"新密码至少 8 个字符。若账号已设置 MFA，本次登录必须先完成 AAL2。变更成功后会登出其他设备的刷新会话，当前这台设备保持登录。",
       passwordMissing:"请完整输入当前密码、新密码与确认密码。",passwordTooShort:"新密码至少需要 8 个字符。",passwordMismatch:"两次输入的新密码不一致。",
       passwordSame:"新密码不能与当前密码相同。",passwordMfaRequired:"此账号已设置 MFA，请先完成本次登录的二次验证（AAL2）。",
@@ -430,7 +433,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       lastFactor:"You must keep at least one verified MFA factor. The last factor cannot be removed.",backupEnabled:"Backup MFA was enabled successfully.",
       factorRemoved:"Authenticator removed.",removeFail:"Removal failed: ",backupFail:"Backup MFA setup failed: ",signoutFail:"Sign-out failed: ",hTrustedDevice:"Trusted Devices",trustedDeviceNote:"Trusted-device protection is optional. Once enabled, this trusted phone can sign in normally; a new phone must complete MFA before it can be trusted.",trustedDeviceManage:"Manage Trusted Devices",trustedDeviceHelp:"This is optional for regular members. When enabled, untrusted new devices are blocked from member, wallet, and administrator features.",
       hPassword:"Change Member Password",passwordReady:"Enter your current password and a new password.",passwordLoginRequired:"Sign in to your member account before changing the password.",
-      currentPassword:"Current password",newPassword:"New password",confirmPassword:"Confirm new password",changePassword:"Change Password",
+      currentPassword:"Current password",newPassword:"New password",confirmPassword:"Confirm new password",changePassword:"Change Password",passwordJump:"Go to Change Password",
       passwordNote:"The new password must be at least 8 characters. If MFA is configured, this sign-in must first reach AAL2. After a successful change, refresh sessions on other devices are signed out while this device stays signed in.",
       passwordMissing:"Enter the current password, new password, and confirmation.",passwordTooShort:"The new password must be at least 8 characters.",passwordMismatch:"The two new-password entries do not match.",
       passwordSame:"The new password must be different from the current password.",passwordMfaRequired:"MFA is configured for this account. Complete AAL2 verification for this sign-in first.",
@@ -455,6 +458,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
     if($("newPassword")) $("newPassword").placeholder=T("newPassword");
     if($("confirmPassword")) $("confirmPassword").placeholder=T("confirmPassword");
     if($("changePasswordBtn")) $("changePasswordBtn").textContent=T("changePassword");
+    if($("passwordJumpBtn")) $("passwordJumpBtn").textContent=T("passwordJump");
     $("recheckBtn").textContent=T("recheck"); $("homeBtn").textContent=T("home"); $("enrollBtn").textContent=T("enroll");
     $("enrollCode").placeholder=T("code"); $("verifyEnrollBtn").textContent=T("enable");
     $("challengeCode").placeholder=T("code"); $("challengeBtn").textContent=T("challenge"); $("signOutBtn").textContent=T("signout");
@@ -576,7 +580,15 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
     }
   };
 
-  $("homeBtn").onclick=()=>location.href="https://avg168.github.io/independent-points/?v=4142hf9";
+  $("passwordJumpBtn").onclick=()=>{
+    const panel=$("passwordPanel");
+    if(panel){
+      panel.classList.remove("hidden");
+      panel.scrollIntoView({behavior:"smooth",block:"start"});
+      setTimeout(()=>$("currentPassword")?.focus(),350);
+    }
+  };
+  $("homeBtn").onclick=()=>location.href="https://avg168.github.io/independent-points/?v=4142hf10";
   $("recheckBtn").onclick=()=>refresh();
   $("trustedDeviceBtn").onclick=()=>location.href="./device-security-v4.14.2.html"+nextParam();
   $("paymentReturnBtn").onclick=()=>{
@@ -656,6 +668,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       return;
     }
     status("loginStatus","ok",T("loginOk"));
+    if($("passwordPanel")) $("passwordPanel").classList.remove("hidden");
     if($("changePasswordBtn")) $("changePasswordBtn").disabled=false;
     if($("passwordStatus")) status("passwordStatus","",T("passwordReady"));
     $("email").textContent=user.email||"—";$("uid").textContent=user.id||"—";status("identityStatus","ok",T("valid"));
@@ -817,7 +830,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
         }
       }catch(_){}
 
-      location.replace("https://avg168.github.io/independent-points/?v=4142hf9&signedout=1");
+      location.replace("https://avg168.github.io/independent-points/?v=4142hf10&signedout=1");
     }catch(e){
       status("identityStatus","err",T("signoutFail")+(e?.message||String(e)));
       btn.disabled=false;

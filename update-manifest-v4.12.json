@@ -1,7 +1,7 @@
 {
   "product": "Independent Points",
   "version": "V4.14.2",
-  "build": "20261002-4142-hf9",
+  "build": "20261002-4142-hf10",
   "release_date": "2026-10-02",
   "channel": "production",
   "checks": {
@@ -49,7 +49,10 @@
     "security_pages_resilient_supabase_bootstrap": true,
     "security_pages_multi_cdn_fallback": true,
     "security_pages_startup_error_boundary": true,
-    "language_storage_read_hardened": true
+    "language_storage_read_hardened": true,
+    "password_panel_directly_below_login": true,
+    "password_shortcut_in_identity_section": true,
+    "password_panel_forced_visible_when_authenticated": true
   },
   "self_file": {
     "name": "update-manifest-v4.12.json",
@@ -59,8 +62,8 @@
   "files": [
     {
       "name": "V4.14.2-正式封版驗收報告.txt",
-      "bytes": 5426,
-      "sha256": "ab30bcb3f4f074d8e03630ce83ba351d5de624e49af06cbce62c9e7d306aa321"
+      "bytes": 5938,
+      "sha256": "8270650ba958772b958898b872bdad575ae04879b64f4a64359891dc722c83f4"
     },
     {
       "name": "admin-assets-v4.12.html",
@@ -89,8 +92,8 @@
     },
     {
       "name": "auth-security-v4.14.2.html",
-      "bytes": 48878,
-      "sha256": "573f43478c2a3c349aea5f5379fdb81efecb2c851356ab287d313465f9e31b3f"
+      "bytes": 49515,
+      "sha256": "aa3f9340c28ee7995c009787f3671f0535c27ea598d2b42ee9fcc7fc92c23a0d"
     },
     {
       "name": "device-security-v4.12.html",
@@ -164,13 +167,13 @@
     },
     {
       "name": "release-history.json",
-      "bytes": 21315,
-      "sha256": "75a30bbf124429ce84a92bbcf8eedeaf0cd1b487ebc050ccaa36ca8db49ba157"
+      "bytes": 21921,
+      "sha256": "ff6754cebaeadecdc571e8ce140b7d3d752a3b374ab00d66ce0243a4816b28ee"
     },
     {
       "name": "release.json",
-      "bytes": 6253,
-      "sha256": "1cf9513a8d3d328f34a6b9d62e5ff2581281994d6d097e069a2933f118bbc581"
+      "bytes": 6788,
+      "sha256": "f817e83fb03ed2dea29aa7ea717496da19594f7920571bae34c2f2eecdf3238b"
     },
     {
       "name": "robots.txt",
@@ -189,8 +192,8 @@
     },
     {
       "name": "service-worker.js",
-      "bytes": 1695,
-      "sha256": "17bcf23ed740482eff70860b5e0d55e079aaf6f42a28ae78951385d1f4f094bd"
+      "bytes": 1696,
+      "sha256": "6ab204b5b8d179b4c509b1d138caa0fc9c5721498f1ff0fad7525da627d7133e"
     },
     {
       "name": "system-info-v4.12.html",
@@ -228,5 +231,5 @@
       "sha256": "892f6dc6f28991bcb7d24ebe3c0c4aea31cdd5acefe0f1acb426509201d48ab4"
     }
   ],
-  "hotfix": 9
+  "hotfix": 10
 }

@@ -4,6 +4,19 @@
     {
       "version": "V4.14.2",
       "date": "2026-10-02",
+      "channel": "hotfix-10-password-panel-location",
+      "title": "Hotfix 10 變更密碼固定入口",
+      "notes": [
+        "將「變更會員密碼」固定移到「會員登入」正下方",
+        "登入身分驗證區新增「前往變更密碼」快捷按鈕",
+        "登入 Session 驗證成功後明確確保 passwordPanel 顯示",
+        "保留 HF9 啟動備援、HF8 本機登出、HF7 密碼驗證與 AAL2 邏輯",
+        "不修改 MFA、受信任裝置、會員資產、提領、Mint 或鏈上合約"
+      ]
+    },
+    {
+      "version": "V4.14.2",
+      "date": "2026-10-02",
       "channel": "hotfix-9-resilient-supabase-bootstrap",
       "title": "Hotfix 9 安全頁 Supabase 啟動備援",
       "notes": [

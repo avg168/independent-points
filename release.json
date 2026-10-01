@@ -1,7 +1,7 @@
 {
   "product": "Independent Points",
   "version": "V4.14.2",
-  "build": "20261002-4142-hf9",
+  "build": "20261002-4142-hf10",
   "release_date": "2026-10-02",
   "channel": "production",
   "rollback_version": "V4.12.4",
@@ -26,6 +26,11 @@
     }
   },
   "notes": [
+    "Hotfix 10: move the member password-change panel directly below the member login panel",
+    "Hotfix 10: add a prominent password-change shortcut in the identity section",
+    "Hotfix 10: explicitly keep the password panel visible after a valid member session is confirmed",
+    "Hotfix 10: preserve HF9 resilient Supabase bootstrap, HF8 local-only sign-out, and HF7 password security logic",
+    "Hotfix 10: no changes to MFA factors, trusted-device records, member assets, withdrawals, Mint, settlement, or the IPT contract",
     "Hotfix 9: add resilient Supabase JS bootstrap for Account Security and Trusted Device pages",
     "Hotfix 9: try jsDelivr exact UMD, then unpkg exact UMD, then jsDelivr package entry",
     "Hotfix 9: show explicit startup errors instead of leaving MFA/device status on an endless loading state",
@@ -89,5 +94,5 @@
   ],
   "manifest_filename": "update-manifest-v4.12.json",
   "manifest_filename_note": "Legacy filename retained for compatibility; manifest content is V4.14.2.",
-  "hotfix": 9
+  "hotfix": 10
 }
