@@ -347,7 +347,12 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       if(error) throw error;
 
       if(data?.allowed!==true){
-        setReturnState("warn","登入已完成，但這個瀏覽器尚未通過受信任裝置驗證。");
+        setReturnState(
+          "warn",
+          data?.expired_current_device
+            ?"登入已完成，但這個裝置的 90 天信任期限已到期。請到受信任裝置重新信任。"
+            :"登入已完成，但這個瀏覽器尚未通過受信任裝置驗證。"
+        );
         $("paymentDeviceBtn").classList.remove("hidden");
         return;
       }
@@ -594,7 +599,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       btn.disabled=false;
     }
   };
-  $("homeBtn").onclick=()=>location.href="https://avg168.github.io/independent-points/?v=4142hf30";
+  $("homeBtn").onclick=()=>location.href="https://avg168.github.io/independent-points/?v=4142hf32";
   $("recheckBtn").onclick=()=>{
     refresh().catch(e=>{
       status("identityStatus","err","重新驗證失敗："+(e?.message||String(e)));
@@ -911,7 +916,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
         }
       }catch(_){}
 
-      location.replace("https://avg168.github.io/independent-points/?v=4142hf30&signedout=1");
+      location.replace("https://avg168.github.io/independent-points/?v=4142hf32&signedout=1");
     }catch(e){
       status("identityStatus","err",T("signoutFail")+(e?.message||String(e)));
       btn.disabled=false;

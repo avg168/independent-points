@@ -208,9 +208,13 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
     if(lastState.protection_enabled && !lastState.trusted_device){
       $("paymentReturnStatus").className="status warn";
       $("paymentReturnStatus").textContent=
-        lastState.aal==="aal2"
-          ?"MFA 已完成，請按下「信任這支裝置」。"
-          :"請先完成 MFA，再信任這支裝置。";
+        lastState.expired_current_device
+          ? (lastState.aal==="aal2"
+              ?"這支裝置的信任期限已到期。MFA 已完成，請重新信任這支裝置。"
+              :"這支裝置的信任期限已到期。請先完成 MFA，再重新信任這支裝置。")
+          : (lastState.aal==="aal2"
+              ?"MFA 已完成，請按下「信任這支裝置」。"
+              :"請先完成 MFA，再信任這支裝置。");
       $("paymentLoginBtn").classList.remove("hidden");
       return;
     }
@@ -228,7 +232,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       enabled:"已啟用",disabled:"未啟用",trusted:"已信任",untrusted:"未信任",checking:"正在檢查…",
       signedOut:"目前已登出。請先登入會員。",readyOff:"目前尚未啟用受信任裝置保護。一般會員可自行選擇是否啟用。",
       readyTrusted:"這支裝置已信任，可以正常使用會員與錢包功能。",
-      readyUntrusted:"這是一支尚未信任的新裝置。請先完成 MFA，再信任這支裝置。",
+      readyUntrusted:"這是一支尚未信任的新裝置。請先完成 MFA，再信任這支裝置。",readyExpired:"這支裝置的 90 天信任期限已到期。請完成 MFA AAL2 後重新信任這支裝置。",
       enable:"啟用並信任這支裝置",trust:"信任這支裝置",mfa:"前往完成 MFA",refresh:"重新檢查",
       hManage:"已信任裝置管理",manageNote:"完成 AAL2 後可以查看與移除已信任裝置。",manageReady:"AAL2 已完成，可以查看與移除已信任裝置。",kActiveDevices:"有效裝置",kTrustDays:"信任有效期",kExpiresAt:"目前裝置到期日",active:"有效",expired:"已過期",trustTime:"信任時間",lastSeen:"最後使用",expiry:"到期時間",days:"天",disable:"停用受信任裝置保護",
       hExplain:"保護方式",explain:"一般會員可自行選擇是否啟用。啟用後，已信任的手機可照常使用；新手機登入後必須先完成 MFA，才能加入受信任裝置。單純知道 Email 與密碼不足以通過新裝置保護。",
@@ -242,7 +246,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       enabled:"已启用",disabled:"未启用",trusted:"已信任",untrusted:"未信任",checking:"正在检查…",
       signedOut:"当前已登出。请先登录会员。",readyOff:"目前尚未启用受信任设备保护。普通会员可自行选择是否启用。",
       readyTrusted:"这台设备已信任，可以正常使用会员与钱包功能。",
-      readyUntrusted:"这是一台尚未信任的新设备。请先完成 MFA，再信任这台设备。",
+      readyUntrusted:"这是一台尚未信任的新设备。请先完成 MFA，再信任这台设备。",readyExpired:"这台设备的 90 天信任期限已到期。请完成 MFA AAL2 后重新信任这台设备。",
       enable:"启用并信任这台设备",trust:"信任这台设备",mfa:"前往完成 MFA",refresh:"重新检查",
       hManage:"已信任设备管理",manageNote:"完成 AAL2 后可以查看与移除已信任设备。",manageReady:"AAL2 已完成，可以查看与移除已信任设备。",kActiveDevices:"有效设备",kTrustDays:"信任有效期",kExpiresAt:"当前设备到期日",active:"有效",expired:"已过期",trustTime:"信任时间",lastSeen:"最后使用",expiry:"到期时间",days:"天",disable:"停用受信任设备保护",
       hExplain:"保护方式",explain:"普通会员可自行选择是否启用。启用后，已信任的手机可照常使用；新手机登录后必须先完成 MFA，才能加入受信任设备。单纯知道 Email 与密码不足以通过新设备保护。",
@@ -256,7 +260,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       enabled:"Enabled",disabled:"Disabled",trusted:"Trusted",untrusted:"Untrusted",checking:"Checking…",
       signedOut:"You are signed out. Sign in first.",readyOff:"Trusted-device protection is not enabled. Regular members may enable it optionally.",
       readyTrusted:"This device is trusted and may use member and wallet features normally.",
-      readyUntrusted:"This is a new untrusted device. Complete MFA, then trust this device.",
+      readyUntrusted:"This is a new untrusted device. Complete MFA, then trust this device.",readyExpired:"This device's 90-day trust period has expired. Complete MFA AAL2, then trust this device again.",
       enable:"Enable & Trust This Device",trust:"Trust This Device",mfa:"Complete MFA",refresh:"Refresh",
       hManage:"Trusted Device Management",manageNote:"Complete AAL2 to view and remove trusted devices.",manageReady:"AAL2 completed. You can view and remove trusted devices.",kActiveDevices:"Active Devices",kTrustDays:"Trust Period",kExpiresAt:"Current Device Expiry",active:"Active",expired:"Expired",trustTime:"Trusted",lastSeen:"Last Used",expiry:"Expires",days:"days",disable:"Disable Trusted-Device Protection",
       hExplain:"How It Works",explain:"This is optional for regular members. Once enabled, trusted phones work normally; a new phone must complete MFA before it can become trusted. Knowing only the email and password is not enough to pass new-device protection.",
@@ -352,8 +356,17 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
         if($("manageNote")) $("manageNote").textContent=T("manageReady");
       }
     }else{
-      $("state").className="status err"; $("state").textContent=T("readyUntrusted");
-      if(s.aal==="aal2") $("trustBtn").classList.remove("hidden"); else $("mfaBtn").classList.remove("hidden");
+      $("state").className="status err";
+      $("state").textContent=s.expired_current_device?T("readyExpired"):T("readyUntrusted");
+      if(s.aal==="aal2"){
+        $("trustBtn").classList.remove("hidden");
+        if(s.protection_enabled){
+          $("managePanel").classList.remove("hidden");
+          if($("manageNote")) $("manageNote").textContent=T("manageReady");
+        }
+      }else{
+        $("mfaBtn").classList.remove("hidden");
+      }
     }
     renderPaymentReturn();
   }
@@ -406,7 +419,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
   $("mfaBtn").onclick=()=>location.href="./auth-security-v4.14.2.html"+nextParam()+"#trustedDeviceSection";
   $("refreshBtn").onclick=refresh;
   $("securityBtn").onclick=()=>location.href="./auth-security-v4.14.2.html"+nextParam()+"#trustedDeviceSection";
-  $("homeBtn").onclick=()=>location.href="https://avg168.github.io/independent-points/?v=4142hf31";
+  $("homeBtn").onclick=()=>location.href="https://avg168.github.io/independent-points/?v=4142hf32";
   $("paymentReturnBtn").onclick=()=>{
     const next=safeNext();
     if(next) location.replace(next);

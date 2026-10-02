@@ -34,8 +34,8 @@ button.danger{background:#a83b45;color:#fff;border-color:#a83b45}
 .hidden{display:none!important}
 @media(min-width:760px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
 </style>
-<script src="./i18n-v4.10.js?v=4142hf29" defer></script>
-<script src="./auth-guard-v4.12.js?v=4142hf29"></script>
+<script src="./i18n-v4.10.js?v=4142hf32" defer></script>
+<script src="./auth-guard-v4.12.js?v=4142hf32"></script>
 </head>
 <body>
 <header>
@@ -267,20 +267,20 @@ button.danger{background:#a83b45;color:#fff;border-color:#a83b45}
     if(!confirm("確定要清除這台裝置上的營運安全紀錄嗎？這不會刪除 Supabase 稽核或鏈上交易。"))return;
     localStorage.removeItem(EVENT_KEY); renderEvents();
   });
-  $("homeBtn").addEventListener("click",()=>location.href="./index.html?v=4142hf29");
+  $("homeBtn").addEventListener("click",()=>location.href="./index.html?v=4142hf32");
   $("refreshBtn").addEventListener("click",load);
   $("walletCoreBtn").addEventListener("click",()=>location.href="./wallet-core-v4.12.html");
-  $("securityCenterBtn").addEventListener("click",()=>location.href="./security-center-v4.12.html?v=4142hf29");
-  $("maintenanceBtn").addEventListener("click",()=>location.href="./maintenance-v4.12.html?v=4142hf29");
-  $("updateCenterBtn").addEventListener("click",()=>location.href="./update-center-v4.12.html?v=4142hf29");
-  $("systemInfoBtn").addEventListener("click",()=>location.href="./system-info-v4.12.html?v=4142hf29");
-  $("eventCenterBtn")?.addEventListener("click",()=>location.href="./event-center-v4.12.html?v=4142hf29");
+  $("securityCenterBtn").addEventListener("click",()=>location.href="./security-center-v4.12.html?v=4142hf32");
+  $("maintenanceBtn").addEventListener("click",()=>location.href="./maintenance-v4.12.html?v=4142hf32");
+  $("updateCenterBtn").addEventListener("click",()=>location.href="./update-center-v4.12.html?v=4142hf32");
+  $("systemInfoBtn").addEventListener("click",()=>location.href="./system-info-v4.12.html?v=4142hf32");
+  $("eventCenterBtn")?.addEventListener("click",()=>location.href="./event-center-v4.12.html?v=4142hf32");
   load();
 })();
 </script>
 <script>
 if("serviceWorker" in navigator){
-  window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js?v=4142hf29",{updateViaCache:"none"}).catch(()=>{}));
+  window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js?v=4142hf32",{updateViaCache:"none"}).catch(()=>{}));
 }
 </script>
 </body>

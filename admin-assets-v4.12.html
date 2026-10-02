@@ -482,7 +482,7 @@ button{
 
 </style>
 
-<link rel="manifest" href="./manifest.webmanifest?v=4142hf29">
+<link rel="manifest" href="./manifest.webmanifest?v=4142hf32">
 <meta name="theme-color" content="#10243d">
 <meta name="application-name" content="Independent Points">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -492,8 +492,8 @@ button{
 <link rel="icon" type="image/svg+xml" href="./ipt-icon-192.png">
 
 <link rel="apple-touch-icon" href="./ipt-apple-touch-180.png">
-<script src="./i18n-v4.10.js?v=4142hf29" defer></script>
-<script src="./auth-guard-v4.12.js?v=4142hf29"></script>
+<script src="./i18n-v4.10.js?v=4142hf32" defer></script>
+<script src="./auth-guard-v4.12.js?v=4142hf32"></script>
 </head>
 <body>
 <header>
@@ -1216,7 +1216,7 @@ button{
 
     sessionStorage.setItem("ipt_print_report",JSON.stringify(report));
     setExportStatus("正在開啟列印／PDF 預覽…","ok");
-    location.href="./print-report-v4.12.html?v=4142hf29";
+    location.href="./print-report-v4.12.html?v=4142hf32";
   }
 
   async function generateReport() {
@@ -1463,7 +1463,7 @@ button{
   $("exportAdminCsvBtn").addEventListener("click",(e)=>{e.preventDefault();exportAdminCsv();});
   $("printAdminBtn").addEventListener("click",(e)=>{e.preventDefault();printAdminReport();});
   $("clearReportBtn").addEventListener("click",(e)=>{e.preventDefault();clearReport();});
-  $("assetCenterBtn").addEventListener("click",()=>{location.href="./asset-center-v4.12.html?v=4142hf29";});
+  $("assetCenterBtn").addEventListener("click",()=>{location.href="./asset-center-v4.12.html?v=4142hf32";});
   $("refreshBtn").addEventListener("click",loadAssets);
   $("applyFilterBtn").addEventListener("click",(e)=>{e.preventDefault();applyFilters();});
   $("resetFilterBtn").addEventListener("click",(e)=>{e.preventDefault();resetFilters();});
@@ -1493,7 +1493,7 @@ button{
 
 <script>
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js?v=4142hf29",{updateViaCache:"none"}).catch(()=>{}));
+  window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js?v=4142hf32",{updateViaCache:"none"}).catch(()=>{}));
 }
 </script>
 
