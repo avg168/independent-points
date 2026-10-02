@@ -501,7 +501,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       try{localStorage.setItem("ipt_last_login_email",email)}catch(_){}
       $("loginPassword").value="";
       status("loginStatus","ok",T("loginOk"));
-      await refresh(data.user);
+      await refresh(data.user,data.session);
     }catch(e){
       status("loginStatus","err",T("loginFail")+(e?.message||String(e)));
     }finally{
@@ -591,7 +591,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       btn.disabled=false;
     }
   };
-  $("homeBtn").onclick=()=>location.href="https://avg168.github.io/independent-points/?v=4142hf15";
+  $("homeBtn").onclick=()=>location.href="https://avg168.github.io/independent-points/?v=4142hf16";
   $("recheckBtn").onclick=()=>{
     refresh().catch(e=>{
       status("identityStatus","err","重新驗證失敗："+(e?.message||String(e)));
@@ -673,26 +673,73 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
     }
   }
 
-  async function refresh(userHint=null){
+  async function refresh(userHint=null,sessionHint=null){
     applyLang();
     status("identityStatus","",T("checking"));
     status("mfaStatus","",T("reading"));
-    $("enrollArea").classList.add("hidden"); $("challengeArea").classList.add("hidden"); $("staleArea").classList.add("hidden"); $("backupArea").classList.add("hidden"); staleFactorIds=[];
+    $("enrollArea").classList.add("hidden");
+    $("challengeArea").classList.add("hidden");
+    $("staleArea").classList.add("hidden");
+    $("backupArea").classList.add("hidden");
+    staleFactorIds=[];
     if($("changePasswordBtn")) $("changePasswordBtn").disabled=true;
-    const {data:{user},error:userErr}=await sb.auth.getUser();
-    if(userErr||!user){
+
+    let session=sessionHint||null;
+    let user=userHint||null;
+
+    if(!session){
+      try{
+        const sessionRes=await withTimeout(sb.auth.getSession(),5000,"登入工作階段讀取");
+        if(sessionRes?.error) throw sessionRes.error;
+        session=sessionRes?.data?.session||null;
+      }catch(e){
+        status("identityStatus","err","無法讀取已保存的登入工作階段，請稍後按「重新驗證登入身分」。");
+        status("mfaStatus","warn","尚未完成 MFA 狀態讀取。");
+        return;
+      }
+    }
+
+    if(!user && session?.user) user=session.user;
+
+    if(!session||!user){
       status("loginStatus","warn",T("loginReady"));
       if($("passwordStatus")) status("passwordStatus","warn",T("passwordLoginRequired"));
-      $("email").textContent="—";$("uid").textContent="—";$("aal").textContent="—";$("factorCount").textContent="0";
-      status("identityStatus","err",T("invalid"));status("mfaStatus","warn",T("noFactor"));
+      $("email").textContent="—";
+      $("uid").textContent="—";
+      $("aal").textContent="—";
+      $("factorCount").textContent="0";
+      status("identityStatus","err",T("invalid"));
+      status("mfaStatus","warn",T("noFactor"));
       await updatePaymentReturn(false);
       return;
     }
+
     status("loginStatus","ok",T("loginOk"));
+    $("email").textContent=user.email||"—";
+    $("uid").textContent=user.id||"—";
+    status("identityStatus","","已恢復登入工作階段，正在向伺服器重新驗證…");
+
+    try{
+      const userRes=await withTimeout(
+        sb.auth.getUser(session.access_token),
+        8000,
+        "登入身分重新驗證"
+      );
+      if(userRes?.error) throw userRes.error;
+      if(!userRes?.data?.user) throw new Error("找不到有效會員身分");
+      user=userRes.data.user;
+    }catch(e){
+      status("identityStatus","warn","登入工作階段仍保留，但伺服器重新驗證暫時失敗。請按「重新驗證登入身分」再試一次。");
+      status("mfaStatus","warn","等待登入身分重新驗證後再讀取 MFA 狀態。");
+      return;
+    }
+
+    $("email").textContent=user.email||"—";
+    $("uid").textContent=user.id||"—";
+    status("identityStatus","ok",T("valid"));
     if($("passwordPanel")) $("passwordPanel").classList.remove("hidden");
     if($("changePasswordBtn")) $("changePasswordBtn").disabled=false;
     if($("passwordStatus")) status("passwordStatus","",T("passwordReady"));
-    $("email").textContent=user.email||"—";$("uid").textContent=user.id||"—";status("identityStatus","ok",T("valid"));
 
     let mfaResults;
     try{
@@ -704,8 +751,13 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       status("mfaStatus","err","MFA 狀態讀取逾時，請按「重新驗證登入身分」再試一次。");
       return;
     }
+
     const [{data:aal,error:aalErr},{data:factors,error:fErr}]=mfaResults;
-    if(aalErr||fErr){status("mfaStatus","err",(aalErr||fErr).message);return}
+    if(aalErr||fErr){
+      status("mfaStatus","err",(aalErr||fErr).message);
+      return;
+    }
+
     $("aal").textContent=aal?.currentLevel||"aal1";
     const allTotp=(factors?.totp||[]);
     const verified=allTotp.filter(x=>x.status==="verified");
@@ -733,7 +785,6 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
 
     await updatePaymentReturn(true);
   }
-
 
   $("clearStaleBtn").onclick=async()=>{
     if(!staleFactorIds.length) return;
@@ -859,7 +910,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
         }
       }catch(_){}
 
-      location.replace("https://avg168.github.io/independent-points/?v=4142hf15&signedout=1");
+      location.replace("https://avg168.github.io/independent-points/?v=4142hf16&signedout=1");
     }catch(e){
       status("identityStatus","err",T("signoutFail")+(e?.message||String(e)));
       btn.disabled=false;
@@ -869,7 +920,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
   applyLang();
     await withTimeout(refresh(),10000,"安全頁初始化");
   }catch(e){
-    console.error("[IPT HF9 auth bootstrap]",e);
+    console.error("[IPT HF16 auth bootstrap]",e);
     const langSafe=(()=>{try{return localStorage.getItem("ipt_language")||"zh-TW"}catch(_){return "zh-TW"}})();
     const prefix=langSafe==="en"
       ?"Startup failed: "

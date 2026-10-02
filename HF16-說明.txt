@@ -1,0 +1,21 @@
+V4.14.2 HF16｜重新整理保留登入 Session
+
+修正：
+1. 重新整理先以 getSession() 恢復登入。
+2. Session 存在時先維持登入畫面。
+3. 再以 getUser(access_token) 做伺服器驗證。
+4. 驗證暫時逾時不清除 Session。
+5. 敏感功能仍需伺服器驗證成功後才啟用。
+6. Service Worker 快取升到 HF16。
+
+請覆蓋：
+index.html
+auth-security-v4.14.2.html
+change-password-v4.14.2.html
+service-worker.js
+
+測試：
+https://avg168.github.io/independent-points/?v=4142hf16
+
+驗收：
+登入後重新整理，應維持登入，不必再次輸入密碼。
