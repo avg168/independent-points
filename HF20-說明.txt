@@ -1,0 +1,19 @@
+V4.14.2 HF20｜管理頁返回導覽修正
+
+本版只處理管理頁導覽，不改提領審核核心邏輯。
+
+修正：
+1. 提領審核頁新增「返回管理中心」
+2. 提領審核頁新增「返回首頁」
+3. 提領審核頁新增「前往完成 MFA」
+4. 首頁管理中心加入固定錨點 #admin-center
+5. 返回管理中心會直接回到首頁管理中心區塊
+6. Service Worker 快取升級到 HF20
+
+請覆蓋：
+- index.html
+- withdrawal-admin-v4.14.2.html
+- service-worker.js
+
+測試入口：
+https://avg168.github.io/independent-points/?v=4142hf20
