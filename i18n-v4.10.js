@@ -622,3 +622,84 @@
     installHF27();
   }
 })();
+
+;(() => {
+  function installHF28(){
+    const api=window.IPTI18N;
+    if(!api?.dictionaries) return;
+
+    Object.assign(api.dictionaries["zh-CN"],{
+      "正在確認 Admin + MFA AAL2 + Trusted Device…":"正在确认 Admin + MFA AAL2 + Trusted Device…",
+      "尚未讀取。":"尚未读取。",
+      "Independent Points V4.14.2｜會員管理":"Independent Points V4.14.2｜会员管理",
+      "← V4.14.2 首頁":"← V4.14.2 首页",
+      "Independent Points V4.14.2｜管理員資產彙總報表":"Independent Points V4.14.2｜管理员资产汇总报表",
+      "Independent Points V4.14.2｜帳戶安全與權限中心":"Independent Points V4.14.2｜账户安全与权限中心",
+      "Independent Points V4.14.2｜營運安全中心":"Independent Points V4.14.2｜运营安全中心",
+      "Independent Points V4.14.2｜營運事件與通知中心":"Independent Points V4.14.2｜运营事件与通知中心",
+      "Independent Points V4.14.2｜版本更新中心":"Independent Points V4.14.2｜版本更新中心",
+      "進階診斷資訊":"高级诊断信息",
+      "Independent Points V4.14.2｜資產中心":"Independent Points V4.14.2｜资产中心",
+      "Independent Points V4.14.2｜我的資產報表":"Independent Points V4.14.2｜我的资产报表",
+      "Independent Points V4.14.2 CORE｜錢包核心":"Independent Points V4.14.2 CORE｜钱包核心",
+      "⚠️ 管理權交接屬高風險操作。候任管理者地址必須逐字核對；提出交接後，還需要 pendingOwner 使用自己的錢包簽名接任。":"⚠️ 管理权交接属于高风险操作。候任管理员地址必须逐字核对；提出交接后，还需要 pendingOwner 使用自己的钱包签名接任。",
+      "候任管理者要「接任」時，不需要輸入地址。請先切換 Trust Wallet 到 pendingOwner 對應的錢包， 重新連線並讀取合約，再執行下方檢查。":"候任管理员要“接任”时，不需要输入地址。请先将 Trust Wallet 切换到 pendingOwner 对应的钱包，重新连接并读取合约，再执行下方检查。",
+      "已整合鏈上讀取、Transfer、Burn、Mint、Pause / Unpause 與雙簽管理權交接。":"已整合链上读取、Transfer、Burn、Mint、Pause / Unpause 与双签管理权交接。",
+      "Owner 與 pendingOwner 均以目前鏈上資料動態判定，不再綁定最初部署地址。":"Owner 与 pendingOwner 均以当前链上数据动态判定，不再绑定最初部署地址。",
+      "讀取餘額、Transfer、Burn。":"读取余额、Transfer、Burn。",
+      "另可 Mint、Pause / Unpause、提出 Ownership Transfer。":"另可 Mint、Pause / Unpause、提出 Ownership Transfer。",
+      "可自行 Accept Ownership。":"可自行 Accept Ownership。",
+      "前置模擬、Nonce / Gas 多節點備援、Gas Limit 預留、5 分鐘防重複送出。":"前置模拟、Nonce / Gas 多节点备用、Gas Limit 预留、5 分钟防重复发送。",
+      "V4.14.2 HF5｜雙模式錢包":"V4.14.2 HF5｜双模式钱包",
+      "120 P = 100.00 平台 IPT":"120 P = 100.00 平台 IPT",
+      "尚未確認":"尚未确认",
+      "檢查中":"检查中",
+      "正在確認 MFA 狀態。":"正在确认 MFA 状态。",
+      "正在確認目前登入帳號…":"正在确认当前登录账号…",
+      "正在讀取目前 Access Token 的 AAL…":"正在读取当前 Access Token 的 AAL…",
+      "驗證器":"验证器",
+      "6 位數 TOTP 驗證碼":"6 位数 TOTP 验证码"
+    });
+
+    Object.assign(api.dictionaries.en,{
+      "正在確認 Admin + MFA AAL2 + Trusted Device…":"Checking Admin + MFA AAL2 + Trusted Device…",
+      "尚未讀取。":"Not loaded yet.",
+      "Independent Points V4.14.2｜會員管理":"Independent Points V4.14.2 | Member Management",
+      "← V4.14.2 首頁":"← V4.14.2 Home",
+      "Independent Points V4.14.2｜管理員資產彙總報表":"Independent Points V4.14.2 | Admin Asset Summary",
+      "Independent Points V4.14.2｜帳戶安全與權限中心":"Independent Points V4.14.2 | Account Security & Access",
+      "Independent Points V4.14.2｜營運安全中心":"Independent Points V4.14.2 | Operations Security Center",
+      "Independent Points V4.14.2｜營運事件與通知中心":"Independent Points V4.14.2 | Operations Events & Alerts",
+      "Independent Points V4.14.2｜版本更新中心":"Independent Points V4.14.2 | Version Update Center",
+      "進階診斷資訊":"Advanced Diagnostics",
+      "Independent Points V4.14.2｜資產中心":"Independent Points V4.14.2 | Asset Center",
+      "Independent Points V4.14.2｜我的資產報表":"Independent Points V4.14.2 | My Asset Report",
+      "Independent Points V4.14.2 CORE｜錢包核心":"Independent Points V4.14.2 CORE | Wallet Core",
+      "⚠️ 管理權交接屬高風險操作。候任管理者地址必須逐字核對；提出交接後，還需要 pendingOwner 使用自己的錢包簽名接任。":"⚠️ Ownership handover is a high-risk operation. Verify the pending owner address character by character. After proposing the transfer, the pendingOwner must sign with their own wallet to accept ownership.",
+      "候任管理者要「接任」時，不需要輸入地址。請先切換 Trust Wallet 到 pendingOwner 對應的錢包， 重新連線並讀取合約，再執行下方檢查。":"When the pending owner accepts ownership, no address input is required. Switch Trust Wallet to the wallet matching pendingOwner, reconnect, read the contract, and then run the checks below.",
+      "已整合鏈上讀取、Transfer、Burn、Mint、Pause / Unpause 與雙簽管理權交接。":"Integrated on-chain reads, Transfer, Burn, Mint, Pause / Unpause, and two-step ownership handover.",
+      "Owner 與 pendingOwner 均以目前鏈上資料動態判定，不再綁定最初部署地址。":"Owner and pendingOwner are determined dynamically from current on-chain data and are no longer tied to the original deployment address.",
+      "讀取餘額、Transfer、Burn。":"Read balances, Transfer, and Burn.",
+      "另可 Mint、Pause / Unpause、提出 Ownership Transfer。":"Also supports Mint, Pause / Unpause, and proposing Ownership Transfer.",
+      "可自行 Accept Ownership。":"Can independently Accept Ownership.",
+      "前置模擬、Nonce / Gas 多節點備援、Gas Limit 預留、5 分鐘防重複送出。":"Preflight simulation, multi-node Nonce / Gas fallback, Gas Limit buffer, and 5-minute duplicate-send protection.",
+      "V4.14.2 HF5｜雙模式錢包":"V4.14.2 HF5 | Dual-Mode Wallet",
+      "120 P = 100.00 平台 IPT":"120 P = 100.00 Platform IPT",
+      "尚未確認":"Not confirmed yet",
+      "檢查中":"Checking",
+      "正在確認 MFA 狀態。":"Checking MFA status.",
+      "正在確認目前登入帳號…":"Checking the current signed-in account…",
+      "正在讀取目前 Access Token 的 AAL…":"Reading the current Access Token AAL…",
+      "驗證器":"Authenticator",
+      "6 位數 TOTP 驗證碼":"6-digit TOTP verification code"
+    });
+
+    api.apply?.(document);
+  }
+
+  if(document.readyState==="loading"){
+    window.addEventListener("DOMContentLoaded",installHF28,{once:true});
+  }else{
+    installHF28();
+  }
+})();
