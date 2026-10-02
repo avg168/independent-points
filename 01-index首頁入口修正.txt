@@ -1,0 +1,20 @@
+V4.14.2 HF12｜index.html 必改兩行
+
+在 index.html 搜尋：
+
+$("loginBtn").addEventListener("click",()=>go("./auth-security-v4.12.html?v=4142"));
+
+改成：
+
+$("loginBtn").addEventListener("click",()=>go("./auth-security-v4.14.2.html?v=4142hf12"));
+
+
+再搜尋：
+
+$("accountSecurityBtn").addEventListener("click",()=>go("./auth-security-v4.12.html?v=4142"));
+
+改成：
+
+$("accountSecurityBtn").addEventListener("click",()=>go("./auth-security-v4.14.2.html?v=4142hf12"));
+
+完成後 Commit changes。
