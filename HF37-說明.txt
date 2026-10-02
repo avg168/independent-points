@@ -1,0 +1,15 @@
+V4.14.2 HF37｜系統資訊／維運中心快取版本統一
+
+修正：
+- system-info-v4.12.html
+  - i18n-v4.10.js?v=4142hf37
+  - service-worker.js?v=4142hf37
+  - 頁內原本純 v=4142 導覽參數統一為 hf37
+
+- maintenance-v4.12.html
+  - i18n-v4.10.js?v=4142hf37
+  - 頁內原本純 v=4142 導覽參數統一為 hf37
+
+- service-worker.js cache 升到 ipt-v4.14.2-hf37
+
+不修改任何功能、權限、資料或後端。
