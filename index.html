@@ -977,14 +977,14 @@ button{
 
   $("refreshBtn").addEventListener("click",load);
   $("assetSummaryRefreshBtn").addEventListener("click",refreshAssetSummary);
-  $("loginBtn").addEventListener("click",()=>go("./auth-security-v4.14.2.html?v=4142hf17"));
-  $("changePasswordBtn").addEventListener("click",()=>go("./change-password-v4.14.2.html?v=4142hf17"));
+  $("loginBtn").addEventListener("click",()=>go("./auth-security-v4.14.2.html?v=4142hf18"));
+  $("changePasswordBtn").addEventListener("click",()=>go("./change-password-v4.14.2.html?v=4142hf18"));
 
   $("myAssetBtn").addEventListener("click",()=>go("./member-assets-v4.12.html?v=4142"));
   $("platformWalletBtn").addEventListener("click",()=>go("./wallet-dual-v4.14.2.html?v=4142"));
   $("historyBtn").addEventListener("click",()=>go("./wallet-core-v4.12.html?go=history"));
   $("assetCenterBtn").addEventListener("click",()=>go("./asset-center-v4.12.html?v=4142"));
-  $("accountSecurityBtn").addEventListener("click",()=>go("./auth-security-v4.14.2.html?v=4142hf17"));
+  $("accountSecurityBtn").addEventListener("click",()=>go("./auth-security-v4.14.2.html?v=4142hf18"));
   $("systemInfoBtn").addEventListener("click",()=>go("./system-info-v4.12.html?v=4142"));
   $("maintenanceBtn")?.addEventListener("click",()=>go("./maintenance-v4.12.html?v=4142"));
 
@@ -998,7 +998,7 @@ button{
   $("mintBtn").addEventListener("click",()=>go("./wallet-core-v4.12.html?go=mint"));
   $("pauseBtn").addEventListener("click",()=>go("./wallet-core-v4.12.html?go=pause"));
   $("ownershipBtn").addEventListener("click",()=>go("./wallet-core-v4.12.html?go=ownership"));
-  $("advancedBtn").addEventListener("click",()=>go("./wallet-core-v4.12.html"));
+  $("advancedBtn").addEventListener("click",()=>go("./wallet-core-v4.12.html?go=advanced"));
   $("updateCenterBtn")?.addEventListener("click",()=>go("./update-center-v4.12.html?v=4142"));
   $("securityCenterBtn")?.addEventListener("click",()=>go("./security-center-v4.12.html?v=4142"));
   $("securityOpsBtn")?.addEventListener("click",()=>go("./security-ops-v4.12.html?v=4142"));
@@ -1193,7 +1193,7 @@ button{
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", async () => {
       try {
-        const reg = await navigator.serviceWorker.register("./service-worker.js?v=4142hf17", {
+        const reg = await navigator.serviceWorker.register("./service-worker.js?v=4142hf18", {
           updateViaCache: "none"
         });
         await reg.update().catch(()=>{});

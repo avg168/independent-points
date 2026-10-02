@@ -1,0 +1,27 @@
+V4.14.2 HF18｜管理中心高風險功能 MFA 強制保護
+
+MFA AAL2 保護範圍：
+- 資產彙總
+- 會員管理
+- 提領審核
+- Mint
+- 暫停／恢復
+- 管理權 Owner / pendingOwner
+- 進階功能
+- 系統更新
+- 安全與權限
+- 營運安全
+- 事件與通知
+
+雙層保護：
+1. 進入管理員敏感頁面／路由前，auth-guard 要求 MFA AAL2。
+2. Mint、Pause、Unpause、提出 Owner 交接、接受 Owner 交接，在真正送出 Trust Wallet 前再次確認 AAL2。
+
+一般會員的查看餘額、IPT 轉帳、收款不因此強制 MFA。
+
+同時將相關管理頁與 wallet-core 的 Supabase JS 由 2.57.4 升級為 2.116.0。
+
+請覆蓋本壓縮檔內所有同名檔案。
+
+測試入口：
+https://avg168.github.io/independent-points/?v=4142hf18
