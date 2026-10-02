@@ -594,7 +594,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       btn.disabled=false;
     }
   };
-  $("homeBtn").onclick=()=>location.href="https://avg168.github.io/independent-points/?v=4142hf29";
+  $("homeBtn").onclick=()=>location.href="https://avg168.github.io/independent-points/?v=4142hf30";
   $("recheckBtn").onclick=()=>{
     refresh().catch(e=>{
       status("identityStatus","err","重新驗證失敗："+(e?.message||String(e)));
@@ -911,7 +911,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
         }
       }catch(_){}
 
-      location.replace("https://avg168.github.io/independent-points/?v=4142hf29&signedout=1");
+      location.replace("https://avg168.github.io/independent-points/?v=4142hf30&signedout=1");
     }catch(e){
       status("identityStatus","err",T("signoutFail")+(e?.message||String(e)));
       btn.disabled=false;

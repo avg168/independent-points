@@ -230,11 +230,11 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       readyTrusted:"這支裝置已信任，可以正常使用會員與錢包功能。",
       readyUntrusted:"這是一支尚未信任的新裝置。請先完成 MFA，再信任這支裝置。",
       enable:"啟用並信任這支裝置",trust:"信任這支裝置",mfa:"前往完成 MFA",refresh:"重新檢查",
-      hManage:"已信任裝置管理",manageNote:"完成 AAL2 後可以查看與移除已信任裝置。",disable:"停用受信任裝置保護",
+      hManage:"已信任裝置管理",manageNote:"完成 AAL2 後可以查看與移除已信任裝置。",manageReady:"AAL2 已完成，可以查看與移除已信任裝置。",disable:"停用受信任裝置保護",
       hExplain:"保護方式",explain:"一般會員可自行選擇是否啟用。啟用後，已信任的手機可照常使用；新手機登入後必須先完成 MFA，才能加入受信任裝置。單純知道 Email 與密碼不足以通過新裝置保護。",
-      security:"帳戶安全／MFA",home:"返回首頁",remove:"移除",current:"目前裝置",revoked:"已移除",
+      security:"帳戶安全／MFA",home:"返回首頁",remove:"移除",removeCurrent:"移除此裝置信任",current:"目前裝置",revoked:"已移除",
       devicePlaceholder:"例如：我的 ASUS 手機",enableOk:"已啟用受信任裝置保護。",trustOk:"這支裝置已加入受信任裝置。",
-      disableOk:"受信任裝置保護已停用。",removeConfirm:"確定要移除此受信任裝置嗎？",failed:"操作失敗："
+      disableOk:"受信任裝置保護已停用。",removeConfirm:"確定要移除此受信任裝置嗎？",removeCurrentConfirm:"確定要移除目前這支裝置的信任嗎？移除後，本機需要重新完成 MFA 才能再次加入受信任裝置。",failed:"操作失敗："
     },
     "zh-CN":{
       title:"受信任设备",subtitle:"用已验证的手机／浏览器降低密码被盗后的账户风险。",
@@ -244,11 +244,11 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       readyTrusted:"这台设备已信任，可以正常使用会员与钱包功能。",
       readyUntrusted:"这是一台尚未信任的新设备。请先完成 MFA，再信任这台设备。",
       enable:"启用并信任这台设备",trust:"信任这台设备",mfa:"前往完成 MFA",refresh:"重新检查",
-      hManage:"已信任设备管理",manageNote:"完成 AAL2 后可以查看与移除已信任设备。",disable:"停用受信任设备保护",
+      hManage:"已信任设备管理",manageNote:"完成 AAL2 后可以查看与移除已信任设备。",manageReady:"AAL2 已完成，可以查看与移除已信任设备。",disable:"停用受信任设备保护",
       hExplain:"保护方式",explain:"普通会员可自行选择是否启用。启用后，已信任的手机可照常使用；新手机登录后必须先完成 MFA，才能加入受信任设备。单纯知道 Email 与密码不足以通过新设备保护。",
-      security:"账户安全／MFA",home:"返回首页",remove:"移除",current:"当前设备",revoked:"已移除",
+      security:"账户安全／MFA",home:"返回首页",remove:"移除",removeCurrent:"移除此设备信任",current:"当前设备",revoked:"已移除",
       devicePlaceholder:"例如：我的 Android 手机",enableOk:"已启用受信任设备保护。",trustOk:"这台设备已加入受信任设备。",
-      disableOk:"受信任设备保护已停用。",removeConfirm:"确定要移除此受信任设备吗？",failed:"操作失败："
+      disableOk:"受信任设备保护已停用。",removeConfirm:"确定要移除此受信任设备吗？",removeCurrentConfirm:"确定要移除当前设备的信任吗？移除后，本机需要重新完成 MFA 才能再次加入受信任设备。",failed:"操作失败："
     },
     "en":{
       title:"Trusted Devices",subtitle:"Use a verified phone/browser to reduce account takeover risk after password theft.",
@@ -258,11 +258,11 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       readyTrusted:"This device is trusted and may use member and wallet features normally.",
       readyUntrusted:"This is a new untrusted device. Complete MFA, then trust this device.",
       enable:"Enable & Trust This Device",trust:"Trust This Device",mfa:"Complete MFA",refresh:"Refresh",
-      hManage:"Trusted Device Management",manageNote:"Complete AAL2 to view and remove trusted devices.",disable:"Disable Trusted-Device Protection",
+      hManage:"Trusted Device Management",manageNote:"Complete AAL2 to view and remove trusted devices.",manageReady:"AAL2 completed. You can view and remove trusted devices.",disable:"Disable Trusted-Device Protection",
       hExplain:"How It Works",explain:"This is optional for regular members. Once enabled, trusted phones work normally; a new phone must complete MFA before it can become trusted. Knowing only the email and password is not enough to pass new-device protection.",
-      security:"Account Security / MFA",home:"Back to Home",remove:"Remove",current:"Current Device",revoked:"Removed",
+      security:"Account Security / MFA",home:"Back to Home",remove:"Remove",removeCurrent:"Remove Trust from This Device",current:"Current Device",revoked:"Removed",
       devicePlaceholder:"Example: My Android phone",enableOk:"Trusted-device protection is enabled.",trustOk:"This device is now trusted.",
-      disableOk:"Trusted-device protection is disabled.",removeConfirm:"Remove this trusted device?",failed:"Action failed: "
+      disableOk:"Trusted-device protection is disabled.",removeConfirm:"Remove this trusted device?",removeCurrentConfirm:"Remove trust from this current device? After removal, this device must complete MFA again before it can be trusted.",failed:"Action failed: "
     }
   };
   const T=k=>(S[lang]||S["zh-TW"])[k]||k;
@@ -286,6 +286,24 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
     if(/Macintosh|Mac OS X/i.test(ua)) return "Mac";
     return lang==="en"?"Current device":"目前裝置";
   }
+  function displayDeviceName(v){
+    const name=String(v||"").trim();
+    if(["Android 手機","Android 手机","Android phone"].includes(name)){
+      return lang==="en"?"Android phone":(lang==="zh-CN"?"Android 手机":"Android 手機");
+    }
+    if(["目前裝置","当前设备","Current device"].includes(name)){
+      return lang==="en"?"Current device":(lang==="zh-CN"?"当前设备":"目前裝置");
+    }
+    return name;
+  }
+  function syncAutoDeviceInputName(){
+    const el=$("deviceNameInput");
+    if(!el) return;
+    const v=String(el.value||"").trim();
+    if(["Android 手機","Android 手机","Android phone","目前裝置","当前设备","Current device"].includes(v)){
+      el.value=defaultName();
+    }
+  }
   function applyLang(){
     if(!["zh-TW","zh-CN","en"].includes(lang)) lang="zh-TW";
     localStorage.setItem("ipt_language",lang);
@@ -300,6 +318,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
     $("refreshBtn").textContent=T("refresh"); $("disableBtn").textContent=T("disable");
     $("securityBtn").textContent=T("security"); $("homeBtn").textContent=T("home");
     $("deviceNameInput").placeholder=T("devicePlaceholder");
+    syncAutoDeviceInputName();
     renderState(lastState);
   }
   document.querySelectorAll("[data-lang]").forEach(b=>b.onclick=async()=>{lang=b.dataset.lang;applyLang();if(lastState?.aal==="aal2"&&lastState?.protection_enabled){try{await loadDevices()}catch(_){}}});
@@ -319,7 +338,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
     $("protection").textContent=s.protection_enabled?T("enabled"):T("disabled");
     $("trusted").textContent=s.trusted_device?T("trusted"):T("untrusted");
     $("aal").textContent=s.aal||"—";
-    $("nameValue").textContent=s.current_device?.device_name||$("deviceNameInput").value||defaultName();
+    $("nameValue").textContent=displayDeviceName(s.current_device?.device_name||$("deviceNameInput").value||defaultName());
     $("enableBtn").classList.add("hidden"); $("trustBtn").classList.add("hidden"); $("mfaBtn").classList.add("hidden");
     $("managePanel").classList.add("hidden");
 
@@ -328,7 +347,10 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       if(s.aal==="aal2") $("enableBtn").classList.remove("hidden"); else $("mfaBtn").classList.remove("hidden");
     }else if(s.trusted_device){
       $("state").className="status ok"; $("state").textContent=T("readyTrusted");
-      if(s.aal==="aal2") $("managePanel").classList.remove("hidden");
+      if(s.aal==="aal2"){
+        $("managePanel").classList.remove("hidden");
+        if($("manageNote")) $("manageNote").textContent=T("manageReady");
+      }
     }else{
       $("state").className="status err"; $("state").textContent=T("readyUntrusted");
       if(s.aal==="aal2") $("trustBtn").classList.remove("hidden"); else $("mfaBtn").classList.remove("hidden");
@@ -345,12 +367,12 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
     const list=data.devices||[];
     $("deviceList").innerHTML=list.length?list.map(d=>`
       <div class="device">
-        <div class="device-title">${esc(d.device_name)} ${d.is_current?`· ${esc(T("current"))}`:""} ${d.revoked_at?`· ${esc(T("revoked"))}`:""}</div>
+        <div class="device-title">${esc(displayDeviceName(d.device_name))} ${d.is_current?`· ${esc(T("current"))}`:""} ${d.revoked_at?`· ${esc(T("revoked"))}`:""}</div>
         <div class="device-meta">${esc(d.user_agent||"")}<br>${esc(fmtTime(d.last_seen_at))}</div>
-        ${d.revoked_at?"":`<button class="danger revokeBtn" data-id="${esc(d.id)}" type="button" style="width:100%;margin-top:10px">${esc(T("remove"))}</button>`}
+        ${d.revoked_at?"":`<button class="danger revokeBtn" data-id="${esc(d.id)}" data-current="${d.is_current?"1":"0"}" type="button" style="width:100%;margin-top:10px">${esc(d.is_current?T("removeCurrent"):T("remove"))}</button>`}
       </div>`).join(""):`<div class="note">—</div>`;
     document.querySelectorAll(".revokeBtn").forEach(btn=>btn.onclick=async()=>{
-      if(!confirm(T("removeConfirm"))) return;
+      if(!confirm(btn.dataset.current==="1"?T("removeCurrentConfirm"):T("removeConfirm"))) return;
       try{await invoke("revoke_device",{device_id:btn.dataset.id});await refresh()}
       catch(e){$("state").className="status err";$("state").textContent=T("failed")+(e?.message||String(e))}
     });
@@ -380,7 +402,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
   $("mfaBtn").onclick=()=>location.href="./auth-security-v4.14.2.html"+nextParam()+"#trustedDeviceSection";
   $("refreshBtn").onclick=refresh;
   $("securityBtn").onclick=()=>location.href="./auth-security-v4.14.2.html"+nextParam()+"#trustedDeviceSection";
-  $("homeBtn").onclick=()=>location.href="https://avg168.github.io/independent-points/?v=4142hf29";
+  $("homeBtn").onclick=()=>location.href="https://avg168.github.io/independent-points/?v=4142hf30";
   $("paymentReturnBtn").onclick=()=>{
     const next=safeNext();
     if(next) location.replace(next);

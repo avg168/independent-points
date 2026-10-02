@@ -1,0 +1,17 @@
+V4.14.2 HF30｜受信任裝置介面收尾
+
+不修改 Trusted Device 後端 API，不修改 MFA / AAL2 / 權限邏輯。
+
+修正：
+- English 模式下，自動產生的 Android 手機顯示為 Android phone
+- 簡中模式顯示 Android 手机
+- 已達 AAL2 時管理提示改為已完成
+- 目前裝置移除按鈕改成更明確文字
+- 移除目前裝置前增加 MFA 後果警告
+- 其他裝置仍維持一般 Remove
+
+請覆蓋：
+- device-security-v4.14.2.html
+- auth-security-v4.14.2.html
+- index.html
+- service-worker.js
