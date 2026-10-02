@@ -378,7 +378,7 @@ button{
 
 </style>
 
-<link rel="manifest" href="./manifest.webmanifest?v=4142hf32">
+<link rel="manifest" href="./manifest.webmanifest?v=4142hf33">
 <meta name="theme-color" content="#10243d">
 <meta name="application-name" content="Independent Points">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -388,8 +388,8 @@ button{
 <link rel="icon" type="image/svg+xml" href="./ipt-icon-192.png">
 
 <link rel="apple-touch-icon" href="./ipt-apple-touch-180.png">
-<script src="./i18n-v4.10.js?v=4142hf32" defer></script>
-<script src="./auth-guard-v4.12.js?v=4142hf32"></script>
+<script src="./i18n-v4.10.js?v=4142hf33" defer></script>
+<script src="./auth-guard-v4.12.js?v=4142hf33"></script>
 </head>
 <body>
 <header>
@@ -461,12 +461,12 @@ button{
     try{
       const {data:{user},error}=await sb.auth.getUser();
       if(error) throw error;
-      if(!session?.user){
+      if(!user){
         setStatus("err","尚未登入會員。請先返回會員頁登入。");
         return;
       }
 
-      const uid=session.user.id;
+      const uid=user.id;
       const [pRes,rRes]=await Promise.all([
         sb.from("member_profiles")
           .select("member_number,display_name,status")
@@ -484,7 +484,7 @@ button{
       const role=rRes.data?.role||"member";
 
       $("profileName").textContent=`${p.member_number||"—"}｜${p.display_name||"—"}`;
-      $("profileEmail").textContent=session.user.email||"—";
+      $("profileEmail").textContent=user.email||"—";
       $("profileChips").innerHTML=
         `<span class="chip ${role==="admin"?"admin":""}">${role==="admin"?"管理員":"會員"}</span>`+
         `<span class="chip ${p.status==="active"?"ok":""}">${p.status==="active"?"正常":"已停權"}</span>`;
@@ -510,10 +510,10 @@ button{
   }
 
   $("memberBtn").addEventListener("click",()=>{
-    location.href="./member-assets-v4.12.html?v=4142hf32";
+    location.href="./member-assets-v4.12.html?v=4142hf33";
   });
   $("adminBtn").addEventListener("click",()=>{
-    location.href="./admin-assets-v4.12.html?v=4142hf32";
+    location.href="./admin-assets-v4.12.html?v=4142hf33";
   });
   $("refreshBtn").addEventListener("click",load);
   $("backBtn").addEventListener("click",()=>{
@@ -527,7 +527,7 @@ button{
 
 <script>
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js?v=4142hf32",{updateViaCache:"none"}).catch(()=>{}));
+  window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js?v=4142hf33",{updateViaCache:"none"}).catch(()=>{}));
 }
 </script>
 

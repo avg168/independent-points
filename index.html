@@ -998,7 +998,7 @@ button{
   $("myAssetBtn").addEventListener("click",()=>go("./member-assets-v4.12.html?v=4142hf32"));
   $("platformWalletBtn").addEventListener("click",()=>go("./wallet-dual-v4.14.2.html?v=4142hf32"));
   $("historyBtn").addEventListener("click",()=>go("./wallet-core-v4.12.html?go=history"));
-  $("assetCenterBtn").addEventListener("click",()=>go("./asset-center-v4.12.html?v=4142hf32"));
+  $("assetCenterBtn").addEventListener("click",()=>go("./asset-center-v4.12.html?v=4142hf33"));
   $("accountSecurityBtn").addEventListener("click",()=>go("./auth-security-v4.14.2.html?v=4142hf32"));
   $("systemInfoBtn").addEventListener("click",()=>go("./system-info-v4.12.html?v=4142hf32"));
   $("maintenanceBtn")?.addEventListener("click",()=>go("./maintenance-v4.12.html?v=4142hf32"));
@@ -1208,7 +1208,7 @@ button{
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", async () => {
       try {
-        const reg = await navigator.serviceWorker.register("./service-worker.js?v=4142hf32", {
+        const reg = await navigator.serviceWorker.register("./service-worker.js?v=4142hf33", {
           updateViaCache: "none"
         });
         await reg.update().catch(()=>{});

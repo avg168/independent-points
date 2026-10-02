@@ -1,0 +1,15 @@
+V4.14.2 HF33｜資產中心登入修正
+
+修正：
+- asset-center-v4.12.html 使用不存在的 session.user，造成「session is not defined」
+- 改為使用已由 sb.auth.getUser() 驗證過的 user
+- uid 改為 user.id
+- Email 改為 user.email
+- 資產中心入口與 Service Worker 快取版本升到 HF33
+
+不修改：
+- MFA
+- Trusted Device
+- Admin API
+- 提領
+- Secret Key 試點
