@@ -111,7 +111,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
   <section id="managePanel" class="panel hidden">
     <h2 id="hManage">已信任裝置管理</h2>
     <div id="manageNote" class="status">完成 AAL2 後可以查看與移除已信任裝置。</div>
-    <div id="deviceList"></div>
+    <div class="grid" style="margin-top:12px"><div class="card"><div class="k" id="kActiveDevices">有效裝置</div><div id="activeDevices" class="v">—</div></div><div class="card"><div class="k" id="kTrustDays">信任有效期</div><div id="trustDays" class="v">—</div></div><div class="card"><div class="k" id="kExpiresAt">目前裝置到期日</div><div id="expiresAt" class="v">—</div></div></div><div id="deviceList"></div>
     <button id="disableBtn" class="danger" type="button" style="width:100%;margin-top:12px">停用受信任裝置保護</button>
   </section>
 
@@ -230,7 +230,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       readyTrusted:"這支裝置已信任，可以正常使用會員與錢包功能。",
       readyUntrusted:"這是一支尚未信任的新裝置。請先完成 MFA，再信任這支裝置。",
       enable:"啟用並信任這支裝置",trust:"信任這支裝置",mfa:"前往完成 MFA",refresh:"重新檢查",
-      hManage:"已信任裝置管理",manageNote:"完成 AAL2 後可以查看與移除已信任裝置。",manageReady:"AAL2 已完成，可以查看與移除已信任裝置。",disable:"停用受信任裝置保護",
+      hManage:"已信任裝置管理",manageNote:"完成 AAL2 後可以查看與移除已信任裝置。",manageReady:"AAL2 已完成，可以查看與移除已信任裝置。",kActiveDevices:"有效裝置",kTrustDays:"信任有效期",kExpiresAt:"目前裝置到期日",active:"有效",expired:"已過期",trustTime:"信任時間",lastSeen:"最後使用",expiry:"到期時間",days:"天",disable:"停用受信任裝置保護",
       hExplain:"保護方式",explain:"一般會員可自行選擇是否啟用。啟用後，已信任的手機可照常使用；新手機登入後必須先完成 MFA，才能加入受信任裝置。單純知道 Email 與密碼不足以通過新裝置保護。",
       security:"帳戶安全／MFA",home:"返回首頁",remove:"移除",removeCurrent:"移除此裝置信任",current:"目前裝置",revoked:"已移除",
       devicePlaceholder:"例如：我的 ASUS 手機",enableOk:"已啟用受信任裝置保護。",trustOk:"這支裝置已加入受信任裝置。",
@@ -244,7 +244,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       readyTrusted:"这台设备已信任，可以正常使用会员与钱包功能。",
       readyUntrusted:"这是一台尚未信任的新设备。请先完成 MFA，再信任这台设备。",
       enable:"启用并信任这台设备",trust:"信任这台设备",mfa:"前往完成 MFA",refresh:"重新检查",
-      hManage:"已信任设备管理",manageNote:"完成 AAL2 后可以查看与移除已信任设备。",manageReady:"AAL2 已完成，可以查看与移除已信任设备。",disable:"停用受信任设备保护",
+      hManage:"已信任设备管理",manageNote:"完成 AAL2 后可以查看与移除已信任设备。",manageReady:"AAL2 已完成，可以查看与移除已信任设备。",kActiveDevices:"有效设备",kTrustDays:"信任有效期",kExpiresAt:"当前设备到期日",active:"有效",expired:"已过期",trustTime:"信任时间",lastSeen:"最后使用",expiry:"到期时间",days:"天",disable:"停用受信任设备保护",
       hExplain:"保护方式",explain:"普通会员可自行选择是否启用。启用后，已信任的手机可照常使用；新手机登录后必须先完成 MFA，才能加入受信任设备。单纯知道 Email 与密码不足以通过新设备保护。",
       security:"账户安全／MFA",home:"返回首页",remove:"移除",removeCurrent:"移除此设备信任",current:"当前设备",revoked:"已移除",
       devicePlaceholder:"例如：我的 Android 手机",enableOk:"已启用受信任设备保护。",trustOk:"这台设备已加入受信任设备。",
@@ -258,7 +258,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       readyTrusted:"This device is trusted and may use member and wallet features normally.",
       readyUntrusted:"This is a new untrusted device. Complete MFA, then trust this device.",
       enable:"Enable & Trust This Device",trust:"Trust This Device",mfa:"Complete MFA",refresh:"Refresh",
-      hManage:"Trusted Device Management",manageNote:"Complete AAL2 to view and remove trusted devices.",manageReady:"AAL2 completed. You can view and remove trusted devices.",disable:"Disable Trusted-Device Protection",
+      hManage:"Trusted Device Management",manageNote:"Complete AAL2 to view and remove trusted devices.",manageReady:"AAL2 completed. You can view and remove trusted devices.",kActiveDevices:"Active Devices",kTrustDays:"Trust Period",kExpiresAt:"Current Device Expiry",active:"Active",expired:"Expired",trustTime:"Trusted",lastSeen:"Last Used",expiry:"Expires",days:"days",disable:"Disable Trusted-Device Protection",
       hExplain:"How It Works",explain:"This is optional for regular members. Once enabled, trusted phones work normally; a new phone must complete MFA before it can become trusted. Knowing only the email and password is not enough to pass new-device protection.",
       security:"Account Security / MFA",home:"Back to Home",remove:"Remove",removeCurrent:"Remove Trust from This Device",current:"Current Device",revoked:"Removed",
       devicePlaceholder:"Example: My Android phone",enableOk:"Trusted-device protection is enabled.",trustOk:"This device is now trusted.",
@@ -313,7 +313,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       b.classList.toggle("active",b.dataset.lang===lang);
       b.setAttribute("aria-pressed",b.dataset.lang===lang?"true":"false");
     });
-    ["title","subtitle","hState","kProtection","kTrusted","kAal","kName","hManage","manageNote","hExplain","explain"].forEach(id=>$(id).textContent=T(id));
+    ["title","subtitle","hState","kProtection","kTrusted","kAal","kName","hManage","manageNote","kActiveDevices","kTrustDays","kExpiresAt","hExplain","explain"].forEach(id=>$(id).textContent=T(id));
     $("enableBtn").textContent=T("enable"); $("trustBtn").textContent=T("trust"); $("mfaBtn").textContent=T("mfa");
     $("refreshBtn").textContent=T("refresh"); $("disableBtn").textContent=T("disable");
     $("securityBtn").textContent=T("security"); $("homeBtn").textContent=T("home");
@@ -359,17 +359,21 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
   }
 
   function fmtTime(v){if(!v)return"—";const d=new Date(v);return Number.isNaN(d.getTime())?"—":d.toLocaleString(lang==="en"?"en-US":"zh-TW",{hour12:false})}
+  function expiryFromTrusted(v,days=90){if(!v)return "";const d=new Date(v);if(Number.isNaN(d.getTime()))return "";d.setTime(d.getTime()+Number(days||90)*86400000);return d.toISOString()}
+  function renderPolicySummary(data){const list=Array.isArray(data?.devices)?data.devices:[];const max=Number(data?.policy?.max_active_devices||5);const days=Number(data?.policy?.trust_days||90);const active=list.filter(d=>!d.revoked_at&&!d.expired).length;if($("activeDevices"))$("activeDevices").textContent=active+" / "+max;if($("trustDays"))$("trustDays").textContent=days+" "+T("days");if($("expiresAt")){const exp=lastState?.current_device?.expires_at||expiryFromTrusted(lastState?.current_device?.trusted_at,days);$("expiresAt").textContent=fmtTime(exp)}}
   function esc(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
 
   async function loadDevices(){
     if(lastState?.aal!=="aal2") return;
     const data=await invoke("list");
     const list=data.devices||[];
+    renderPolicySummary(data);
+    const trustDays=Number(data?.policy?.trust_days||90);
     $("deviceList").innerHTML=list.length?list.map(d=>`
       <div class="device">
-        <div class="device-title">${esc(displayDeviceName(d.device_name))} ${d.is_current?`· ${esc(T("current"))}`:""} ${d.revoked_at?`· ${esc(T("revoked"))}`:""}</div>
-        <div class="device-meta">${esc(d.user_agent||"")}<br>${esc(fmtTime(d.last_seen_at))}</div>
-        ${d.revoked_at?"":`<button class="danger revokeBtn" data-id="${esc(d.id)}" data-current="${d.is_current?"1":"0"}" type="button" style="width:100%;margin-top:10px">${esc(d.is_current?T("removeCurrent"):T("remove"))}</button>`}
+        <div class="device-title">${esc(displayDeviceName(d.device_name))} ${d.is_current?`· ${esc(T("current"))}`:""} ${d.revoked_at?`· ${esc(T("revoked"))}`:(d.expired?`· ${esc(T("expired"))}`:`· ${esc(T("active"))}`)}</div>
+        <div class="device-meta">${esc(d.user_agent||"")}<br>${esc(T("trustTime"))}：${esc(fmtTime(d.trusted_at))}<br>${esc(T("lastSeen"))}：${esc(fmtTime(d.last_seen_at))}${(!d.revoked_at)?`<br>${esc(T("expiry"))}：${esc(fmtTime(expiryFromTrusted(d.trusted_at,trustDays)))}`:""}</div>
+        ${(d.revoked_at||d.expired)?"":`<button class="danger revokeBtn" data-id="${esc(d.id)}" data-current="${d.is_current?"1":"0"}" type="button" style="width:100%;margin-top:10px">${esc(d.is_current?T("removeCurrent"):T("remove"))}</button>`}
       </div>`).join(""):`<div class="note">—</div>`;
     document.querySelectorAll(".revokeBtn").forEach(btn=>btn.onclick=async()=>{
       if(!confirm(btn.dataset.current==="1"?T("removeCurrentConfirm"):T("removeConfirm"))) return;
@@ -384,7 +388,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
     if(error||!user){
       lastState=null;
       $("state").className="status warn"; $("state").textContent=T("signedOut");
-      ["protection","trusted","aal","nameValue"].forEach(id=>$(id).textContent="—");
+      ["protection","trusted","aal","nameValue","activeDevices","trustDays","expiresAt"].forEach(id=>{if($(id))$(id).textContent="—"});
       ["enableBtn","trustBtn","mfaBtn"].forEach(id=>$(id).classList.add("hidden"));
       $("managePanel").classList.add("hidden");
       renderPaymentReturn();
@@ -402,7 +406,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
   $("mfaBtn").onclick=()=>location.href="./auth-security-v4.14.2.html"+nextParam()+"#trustedDeviceSection";
   $("refreshBtn").onclick=refresh;
   $("securityBtn").onclick=()=>location.href="./auth-security-v4.14.2.html"+nextParam()+"#trustedDeviceSection";
-  $("homeBtn").onclick=()=>location.href="https://avg168.github.io/independent-points/?v=4142hf30";
+  $("homeBtn").onclick=()=>location.href="https://avg168.github.io/independent-points/?v=4142hf31";
   $("paymentReturnBtn").onclick=()=>{
     const next=safeNext();
     if(next) location.replace(next);

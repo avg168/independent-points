@@ -1,0 +1,9 @@
+V4.14.2 HF31｜受信任裝置政策資訊化
+
+新增有效裝置 X / 5、90 天有效期、目前裝置到期日，以及每台裝置的有效/過期/移除狀態與時間資訊。
+
+請覆蓋：
+- device-security-v4.14.2.html
+- service-worker.js
+
+測試入口：https://avg168.github.io/independent-points/device-security-v4.14.2.html?v=4142hf31
