@@ -582,7 +582,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
     }
   };
 
-  $("dedicatedPasswordBtn").onclick=()=>location.href="./change-password-v4.14.2.html?v=4142hf11";
+  $("dedicatedPasswordBtn").onclick=()=>location.href="./change-password-v4.14.2.html?v=4142hf12";
 
   $("passwordJumpBtn").onclick=()=>{
     const panel=$("passwordPanel");
@@ -592,7 +592,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       setTimeout(()=>$("currentPassword")?.focus(),350);
     }
   };
-  $("homeBtn").onclick=()=>location.href="https://avg168.github.io/independent-points/?v=4142hf11";
+  $("homeBtn").onclick=()=>location.href="https://avg168.github.io/independent-points/?v=4142hf12";
   $("recheckBtn").onclick=()=>refresh();
   $("trustedDeviceBtn").onclick=()=>location.href="./device-security-v4.14.2.html"+nextParam();
   $("paymentReturnBtn").onclick=()=>{
@@ -834,7 +834,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
         }
       }catch(_){}
 
-      location.replace("https://avg168.github.io/independent-points/?v=4142hf11&signedout=1");
+      location.replace("https://avg168.github.io/independent-points/?v=4142hf12&signedout=1");
     }catch(e){
       status("identityStatus","err",T("signoutFail")+(e?.message||String(e)));
       btn.disabled=false;

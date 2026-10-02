@@ -383,6 +383,7 @@ button{
       <button id="refreshBtn" class="primary" type="button">重新整理</button>
       <button id="loginBtn" class="light" type="button">會員登入／帳戶安全</button>
     </div>
+    <button id="changePasswordBtn" class="secondary" type="button" style="width:100%;margin-top:10px">🔑 變更密碼</button>
   </section>
 
   <section id="assetSummarySection" class="panel" style="display:none">
@@ -976,13 +977,14 @@ button{
 
   $("refreshBtn").addEventListener("click",load);
   $("assetSummaryRefreshBtn").addEventListener("click",refreshAssetSummary);
-  $("loginBtn").addEventListener("click",()=>go("./auth-security-v4.12.html?v=4142"));
+  $("loginBtn").addEventListener("click",()=>go("./auth-security-v4.14.2.html?v=4142hf12"));
+  $("changePasswordBtn").addEventListener("click",()=>go("./change-password-v4.14.2.html?v=4142hf12"));
 
   $("myAssetBtn").addEventListener("click",()=>go("./member-assets-v4.12.html?v=4142"));
   $("platformWalletBtn").addEventListener("click",()=>go("./wallet-dual-v4.14.2.html?v=4142"));
   $("historyBtn").addEventListener("click",()=>go("./wallet-core-v4.12.html?go=history"));
   $("assetCenterBtn").addEventListener("click",()=>go("./asset-center-v4.12.html?v=4142"));
-  $("accountSecurityBtn").addEventListener("click",()=>go("./auth-security-v4.12.html?v=4142"));
+  $("accountSecurityBtn").addEventListener("click",()=>go("./auth-security-v4.14.2.html?v=4142hf12"));
   $("systemInfoBtn").addEventListener("click",()=>go("./system-info-v4.12.html?v=4142"));
   $("maintenanceBtn")?.addEventListener("click",()=>go("./maintenance-v4.12.html?v=4142"));
 
