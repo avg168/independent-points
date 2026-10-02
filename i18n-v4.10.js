@@ -731,3 +731,85 @@
     installHF34();
   }
 })();
+
+
+;(() => {
+  function installHF35(){
+    const api=window.IPTI18N;
+    if(!api?.dictionaries) return;
+
+    Object.assign(api.dictionaries["zh-CN"],{
+      "鑄造轉入":"铸造转入",
+      "銷毀轉出":"销毁转出",
+      "資產明細載入失敗":"资产明细加载失败",
+      "已取消分享 CSV。":"已取消分享 CSV。",
+      "已送出 CSV 下載要求；同時已把 CSV 內容複製到剪貼簿，若瀏覽器沒有跳出下載，可直接貼到試算表。":"已发出 CSV 下载请求；同时已将 CSV 内容复制到剪贴板，若浏览器没有弹出下载，可直接粘贴到电子表格。",
+      "已送出 CSV 下載要求。若手機仍未顯示下載，請改用支援下載的 Chrome 開啟此頁。":"已发出 CSV 下载请求。若手机仍未显示下载，请改用支持下载的 Chrome 打开此页。",
+      "此瀏覽器不支援直接下載，CSV 內容已複製到剪貼簿，可貼到 Google 試算表或 Excel。":"此浏览器不支持直接下载，CSV 内容已复制到剪贴板，可粘贴到 Google 表格或 Excel。",
+      "CSV 匯出失敗：":"CSV 导出失败：",
+      "請先產生彙總報表。":"请先生成汇总报表。",
+      "交易會員":"交易会员",
+      "IPT 數量":"IPT 数量",
+      "正在開啟列印／PDF 預覽…":"正在打开打印／PDF 预览…",
+      "正在彙整會員鏈上資產紀錄…":"正在汇总会员链上资产记录…",
+      "開始日期不能晚於結束日期。":"开始日期不能晚于结束日期。",
+      "沒有符合條件且已綁定錢包的會員。":"没有符合条件且已绑定钱包的会员。",
+      "報表產生失敗：":"报表生成失败：",
+      "正在讀取會員資料與 Sepolia IPT 鏈上餘額…":"正在读取会员资料与 Sepolia IPT 链上余额…",
+      "尚未登入雲端會員。請先完成會員登入。":"尚未登录云端会员。请先完成会员登录。",
+      "需要管理員登入。":"需要管理员登录。",
+      "資產報表載入失敗":"资产报表加载失败",
+      "此條件下沒有交易紀錄。":"此条件下没有交易记录。",
+      "此條件下沒有會員資產變動。":"此条件下没有会员资产变动。",
+      "IPT 餘額":"IPT 余额",
+      "主錢包地址":"主钱包地址",
+      "錢包驗證":"钱包验证",
+      "目前 IPT 餘額":"当前 IPT 余额",
+      "累計轉入":"累计转入",
+      "累計轉出":"累计转出",
+      "最近交易紀錄":"最近交易记录"
+    });
+
+    Object.assign(api.dictionaries.en,{
+      "鑄造轉入":"Mint In",
+      "銷毀轉出":"Burn Out",
+      "資產明細載入失敗":"Failed to load asset details",
+      "已取消分享 CSV。":"CSV sharing was cancelled.",
+      "已送出 CSV 下載要求；同時已把 CSV 內容複製到剪貼簿，若瀏覽器沒有跳出下載，可直接貼到試算表。":"CSV download requested. The CSV was also copied to the clipboard in case the browser does not start the download.",
+      "已送出 CSV 下載要求。若手機仍未顯示下載，請改用支援下載的 Chrome 開啟此頁。":"CSV download requested. If no download appears, open this page in Chrome.",
+      "此瀏覽器不支援直接下載，CSV 內容已複製到剪貼簿，可貼到 Google 試算表或 Excel。":"Direct download is not supported in this browser. The CSV has been copied to the clipboard for Google Sheets or Excel.",
+      "CSV 匯出失敗：":"CSV export failed: ",
+      "請先產生彙總報表。":"Generate the summary report first.",
+      "交易會員":"Transaction Member",
+      "IPT 數量":"IPT Amount",
+      "正在開啟列印／PDF 預覽…":"Opening Print / PDF preview…",
+      "正在彙整會員鏈上資產紀錄…":"Compiling member on-chain asset records…",
+      "開始日期不能晚於結束日期。":"Start date cannot be later than end date.",
+      "沒有符合條件且已綁定錢包的會員。":"No wallet-linked members match the current criteria.",
+      "報表產生失敗：":"Report generation failed: ",
+      "正在讀取會員資料與 Sepolia IPT 鏈上餘額…":"Loading member data and Sepolia IPT on-chain balances…",
+      "尚未登入雲端會員。請先完成會員登入。":"You are not signed in. Complete member sign-in first.",
+      "需要管理員登入。":"Administrator sign-in required.",
+      "資產報表載入失敗":"Failed to load asset report",
+      "此條件下沒有交易紀錄。":"No transactions match these criteria.",
+      "此條件下沒有會員資產變動。":"No member asset changes match these criteria.",
+      "IPT 餘額":"IPT Balance",
+      "主錢包地址":"Primary Wallet Address",
+      "錢包驗證":"Wallet Verification",
+      "目前 IPT 餘額":"Current IPT Balance",
+      "累計轉入":"Total Incoming",
+      "累計轉出":"Total Outgoing",
+      "最近交易紀錄":"Recent Transactions"
+    });
+
+    api.apply?.(document);
+    const lang=api.getLang?.() || localStorage.getItem("ipt_language") || "zh-TW";
+    window.dispatchEvent(new CustomEvent("ipt-language-change",{detail:{lang}}));
+  }
+
+  if(document.readyState==="loading"){
+    window.addEventListener("DOMContentLoaded",installHF35,{once:true});
+  }else{
+    installHF35();
+  }
+})();
