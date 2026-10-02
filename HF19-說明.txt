@@ -1,0 +1,25 @@
+V4.14.2 HF19｜全站 Auth SDK 一致化＋舊安全入口退場
+
+目的：
+- 全站仍使用 Supabase JS 2.57.4 的主要會員／付款／提領頁升級到 2.116.0
+- 登入、MFA、密碼、受信任裝置入口統一到 HF19
+- update-center 不再把 auth-security-v4.12.html / device-security-v4.12.html 當正式必備安全頁
+- Service Worker 快取升級到 HF19
+
+本包包含：
+index.html
+auth-security-v4.14.2.html
+change-password-v4.14.2.html
+device-security-v4.14.2.html
+asset-center-v4.12.html
+member-assets-v4.12.html
+maintenance-v4.12.html
+pay-v4.14.2.html
+wallet-dual-v4.14.2.html
+withdrawal-v4.14.2.html
+withdrawal-mfa-v4.14.2.html
+update-center-v4.12.html
+service-worker.js
+
+測試入口：
+https://avg168.github.io/independent-points/?v=4142hf19

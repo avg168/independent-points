@@ -201,7 +201,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
   </section>
 </main>
 <script>
-/* V4.14.2 HF17: Supabase Auth SDK upgrade + session/MFA recovery */
+/* V4.14.2 HF19: Supabase Auth SDK upgrade + session/MFA recovery */
 (async () => {
   try{
     await window.IPT_SUPABASE_READY;
@@ -591,7 +591,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       btn.disabled=false;
     }
   };
-  $("homeBtn").onclick=()=>location.href="https://avg168.github.io/independent-points/?v=4142hf17";
+  $("homeBtn").onclick=()=>location.href="https://avg168.github.io/independent-points/?v=4142hf19";
   $("recheckBtn").onclick=()=>{
     refresh().catch(e=>{
       status("identityStatus","err","重新驗證失敗："+(e?.message||String(e)));
@@ -908,7 +908,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
         }
       }catch(_){}
 
-      location.replace("https://avg168.github.io/independent-points/?v=4142hf17&signedout=1");
+      location.replace("https://avg168.github.io/independent-points/?v=4142hf19&signedout=1");
     }catch(e){
       status("identityStatus","err",T("signoutFail")+(e?.message||String(e)));
       btn.disabled=false;
@@ -918,7 +918,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
   applyLang();
     await withTimeout(refresh(),10000,"安全頁初始化");
   }catch(e){
-    console.error("[IPT HF17 auth bootstrap]",e);
+    console.error("[IPT HF19 auth bootstrap]",e);
     const langSafe=(()=>{try{return localStorage.getItem("ipt_language")||"zh-TW"}catch(_){return "zh-TW"}})();
     const prefix=langSafe==="en"
       ?"Startup failed: "
