@@ -1,0 +1,20 @@
+V4.14.2 HF12｜auth-security-v4.14.2.html 導航統一
+
+搜尋：
+
+$("dedicatedPasswordBtn").onclick=()=>location.href="./change-password-v4.14.2.html?v=4142hf11";
+
+改成：
+
+$("dedicatedPasswordBtn").onclick=()=>location.href="./change-password-v4.14.2.html?v=4142hf12";
+
+
+搜尋：
+
+$("homeBtn").onclick=()=>location.href="https://avg168.github.io/independent-points/?v=4142hf11";
+
+改成：
+
+$("homeBtn").onclick=()=>location.href="https://avg168.github.io/independent-points/?v=4142hf12";
+
+完成後 Commit changes。
