@@ -1,0 +1,35 @@
+V4.14.2 HF38｜全站共用資源快取版本統一
+
+只統一共用資源 cache-buster：
+- i18n-v4.10.js?v=4142hf38
+- auth-guard-v4.12.js?v=4142hf38
+- service-worker.js?v=4142hf38
+- Service Worker cache: ipt-v4.14.2-hf38
+
+不修改：
+- 頁面功能
+- 導覽目的地
+- 登入／MFA
+- Trusted Device
+- Admin 權限
+- 資產／錢包／提領
+- Supabase 後端
+
+實際有變更的檔案：
+index.html
+admin-assets-v4.12.html
+admin-members-v4.12.html
+member-assets-v4.12.html
+asset-center-v4.12.html
+wallet-core-v4.12.html
+wallet-dual-v4.14.2.html
+withdrawal-v4.14.2.html
+withdrawal-mfa-v4.14.2.html
+withdrawal-admin-v4.14.2.html
+security-center-v4.12.html
+security-ops-v4.12.html
+event-center-v4.12.html
+update-center-v4.12.html
+pay-v4.14.2.html
+system-info-v4.12.html
+maintenance-v4.12.html

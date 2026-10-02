@@ -345,7 +345,7 @@ button{
 <link rel="icon" type="image/svg+xml" href="./ipt-icon-192.png">
 
 <link rel="apple-touch-icon" href="./ipt-apple-touch-180.png">
-<script src="./i18n-v4.10.js?v=4142hf32" defer></script>
+<script src="./i18n-v4.10.js?v=4142hf38" defer></script>
 <!-- V4.14.2 Homepage Signed-Out Fail-Closed Hotfix 17 + Trusted Device Hotfix 19 -->
 </head>
 <body>
@@ -1208,7 +1208,7 @@ button{
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", async () => {
       try {
-        const reg = await navigator.serviceWorker.register("./service-worker.js?v=4142hf33", {
+        const reg = await navigator.serviceWorker.register("./service-worker.js?v=4142hf38", {
           updateViaCache: "none"
         });
         await reg.update().catch(()=>{});
