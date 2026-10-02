@@ -72,7 +72,7 @@ pre{
 }
 </style>
 
-<script src="https://avg168.github.io/independent-points/i18n-v4.10.js?v=4142hf24" defer></script>
+<script src="https://avg168.github.io/independent-points/i18n-v4.10.js?v=4142hf25" defer></script>
 </head>
 <body>
 <header>
@@ -170,6 +170,14 @@ let mintData="";
 let mintGasLimit=0n;
 let mintRequestPending=false;
 function status(id,kind,text){const e=$(id);e.className="status "+kind;e.textContent=text;}
+function uiLang(){
+  try{return window.IPTI18N?.getLang?.()||localStorage.getItem("ipt_language")||"zh-TW"}catch(_){return "zh-TW"}
+}
+function L(zh,cn,en){
+  const lang=uiLang();
+  return lang==="en"?en:(lang==="zh-CN"?cn:zh);
+}
+
 async function adminToken(){const {data:{session},error}=await sb.auth.getSession();if(error)throw error;if(!session?.access_token)throw new Error("沒有有效登入 Session");return session.access_token;}
 const STATUS_LABELS={
   pending:"待審核", approved:"已核准", tx_submitted:"鏈上確認中",
@@ -211,9 +219,9 @@ function renderSecurityFailed(err){
   $("mfaBtn").textContent="🔐 前往完成 MFA";
 }
 
-$("backAdminBtn").onclick=()=>location.href="./index.html?v=4142hf24&goto=admin";
-$("homeBtn").onclick=()=>location.href="./index.html?v=4142hf24";
-$("mfaBtn").onclick=()=>location.href="./auth-security-v4.14.2.html?v=4142hf24#mfa";
+$("backAdminBtn").onclick=()=>location.href="./index.html?v=4142hf25&goto=admin";
+$("homeBtn").onclick=()=>location.href="./index.html?v=4142hf25";
+$("mfaBtn").onclick=()=>location.href="./auth-security-v4.14.2.html?v=4142hf25#mfa";
 
 async function loadQueue(){
   status("adminStatus","info","正在確認 Admin + MFA AAL2 + Trusted Device…");
@@ -325,7 +333,7 @@ async function initWC(){
   wc.on("chainChanged",()=>{mintReady=false;$("mintBtn").disabled=true;});return wc;
 }
 $("openTrustDappBtn").onclick=()=>{
-  const target=location.origin+location.pathname+"?v=4142hf24";
+  const target=location.origin+location.pathname+"?v=4142hf25";
   const deepLink="https://link.trustwallet.com/open_url?coin_id=60&url="+encodeURIComponent(target);
   location.href=deepLink;
 };
@@ -346,7 +354,7 @@ $("connectBtn").onclick=async()=>{
       const cid=await ensureSepolia(injected);
 
       status("walletStatus","ok",`錢包：${account||"未知"}｜Chain：${cid}｜Sepolia`);
-      status("signModeStatus","ok","簽名模式：Trust Wallet DApp Browser 直接簽名（推薦）。");
+      status("signModeStatus","ok",L("簽名模式：Trust Wallet DApp Browser 直接簽名（推薦）。","签名模式：Trust Wallet DApp Browser 直接签名（推荐）。","Signing mode: direct signing in Trust Wallet DApp Browser (recommended)."));
       $("preflightBtn").disabled=!(account&&cid===CHAIN_ID&&selected?.status==="approved");
       return;
     }
@@ -366,13 +374,13 @@ $("connectBtn").onclick=async()=>{
     }
 
     status("walletStatus","ok",`錢包：${account||"未知"}｜Chain：${cid}｜Sepolia`);
-    status("signModeStatus","warn","簽名模式：Chrome + WalletConnect。送出後請立刻手動切到 Trust Wallet 查看交易確認。");
+    status("signModeStatus","warn",L("簽名模式：Chrome + WalletConnect。送出後請立刻手動切到 Trust Wallet 查看交易確認。","签名模式：Chrome + WalletConnect。发送后请立即手动切换到 Trust Wallet 查看交易确认。","Signing mode: Chrome + WalletConnect. After sending, switch to Trust Wallet immediately to review the transaction confirmation."));
     $("preflightBtn").disabled=!(account&&cid===CHAIN_ID&&selected?.status==="approved");
   }catch(e){
     activeWalletProvider=null;
     walletMode="none";
-    status("walletStatus","err","Trust Wallet 連線失敗："+(e?.message||String(e)));
-    status("signModeStatus","err","簽名模式：未建立。");
+    status("walletStatus","err",L("Trust Wallet 連線失敗：","Trust Wallet 连接失败：","Trust Wallet connection failed: ")+(e?.message||String(e)));
+    status("signModeStatus","err",L("簽名模式：未建立。","签名模式：未建立。","Signing mode: not established."));
   }
 };
 async function workingReadProvider(){let last=null;for(const rpc of READ_RPCS){try{const p=new JsonRpcProvider(rpc);const n=await p.getNetwork();if(Number(n.chainId)===CHAIN_ID)return p;}catch(e){last=e}}throw last||new Error("Sepolia RPC 無法使用");}
@@ -413,14 +421,14 @@ $("preflightBtn").onclick=async()=>{
       `Mint 前檢查通過｜Owner：${owner}｜收款：${selected.wallet_address}｜數量：${fmt(selected.ipt_units)} IPT｜預估 Gas：${gas}｜建議 Gas Limit：${mintGasLimit}｜模式：${walletMode==="trust-injected"?"Trust DApp Browser":"WalletConnect"}`
     );
   }catch(e){
-    status("preflightStatus","err","Mint 前檢查失敗："+(e?.message||String(e)));
+    status("preflightStatus","err",L("Mint 前檢查失敗：","Mint 前检查失败：","Mint pre-check failed: ")+(e?.message||String(e)));
   }
 };
 $("mintBtn").onclick=async()=>{
   if(!mintReady||!selected||!activeWalletProvider) return;
 
   if(recentMintInflight()){
-    status("preflightStatus","warn","防重複保護：這筆 Mint 在 5 分鐘內已送出過簽名請求。請先到 Trust Wallet 確認是否有待處理交易，不要重複送出。");
+    status("preflightStatus","warn",L("防重複保護：這筆 Mint 在 5 分鐘內已送出過簽名請求。請先到 Trust Wallet 確認是否有待處理交易，不要重複送出。","防重复保护：这笔 Mint 在 5 分钟内已发送过签名请求。请先到 Trust Wallet 确认是否有待处理交易，不要重复发送。","Duplicate protection: a signing request for this Mint was already sent within the last 5 minutes. Check Trust Wallet for a pending transaction before trying again."));
     return;
   }
 
@@ -447,11 +455,11 @@ $("mintBtn").onclick=async()=>{
 
     if(walletMode==="walletconnect"){
       status("preflightStatus","warn",
-        "WalletConnect 簽名請求正在送出。現在請用 Android 最近使用 App 手動切到 Trust Wallet，查看待確認交易；不要再次按 Mint。"
+        L("WalletConnect 簽名請求正在送出。現在請用 Android 最近使用 App 手動切到 Trust Wallet，查看待確認交易；不要再次按 Mint。","WalletConnect 签名请求正在发送。现在请用 Android 最近使用 App 手动切换到 Trust Wallet，查看待确认交易；不要再次按 Mint。","The WalletConnect signing request is being sent. Switch to Trust Wallet from Android Recents to review the pending transaction. Do not press Mint again.")
       );
     }else{
       status("preflightStatus","info",
-        "正在要求 Trust Wallet 顯示 Mint 交易確認…"
+        L("正在要求 Trust Wallet 顯示 Mint 交易確認…","正在请求 Trust Wallet 显示 Mint 交易确认…","Requesting Trust Wallet to show the Mint confirmation…")
       );
     }
 
@@ -475,7 +483,7 @@ $("mintBtn").onclick=async()=>{
     if(error) throw error;
 
     $("txHashInput").value=hash;
-    status("chainStatus","ok","Trust Wallet 已送出 Mint，tx hash 已登記。現在等待鏈上確認。");
+    status("chainStatus","ok",L("Trust Wallet 已送出 Mint，tx hash 已登記。現在等待鏈上確認。","Trust Wallet 已发送 Mint，tx hash 已登记。现在等待链上确认。","Trust Wallet sent the Mint transaction and the tx hash was registered. Waiting for on-chain confirmation."));
 
     await loadQueue();
     const refreshed=rows.find(x=>x.id===selected.id);
@@ -489,7 +497,7 @@ $("mintBtn").onclick=async()=>{
 
     if(rejected){
       clearMintInflight();
-      status("preflightStatus","warn","Trust Wallet 已取消／拒絕交易。本次沒有送出 Mint。");
+      status("preflightStatus","warn",L("Trust Wallet 已取消／拒絕交易。本次沒有送出 Mint。","Trust Wallet 已取消／拒绝交易。本次没有发送 Mint。","Trust Wallet cancelled or rejected the transaction. No Mint transaction was sent."));
       $("mintBtn").disabled=false;
     }else{
       status("preflightStatus","err",
@@ -498,8 +506,8 @@ $("mintBtn").onclick=async()=>{
     }
   }
 };
-$("registerTxBtn").onclick=async()=>{if(!selected)return;const hash=$("txHashInput").value.trim();try{const {error}=await sb.rpc("platform_admin_submit_ipt_withdrawal_tx",{p_withdrawal_id:selected.id,p_tx_hash:hash});if(error)throw error;status("chainStatus","ok","tx hash 已登記，但平台尚未結算。請執行後端鏈上驗證。");await loadQueue();}catch(e){status("chainStatus","err","登記失敗："+(e?.message||String(e)));}};
-$("verifyChainBtn").onclick=async()=>{if(!selected)return;$("verifyChainBtn").disabled=true;status("chainStatus","info","後端正在獨立查詢 Sepolia RPC、Mint calldata、receipt 與 Transfer 事件…");try{const token=await adminToken();const resp=await fetch(VERIFY_URL,{method:"POST",headers:{"Content-Type":"application/json","apikey":KEY,"Authorization":"Bearer "+token},body:JSON.stringify({withdrawal_id:selected.id})});const body=await resp.json().catch(()=>({}));if(resp.status===202){status("chainStatus","warn",`鏈上尚在確認：${body.status||"pending"}｜confirmations ${body.confirmations??0}/${body.min_confirmations??2}`);return;}if(!resp.ok)throw new Error(body?.error||("HTTP "+resp.status));status("chainStatus","ok",`鏈上驗證完成，平台結算成功。tx：${body.tx_hash}｜block：${body.block_number}｜confirmations：${body.confirmations}`);await loadQueue();}catch(e){status("chainStatus","err","鏈上驗證失敗："+(e?.message||String(e)));}finally{$("verifyChainBtn").disabled=false;}};
+$("registerTxBtn").onclick=async()=>{if(!selected)return;const hash=$("txHashInput").value.trim();try{const {error}=await sb.rpc("platform_admin_submit_ipt_withdrawal_tx",{p_withdrawal_id:selected.id,p_tx_hash:hash});if(error)throw error;status("chainStatus","ok",L("tx hash 已登記，但平台尚未結算。請執行後端鏈上驗證。","tx hash 已登记，但平台尚未结算。请执行后端链上验证。","The tx hash was registered, but platform settlement is not complete. Run server-side on-chain verification."));await loadQueue();}catch(e){status("chainStatus","err",L("登記失敗：","登记失败：","Registration failed: ")+(e?.message||String(e)));}};
+$("verifyChainBtn").onclick=async()=>{if(!selected)return;$("verifyChainBtn").disabled=true;status("chainStatus","info",L("後端正在獨立查詢 Sepolia RPC、Mint calldata、receipt 與 Transfer 事件…","后端正在独立查询 Sepolia RPC、Mint calldata、receipt 与 Transfer 事件…","The server is independently checking Sepolia RPC, Mint calldata, the receipt, and Transfer events…"));try{const token=await adminToken();const resp=await fetch(VERIFY_URL,{method:"POST",headers:{"Content-Type":"application/json","apikey":KEY,"Authorization":"Bearer "+token},body:JSON.stringify({withdrawal_id:selected.id})});const body=await resp.json().catch(()=>({}));if(resp.status===202){status("chainStatus","warn",`鏈上尚在確認：${body.status||"pending"}｜confirmations ${body.confirmations??0}/${body.min_confirmations??2}`);return;}if(!resp.ok)throw new Error(body?.error||("HTTP "+resp.status));status("chainStatus","ok",`鏈上驗證完成，平台結算成功。tx：${body.tx_hash}｜block：${body.block_number}｜confirmations：${body.confirmations}`);await loadQueue();}catch(e){status("chainStatus","err",L("鏈上驗證失敗：","链上验证失败：","On-chain verification failed: ")+(e?.message||String(e)));}finally{$("verifyChainBtn").disabled=false;}};
 $("reloadBtn").onclick=()=>loadQueue().catch(e=>{renderSecurityFailed(e);status("adminStatus","err",e?.message||String(e));});
 loadQueue().catch(e=>{renderSecurityFailed(e);status("adminStatus","err","管理員驗證失敗："+(e?.message||String(e))+"。請確認登入、Admin 角色、MFA AAL2 與 Trusted Device。");});
 </script>

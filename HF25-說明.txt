@@ -1,0 +1,19 @@
+V4.14.2 HF25｜提領審核動態訊息多語系補全
+
+HF24 補固定文字；HF25 補操作中才出現的動態訊息。
+本版不改提領、Mint、AAL2、Trust Wallet 或鏈上驗證核心邏輯。
+
+已補：
+- Trust Wallet 連線成功／失敗
+- 簽名模式
+- Mint 前檢查失敗
+- 防重複送出提示
+- Mint 送出／取消
+- tx hash 登記
+- 後端鏈上驗證中／失敗
+
+請覆蓋：
+- withdrawal-admin-v4.14.2.html
+- index.html
+- auth-security-v4.14.2.html
+- service-worker.js
