@@ -1,0 +1,17 @@
+V4.14.2 HF26｜提領審核動態訊息最終收尾
+
+只補多語系顯示，不改提領、Mint、MFA AAL2、Trust Wallet 或鏈上驗證邏輯。
+
+收尾：
+- Mint 前檢查成功
+- Sepolia / Owner / paused / cap 錯誤
+- 鏈上確認中
+- 鏈上驗證成功
+- Admin 驗證失敗
+- 提領狀態依目前語言即時顯示
+- 語言切換後重新渲染提領佇列與 MFA 狀態
+
+請覆蓋：
+- withdrawal-admin-v4.14.2.html
+- index.html
+- service-worker.js
