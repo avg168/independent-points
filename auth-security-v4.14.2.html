@@ -93,7 +93,6 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
     <input id="loginPassword" type="password" autocomplete="current-password" placeholder="密碼" style="width:100%;margin-top:10px">
     <button id="loginSubmitBtn" class="primary" type="button" style="width:100%;margin-top:10px">登入</button>
     <div class="note" id="loginNote">Supabase 會員登入與 Trust Wallet 連線是兩件不同的事。登入成功後才會建立會員 Auth Session。</div>
-    <button id="dedicatedPasswordBtn" class="blue" type="button" style="width:100%;margin-top:12px">開啟獨立變更密碼頁</button>
   </section>
 
 
@@ -131,7 +130,6 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       <div class="card"><div class="k" id="kFactor">已驗證 MFA</div><div id="factorCount" class="v">—</div></div>
     </div>
     <div class="actions">
-      <button id="passwordJumpBtn" class="primary full" type="button">前往變更密碼</button>
       <button id="recheckBtn" class="blue" type="button">重新驗證登入身分</button>
       <button id="homeBtn" class="light" type="button">返回首頁</button>
     </div>
@@ -581,18 +579,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       btn.disabled=false;
     }
   };
-
-  $("dedicatedPasswordBtn").onclick=()=>location.href="./change-password-v4.14.2.html?v=4142hf12";
-
-  $("passwordJumpBtn").onclick=()=>{
-    const panel=$("passwordPanel");
-    if(panel){
-      panel.classList.remove("hidden");
-      panel.scrollIntoView({behavior:"smooth",block:"start"});
-      setTimeout(()=>$("currentPassword")?.focus(),350);
-    }
-  };
-  $("homeBtn").onclick=()=>location.href="https://avg168.github.io/independent-points/?v=4142hf12";
+  $("homeBtn").onclick=()=>location.href="https://avg168.github.io/independent-points/?v=4142hf13";
   $("recheckBtn").onclick=()=>refresh();
   $("trustedDeviceBtn").onclick=()=>location.href="./device-security-v4.14.2.html"+nextParam();
   $("paymentReturnBtn").onclick=()=>{
@@ -834,7 +821,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
         }
       }catch(_){}
 
-      location.replace("https://avg168.github.io/independent-points/?v=4142hf12&signedout=1");
+      location.replace("https://avg168.github.io/independent-points/?v=4142hf13&signedout=1");
     }catch(e){
       status("identityStatus","err",T("signoutFail")+(e?.message||String(e)));
       btn.disabled=false;
