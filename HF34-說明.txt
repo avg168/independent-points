@@ -1,0 +1,13 @@
+V4.14.2 HF34｜管理員資產英文 Placeholder 翻譯修正
+
+修正：
+- 會員編號／暱稱／Email／錢包地址
+  -> Member No. / Nickname / Email / Wallet Address
+- 編號／暱稱／Email／錢包
+  -> Member No. / Nickname / Email / Wallet
+- 補進共用 i18n 字典，避免頁面載入順序造成中文殘留
+- 管理員資產頁 i18n / Service Worker 快取升到 HF34
+
+保留：
+- Android 原生日期欄位「年／月／日」不強制改寫
+- 不修改報表、CSV、PDF、篩選、Admin 權限與資產邏輯

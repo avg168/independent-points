@@ -703,3 +703,31 @@
     installHF28();
   }
 })();
+
+
+;(() => {
+  function installHF34(){
+    const api=window.IPTI18N;
+    if(!api?.dictionaries) return;
+
+    Object.assign(api.dictionaries["zh-CN"],{
+      "會員編號／暱稱／Email／錢包地址":"会员编号／昵称／Email／钱包地址",
+      "編號／暱稱／Email／錢包":"编号／昵称／Email／钱包"
+    });
+
+    Object.assign(api.dictionaries.en,{
+      "會員編號／暱稱／Email／錢包地址":"Member No. / Nickname / Email / Wallet Address",
+      "編號／暱稱／Email／錢包":"Member No. / Nickname / Email / Wallet"
+    });
+
+    api.apply?.(document);
+    const lang=api.getLang?.() || localStorage.getItem("ipt_language") || "zh-TW";
+    window.dispatchEvent(new CustomEvent("ipt-language-change",{detail:{lang}}));
+  }
+
+  if(document.readyState==="loading"){
+    window.addEventListener("DOMContentLoaded",installHF34,{once:true});
+  }else{
+    installHF34();
+  }
+})();
