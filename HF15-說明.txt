@@ -1,0 +1,17 @@
+V4.14.2 HF15｜帳戶安全頁防卡修正
+
+請覆蓋：
+- index.html
+- auth-security-v4.14.2.html
+- change-password-v4.14.2.html
+- service-worker.js
+
+修正重點：
+- 登入成功後直接使用 Supabase 回傳 user
+- getUser 加 8 秒逾時
+- MFA 狀態讀取加 8 秒逾時
+- 初始化加 10 秒總逾時
+- 不再永久停在「正在讀取」
+
+測試入口：
+https://avg168.github.io/independent-points/?v=4142hf15

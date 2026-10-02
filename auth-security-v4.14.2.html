@@ -299,7 +299,19 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
     $("paymentReturnBtn").classList.add("hidden");
     $("paymentDeviceBtn").classList.add("hidden");
 
-    const {data:{user},error:userErr}=await sb.auth.getUser();
+    let user=userHint||null;
+    let userErr=null;
+    if(!user){
+      try{
+        const userRes=await withTimeout(sb.auth.getUser(),8000,"登入身分重新驗證");
+        user=userRes?.data?.user||null;
+        userErr=userRes?.error||null;
+      }catch(e){
+        status("identityStatus","err","登入身分重新驗證逾時，請按「重新驗證登入身分」再試一次。");
+        status("mfaStatus","warn","尚未完成 MFA 狀態讀取。");
+        return;
+      }
+    }
     if(userErr||!user){
       setReturnState("warn","請先完成會員登入。登入成功後會繼續檢查 MFA 與受信任裝置。");
       return;
@@ -489,7 +501,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       try{localStorage.setItem("ipt_last_login_email",email)}catch(_){}
       $("loginPassword").value="";
       status("loginStatus","ok",T("loginOk"));
-      await refresh();
+      await refresh(data.user);
     }catch(e){
       status("loginStatus","err",T("loginFail")+(e?.message||String(e)));
     }finally{
@@ -579,8 +591,13 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       btn.disabled=false;
     }
   };
-  $("homeBtn").onclick=()=>location.href="https://avg168.github.io/independent-points/?v=4142hf14";
-  $("recheckBtn").onclick=()=>refresh();
+  $("homeBtn").onclick=()=>location.href="https://avg168.github.io/independent-points/?v=4142hf15";
+  $("recheckBtn").onclick=()=>{
+    refresh().catch(e=>{
+      status("identityStatus","err","重新驗證失敗："+(e?.message||String(e)));
+      status("mfaStatus","err","MFA 狀態讀取失敗。");
+    });
+  };
   $("trustedDeviceBtn").onclick=()=>location.href="./device-security-v4.14.2.html"+nextParam();
   $("paymentReturnBtn").onclick=()=>{
     const next=safeNext();
@@ -643,7 +660,20 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
     }
   }
 
-  async function refresh(){
+
+  async function withTimeout(promise,ms,label){
+    let timer;
+    try{
+      return await Promise.race([
+        promise,
+        new Promise((_,reject)=>timer=setTimeout(()=>reject(new Error((label||"操作")+"逾時")),ms))
+      ]);
+    }finally{
+      clearTimeout(timer);
+    }
+  }
+
+  async function refresh(userHint=null){
     applyLang();
     status("identityStatus","",T("checking"));
     status("mfaStatus","",T("reading"));
@@ -664,9 +694,17 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
     if($("passwordStatus")) status("passwordStatus","",T("passwordReady"));
     $("email").textContent=user.email||"—";$("uid").textContent=user.id||"—";status("identityStatus","ok",T("valid"));
 
-    const [{data:aal,error:aalErr},{data:factors,error:fErr}]=await Promise.all([
-      sb.auth.mfa.getAuthenticatorAssuranceLevel(),sb.auth.mfa.listFactors()
-    ]);
+    let mfaResults;
+    try{
+      mfaResults=await withTimeout(Promise.all([
+        sb.auth.mfa.getAuthenticatorAssuranceLevel(),
+        sb.auth.mfa.listFactors()
+      ]),8000,"MFA 狀態讀取");
+    }catch(e){
+      status("mfaStatus","err","MFA 狀態讀取逾時，請按「重新驗證登入身分」再試一次。");
+      return;
+    }
+    const [{data:aal,error:aalErr},{data:factors,error:fErr}]=mfaResults;
     if(aalErr||fErr){status("mfaStatus","err",(aalErr||fErr).message);return}
     $("aal").textContent=aal?.currentLevel||"aal1";
     const allTotp=(factors?.totp||[]);
@@ -821,7 +859,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
         }
       }catch(_){}
 
-      location.replace("https://avg168.github.io/independent-points/?v=4142hf14&signedout=1");
+      location.replace("https://avg168.github.io/independent-points/?v=4142hf15&signedout=1");
     }catch(e){
       status("identityStatus","err",T("signoutFail")+(e?.message||String(e)));
       btn.disabled=false;
@@ -829,7 +867,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
   };
 
   applyLang();
-    await refresh();
+    await withTimeout(refresh(),10000,"安全頁初始化");
   }catch(e){
     console.error("[IPT HF9 auth bootstrap]",e);
     const langSafe=(()=>{try{return localStorage.getItem("ipt_language")||"zh-TW"}catch(_){return "zh-TW"}})();
