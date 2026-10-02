@@ -597,3 +597,28 @@
     installHF24();
   }
 })();
+
+;(() => {
+  function installHF27(){
+    const api=window.IPTI18N;
+    if(!api?.dictionaries) return;
+
+    Object.assign(api.dictionaries["zh-CN"],{
+      "🔑 變更密碼":"🔑 更改密码",
+      "V4.14.2 正式整合雙模式平台錢包、120P 兌 100 IPT、平台會員互轉、QR 收款、平台 IPT 提領、管理員核准、Trust Wallet Owner Mint 與 Sepolia 鏈上驗證；原本通過驗證的鏈上錢包核心與安全中心繼續保留。":"V4.14.2 正式整合双模式平台钱包、120P 兑 100 IPT、平台会员互转、QR 收款、平台 IPT 提领、管理员核准、Trust Wallet Owner Mint 与 Sepolia 链上验证；原本通过验证的链上钱包核心与安全中心继续保留。"
+    });
+
+    Object.assign(api.dictionaries.en,{
+      "🔑 變更密碼":"🔑 Change Password",
+      "V4.14.2 正式整合雙模式平台錢包、120P 兌 100 IPT、平台會員互轉、QR 收款、平台 IPT 提領、管理員核准、Trust Wallet Owner Mint 與 Sepolia 鏈上驗證；原本通過驗證的鏈上錢包核心與安全中心繼續保留。":"V4.14.2 integrates the dual-mode platform wallet, 120P-to-100 IPT conversion, member-to-member platform transfers, QR payments, Platform IPT withdrawals, admin approval, Trust Wallet Owner Mint, and Sepolia on-chain verification, while retaining the previously verified on-chain wallet core and security center."
+    });
+
+    api.apply?.(document);
+  }
+
+  if(document.readyState==="loading"){
+    window.addEventListener("DOMContentLoaded",installHF27,{once:true});
+  }else{
+    installHF27();
+  }
+})();
