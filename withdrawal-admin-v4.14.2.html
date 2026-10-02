@@ -15,6 +15,18 @@ section,.item{background:#fff;border:1px solid #dbe3ed;border-radius:18px;paddin
 button,input,textarea,select{font:inherit}button{width:100%;min-height:48px;border:0;border-radius:13px;padding:12px;font-weight:900;touch-action:manipulation}.primary{background:#1765d8;color:#fff}.green{background:#18866d;color:#fff}.gray{background:#e8eef7;color:#17365d}.danger{background:#a83b45;color:#fff}button:disabled{opacity:.45}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.k{font-size:.78rem;color:#687486;font-weight:800}.v{font-weight:900;margin-top:4px;word-break:break-all}.meta{font-size:.82rem;color:#687486;line-height:1.55;margin-top:5px;word-break:break-all}
 .chip{display:inline-block;padding:4px 8px;border-radius:999px;background:#eef3f8;font-size:.72rem;font-weight:900}.pending{background:#fff3d7;color:#7e5a08}.approved{background:#e9f2ff;color:#205ea8}.tx_submitted{background:#eee9ff;color:#5b3ea8}.completed{background:#eaf8f0;color:#17694f}.failed,.rejected{background:#ffecec;color:#922c2c}
+.cancelled{background:#eef2f7;color:#475569}
+.security-grid,.summary-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:12px}
+.security-card,.summary-card{border:1px solid #dbe3ed;border-radius:13px;padding:11px;background:#f8fafc}
+.security-card .k,.summary-card .k{font-size:.76rem;color:#687486;font-weight:800}
+.security-card .v,.summary-card .v{font-weight:900;color:#17365d;margin-top:4px;word-break:break-word}
+.security-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+.security-chip{display:inline-flex;align-items:center;padding:6px 9px;border-radius:999px;background:#eef2f7;color:#475569;font-size:.78rem;font-weight:900}
+.security-chip.ok{background:#eaf8f0;color:#17694f}
+.security-chip.err{background:#ffecec;color:#922c2c}
+.system-note{margin-top:12px;padding:11px 12px;border-radius:12px;background:#f8fafc;border:1px solid #dbe3ed;color:#536274;font-size:.82rem;line-height:1.6;overflow-wrap:anywhere}
+@media(max-width:520px){.security-grid,.summary-grid{grid-template-columns:1fr}}
+
 input,textarea{width:100%;border:1px solid #cbd6e2;border-radius:12px;padding:12px;margin-top:8px}.wallet{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;word-break:break-all}.hidden{display:none!important}.selected{outline:3px solid #8ab6ef}@media(max-width:520px){.grid2,.actions{grid-template-columns:1fr}}
 </style>
 
@@ -72,6 +84,19 @@ pre{
 <section>
   <h2>管理員安全狀態</h2>
   <div id="adminStatus" class="status info">正在確認 Admin + MFA AAL2 + Trusted Device…</div>
+  <div class="security-grid">
+    <div class="security-card"><div class="k">管理員 Email</div><div id="adminEmail" class="v">讀取中…</div></div>
+    <div class="security-card"><div class="k">會員編號</div><div id="adminMemberNo" class="v">讀取中…</div></div>
+  </div>
+  <div class="security-chips">
+    <span id="adminChip" class="security-chip">Admin 待確認</span>
+    <span id="aalChip" class="security-chip">MFA AAL2 待確認</span>
+    <span id="deviceChip" class="security-chip">Trusted Device 待確認</span>
+  </div>
+  <div class="system-note">
+    網路：<b>Ethereum Sepolia</b> ｜ Chain ID：<b>11155111</b><br>
+    IPT 合約：<b>0xd3fb2480…9750cb87</b>
+  </div>
   <div class="actions" style="margin-top:12px">
     <button id="backAdminBtn" class="gray" type="button">← 返回管理中心</button>
     <button id="homeBtn" class="gray" type="button">🏠 返回首頁</button>
@@ -81,7 +106,14 @@ pre{
 </section>
 <section>
   <h2>提領佇列</h2>
-  <div id="queue">尚未讀取。</div>
+  <div class="summary-grid">
+    <div class="summary-card"><div class="k">待審核</div><div id="sumPending" class="v">0</div></div>
+    <div class="summary-card"><div class="k">已核准</div><div id="sumApproved" class="v">0</div></div>
+    <div class="summary-card"><div class="k">鏈上確認中</div><div id="sumSubmitted" class="v">0</div></div>
+    <div class="summary-card"><div class="k">已完成</div><div id="sumCompleted" class="v">0</div></div>
+    <div class="summary-card"><div class="k">已取消／拒絕／失敗</div><div id="sumClosed" class="v">0</div></div>
+  </div>
+  <div id="queue" style="margin-top:12px">尚未讀取。</div>
 </section>
 <section id="mintPanel" class="hidden">
   <h2>Trust Wallet Owner Mint</h2>
@@ -139,22 +171,65 @@ let mintGasLimit=0n;
 let mintRequestPending=false;
 function status(id,kind,text){const e=$(id);e.className="status "+kind;e.textContent=text;}
 async function adminToken(){const {data:{session},error}=await sb.auth.getSession();if(error)throw error;if(!session?.access_token)throw new Error("沒有有效登入 Session");return session.access_token;}
+const STATUS_LABELS={
+  pending:"待審核", approved:"已核准", tx_submitted:"鏈上確認中",
+  completed:"已完成", cancelled:"已取消", rejected:"已拒絕", failed:"失敗"
+};
+function statusLabel(v){return STATUS_LABELS[String(v||"")]||String(v||"未知狀態");}
+function setSecurityChip(id,state,text){const el=$(id);if(!el)return;el.className="security-chip"+(state?" "+state:"");el.textContent=text;}
+function renderQueueSummary(){
+  const count=(name)=>rows.filter(x=>x.status===name).length;
+  $("sumPending").textContent=String(count("pending"));
+  $("sumApproved").textContent=String(count("approved"));
+  $("sumSubmitted").textContent=String(count("tx_submitted"));
+  $("sumCompleted").textContent=String(count("completed"));
+  $("sumClosed").textContent=String(count("cancelled")+count("rejected")+count("failed"));
+}
+async function loadAdminIdentity(adminId){
+  let email="—", memberNo="—";
+  try{const {data:userData}=await sb.auth.getUser();email=userData?.user?.email||"—";}catch(_){}
+  try{
+    if(adminId){
+      const {data:profile}=await sb.from("member_profiles").select("member_number").eq("id",adminId).maybeSingle();
+      memberNo=profile?.member_number||"—";
+    }
+  }catch(_){}
+  $("adminEmail").textContent=email;
+  $("adminMemberNo").textContent=memberNo;
+}
+function renderSecurityPassed(){
+  setSecurityChip("adminChip","ok","Admin ✅");
+  setSecurityChip("aalChip","ok","MFA AAL2 ✅");
+  setSecurityChip("deviceChip","ok","Trusted Device ✅");
+  $("mfaBtn").textContent="🔐 MFA 已完成｜重新驗證";
+}
+function renderSecurityFailed(err){
+  const msg=String(err?.message||err||"");
+  setSecurityChip("adminChip",msg.includes("Admin role")?"err":"","Admin "+(msg.includes("Admin role")?"未通過":"待確認"));
+  setSecurityChip("aalChip",(msg.includes("MFA")||msg.includes("AAL2"))?"err":"","MFA AAL2 "+((msg.includes("MFA")||msg.includes("AAL2"))?"未完成":"待確認"));
+  setSecurityChip("deviceChip",msg.includes("Trusted device")?"err":"","Trusted Device "+(msg.includes("Trusted device")?"未通過":"待確認"));
+  $("mfaBtn").textContent="🔐 前往完成 MFA";
+}
 
-$("backAdminBtn").onclick=()=>location.href="./index.html?v=4142hf21&goto=admin";
-$("homeBtn").onclick=()=>location.href="./index.html?v=4142hf21";
-$("mfaBtn").onclick=()=>location.href="./auth-security-v4.14.2.html?v=4142hf21#mfa";
+$("backAdminBtn").onclick=()=>location.href="./index.html?v=4142hf23&goto=admin";
+$("homeBtn").onclick=()=>location.href="./index.html?v=4142hf23";
+$("mfaBtn").onclick=()=>location.href="./auth-security-v4.14.2.html?v=4142hf23#mfa";
 
 async function loadQueue(){
   status("adminStatus","info","正在確認 Admin + MFA AAL2 + Trusted Device…");
   const {data,error}=await sb.rpc("platform_admin_list_ipt_withdrawals",{p_limit:100});
   if(error)throw error;
   rows=data?.withdrawals||[];
+  renderSecurityPassed();
+  await loadAdminIdentity(data?.admin_user_id||null);
   status("adminStatus","ok","管理員安全驗證通過。可審核提領申請。");
+  renderQueueSummary();
   renderQueue();
 }
 function renderQueue(){
+  renderQueueSummary();
   if(!rows.length){$("queue").innerHTML='<div class="meta">目前沒有提領申請。</div>';return;}
-  $("queue").innerHTML=rows.map(w=>`<div class="item ${selected?.id===w.id?"selected":""}" data-id="${w.id}"><div><b>${w.display_name||"IPT 會員"}｜${w.member_number}</b> <span class="chip ${w.status}">${w.status}</span></div><div class="meta">${fmt(w.ipt_units)} IPT<br>${w.wallet_address}<br>${new Date(w.requested_at).toLocaleString("zh-TW",{hour12:false})}<br>ID：${w.id}${w.tx_hash?`<br>tx：${w.tx_hash}`:""}</div><div class="actions">${w.status==="pending"?`<button class="green approveBtn" data-id="${w.id}" type="button">核准</button><button class="danger rejectBtn" data-id="${w.id}" type="button">拒絕並解鎖</button>`:""}${w.status==="approved"?`<button class="primary mintSelectBtn" data-id="${w.id}" type="button">準備 Mint</button>`:""}${w.status==="tx_submitted"?`<button class="primary verifySelectBtn" data-id="${w.id}" type="button">驗證鏈上交易</button>`:""}</div></div>`).join("");
+  $("queue").innerHTML=rows.map(w=>`<div class="item ${selected?.id===w.id?"selected":""}" data-id="${w.id}"><div><b>${w.display_name||"IPT 會員"}｜${w.member_number}</b> <span class="chip ${w.status}">${statusLabel(w.status)}</span></div><div class="meta">${fmt(w.ipt_units)} IPT<br>${w.wallet_address}<br>${new Date(w.requested_at).toLocaleString("zh-TW",{hour12:false})}<br>ID：${w.id}${w.tx_hash?`<br>tx：${w.tx_hash}`:""}</div><div class="actions">${w.status==="pending"?`<button class="green approveBtn" data-id="${w.id}" type="button">核准</button><button class="danger rejectBtn" data-id="${w.id}" type="button">拒絕並解鎖</button>`:""}${w.status==="approved"?`<button class="primary mintSelectBtn" data-id="${w.id}" type="button">準備 Mint</button>`:""}${w.status==="tx_submitted"?`<button class="primary verifySelectBtn" data-id="${w.id}" type="button">驗證鏈上交易</button>`:""}</div></div>`).join("");
   document.querySelectorAll(".approveBtn").forEach(b=>b.onclick=()=>review(b.dataset.id,"approve"));
   document.querySelectorAll(".rejectBtn").forEach(b=>b.onclick=()=>review(b.dataset.id,"reject"));
   document.querySelectorAll(".mintSelectBtn").forEach(b=>b.onclick=()=>selectMint(b.dataset.id));
@@ -250,7 +325,7 @@ async function initWC(){
   wc.on("chainChanged",()=>{mintReady=false;$("mintBtn").disabled=true;});return wc;
 }
 $("openTrustDappBtn").onclick=()=>{
-  const target=location.origin+location.pathname+"?v=4142hf21";
+  const target=location.origin+location.pathname+"?v=4142hf23";
   const deepLink="https://link.trustwallet.com/open_url?coin_id=60&url="+encodeURIComponent(target);
   location.href=deepLink;
 };
@@ -425,8 +500,8 @@ $("mintBtn").onclick=async()=>{
 };
 $("registerTxBtn").onclick=async()=>{if(!selected)return;const hash=$("txHashInput").value.trim();try{const {error}=await sb.rpc("platform_admin_submit_ipt_withdrawal_tx",{p_withdrawal_id:selected.id,p_tx_hash:hash});if(error)throw error;status("chainStatus","ok","tx hash 已登記，但平台尚未結算。請執行後端鏈上驗證。");await loadQueue();}catch(e){status("chainStatus","err","登記失敗："+(e?.message||String(e)));}};
 $("verifyChainBtn").onclick=async()=>{if(!selected)return;$("verifyChainBtn").disabled=true;status("chainStatus","info","後端正在獨立查詢 Sepolia RPC、Mint calldata、receipt 與 Transfer 事件…");try{const token=await adminToken();const resp=await fetch(VERIFY_URL,{method:"POST",headers:{"Content-Type":"application/json","apikey":KEY,"Authorization":"Bearer "+token},body:JSON.stringify({withdrawal_id:selected.id})});const body=await resp.json().catch(()=>({}));if(resp.status===202){status("chainStatus","warn",`鏈上尚在確認：${body.status||"pending"}｜confirmations ${body.confirmations??0}/${body.min_confirmations??2}`);return;}if(!resp.ok)throw new Error(body?.error||("HTTP "+resp.status));status("chainStatus","ok",`鏈上驗證完成，平台結算成功。tx：${body.tx_hash}｜block：${body.block_number}｜confirmations：${body.confirmations}`);await loadQueue();}catch(e){status("chainStatus","err","鏈上驗證失敗："+(e?.message||String(e)));}finally{$("verifyChainBtn").disabled=false;}};
-$("reloadBtn").onclick=()=>loadQueue().catch(e=>status("adminStatus","err",e?.message||String(e)));
-loadQueue().catch(e=>status("adminStatus","err","管理員驗證失敗："+(e?.message||String(e))+"。請確認登入、Admin 角色、MFA AAL2 與 Trusted Device。"));
+$("reloadBtn").onclick=()=>loadQueue().catch(e=>{renderSecurityFailed(e);status("adminStatus","err",e?.message||String(e));});
+loadQueue().catch(e=>{renderSecurityFailed(e);status("adminStatus","err","管理員驗證失敗："+(e?.message||String(e))+"。請確認登入、Admin 角色、MFA AAL2 與 Trusted Device。");});
 </script>
 </body>
 </html>

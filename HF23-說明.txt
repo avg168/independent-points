@@ -1,0 +1,14 @@
+V4.14.2 HF23｜提領審核資訊完整化
+
+不改提領、Mint、鏈上驗證核心流程。
+新增管理員 Email、會員編號、Admin/MFA AAL2/Trusted Device 狀態、
+Sepolia/Chain ID/合約摘要、提領佇列統計，以及狀態中文化。
+
+請覆蓋：
+- withdrawal-admin-v4.14.2.html
+- index.html
+- auth-security-v4.14.2.html
+- service-worker.js
+
+測試入口：
+https://avg168.github.io/independent-points/?v=4142hf23
