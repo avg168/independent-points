@@ -1,0 +1,21 @@
+V4.14.2 HF17｜Supabase Auth 核心升級版
+
+這版處理 Android/PWA 上登入 Session 與 MFA 恢復問題。
+
+主要修正：
+1. Supabase JS 由 2.57.4 升級到 2.116.0。
+2. 保留 HF16 的 Session 恢復邏輯。
+3. getSession 暫時失敗時不再把 MFA 整段卡死。
+4. 未恢復 Session 時會明確要求先登入；登入成功後自動顯示 MFA 6 位數驗證。
+5. 受信任裝置頁也同步升級 Supabase JS。
+6. Service Worker 快取升級到 HF17。
+
+請覆蓋：
+- index.html
+- auth-security-v4.14.2.html
+- change-password-v4.14.2.html
+- device-security-v4.14.2.html
+- service-worker.js
+
+測試入口：
+https://avg168.github.io/independent-points/?v=4142hf17

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Independent Points V4.14.2｜正式整合首頁</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.min.js"></script>
 <style>
 :root{
   font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;
@@ -977,14 +977,14 @@ button{
 
   $("refreshBtn").addEventListener("click",load);
   $("assetSummaryRefreshBtn").addEventListener("click",refreshAssetSummary);
-  $("loginBtn").addEventListener("click",()=>go("./auth-security-v4.14.2.html?v=4142hf16"));
-  $("changePasswordBtn").addEventListener("click",()=>go("./change-password-v4.14.2.html?v=4142hf16"));
+  $("loginBtn").addEventListener("click",()=>go("./auth-security-v4.14.2.html?v=4142hf17"));
+  $("changePasswordBtn").addEventListener("click",()=>go("./change-password-v4.14.2.html?v=4142hf17"));
 
   $("myAssetBtn").addEventListener("click",()=>go("./member-assets-v4.12.html?v=4142"));
   $("platformWalletBtn").addEventListener("click",()=>go("./wallet-dual-v4.14.2.html?v=4142"));
   $("historyBtn").addEventListener("click",()=>go("./wallet-core-v4.12.html?go=history"));
   $("assetCenterBtn").addEventListener("click",()=>go("./asset-center-v4.12.html?v=4142"));
-  $("accountSecurityBtn").addEventListener("click",()=>go("./auth-security-v4.14.2.html?v=4142hf16"));
+  $("accountSecurityBtn").addEventListener("click",()=>go("./auth-security-v4.14.2.html?v=4142hf17"));
   $("systemInfoBtn").addEventListener("click",()=>go("./system-info-v4.12.html?v=4142"));
   $("maintenanceBtn")?.addEventListener("click",()=>go("./maintenance-v4.12.html?v=4142"));
 
@@ -1193,7 +1193,7 @@ button{
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", async () => {
       try {
-        const reg = await navigator.serviceWorker.register("./service-worker.js?v=4142hf16", {
+        const reg = await navigator.serviceWorker.register("./service-worker.js?v=4142hf17", {
           updateViaCache: "none"
         });
         await reg.update().catch(()=>{});
