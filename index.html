@@ -977,14 +977,14 @@ button{
 
   $("refreshBtn").addEventListener("click",load);
   $("assetSummaryRefreshBtn").addEventListener("click",refreshAssetSummary);
-  $("loginBtn").addEventListener("click",()=>go("./auth-security-v4.14.2.html?v=4142hf13"));
-  $("changePasswordBtn").addEventListener("click",()=>go("./change-password-v4.14.2.html?v=4142hf13"));
+  $("loginBtn").addEventListener("click",()=>go("./auth-security-v4.14.2.html?v=4142hf14"));
+  $("changePasswordBtn").addEventListener("click",()=>go("./change-password-v4.14.2.html?v=4142hf14"));
 
   $("myAssetBtn").addEventListener("click",()=>go("./member-assets-v4.12.html?v=4142"));
   $("platformWalletBtn").addEventListener("click",()=>go("./wallet-dual-v4.14.2.html?v=4142"));
   $("historyBtn").addEventListener("click",()=>go("./wallet-core-v4.12.html?go=history"));
   $("assetCenterBtn").addEventListener("click",()=>go("./asset-center-v4.12.html?v=4142"));
-  $("accountSecurityBtn").addEventListener("click",()=>go("./auth-security-v4.14.2.html?v=4142hf13"));
+  $("accountSecurityBtn").addEventListener("click",()=>go("./auth-security-v4.14.2.html?v=4142hf14"));
   $("systemInfoBtn").addEventListener("click",()=>go("./system-info-v4.12.html?v=4142"));
   $("maintenanceBtn")?.addEventListener("click",()=>go("./maintenance-v4.12.html?v=4142"));
 
@@ -1193,7 +1193,7 @@ button{
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", async () => {
       try {
-        const reg = await navigator.serviceWorker.register("./service-worker.js?v=4142", {
+        const reg = await navigator.serviceWorker.register("./service-worker.js?v=4142hf14", {
           updateViaCache: "none"
         });
         await reg.update().catch(()=>{});

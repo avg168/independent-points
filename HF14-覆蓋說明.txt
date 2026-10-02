@@ -1,0 +1,13 @@
+V4.14.2 HF14｜版本路徑統一與舊安全頁快取清理
+
+請將以下 4 個檔案上傳到 GitHub main 並覆蓋同名檔案：
+- index.html
+- auth-security-v4.14.2.html
+- change-password-v4.14.2.html
+- service-worker.js
+
+本版不改動登入、MFA、IPT、錢包或變更密碼核心功能。
+只做版本路徑與快取一致性整理。
+
+測試入口：
+https://avg168.github.io/independent-points/?v=4142hf14
