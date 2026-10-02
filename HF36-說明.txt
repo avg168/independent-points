@@ -1,0 +1,18 @@
+V4.14.2 HF36｜全站英文殘留收尾
+
+補齊全站掃描最後 6 個共用翻譯缺口：
+
+withdrawal-admin:
+- 0x... 交易雜湊
+  -> 0x... Transaction Hash
+
+system-info:
+- Independent Points V4.14.2｜系統資訊
+- V4.14.2｜正式穩定整合版
+- Mint / Pause / Ownership 風險提示與二次確認
+- 60 秒｜一次送簽後重新鎖定
+
+maintenance:
+- Independent Points V4.14.2｜維運中心
+
+不修改任何登入、MFA、Trusted Device、Admin、資產、錢包、提領或鏈上邏輯。

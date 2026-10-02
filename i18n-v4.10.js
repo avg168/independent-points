@@ -813,3 +813,39 @@
     installHF35();
   }
 })();
+
+
+;(() => {
+  function installHF36(){
+    const api=window.IPTI18N;
+    if(!api?.dictionaries) return;
+
+    Object.assign(api.dictionaries["zh-CN"],{
+      "0x... 交易雜湊":"0x... 交易哈希",
+      "Independent Points V4.14.2｜系統資訊":"Independent Points V4.14.2｜系统信息",
+      "V4.14.2｜正式穩定整合版":"V4.14.2｜正式稳定整合版",
+      "Mint / Pause / Ownership 風險提示與二次確認":"Mint / Pause / Ownership 风险提示与二次确认",
+      "60 秒｜一次送簽後重新鎖定":"60 秒｜一次送签后重新锁定",
+      "Independent Points V4.14.2｜維運中心":"Independent Points V4.14.2｜运维中心"
+    });
+
+    Object.assign(api.dictionaries.en,{
+      "0x... 交易雜湊":"0x... Transaction Hash",
+      "Independent Points V4.14.2｜系統資訊":"Independent Points V4.14.2 | System Information",
+      "V4.14.2｜正式穩定整合版":"V4.14.2 | Production Stable Integration",
+      "Mint / Pause / Ownership 風險提示與二次確認":"Mint / Pause / Ownership Risk Warning and Secondary Confirmation",
+      "60 秒｜一次送簽後重新鎖定":"60 seconds | Re-lock after one signed action",
+      "Independent Points V4.14.2｜維運中心":"Independent Points V4.14.2 | Maintenance Center"
+    });
+
+    api.apply?.(document);
+    const lang=api.getLang?.() || localStorage.getItem("ipt_language") || "zh-TW";
+    window.dispatchEvent(new CustomEvent("ipt-language-change",{detail:{lang}}));
+  }
+
+  if(document.readyState==="loading"){
+    window.addEventListener("DOMContentLoaded",installHF36,{once:true});
+  }else{
+    installHF36();
+  }
+})();
