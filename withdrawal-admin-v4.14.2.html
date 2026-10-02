@@ -140,9 +140,9 @@ let mintRequestPending=false;
 function status(id,kind,text){const e=$(id);e.className="status "+kind;e.textContent=text;}
 async function adminToken(){const {data:{session},error}=await sb.auth.getSession();if(error)throw error;if(!session?.access_token)throw new Error("沒有有效登入 Session");return session.access_token;}
 
-$("backAdminBtn").onclick=()=>location.href="./index.html?v=4142hf20#admin-center";
-$("homeBtn").onclick=()=>location.href="./index.html?v=4142hf20";
-$("mfaBtn").onclick=()=>location.href="./auth-security-v4.14.2.html?v=4142hf20";
+$("backAdminBtn").onclick=()=>location.href="./index.html?v=4142hf21&goto=admin";
+$("homeBtn").onclick=()=>location.href="./index.html?v=4142hf21";
+$("mfaBtn").onclick=()=>location.href="./auth-security-v4.14.2.html?v=4142hf21#mfa";
 
 async function loadQueue(){
   status("adminStatus","info","正在確認 Admin + MFA AAL2 + Trusted Device…");
@@ -250,7 +250,7 @@ async function initWC(){
   wc.on("chainChanged",()=>{mintReady=false;$("mintBtn").disabled=true;});return wc;
 }
 $("openTrustDappBtn").onclick=()=>{
-  const target=location.origin+location.pathname+"?v=4142hf20";
+  const target=location.origin+location.pathname+"?v=4142hf21";
   const deepLink="https://link.trustwallet.com/open_url?coin_id=60&url="+encodeURIComponent(target);
   location.href=deepLink;
 };

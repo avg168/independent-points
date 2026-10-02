@@ -1,0 +1,17 @@
+V4.14.2 HF21｜管理中心與 MFA 導向修正
+
+修正：
+1. 返回管理中心改為：
+   index.html?v=4142hf21&goto=admin
+2. 首頁確認管理員身分後，自動捲到管理中心。
+3. 前往完成 MFA 改為：
+   auth-security-v4.14.2.html?v=4142hf21#mfa
+4. 帳戶安全頁新增 id=mfa 錨點。
+5. 安全頁載入完成後自動捲到 MFA 區塊。
+6. Service Worker 快取升到 HF21。
+
+請覆蓋：
+- index.html
+- withdrawal-admin-v4.14.2.html
+- auth-security-v4.14.2.html
+- service-worker.js
