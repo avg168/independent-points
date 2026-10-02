@@ -175,8 +175,11 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
   }
 
   function nextParam(){
+    const q=new URLSearchParams();
+    q.set("v","4142hf29");
     const n=safeNext();
-    return n?"?next="+encodeURIComponent(n):"";
+    if(n) q.set("next",n);
+    return "?"+q.toString();
   }
 
   function renderPaymentReturn(){
@@ -377,7 +380,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
   $("mfaBtn").onclick=()=>location.href="./auth-security-v4.14.2.html"+nextParam()+"#trustedDeviceSection";
   $("refreshBtn").onclick=refresh;
   $("securityBtn").onclick=()=>location.href="./auth-security-v4.14.2.html"+nextParam()+"#trustedDeviceSection";
-  $("homeBtn").onclick=()=>location.href="https://avg168.github.io/independent-points/?v=4142hf9";
+  $("homeBtn").onclick=()=>location.href="https://avg168.github.io/independent-points/?v=4142hf29";
   $("paymentReturnBtn").onclick=()=>{
     const next=safeNext();
     if(next) location.replace(next);

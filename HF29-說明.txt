@@ -1,0 +1,17 @@
+V4.14.2 HF29｜正式導覽與快取版本統一
+
+不修改 MFA、Trusted Device、提領、Mint 或鏈上交易邏輯。
+
+處理：
+- 首頁與正式入口版本參數統一
+- Auth / MFA / 變更密碼 / 受信任裝置返回路徑統一
+- Withdrawal / Withdrawal MFA / Wallet Dual 導覽統一
+- Wallet Core 返回首頁統一
+- auth-guard-v4.12.js 與所有受保護頁面統一使用 HF29
+- Service Worker cache key / registration 統一 HF29
+
+目的：
+避免 Android / PWA 因舊 hf9 / hf19 / hf22 / hf23 / v=4142 重新載入舊快取。
+
+測試入口：
+https://avg168.github.io/independent-points/?v=4142hf29
