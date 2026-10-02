@@ -1,7 +1,7 @@
 {
   "product": "Independent Points",
   "version": "V4.14.2",
-  "build": "20261002-4142-hf10",
+  "build": "20261002-4142-hf11",
   "release_date": "2026-10-02",
   "channel": "production",
   "rollback_version": "V4.12.4",
@@ -26,6 +26,11 @@
     }
   },
   "notes": [
+    "Hotfix 11: add a dedicated change-password-v4.14.2.html page so password management no longer depends on the large Account Security page layout or browser page restoration",
+    "Hotfix 11: add a prominent dedicated-password button directly below Member Sign In",
+    "Hotfix 11: dedicated page supports zh-TW, zh-CN and English and validates sign-in, AAL2 when MFA is configured, current password, and new-password confirmation",
+    "Hotfix 11: preserve HF10 embedded password panel as a fallback",
+    "Hotfix 11: no changes to member assets, MFA factors, trusted-device records, withdrawals, Mint, settlement, or the IPT contract",
     "Hotfix 10: move the member password-change panel directly below the member login panel",
     "Hotfix 10: add a prominent password-change shortcut in the identity section",
     "Hotfix 10: explicitly keep the password panel visible after a valid member session is confirmed",
@@ -94,5 +99,5 @@
   ],
   "manifest_filename": "update-manifest-v4.12.json",
   "manifest_filename_note": "Legacy filename retained for compatibility; manifest content is V4.14.2.",
-  "hotfix": 10
+  "hotfix": 11
 }

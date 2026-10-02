@@ -1,7 +1,7 @@
 {
   "product": "Independent Points",
   "version": "V4.14.2",
-  "build": "20261002-4142-hf10",
+  "build": "20261002-4142-hf11",
   "release_date": "2026-10-02",
   "channel": "production",
   "checks": {
@@ -52,7 +52,11 @@
     "language_storage_read_hardened": true,
     "password_panel_directly_below_login": true,
     "password_shortcut_in_identity_section": true,
-    "password_panel_forced_visible_when_authenticated": true
+    "password_panel_forced_visible_when_authenticated": true,
+    "dedicated_password_page": true,
+    "dedicated_password_button_below_login": true,
+    "dedicated_password_aal2_when_mfa": true,
+    "dedicated_password_current_password_verification": true
   },
   "self_file": {
     "name": "update-manifest-v4.12.json",
@@ -62,8 +66,8 @@
   "files": [
     {
       "name": "V4.14.2-正式封版驗收報告.txt",
-      "bytes": 5938,
-      "sha256": "8270650ba958772b958898b872bdad575ae04879b64f4a64359891dc722c83f4"
+      "bytes": 6501,
+      "sha256": "243eb9cbc2e81d77a065d1dd607ca7140d640d6c269388064085d20338fd8ba3"
     },
     {
       "name": "admin-assets-v4.12.html",
@@ -92,8 +96,8 @@
     },
     {
       "name": "auth-security-v4.14.2.html",
-      "bytes": 49515,
-      "sha256": "aa3f9340c28ee7995c009787f3671f0535c27ea598d2b42ee9fcc7fc92c23a0d"
+      "bytes": 49986,
+      "sha256": "bb911a2f532ad18e766933e09739e0c458731a2e7bca0ffacd68f0c5ba267949"
     },
     {
       "name": "device-security-v4.12.html",
@@ -167,13 +171,13 @@
     },
     {
       "name": "release-history.json",
-      "bytes": 21921,
-      "sha256": "ff6754cebaeadecdc571e8ce140b7d3d752a3b374ab00d66ce0243a4816b28ee"
+      "bytes": 22500,
+      "sha256": "7d929ccd4b18a452725a17ae67cfbdbd30d88d328820f83b638bd5e57b9a5276"
     },
     {
       "name": "release.json",
-      "bytes": 6788,
-      "sha256": "f817e83fb03ed2dea29aa7ea717496da19594f7920571bae34c2f2eecdf3238b"
+      "bytes": 7429,
+      "sha256": "4c0a8bbf9ff8aeebe6c9fa27fda67107e2d8db2e7b5594b4035cd60b4631a2d1"
     },
     {
       "name": "robots.txt",
@@ -192,8 +196,8 @@
     },
     {
       "name": "service-worker.js",
-      "bytes": 1696,
-      "sha256": "6ab204b5b8d179b4c509b1d138caa0fc9c5721498f1ff0fad7525da627d7133e"
+      "bytes": 1730,
+      "sha256": "6b984b9079843960e03bdcb2702cbdaf546d8d47a90caebe666fcbdc4d7077a1"
     },
     {
       "name": "system-info-v4.12.html",
@@ -229,7 +233,12 @@
       "name": "withdrawal-v4.14.2.html",
       "bytes": 22224,
       "sha256": "892f6dc6f28991bcb7d24ebe3c0c4aea31cdd5acefe0f1acb426509201d48ab4"
+    },
+    {
+      "name": "change-password-v4.14.2.html",
+      "bytes": 16265,
+      "sha256": "9185fd0e498dd4dc2ccd090b3ee7734085f4c8b9ab80c2ad28162e8dbfb7eabf"
     }
   ],
-  "hotfix": 10
+  "hotfix": 11
 }

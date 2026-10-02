@@ -4,6 +4,19 @@
     {
       "version": "V4.14.2",
       "date": "2026-10-02",
+      "channel": "hotfix-11-dedicated-password-page",
+      "title": "Hotfix 11 獨立會員變更密碼頁",
+      "notes": [
+        "新增 change-password-v4.14.2.html 獨立密碼管理頁",
+        "帳戶安全頁會員登入下方新增「開啟獨立變更密碼頁」按鈕",
+        "獨立頁固定顯示目前密碼、新密碼、再次輸入新密碼與變更密碼按鈕",
+        "若帳號有 MFA，必須完成 AAL2 才能變更",
+        "保留 HF10 內嵌密碼區塊作為備援"
+      ]
+    },
+    {
+      "version": "V4.14.2",
+      "date": "2026-10-02",
       "channel": "hotfix-10-password-panel-location",
       "title": "Hotfix 10 變更密碼固定入口",
       "notes": [
