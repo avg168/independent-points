@@ -1,0 +1,18 @@
+V4.14.2 HF24｜提領審核多語系補全
+
+修正 HF23 新增欄位在簡中／English 模式下中英混用。
+
+補齊：
+- 管理員 Email
+- 會員編號
+- Admin / MFA AAL2 / Trusted Device
+- 網路 / IPT 合約
+- 返回管理中心 / 返回首頁
+- MFA 完成／重新驗證
+- 提領統計與狀態標籤
+
+請覆蓋：
+- withdrawal-admin-v4.14.2.html
+- i18n-v4.10.js
+- index.html
+- service-worker.js

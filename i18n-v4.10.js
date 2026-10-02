@@ -530,3 +530,70 @@
     install();
   }
 })();
+
+;(() => {
+  function installHF24(){
+    const api=window.IPTI18N;
+    if(!api?.dictionaries) return;
+
+    Object.assign(api.dictionaries["zh-CN"],{
+      "管理員 Email":"管理员 Email",
+      "會員編號":"会员编号",
+      "Admin 待確認":"Admin 待确认",
+      "MFA AAL2 待確認":"MFA AAL2 待确认",
+      "Trusted Device 待確認":"Trusted Device 待确认",
+      "Admin ✅":"Admin ✅",
+      "MFA AAL2 ✅":"MFA AAL2 ✅",
+      "Trusted Device ✅":"Trusted Device ✅",
+      "網路：":"网络：",
+      "IPT 合約：":"IPT 合约：",
+      "← 返回管理中心":"← 返回管理中心",
+      "🏠 返回首頁":"🏠 返回首页",
+      "🔐 前往完成 MFA":"🔐 前往完成 MFA",
+      "🔐 MFA 已完成｜重新驗證":"🔐 MFA 已完成｜重新验证",
+      "待審核":"待审核",
+      "已核准":"已核准",
+      "鏈上確認中":"链上确认中",
+      "已完成":"已完成",
+      "已取消／拒絕／失敗":"已取消／拒绝／失败",
+      "已取消":"已取消",
+      "已拒絕":"已拒绝",
+      "失敗":"失败"
+    });
+
+    Object.assign(api.dictionaries.en,{
+      "管理員 Email":"Admin Email",
+      "會員編號":"Member Number",
+      "Admin 待確認":"Admin Pending",
+      "MFA AAL2 待確認":"MFA AAL2 Pending",
+      "Trusted Device 待確認":"Trusted Device Pending",
+      "Admin ✅":"Admin ✅",
+      "MFA AAL2 ✅":"MFA AAL2 ✅",
+      "Trusted Device ✅":"Trusted Device ✅",
+      "網路：":"Network:",
+      "IPT 合約：":"IPT Contract:",
+      "← 返回管理中心":"← Back to Admin Center",
+      "🏠 返回首頁":"🏠 Back to Home",
+      "🔐 前往完成 MFA":"🔐 Complete MFA",
+      "🔐 MFA 已完成｜重新驗證":"🔐 MFA Complete | Verify Again",
+      "待審核":"Pending Review",
+      "已核准":"Approved",
+      "鏈上確認中":"On-chain Pending",
+      "已完成":"Completed",
+      "已取消／拒絕／失敗":"Cancelled / Rejected / Failed",
+      "已取消":"Cancelled",
+      "已拒絕":"Rejected",
+      "失敗":"Failed"
+    });
+
+    api.apply?.(document);
+    const lang=api.getLang?.() || localStorage.getItem("ipt_language") || "zh-TW";
+    window.dispatchEvent(new CustomEvent("ipt-language-change",{detail:{lang}}));
+  }
+
+  if(document.readyState==="loading"){
+    window.addEventListener("DOMContentLoaded",installHF24,{once:true});
+  }else{
+    installHF24();
+  }
+})();
