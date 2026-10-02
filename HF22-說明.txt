@@ -1,0 +1,18 @@
+V4.14.2 HF22｜Auth Guard 全站一致化
+
+本版不改 MFA 規則，只統一安全守衛與快取版本。
+
+處理：
+1. auth-guard 內所有帳戶安全連結統一到 HF22。
+2. wallet-core / admin-assets / admin-members / update-center /
+   security-center / security-ops / event-center / asset-center / member-assets
+   全部使用 auth-guard-v4.12.js?v=4142hf22。
+3. 上述頁面的 Service Worker 註冊參數同步 HF22。
+4. 首頁帳戶安全入口同步 HF22。
+5. auth-security 內部返回與登出路徑同步 HF22。
+6. Service Worker cache key 升級到 ipt-v4.14.2-hf22。
+
+請覆蓋本包所有同名檔案。
+
+測試入口：
+https://avg168.github.io/independent-points/?v=4142hf22
