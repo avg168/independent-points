@@ -227,7 +227,8 @@
           t("需要管理員權限","需要管理员权限","Administrator access required"),
           t("此功能僅限管理員使用。即使已完成 MFA，一般會員仍無法進入 Mint、Pause、Ownership 或其他管理功能。","此功能仅限管理员使用。即使已完成 MFA，普通会员仍无法进入 Mint、Pause、Ownership 或其他管理功能。","This feature is restricted to administrators. MFA does not grant members access to Mint, Pause, Ownership, or other administrator functions."),
           t("返回首頁","返回首页","Return Home"),
-          "./index.html?v=4142hf41"
+          "./index.html?v=4142hf41",
+          false
         );
         return;
       }

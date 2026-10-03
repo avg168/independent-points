@@ -1,0 +1,7 @@
+HF42｜Auth Guard 重複返回首頁按鈕修正
+
+只修改 auth-guard-v4.12.js。
+在 HF41 的「需要管理員權限」畫面，設定 allowHome=false，
+因此只保留主要的「返回首頁」按鈕，不再自動產生第二顆同名按鈕。
+
+HF41 Admin role gate、MFA、AAL2、Trusted Device 與鏈上邏輯完全不變。
