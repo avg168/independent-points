@@ -1,0 +1,18 @@
+V4.14.2 HF39｜首頁 Session 恢復修正
+
+真機驗收問題：
+- Android Chrome 登入後重新整理首頁，畫面被判定為已登出。
+
+修正：
+1. 首頁先讀 Supabase getSession()，再處理 signed-out marker。
+2. 有有效 Supabase Session 時，舊的 ipt_just_signed_out marker 不得覆蓋登入狀態。
+3. getSession timeout 由 3 秒調整為 5 秒，降低 Android 冷啟動誤判。
+4. 首頁殘留 hf32/hf33/hf35/hf36/hf37/hf38 導覽與共用資源參數統一為 hf39。
+5. Service Worker cache 升為 ipt-v4.14.2-hf39。
+
+不修改：
+- Supabase Auth 後端
+- MFA
+- Trusted Device 後端規則
+- Admin 權限
+- Wallet / 資產 / 提領邏輯
