@@ -1,0 +1,15 @@
+V4.14.2 HF44｜平台 Admin × 鏈上 Owner 雙重身分鎖
+
+問題：
+一般 member 若手機仍連接合約 Owner Trust Wallet，wallet-core 原本會因鏈上地址相符而顯示管理 UI。
+
+修正：
+1. 從 Supabase getUser() 重新驗證目前平台登入 user。
+2. 由 member_roles 讀取目前 user.id 的 role。
+3. show-owner / show-ownership 必須同時滿足平台 role=admin 與鏈上 Owner/pendingOwner。
+4. member + Owner Wallet 只顯示「鏈上 Owner 錢包（平台會員無管理權）」，不開管理 UI。
+5. 啟用 60 秒高風險操作視窗前，再重新驗證平台 admin。
+6. iptRequireHighRiskAal2() 在 AAL2 前也先重新驗證平台 admin，防止 UI/CSS 篡改繞過。
+
+授權模型：
+平台 Admin 決定是否有管理資格；鏈上 Owner/pendingOwner 決定錢包是否有簽署資格。兩者必須同時成立。

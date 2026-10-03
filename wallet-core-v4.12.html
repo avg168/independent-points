@@ -11,7 +11,7 @@ html.ipt-auth-pending body > *:not(#iptAuthGuardOverlay){
 </style>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.min.js"></script>
-<script src="./auth-guard-v4.12.js?v=4142hf43"></script>
+<script src="./auth-guard-v4.12.js?v=4142hf44"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Independent Points V4.14.2 CORE｜錢包核心</title>
@@ -458,7 +458,7 @@ body.v41-route.route-ownership.show-ownership #securityGuardSection{display:bloc
 
 </style>
 
-<link rel="manifest" href="./manifest.webmanifest?v=4142hf43">
+<link rel="manifest" href="./manifest.webmanifest?v=4142hf44">
 <meta name="theme-color" content="#10243d">
 <meta name="application-name" content="Independent Points">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -468,7 +468,7 @@ body.v41-route.route-ownership.show-ownership #securityGuardSection{display:bloc
 <link rel="icon" type="image/svg+xml" href="./ipt-icon-192.png">
 
 <link rel="apple-touch-icon" href="./ipt-apple-touch-180.png">
-<script src="./i18n-v4.10.js?v=4142hf43" defer></script>
+<script src="./i18n-v4.10.js?v=4142hf44" defer></script>
 </head>
 <body>
 <div class="v42-sticky-nav">
@@ -833,6 +833,37 @@ const $ = id => document.getElementById(id);
 const same = (a,b) => String(a||"").toLowerCase() === String(b||"").toLowerCase();
 const ZERO_ADDRESS_UI = "0x0000000000000000000000000000000000000000";
 
+// HF44: platform authorization and on-chain wallet authority are separate.
+// Management UI requires BOTH a server-validated platform admin and the correct chain wallet.
+let iptPlatformAdmin = false;
+let iptPlatformAdminUserId = "";
+
+async function iptRefreshPlatformAdmin(){
+  iptPlatformAdmin=false;
+  iptPlatformAdminUserId="";
+  try{
+    if(!window.supabase?.createClient) return false;
+    const sb=window.supabase.createClient(
+      "https://uccexvgqmoxhgykkjdcy.supabase.co",
+      "sb_publishable_FBsN1DYTQMv2_bWhpbXHAA_qdAq7ri7",
+      {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}
+    );
+    const {data:{user},error:userErr}=await sb.auth.getUser();
+    if(userErr||!user) return false;
+    const {data:roleRow,error:roleErr}=await sb
+      .from("member_roles")
+      .select("role")
+      .eq("user_id",user.id)
+      .maybeSingle();
+    if(roleErr||roleRow?.role!=="admin") return false;
+    iptPlatformAdmin=true;
+    iptPlatformAdminUserId=user.id;
+    return true;
+  }catch(_){
+    return false;
+  }
+}
+
 function setMemberRoleUI(owner = "", pendingOwner = "") {
   const isOwner = !!account && same(account, owner);
   const isPending =
@@ -841,9 +872,28 @@ function setMemberRoleUI(owner = "", pendingOwner = "") {
     !same(pendingOwner, ZERO_ADDRESS_UI) &&
     same(account, pendingOwner);
 
-  document.body.classList.toggle("show-owner", isOwner);
-  document.body.classList.toggle("show-ownership", isOwner || isPending);
+  // HF44 fail-closed dual lock:
+  // chain Owner alone never exposes platform management UI.
+  const allowOwner = iptPlatformAdmin && isOwner;
+  const allowOwnership = iptPlatformAdmin && (isOwner || isPending);
+  document.body.classList.toggle("show-owner", allowOwner);
+  document.body.classList.toggle("show-ownership", allowOwnership);
   document.body.classList.add("chain-ok");
+
+  const roleEl=$("role");
+  if(roleEl){
+    if(iptPlatformAdmin && isOwner){
+      roleEl.innerHTML="<span class='pill'>平台 Admin × 鏈上 Owner</span>";
+    }else if(iptPlatformAdmin && isPending){
+      roleEl.innerHTML="<span class='pill'>平台 Admin × pendingOwner</span>";
+    }else if(isOwner){
+      roleEl.innerHTML="<span class='pill'>鏈上 Owner 錢包（平台會員無管理權）</span>";
+    }else if(isPending){
+      roleEl.innerHTML="<span class='pill'>pendingOwner 錢包（平台會員無管理權）</span>";
+    }else{
+      roleEl.innerHTML="<span class='pill'>一般錢包</span>";
+    }
+  }
 
   const historyWallet = $("historyWallet");
   if (historyWallet) historyWallet.textContent = account || "尚未連線";
@@ -916,6 +966,7 @@ async function chainIdOf(p) {
 }
 
 async function renderSession() {
+  await iptRefreshPlatformAdmin();
   if (!wc?.session) {
     resetDisconnected();
     return;
@@ -2097,6 +2148,10 @@ $("mintAmount").addEventListener("input", () => {
 
 
 async function iptRequireHighRiskAal2(){
+  if(!(await iptRefreshPlatformAdmin())){
+    throw new Error("目前平台登入身分不是管理員，無法執行高風險管理操作。");
+  }
+
   if(!window.supabase?.createClient){
     throw new Error("無法載入登入驗證元件，已取消高風險操作。");
   }
@@ -3416,6 +3471,10 @@ async function v48RefreshRoleOnce(){
 $("armSecurityGuardBtn")?.addEventListener("click",async()=>{
   try{
     if(!account) throw new Error("請先連接 Trust Wallet。");
+    if(!(await iptRefreshPlatformAdmin())){
+      v48Disarm("platform_admin_required");
+      throw new Error("目前平台登入身分不是管理員，無法啟用高風險操作視窗。");
+    }
 
     // Use already-read owner state first. Only do one RPC refresh if needed.
     let role=v48CachedRole;
@@ -3446,7 +3505,7 @@ $("armSecurityGuardBtn")?.addEventListener("click",async()=>{
 });
 
 $("openSecurityOpsBtn")?.addEventListener("click",()=>{
-  location.href="./security-ops-v4.12.html?v=4142hf43";
+  location.href="./security-ops-v4.12.html?v=4142hf44";
 });
 
 // Capture high-risk sends before the existing transaction handlers.
@@ -3557,7 +3616,7 @@ v48RenderGuardLocal();
   }
 
   $("v41HomeBtn")?.addEventListener("click", () => {
-    location.href = "./index.html?v=4142hf43";
+    location.href = "./index.html?v=4142hf44";
   });
 
   $("v41TopReadBtn")?.addEventListener("click", () => {
@@ -3653,7 +3712,7 @@ v48RenderGuardLocal();
 (() => {
   const $ = (id) => document.getElementById(id);
 
-  $("v42BackHomeBtn")?.addEventListener("click",()=>location.href="./index.html?v=4142hf43");
+  $("v42BackHomeBtn")?.addEventListener("click",()=>location.href="./index.html?v=4142hf44");
   $("v42ReadNowBtn")?.addEventListener("click",()=>{
     const b=$("readBtn");
     if(b && !b.disabled){ b.click(); return; }
@@ -3709,7 +3768,7 @@ v48RenderGuardLocal();
 
 <script>
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js?v=4142hf43",{updateViaCache:"none"}).catch(()=>{}));
+  window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js?v=4142hf44",{updateViaCache:"none"}).catch(()=>{}));
 }
 </script>
 
