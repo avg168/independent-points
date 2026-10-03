@@ -79,8 +79,8 @@ input{
 .hidden{display:none!important}
 @media(min-width:720px){.grid{grid-template-columns:repeat(6,minmax(0,1fr))}}
 </style>
-<script src="./i18n-v4.10.js?v=4142hf38" defer></script>
-<script src="./auth-guard-v4.12.js?v=4142hf38"></script>
+<script src="./i18n-v4.10.js?v=4142hf43" defer></script>
+<script src="./auth-guard-v4.12.js?v=4142hf43"></script>
 </head>
 <body>
 <header>
@@ -415,7 +415,7 @@ input{
     }
   }
 
-  $("homeBtn").addEventListener("click",()=>location.href="./index.html?v=4142hf32");
+  $("homeBtn").addEventListener("click",()=>location.href="./index.html?v=4142hf43");
   $("refreshBtn").addEventListener("click",()=>load($("queryInput").value.trim()));
   $("searchBtn").addEventListener("click",()=>load($("queryInput").value.trim()));
   $("clearBtn").addEventListener("click",()=>{$("queryInput").value="";load("")});
@@ -425,9 +425,9 @@ input{
   $("mintBtn").addEventListener("click",()=>location.href="./wallet-core-v4.12.html?go=mint");
   $("pauseBtn").addEventListener("click",()=>location.href="./wallet-core-v4.12.html?go=pause");
   $("ownershipBtn").addEventListener("click",()=>location.href="./wallet-core-v4.12.html?go=ownership");
-  $("memberAdminBtn").addEventListener("click",()=>location.href="./admin-members-v4.12.html?v=4142hf32");
-  $("securityOpsBtn")?.addEventListener("click",()=>location.href="./security-ops-v4.12.html?v=4142hf32");
-  $("eventCenterBtn")?.addEventListener("click",()=>location.href="./event-center-v4.12.html?v=4142hf32");
+  $("memberAdminBtn").addEventListener("click",()=>location.href="./admin-members-v4.12.html?v=4142hf43");
+  $("securityOpsBtn")?.addEventListener("click",()=>location.href="./security-ops-v4.12.html?v=4142hf43");
+  $("eventCenterBtn")?.addEventListener("click",()=>location.href="./event-center-v4.12.html?v=4142hf43");
 
   window.addEventListener("ipt-language-change",()=>load($("queryInput").value.trim()));
   load("");
@@ -435,7 +435,7 @@ input{
 </script>
 <script>
 if("serviceWorker" in navigator){
-  window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js?v=4142hf38",{updateViaCache:"none"}).catch(()=>{}));
+  window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js?v=4142hf43",{updateViaCache:"none"}).catch(()=>{}));
 }
 </script>
 </body>

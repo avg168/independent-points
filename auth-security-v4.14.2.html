@@ -251,7 +251,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
 
   function nextParam(){
     const q=new URLSearchParams();
-    q.set("v","4142hf29");
+    q.set("v","4142hf43");
     const n=safeNext();
     if(n) q.set("next",n);
     return "?"+q.toString();
@@ -599,7 +599,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       btn.disabled=false;
     }
   };
-  $("homeBtn").onclick=()=>location.href="https://avg168.github.io/independent-points/?v=4142hf32";
+  $("homeBtn").onclick=()=>location.href="https://avg168.github.io/independent-points/?v=4142hf43";
   $("recheckBtn").onclick=()=>{
     refresh().catch(e=>{
       status("identityStatus","err","重新驗證失敗："+(e?.message||String(e)));
@@ -916,7 +916,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
         }
       }catch(_){}
 
-      location.replace("https://avg168.github.io/independent-points/?v=4142hf32&signedout=1");
+      location.replace("https://avg168.github.io/independent-points/?v=4142hf43&signedout=1");
     }catch(e){
       status("identityStatus","err",T("signoutFail")+(e?.message||String(e)));
       btn.disabled=false;

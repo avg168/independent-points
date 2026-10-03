@@ -11,7 +11,7 @@ html.ipt-auth-pending body > *:not(#iptAuthGuardOverlay){
 </style>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.min.js"></script>
-<script src="./auth-guard-v4.12.js?v=4142hf41"></script>
+<script src="./auth-guard-v4.12.js?v=4142hf43"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Independent Points V4.14.2 CORE｜錢包核心</title>
@@ -458,7 +458,7 @@ body.v41-route.route-ownership.show-ownership #securityGuardSection{display:bloc
 
 </style>
 
-<link rel="manifest" href="./manifest.webmanifest?v=4142hf32">
+<link rel="manifest" href="./manifest.webmanifest?v=4142hf43">
 <meta name="theme-color" content="#10243d">
 <meta name="application-name" content="Independent Points">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -468,7 +468,7 @@ body.v41-route.route-ownership.show-ownership #securityGuardSection{display:bloc
 <link rel="icon" type="image/svg+xml" href="./ipt-icon-192.png">
 
 <link rel="apple-touch-icon" href="./ipt-apple-touch-180.png">
-<script src="./i18n-v4.10.js?v=4142hf41" defer></script>
+<script src="./i18n-v4.10.js?v=4142hf43" defer></script>
 </head>
 <body>
 <div class="v42-sticky-nav">
@@ -3446,7 +3446,7 @@ $("armSecurityGuardBtn")?.addEventListener("click",async()=>{
 });
 
 $("openSecurityOpsBtn")?.addEventListener("click",()=>{
-  location.href="./security-ops-v4.12.html?v=4142hf32";
+  location.href="./security-ops-v4.12.html?v=4142hf43";
 });
 
 // Capture high-risk sends before the existing transaction handlers.
@@ -3557,7 +3557,7 @@ v48RenderGuardLocal();
   }
 
   $("v41HomeBtn")?.addEventListener("click", () => {
-    location.href = "./index.html?v=4142hf32";
+    location.href = "./index.html?v=4142hf43";
   });
 
   $("v41TopReadBtn")?.addEventListener("click", () => {
@@ -3653,7 +3653,7 @@ v48RenderGuardLocal();
 (() => {
   const $ = (id) => document.getElementById(id);
 
-  $("v42BackHomeBtn")?.addEventListener("click",()=>location.href="./index.html?v=4142hf32");
+  $("v42BackHomeBtn")?.addEventListener("click",()=>location.href="./index.html?v=4142hf43");
   $("v42ReadNowBtn")?.addEventListener("click",()=>{
     const b=$("readBtn");
     if(b && !b.disabled){ b.click(); return; }
@@ -3709,7 +3709,7 @@ v48RenderGuardLocal();
 
 <script>
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js?v=4142hf41",{updateViaCache:"none"}).catch(()=>{}));
+  window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js?v=4142hf43",{updateViaCache:"none"}).catch(()=>{}));
 }
 </script>
 

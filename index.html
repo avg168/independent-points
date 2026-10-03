@@ -335,7 +335,7 @@ button{
 
 </style>
 
-<link rel="manifest" href="./manifest.webmanifest?v=4142hf41">
+<link rel="manifest" href="./manifest.webmanifest?v=4142hf43">
 <meta name="theme-color" content="#10243d">
 <meta name="application-name" content="Independent Points">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -345,7 +345,7 @@ button{
 <link rel="icon" type="image/svg+xml" href="./ipt-icon-192.png">
 
 <link rel="apple-touch-icon" href="./ipt-apple-touch-180.png">
-<script src="./i18n-v4.10.js?v=4142hf41" defer></script>
+<script src="./i18n-v4.10.js?v=4142hf43" defer></script>
 <!-- V4.14.2 Homepage Signed-Out Fail-Closed Hotfix 17 + Trusted Device Hotfix 19 -->
 </head>
 <body>
@@ -662,7 +662,7 @@ button{
       marked=q.get("signedout")==="1" || sessionStorage.getItem("ipt_just_signed_out")==="1";
       if(marked){
         sessionStorage.removeItem("ipt_just_signed_out");
-        history.replaceState(null,"","./index.html?v=4142hf41");
+        history.replaceState(null,"","./index.html?v=4142hf43");
       }
     }catch(_){}
     return marked;
@@ -996,32 +996,32 @@ button{
 
   $("refreshBtn").addEventListener("click",load);
   $("assetSummaryRefreshBtn").addEventListener("click",refreshAssetSummary);
-  $("loginBtn").addEventListener("click",()=>go("./auth-security-v4.14.2.html?v=4142hf41"));
-  $("changePasswordBtn").addEventListener("click",()=>go("./change-password-v4.14.2.html?v=4142hf41"));
+  $("loginBtn").addEventListener("click",()=>go("./auth-security-v4.14.2.html?v=4142hf43"));
+  $("changePasswordBtn").addEventListener("click",()=>go("./change-password-v4.14.2.html?v=4142hf43"));
 
-  $("myAssetBtn").addEventListener("click",()=>go("./member-assets-v4.12.html?v=4142hf41"));
-  $("platformWalletBtn").addEventListener("click",()=>go("./wallet-dual-v4.14.2.html?v=4142hf41"));
+  $("myAssetBtn").addEventListener("click",()=>go("./member-assets-v4.12.html?v=4142hf43"));
+  $("platformWalletBtn").addEventListener("click",()=>go("./wallet-dual-v4.14.2.html?v=4142hf43"));
   $("historyBtn").addEventListener("click",()=>go("./wallet-core-v4.12.html?go=history"));
-  $("assetCenterBtn").addEventListener("click",()=>go("./asset-center-v4.12.html?v=4142hf41"));
-  $("accountSecurityBtn").addEventListener("click",()=>go("./auth-security-v4.14.2.html?v=4142hf41"));
-  $("systemInfoBtn").addEventListener("click",()=>go("./system-info-v4.12.html?v=4142hf41"));
-  $("maintenanceBtn")?.addEventListener("click",()=>go("./maintenance-v4.12.html?v=4142hf41"));
+  $("assetCenterBtn").addEventListener("click",()=>go("./asset-center-v4.12.html?v=4142hf43"));
+  $("accountSecurityBtn").addEventListener("click",()=>go("./auth-security-v4.14.2.html?v=4142hf43"));
+  $("systemInfoBtn").addEventListener("click",()=>go("./system-info-v4.12.html?v=4142hf43"));
+  $("maintenanceBtn")?.addEventListener("click",()=>go("./maintenance-v4.12.html?v=4142hf43"));
 
   $("balanceBtn").addEventListener("click",()=>go("./wallet-core-v4.12.html?go=balance"));
   $("transferBtn").addEventListener("click",()=>go("./wallet-core-v4.12.html?go=transfer"));
   $("receiveBtn").addEventListener("click",()=>go("./wallet-core-v4.12.html?go=receive"));
 
-  $("adminAssetBtn").addEventListener("click",()=>go("./admin-assets-v4.12.html?v=4142hf41"));
-  $("adminMemberBtn").addEventListener("click",()=>go("./admin-members-v4.12.html?v=4142hf41"));
-  $("withdrawalAdminBtn").addEventListener("click",()=>go("./withdrawal-admin-v4.14.2.html?v=4142hf41"));
+  $("adminAssetBtn").addEventListener("click",()=>go("./admin-assets-v4.12.html?v=4142hf43"));
+  $("adminMemberBtn").addEventListener("click",()=>go("./admin-members-v4.12.html?v=4142hf43"));
+  $("withdrawalAdminBtn").addEventListener("click",()=>go("./withdrawal-admin-v4.14.2.html?v=4142hf43"));
   $("mintBtn").addEventListener("click",()=>go("./wallet-core-v4.12.html?go=mint"));
   $("pauseBtn").addEventListener("click",()=>go("./wallet-core-v4.12.html?go=pause"));
   $("ownershipBtn").addEventListener("click",()=>go("./wallet-core-v4.12.html?go=ownership"));
   $("advancedBtn").addEventListener("click",()=>go("./wallet-core-v4.12.html?go=advanced"));
-  $("updateCenterBtn")?.addEventListener("click",()=>go("./update-center-v4.12.html?v=4142hf41"));
-  $("securityCenterBtn")?.addEventListener("click",()=>go("./security-center-v4.12.html?v=4142hf41"));
-  $("securityOpsBtn")?.addEventListener("click",()=>go("./security-ops-v4.12.html?v=4142hf41"));
-  $("eventCenterBtn")?.addEventListener("click",()=>go("./event-center-v4.12.html?v=4142hf41"));
+  $("updateCenterBtn")?.addEventListener("click",()=>go("./update-center-v4.12.html?v=4142hf43"));
+  $("securityCenterBtn")?.addEventListener("click",()=>go("./security-center-v4.12.html?v=4142hf43"));
+  $("securityOpsBtn")?.addEventListener("click",()=>go("./security-ops-v4.12.html?v=4142hf43"));
+  $("eventCenterBtn")?.addEventListener("click",()=>go("./event-center-v4.12.html?v=4142hf43"));
   $("v43NavAssets")?.addEventListener("click",()=>{
     if(!$("myAssetBtn").disabled) $("myAssetBtn").click();
   });
@@ -1075,8 +1075,8 @@ button{
 <script>
 (() => {
   /* V4.14.2 Production Seal */
-  const OFFICIAL_URL = "https://avg168.github.io/independent-points/?v=4142hf41";
-  const CHROME_INTENT = "intent://avg168.github.io/independent-points/?v=4142hf41#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=https%3A%2F%2Favg168.github.io%2Findependent-points%2F%3Fv%3D441;end";
+  const OFFICIAL_URL = "https://avg168.github.io/independent-points/?v=4142hf43";
+  const CHROME_INTENT = "intent://avg168.github.io/independent-points/?v=4142hf43#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=https%3A%2F%2Favg168.github.io%2Findependent-points%2F%3Fv%3D441;end";
   let deferredInstallPrompt = null;
 
   const installBtn = document.getElementById("installAppBtn");
@@ -1212,7 +1212,7 @@ button{
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", async () => {
       try {
-        const reg = await navigator.serviceWorker.register("./service-worker.js?v=4142hf41", {
+        const reg = await navigator.serviceWorker.register("./service-worker.js?v=4142hf43", {
           updateViaCache: "none"
         });
         await reg.update().catch(()=>{});

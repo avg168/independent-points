@@ -96,7 +96,7 @@
       </div>`;
     document.getElementById("iptGuardPrimary").onclick=()=>location.href=primaryHref;
     const hb=document.getElementById("iptGuardHome");
-    if(hb) hb.onclick=()=>location.href="./index.html?v=4142hf41";
+    if(hb) hb.onclick=()=>location.href="./index.html?v=4142hf43";
   }
 
   function hideOverlay(){
@@ -115,7 +115,7 @@
         t("無法驗證會員登入","无法验证会员登录","Unable to verify sign-in"),
         t("登入驗證元件未能載入。為安全起見，錢包功能保持鎖定。請返回帳戶安全重新登入。","登录验证组件未能加载。为安全起见，钱包功能保持锁定。请返回账户安全重新登录。","The sign-in verification component could not load. Wallet features remain locked for safety. Return to Account Security and sign in again."),
         t("前往帳戶安全","前往账户安全","Open Account Security"),
-        "./auth-security-v4.14.2.html?v=4142hf41"
+        "./auth-security-v4.14.2.html?v=4142hf43"
       );
       return;
     }
@@ -129,7 +129,7 @@
         t("正在驗證會員登入","正在验证会员登录","Checking member sign-in"),
         t("錢包功能需要有效的會員登入，正在向伺服器重新確認身分。","钱包功能需要有效的会员登录，正在向服务器重新确认身份。","Wallet features require a valid member sign-in. Your identity is being revalidated with the server."),
         t("驗證中…","验证中…","Checking…"),
-        "./auth-security-v4.14.2.html?v=4142hf41",
+        "./auth-security-v4.14.2.html?v=4142hf43",
         false
       );
       const checkingBtn=document.getElementById("iptGuardPrimary");
@@ -143,7 +143,7 @@
         t("需要重新登入","需要重新登录","Sign-in required"),
         t("這個頁面需要有效的會員登入。系統已重新向伺服器驗證目前身分，但沒有取得有效使用者。","此页面需要有效的会员登录。系统已重新向服务器验证当前身份，但没有取得有效用户。","This page requires a valid member sign-in. Your identity was revalidated with the server, but no valid user was found."),
         t("前往帳戶安全","前往账户安全","Open Account Security"),
-        "./auth-security-v4.14.2.html?v=4142hf41"
+        "./auth-security-v4.14.2.html?v=4142hf43"
       );
       return;
     }
@@ -175,7 +175,7 @@
             ? t("這支裝置的 90 天信任期限已到期。請先完成 MFA，再到受信任裝置重新信任這支裝置。","这台设备的 90 天信任期限已到期。请先完成 MFA，再到受信任设备重新信任这台设备。","This device's 90-day trust period has expired. Complete MFA, then trust this device again in Trusted Devices.")
             : t("這個帳號已啟用受信任裝置保護。請先到帳戶安全完成 MFA，再將這支裝置加入受信任裝置。","这个账号已启用受信任设备保护。请先到账户安全完成 MFA，再将这台设备加入受信任设备。","Trusted-device protection is enabled. Complete MFA in Account Security, then trust this device before continuing."),
           t("前往帳戶安全","前往账户安全","Open Account Security"),
-          "./auth-security-v4.14.2.html?v=4142hf41#trustedDeviceSection"
+          "./auth-security-v4.14.2.html?v=4142hf43#trustedDeviceSection"
         );
         return;
       }
@@ -192,7 +192,7 @@
           t("無法確認受信任裝置","无法确认受信任设备","Unable to verify trusted device"),
           t("目前無法安全確認這個裝置的登入權限。為安全起見，此頁暫時鎖定。","目前无法安全确认这个设备的登录权限。为安全起见，此页暂时锁定。","This device could not be verified safely. This page remains locked."),
           t("前往帳戶安全","前往账户安全","Open Account Security"),
-          "./auth-security-v4.14.2.html?v=4142hf41#trustedDeviceSection"
+          "./auth-security-v4.14.2.html?v=4142hf43#trustedDeviceSection"
         );
         return;
       }
@@ -217,7 +217,7 @@
           t("無法確認管理員權限","无法确认管理员权限","Unable to verify administrator role"),
           t("目前無法安全確認管理員角色。為安全起見，此頁暫時鎖定。","目前无法安全确认管理员角色。为安全起见，此页暂时锁定。","The administrator role could not be verified safely. This page remains locked."),
           t("返回首頁","返回首页","Return Home"),
-          "./index.html?v=4142hf41"
+          "./index.html?v=4142hf43"
         );
         return;
       }
@@ -227,7 +227,7 @@
           t("需要管理員權限","需要管理员权限","Administrator access required"),
           t("此功能僅限管理員使用。即使已完成 MFA，一般會員仍無法進入 Mint、Pause、Ownership 或其他管理功能。","此功能仅限管理员使用。即使已完成 MFA，普通会员仍无法进入 Mint、Pause、Ownership 或其他管理功能。","This feature is restricted to administrators. MFA does not grant members access to Mint, Pause, Ownership, or other administrator functions."),
           t("返回首頁","返回首页","Return Home"),
-          "./index.html?v=4142hf41",
+          "./index.html?v=4142hf43",
           false
         );
         return;
@@ -239,7 +239,7 @@
           t("無法確認二次驗證","无法确认二次验证","Unable to verify MFA"),
           t("目前無法確認管理員二次驗證狀態。為安全起見，此頁暫時鎖定。","目前无法确认管理员二次验证状态。为安全起见，此页暂时锁定。","The administrator MFA status could not be confirmed. This page is locked for safety."),
           t("前往帳戶安全","前往账户安全","Open Account Security"),
-          "./auth-security-v4.14.2.html?v=4142hf41"
+          "./auth-security-v4.14.2.html?v=4142hf43"
         );
         return;
       }
@@ -250,7 +250,7 @@
           t("MFA 狀態讀取失敗","MFA 状态读取失败","MFA status unavailable"),
           t("管理員頁面需要先確認 MFA 狀態。","管理员页面需要先确认 MFA 状态。","Administrator pages require MFA status verification."),
           t("前往帳戶安全","前往账户安全","Open Account Security"),
-          "./auth-security-v4.14.2.html?v=4142hf41"
+          "./auth-security-v4.14.2.html?v=4142hf43"
         );
         return;
       }
@@ -261,7 +261,7 @@
           t("管理員尚未設定 MFA","管理员尚未设置 MFA","Administrator MFA not configured"),
           t("管理員敏感功能必須先設定驗證器 App（TOTP）。完成 MFA 後才能繼續。","管理员敏感功能必须先设置验证器 App（TOTP）。完成 MFA 后才能继续。","Administrator-sensitive features require an authenticator app (TOTP). Complete MFA before continuing."),
           t("立即設定 MFA","立即设置 MFA","Set up MFA"),
-          "./auth-security-v4.14.2.html?v=4142hf41"
+          "./auth-security-v4.14.2.html?v=4142hf43"
         );
         return;
       }
@@ -271,7 +271,7 @@
           t("需要二次驗證","需要二次验证","Second-factor verification required"),
           t("你的帳號已設定 MFA，但這次登入尚未完成第二因素驗證。完成後才可進入管理員敏感頁面。","你的账号已设置 MFA，但这次登录尚未完成第二因素验证。完成后才可进入管理员敏感页面。","MFA is enrolled, but this sign-in has not completed second-factor verification. Complete MFA before accessing administrator-sensitive pages."),
           t("進行二次驗證","进行二次验证","Verify MFA"),
-          "./auth-security-v4.14.2.html?v=4142hf41"
+          "./auth-security-v4.14.2.html?v=4142hf43"
         );
         return;
       }

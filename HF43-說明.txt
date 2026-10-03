@@ -1,0 +1,13 @@
+V4.14.2 HF43｜全站正式導覽統一
+
+統一規則：
+- 返回首頁 / 返回會員頁 -> ./index.html?v=4142hf43
+- 返回管理中心 -> ./index.html?v=4142hf43&goto=admin
+- 正式會員/管理頁不再使用 history.back() 作主要導覽
+- 正式頁舊 HF29/HF32/HF33/HF35/HF36/HF37/HF38/HF39/HF40/HF41/HF42 導覽與共用資源參數統一 HF43
+- Service Worker cache -> ipt-v4.14.2-hf43
+- print-report 的列印預覽返回流程未納入此次強制改寫
+
+安全機制：
+HF41 Admin role gate 與 HF42 單一返回按鈕保留。
+不修改 Supabase、MFA、Trusted Device、資產、提領、鏈上交易邏輯。
