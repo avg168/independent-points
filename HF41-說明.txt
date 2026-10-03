@@ -1,0 +1,18 @@
+V4.14.2 HF41｜Wallet Admin Route Role Gate
+
+安全驗收 06 發現：
+wallet-core 的 go=mint / pause / ownership / advanced 原本要求 MFA AAL2，
+但 Auth Guard 未明確驗證 member_roles.role = admin。
+
+修正後順序：
+1. 有效 Supabase Session / getUser
+2. Trusted Device
+3. member_roles 讀取目前 user.id
+4. role 必須為 admin
+5. MFA factor 必須存在
+6. current AAL 必須為 aal2
+7. 才允許 Admin page / wallet admin route
+
+一般 member 即使已設定 MFA 並完成 AAL2，也不能進入管理路由。
+
+不修改鏈上 Mint/Pause/Ownership 執行邏輯、合約、資產、提領或資料庫。
