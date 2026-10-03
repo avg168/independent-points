@@ -11,7 +11,7 @@ html.ipt-auth-pending body > *:not(#iptAuthGuardOverlay){
 </style>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.min.js"></script>
-<script src="./auth-guard-v4.12.js?v=4142hf46"></script>
+<script src="./auth-guard-v4.12.js?v=4142hf47"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Independent Points V4.14.2 CORE｜錢包核心</title>
@@ -459,7 +459,7 @@ body.platform-admin.v41-route.route-ownership.show-ownership #securityGuardSecti
 
 </style>
 
-<link rel="manifest" href="./manifest.webmanifest?v=4142hf46">
+<link rel="manifest" href="./manifest.webmanifest?v=4142hf47">
 <meta name="theme-color" content="#10243d">
 <meta name="application-name" content="Independent Points">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -469,7 +469,7 @@ body.platform-admin.v41-route.route-ownership.show-ownership #securityGuardSecti
 <link rel="icon" type="image/svg+xml" href="./ipt-icon-192.png">
 
 <link rel="apple-touch-icon" href="./ipt-apple-touch-180.png">
-<script src="./i18n-v4.10.js?v=4142hf46" defer></script>
+<script src="./i18n-v4.10.js?v=4142hf47" defer></script>
 </head>
 <body>
 <div class="v42-sticky-nav">
@@ -539,15 +539,24 @@ body.platform-admin.v41-route.route-ownership.show-ownership #securityGuardSecti
   <h2>② 我的帳戶</h2>
   <div class="row"><div class="label">平台權限</div><div id="platformRole">確認中…</div></div>
   <div class="row"><div class="label">會員主錢包</div><div id="memberPrimaryWallet" class="addr">確認中…</div></div>
-  <div class="row"><div class="label">錢包一致性</div><div id="memberWalletMatch">確認中…</div></div>
-  <div class="row"><div class="label">鏈上錢包角色</div><div id="role">尚未連線</div></div>
+  <div class="row"><div class="label">會員錢包驗證</div><div id="memberWalletVerification">確認中…</div></div>
+  <div class="row"><div class="label">目前連線錢包</div><div id="connectedWalletAddress" class="addr">尚未連線</div></div>
+  <div class="row"><div class="label">連線錢包角色</div><div id="role">尚未連線</div></div>
+  <div class="row"><div class="label">資產歸屬</div><div id="memberWalletMatch">確認中…</div></div>
   <div class="row"><div class="label">合約狀態</div><div id="contractState">尚未讀取</div></div>
   <div id="memberWalletWarning" class="box warn" style="display:none"></div>
   <button id="readBtn" class="green" type="button" disabled>讀取 IPT 鏈上資料</button>
 </section>
 
+<section id="memberAssetSection">
+  <h2>③ 會員資產</h2>
+  <div class="row"><div class="label">會員主錢包</div><div id="memberAssetWallet" class="addr">確認中…</div></div>
+  <div class="row"><div class="label">會員 IPT</div><div id="memberAssetBalance">尚未確認</div></div>
+  <div id="memberAssetNote" class="box info">會員 IPT 只依已綁定且已驗證的主錢包認定。</div>
+</section>
+
 <section id="balanceSection">
-  <h2 id="balanceTitle">③ 我的 IPT</h2>
+  <h2 id="balanceTitle">④ 目前連線錢包 IPT</h2>
   <div id="balance" class="balance">— IPT</div>
   <div class="row"><div class="label">鏈上總供給量</div><div id="supply">—</div></div>
   <div class="row"><div class="label">剩餘可發行</div><div id="remaining">—</div></div>
@@ -586,7 +595,7 @@ body.platform-admin.v41-route.route-ownership.show-ownership #securityGuardSecti
 </section>
 
 <section id="transferSection">
-  <h2>④ IPT 轉帳</h2>
+  <h2>⑤ IPT 轉帳</h2>
   <div class="box info">
     請確認收款地址與數量。系統會先檢查鏈上餘額與交易狀態，再交由 Trust Wallet 核准。
     若畫面逾時，先重新讀取鏈上資料，不要立即重送。
@@ -851,12 +860,22 @@ let iptMemberWalletStateLoaded = false;
 
 function iptRenderMemberWalletState(){
   const primaryEl=document.getElementById("memberPrimaryWallet");
+  const verifyEl=document.getElementById("memberWalletVerification");
+  const connectedEl=document.getElementById("connectedWalletAddress");
   const matchEl=document.getElementById("memberWalletMatch");
   const warnEl=document.getElementById("memberWalletWarning");
   const titleEl=document.getElementById("balanceTitle");
+  const memberAssetWalletEl=document.getElementById("memberAssetWallet");
+  const memberAssetBalanceEl=document.getElementById("memberAssetBalance");
+  const memberAssetNoteEl=document.getElementById("memberAssetNote");
 
-  if(primaryEl){
-    primaryEl.textContent=iptMemberPrimaryWallet || "尚未綁定";
+  if(primaryEl) primaryEl.textContent=iptMemberPrimaryWallet || "尚未綁定";
+  if(memberAssetWalletEl) memberAssetWalletEl.textContent=iptMemberPrimaryWallet || "尚未綁定";
+  if(connectedEl) connectedEl.textContent=account || "尚未連線";
+  if(verifyEl){
+    if(!iptMemberWalletStateLoaded) verifyEl.textContent="確認中…";
+    else if(!iptMemberPrimaryWallet) verifyEl.textContent="未綁定";
+    else verifyEl.textContent=iptMemberPrimaryVerified ? "已驗證 ✓" : "未驗證";
   }
 
   const matched = !!account &&
@@ -868,15 +887,32 @@ function iptRenderMemberWalletState(){
 
   if(matchEl){
     if(!iptMemberWalletStateLoaded) matchEl.textContent="確認中…";
-    else if(!iptMemberPrimaryWallet) matchEl.textContent="未綁定主錢包";
-    else if(!iptMemberPrimaryVerified) matchEl.textContent="主錢包尚未驗證";
+    else if(!iptMemberPrimaryWallet) matchEl.textContent="會員尚無可對應的鏈上資產";
+    else if(!iptMemberPrimaryVerified) matchEl.textContent="會員主錢包尚未驗證";
     else if(!account) matchEl.textContent="尚未連接 Trust Wallet";
-    else if(matched) matchEl.textContent="一致 ✓";
-    else matchEl.textContent="目前連線錢包與會員主錢包不一致";
+    else if(matched) matchEl.textContent="目前連線錢包 = 會員已驗證主錢包 ✓";
+    else matchEl.textContent="外部連線錢包，不屬於目前會員資產";
   }
 
-  if(titleEl){
-    titleEl.textContent = matched ? "③ 我的 IPT" : "③ 目前連線錢包 IPT";
+  if(titleEl) titleEl.textContent="④ 目前連線錢包 IPT";
+
+  if(memberAssetBalanceEl && memberAssetNoteEl){
+    if(!iptMemberWalletStateLoaded){
+      memberAssetBalanceEl.textContent="確認中…";
+      memberAssetNoteEl.textContent="正在確認會員主錢包資料。";
+    }else if(!iptMemberPrimaryWallet){
+      memberAssetBalanceEl.textContent="尚無可對應的鏈上資產";
+      memberAssetNoteEl.textContent="此會員尚未綁定 Sepolia 主錢包，因此不會把任何外部連線錢包餘額列為會員資產。";
+    }else if(!iptMemberPrimaryVerified){
+      memberAssetBalanceEl.textContent="尚未確認";
+      memberAssetNoteEl.textContent="會員主錢包尚未完成驗證，暫不認定鏈上 IPT 為會員資產。";
+    }else if(matched){
+      memberAssetBalanceEl.textContent=document.getElementById("balance")?.textContent || "讀取鏈上資料後顯示";
+      memberAssetNoteEl.textContent="目前連線錢包與會員已驗證主錢包一致。";
+    }else{
+      memberAssetBalanceEl.textContent="請以會員主錢包讀取";
+      memberAssetNoteEl.textContent="目前連線的是外部錢包。外部錢包餘額不會列入目前會員資產。";
+    }
   }
 
   if(warnEl){
@@ -891,7 +927,7 @@ function iptRenderMemberWalletState(){
       warnEl.textContent="會員主錢包尚未完成驗證。鏈上餘額暫不認定為會員資產，轉帳與 Burn 已鎖定。";
     }else if(account && !matched){
       warnEl.style.display="block";
-      warnEl.textContent="目前 Trust Wallet 與此會員已驗證主錢包不一致。畫面餘額只代表目前連線地址，不代表此會員資產；轉帳與 Burn 已鎖定。";
+      warnEl.textContent="目前連線的是外部 Trust Wallet，不是此會員已驗證的主錢包。下方「目前連線錢包 IPT」只屬於該外部地址，不屬於目前會員；轉帳與 Burn 已鎖定。";
     }else if(matched){
       warnEl.style.display="none";
       warnEl.textContent="";
@@ -3641,7 +3677,7 @@ $("armSecurityGuardBtn")?.addEventListener("click",async()=>{
 });
 
 $("openSecurityOpsBtn")?.addEventListener("click",()=>{
-  location.href="./security-ops-v4.12.html?v=4142hf46";
+  location.href="./security-ops-v4.12.html?v=4142hf47";
 });
 
 // Capture high-risk sends before the existing transaction handlers.
@@ -3752,7 +3788,7 @@ v48RenderGuardLocal();
   }
 
   $("v41HomeBtn")?.addEventListener("click", () => {
-    location.href = "./index.html?v=4142hf46";
+    location.href = "./index.html?v=4142hf47";
   });
 
   $("v41TopReadBtn")?.addEventListener("click", () => {
@@ -3848,7 +3884,7 @@ v48RenderGuardLocal();
 (() => {
   const $ = (id) => document.getElementById(id);
 
-  $("v42BackHomeBtn")?.addEventListener("click",()=>location.href="./index.html?v=4142hf46");
+  $("v42BackHomeBtn")?.addEventListener("click",()=>location.href="./index.html?v=4142hf47");
   $("v42ReadNowBtn")?.addEventListener("click",()=>{
     const b=$("readBtn");
     if(b && !b.disabled){ b.click(); return; }
@@ -3904,7 +3940,7 @@ v48RenderGuardLocal();
 
 <script>
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js?v=4142hf46",{updateViaCache:"none"}).catch(()=>{}));
+  window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js?v=4142hf47",{updateViaCache:"none"}).catch(()=>{}));
 }
 </script>
 
