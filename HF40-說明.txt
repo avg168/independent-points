@@ -1,0 +1,15 @@
+V4.14.2 HF40｜管理員資產頁返回管理中心修正
+
+真機驗收發現：
+- admin-assets 的「返回上一頁」使用 history.back()。
+- 從 MFA 阻擋頁／重新整理等流程進入時，瀏覽器上一頁不一定是管理中心。
+
+修正：
+- 「返回上一頁」改名「返回管理中心」。
+- 固定導向 ./index.html?v=4142hf40&goto=admin。
+- 首頁既有 goto=admin 機制只在 role=admin 驗證成功後定位管理中心。
+- admin-assets 共用資源與 Service Worker 參數升到 hf40。
+- 首頁 cache-buster 升到 hf40。
+- Service Worker cache 升到 ipt-v4.14.2-hf40。
+
+不修改 MFA、Trusted Device、Admin 權限、資產資料、Supabase 後端。
