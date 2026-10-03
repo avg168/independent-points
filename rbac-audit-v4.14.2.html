@@ -1,9 +1,99 @@
-<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>V4.14.2 RBAC 只讀驗收</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.min.js"></script><style>:root{font-family:system-ui,-apple-system,"Noto Sans TC",sans-serif;color:#172033;background:#f4f7fb}*{box-sizing:border-box}body{margin:0}header{background:#10243d;color:#fff;padding:24px 18px 28px;border-radius:0 0 24px 24px}main{max-width:720px;margin:auto;padding:16px}.panel{background:#fff;border:1px solid #dde5ef;border-radius:16px;padding:16px;margin-bottom:14px}.status{padding:12px;border-radius:12px;background:#edf4ff;margin:10px 0;white-space:pre-wrap;word-break:break-word}.ok{background:#ebf8f2;color:#17694f}.bad{background:#fff0f1;color:#9b2633}.warn{background:#fff8e8;color:#7a5412}button{width:100%;min-height:50px;border:0;border-radius:12px;background:#176c59;color:#fff;font:inherit;font-weight:800}button:disabled{opacity:.5}.row{padding:10px 0;border-bottom:1px solid #edf1f5}.row:last-child{border-bottom:0}</style></head><body><header><b>Independent Points V4.14.2</b><h1>RBAC 只讀權限驗收</h1><p>只測試目前登入 Session 是否能越權讀取 Admin API；不修改任何資料。</p></header><main><section class="panel"><div id="who" class="status">正在確認目前登入身分…</div><button id="run" type="button" disabled>開始只讀權限測試</button></section><section class="panel"><div id="summary" class="status">尚未測試。</div><div id="results"></div></section></main><script>
+<!doctype html>
+<html lang="zh-Hant"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>V4.14.2 RBAC 只讀驗收 V2</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.min.js"></script>
+<style>
+:root{font-family:system-ui,-apple-system,"Noto Sans TC",sans-serif;color:#172033;background:#f4f7fb}*{box-sizing:border-box}body{margin:0}
+header{background:#10243d;color:#fff;padding:24px 18px 28px;border-radius:0 0 24px 24px}main{max-width:720px;margin:auto;padding:16px}
+.panel{background:#fff;border:1px solid #dde5ef;border-radius:16px;padding:16px;margin-bottom:14px}.status{padding:12px;border-radius:12px;background:#edf4ff;margin:10px 0;white-space:pre-wrap;word-break:break-word}
+.ok{background:#ebf8f2;color:#17694f}.bad{background:#fff0f1;color:#9b2633}.warn{background:#fff8e8;color:#7a5412}
+button{width:100%;min-height:50px;border:0;border-radius:12px;background:#176c59;color:#fff;font:inherit;font-weight:800;margin-top:10px}
+button.secondary{background:#326b9c}button:disabled{opacity:.5}.row{padding:10px 0;border-bottom:1px solid #edf1f5}.row:last-child{border-bottom:0}
+</style></head><body>
+<header><b>Independent Points V4.14.2</b><h1>RBAC 只讀權限驗收 V2</h1><p>只測試目前登入 Session 是否能越權讀取 Admin API；不修改任何資料。</p></header>
+<main><section class="panel">
+<div id="who" class="status">尚未檢查登入身分。</div>
+<button id="recheck" class="secondary" type="button">重新檢查登入身分</button>
+<button id="run" type="button" disabled>開始只讀權限測試</button>
+</section><section class="panel"><div id="summary" class="status">尚未測試。</div><div id="results"></div></section></main>
+<script>
 const URL="https://uccexvgqmoxhgykkjdcy.supabase.co",KEY="sb_publishable_FBsN1DYTQMv2_bWhpbXHAA_qdAq7ri7";
-const sb=supabase.createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}),$=id=>document.getElementById(id);let session=null,role=null;
-async function init(){const {data:{session:s}}=await sb.auth.getSession();session=s;if(!session){$("who").className="status bad";$("who").textContent="目前沒有登入 Session。請先用「測試會員2」登入正式網站，再回到本頁。";return}const {data:{user},error}=await sb.auth.getUser();if(error||!user){$("who").className="status bad";$("who").textContent="登入 Session 驗證失敗。";return}const {data:r}=await sb.from("member_roles").select("role").eq("user_id",user.id).maybeSingle();role=r?.role||"member";const {data:p}=await sb.from("member_profiles").select("member_number,display_name,status").eq("id",user.id).maybeSingle();$("who").className="status "+(role==="member"?"ok":"warn");$("who").textContent="會員："+(p?.member_number||"—")+" / "+(p?.display_name||"—")+"\n角色："+role+"\n狀態："+(p?.status||"—");if(role!=="member"){$("summary").className="status warn";$("summary").textContent="本驗收必須使用一般 member 帳號。請改用測試會員2登入。";return}$("run").disabled=false}
-async function edge(slug,body={}){const r=await fetch(URL+"/functions/v1/"+slug,{method:"POST",headers:{"Authorization":"Bearer "+session.access_token,"apikey":KEY,"Content-Type":"application/json"},body:JSON.stringify(body)});let data=null;try{data=await r.json()}catch{}return{status:r.status,data}}
-async function rpc(name,body={}){const r=await fetch(URL+"/rest/v1/rpc/"+name,{method:"POST",headers:{"Authorization":"Bearer "+session.access_token,"apikey":KEY,"Content-Type":"application/json"},body:JSON.stringify(body)});let data=null;try{data=await r.json()}catch{}return{status:r.status,data}}
+const $=id=>document.getElementById(id);let sb=null,session=null,role=null;
+const timeout=(promise,ms,label)=>Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error(label+"逾時")),ms))]);
+async function client(){
+ if(sb)return sb;
+ const started=Date.now();
+ while(Date.now()-started<10000){
+   if(window.supabase?.createClient){
+     sb=window.supabase.createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+     return sb;
+   }
+   await new Promise(r=>setTimeout(r,150));
+ }
+ throw new Error("Supabase SDK 載入逾時");
+}
+async function checkIdentity(){
+ $("run").disabled=true;$("recheck").disabled=true;$("who").className="status";$("who").textContent="正在確認目前登入身分…";
+ try{
+   const c=await client();
+   const sr=await timeout(c.auth.getSession(),5000,"本機 Session 讀取");
+   if(sr.error)throw sr.error;
+   session=sr.data?.session||null;
+   if(!session){
+     $("who").className="status warn";$("who").textContent="目前沒有登入 Session。請先在同一個 Chrome 瀏覽器登入「測試會員2」，再回本頁按「重新檢查登入身分」。";return;
+   }
+   const ur=await timeout(c.auth.getUser(),8000,"伺服器登入身分驗證");
+   if(ur.error)throw ur.error;
+   const user=ur.data?.user;
+   if(!user)throw new Error("找不到有效登入使用者");
+   const rr=await timeout(c.from("member_roles").select("role").eq("user_id",user.id).maybeSingle(),8000,"角色讀取");
+   if(rr.error)throw rr.error;
+   role=rr.data?.role||"member";
+   const pr=await timeout(c.from("member_profiles").select("member_number,display_name,status").eq("id",user.id).maybeSingle(),8000,"會員資料讀取");
+   if(pr.error)throw pr.error;
+   const p=pr.data||{};
+   $("who").className="status "+(role==="member"?"ok":"warn");
+   $("who").textContent="會員："+(p.member_number||"—")+" / "+(p.display_name||"—")+"\\n角色："+role+"\\n狀態："+(p.status||"—");
+   if(role!=="member"){$("summary").className="status warn";$("summary").textContent="本驗收必須使用一般 member 帳號。請改用測試會員2登入。";return}
+   $("run").disabled=false;
+ }catch(e){
+   session=null;role=null;$("who").className="status bad";$("who").textContent="登入身分檢查失敗："+String(e?.message||e);
+ }finally{$("recheck").disabled=false}
+}
+async function edge(slug,body={}){
+ const r=await fetch(URL+"/functions/v1/"+slug,{method:"POST",headers:{"Authorization":"Bearer "+session.access_token,"apikey":KEY,"Content-Type":"application/json"},body:JSON.stringify(body)});
+ let data=null;try{data=await r.json()}catch{}return{status:r.status,data};
+}
+async function rpc(name,body={}){
+ const r=await fetch(URL+"/rest/v1/rpc/"+name,{method:"POST",headers:{"Authorization":"Bearer "+session.access_token,"apikey":KEY,"Content-Type":"application/json"},body:JSON.stringify(body)});
+ let data=null;try{data=await r.json()}catch{}return{status:r.status,data};
+}
 const msg=d=>String(d?.error||d?.message||d?.code||"").slice(0,160);
-$("run").onclick=async()=>{$("run").disabled=true;$("results").innerHTML="";$("summary").className="status";$("summary").textContent="測試中…";const tests=[["Admin Members",()=>edge("admin-members",{})],["Admin Assets",()=>edge("admin-assets",{})],["Admin Security",()=>edge("admin-security-state",{})],["Admin Platform Wallet",()=>edge("admin-platform-wallet",{})],["Admin Withdrawal Context",()=>rpc("platform_admin_withdrawal_context",{})],["Admin Withdrawal List",()=>rpc("platform_admin_list_ipt_withdrawals",{p_limit:1})]];let pass=0;for(const [name,fn] of tests){let x;try{x=await fn()}catch(e){x={status:0,data:{error:String(e)}}}const denied=x.status===401||x.status===403||/admin|mfa|trusted|permission|denied|required/i.test(msg(x.data));if(denied)pass++;const div=document.createElement("div");div.className="row";div.textContent=(denied?"PASS ✓ ":"FAIL ✗ ")+name+" — HTTP "+x.status+" — "+msg(x.data);$("results").appendChild(div)}$("summary").className="status "+(pass===tests.length?"ok":"bad");$("summary").textContent=pass===tests.length?"PASS："+pass+" / "+tests.length+"。一般會員未取得任何 Admin 讀取權限。":"FAIL："+pass+" / "+tests.length+"。至少一項需要進一步檢查。";$("run").disabled=false};init();
+$("recheck").onclick=checkIdentity;
+$("run").onclick=async()=>{
+ if(!session||role!=="member")return;
+ $("run").disabled=true;$("results").innerHTML="";$("summary").className="status";$("summary").textContent="測試中…";
+ const tests=[
+  ["Admin Members",()=>edge("admin-members",{})],
+  ["Admin Assets",()=>edge("admin-assets",{})],
+  ["Admin Security",()=>edge("admin-security-state",{})],
+  ["Admin Platform Wallet",()=>edge("admin-platform-wallet",{})],
+  ["Admin Withdrawal Context",()=>rpc("platform_admin_withdrawal_context",{})],
+  ["Admin Withdrawal List",()=>rpc("platform_admin_list_ipt_withdrawals",{p_limit:1})]
+ ];
+ let pass=0;
+ for(const [name,fn] of tests){
+   let x;try{x=await fn()}catch(e){x={status:0,data:{error:String(e)}}}
+   const denied=x.status===401||x.status===403||/admin|mfa|trusted|permission|denied|required/i.test(msg(x.data));
+   if(denied)pass++;
+   const div=document.createElement("div");div.className="row";
+   div.textContent=(denied?"PASS ✓ ":"FAIL ✗ ")+name+" — HTTP "+x.status+" — "+msg(x.data);
+   $("results").appendChild(div);
+ }
+ $("summary").className="status "+(pass===tests.length?"ok":"bad");
+ $("summary").textContent=pass===tests.length?"PASS："+pass+" / "+tests.length+"。一般會員未取得任何 Admin 讀取權限。":"FAIL："+pass+" / "+tests.length+"。至少一項需要進一步檢查。";
+ $("run").disabled=false;
+};
+checkIdentity();
 </script></body></html>
