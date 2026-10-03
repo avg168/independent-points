@@ -1,0 +1,13 @@
+V4.14.2 HF45｜會員／管理員 Wallet UI 完全分流
+
+來源：使用者上傳的 HF44 wallet-core-v4.12.html。
+
+只需覆蓋：
+wallet-core-v4.12.html
+
+HF45：
+1. 平台權限與鏈上錢包角色分開顯示。
+2. 一般會員即使連到合約 Owner Wallet，也不顯示管理中心、進階管理、營運安全、Mint、Pause、Ownership。
+3. 管理 UI 必須同時滿足平台 Admin 與對應鏈上 Owner / pendingOwner。
+4. ?go=mint / pause / ownership 管理路由同樣要求 platform-admin。
+5. HF44 高風險操作前重新驗證平台 Admin 與 MFA AAL2 的安全機制保留。

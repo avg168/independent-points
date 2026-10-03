@@ -11,7 +11,7 @@ html.ipt-auth-pending body > *:not(#iptAuthGuardOverlay){
 </style>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.min.js"></script>
-<script src="./auth-guard-v4.12.js?v=4142hf44"></script>
+<script src="./auth-guard-v4.12.js?v=4142hf45"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Independent Points V4.14.2 CORE｜錢包核心</title>
@@ -52,10 +52,11 @@ button:disabled{opacity:.45}
 .quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .quick-grid button{touch-action:manipulation;-webkit-tap-highlight-color:transparent;margin:0}
 .soft{background:#f1f5fb;color:#17365d}
-.owner-only,.ownership-only,.tech-only{display:none}
-body.show-owner .owner-only{display:block}
-body.show-ownership .ownership-only{display:block}
-body.show-tech .tech-only{display:block}
+.owner-only,.ownership-only,.tech-only,.platform-admin-only{display:none}
+body.platform-admin.show-owner .owner-only{display:block}
+body.platform-admin.show-ownership .ownership-only{display:block}
+body.platform-admin.show-tech .tech-only{display:block}
+body.platform-admin .platform-admin-only{display:block}
 .member-wallet{
   padding:12px 14px;border-radius:12px;background:#f6f8fb;
   font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
@@ -81,8 +82,8 @@ details.member-details summary{
 .advanced-feature{display:none}
 body.show-advanced .advanced-feature{display:block}
 .admin-hub-btn{display:none}
-body.show-owner .admin-hub-btn{display:block}
-body.show-ownership .admin-hub-btn{display:block}
+body.platform-admin.show-owner .admin-hub-btn{display:block}
+body.platform-admin.show-ownership .admin-hub-btn{display:block}
 .compact-warning{
   background:#fff7df;border-left:5px solid #d59a0b;
   padding:12px 14px;border-radius:12px;line-height:1.6
@@ -131,13 +132,13 @@ body.v41-route.route-transfer #balanceSection,
 body.v41-route.route-transfer #transferSection{display:block!important}
 body.v41-route.route-history #historySection{display:block!important}
 body.v41-route.route-receive #receiveSection{display:block!important}
-body.v41-route.route-mint.show-owner #mintSection{display:block!important}
-body.v41-route.route-pause.show-owner #pauseSection{display:block!important}
-body.v41-route.route-ownership.show-ownership #ownershipSection{display:block!important}
+body.platform-admin.v41-route.route-mint.show-owner #mintSection{display:block!important}
+body.platform-admin.v41-route.route-pause.show-owner #pauseSection{display:block!important}
+body.platform-admin.v41-route.route-ownership.show-ownership #ownershipSection{display:block!important}
 
-body.v41-route.route-mint.show-owner #v41RouteGuide,
-body.v41-route.route-pause.show-owner #v41RouteGuide,
-body.v41-route.route-ownership.show-ownership #v41RouteGuide,
+body.platform-admin.v41-route.route-mint.show-owner #v41RouteGuide,
+body.platform-admin.v41-route.route-pause.show-owner #v41RouteGuide,
+body.platform-admin.v41-route.route-ownership.show-ownership #v41RouteGuide,
 body.v41-route.route-balance #v41RouteGuide,
 body.v41-route.route-transfer #v41RouteGuide,
 body.v41-route.route-history #v41RouteGuide,
@@ -440,11 +441,11 @@ button{
 
 /* ===== formal operations security guard ===== */
 #securityGuardSection{display:none}
-body.show-owner #securityGuardSection,
-body.show-ownership #securityGuardSection{display:block}
-body.v41-route.route-mint.show-owner #securityGuardSection,
-body.v41-route.route-pause.show-owner #securityGuardSection,
-body.v41-route.route-ownership.show-ownership #securityGuardSection{display:block!important}
+body.platform-admin.show-owner #securityGuardSection,
+body.platform-admin.show-ownership #securityGuardSection{display:block}
+body.platform-admin.v41-route.route-mint.show-owner #securityGuardSection,
+body.platform-admin.v41-route.route-pause.show-owner #securityGuardSection,
+body.platform-admin.v41-route.route-ownership.show-ownership #securityGuardSection{display:block!important}
 .security-guard-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .security-guard-card{
   border:1px solid #dfe6ef;border-radius:12px;background:#f8fafc;padding:12px
@@ -458,7 +459,7 @@ body.v41-route.route-ownership.show-ownership #securityGuardSection{display:bloc
 
 </style>
 
-<link rel="manifest" href="./manifest.webmanifest?v=4142hf44">
+<link rel="manifest" href="./manifest.webmanifest?v=4142hf45">
 <meta name="theme-color" content="#10243d">
 <meta name="application-name" content="Independent Points">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -468,7 +469,7 @@ body.v41-route.route-ownership.show-ownership #securityGuardSection{display:bloc
 <link rel="icon" type="image/svg+xml" href="./ipt-icon-192.png">
 
 <link rel="apple-touch-icon" href="./ipt-apple-touch-180.png">
-<script src="./i18n-v4.10.js?v=4142hf44" defer></script>
+<script src="./i18n-v4.10.js?v=4142hf45" defer></script>
 </head>
 <body>
 <div class="v42-sticky-nav">
@@ -498,7 +499,7 @@ body.v41-route.route-ownership.show-ownership #securityGuardSection{display:bloc
     <button id="goTransferBtn" class="blue" type="button">轉帳</button>
     <button id="goHistoryBtn" class="soft" type="button">交易紀錄</button>
     <button id="goAdminBtn" class="soft admin-hub-btn" type="button">管理中心</button>
-    <button id="toggleAdvancedBtn" class="soft" type="button">進階功能</button>
+    <button id="toggleAdvancedBtn" class="soft platform-admin-only" type="button">進階管理功能</button>
   </div>
 </section>
 
@@ -536,7 +537,8 @@ body.v41-route.route-ownership.show-ownership #securityGuardSection{display:bloc
 
 <section id="identitySection">
   <h2>② 我的帳戶</h2>
-  <div class="row"><div class="label">目前身分</div><div id="role">尚未連線</div></div>
+  <div class="row"><div class="label">平台權限</div><div id="platformRole">確認中…</div></div>
+  <div class="row"><div class="label">鏈上錢包角色</div><div id="role">尚未連線</div></div>
   <div class="row"><div class="label">合約狀態</div><div id="contractState">尚未讀取</div></div>
   <button id="readBtn" class="green" type="button" disabled>讀取 IPT 鏈上資料</button>
 </section>
@@ -622,7 +624,7 @@ body.v41-route.route-ownership.show-ownership #securityGuardSection{display:bloc
 </section>
 
 
-<section id="securityGuardSection">
+<section id="securityGuardSection" class="platform-admin-only">
   <h2>營運安全保護</h2>
   <div id="securityGuardStatus" class="box warn locked">
     高風險交易目前鎖定。完成原本前置檢查後，還需要啟用一次 60 秒操作視窗。
@@ -841,6 +843,9 @@ let iptPlatformAdminUserId = "";
 async function iptRefreshPlatformAdmin(){
   iptPlatformAdmin=false;
   iptPlatformAdminUserId="";
+  document.body.classList.remove("platform-admin");
+  const platformRoleEl=document.getElementById("platformRole");
+  if(platformRoleEl) platformRoleEl.textContent="一般會員";
   try{
     if(!window.supabase?.createClient) return false;
     const sb=window.supabase.createClient(
@@ -858,6 +863,8 @@ async function iptRefreshPlatformAdmin(){
     if(roleErr||roleRow?.role!=="admin") return false;
     iptPlatformAdmin=true;
     iptPlatformAdminUserId=user.id;
+    document.body.classList.add("platform-admin");
+    if(platformRoleEl) platformRoleEl.textContent="管理員";
     return true;
   }catch(_){
     return false;
@@ -882,17 +889,9 @@ function setMemberRoleUI(owner = "", pendingOwner = "") {
 
   const roleEl=$("role");
   if(roleEl){
-    if(iptPlatformAdmin && isOwner){
-      roleEl.innerHTML="<span class='pill'>平台 Admin × 鏈上 Owner</span>";
-    }else if(iptPlatformAdmin && isPending){
-      roleEl.innerHTML="<span class='pill'>平台 Admin × pendingOwner</span>";
-    }else if(isOwner){
-      roleEl.innerHTML="<span class='pill'>鏈上 Owner 錢包（平台會員無管理權）</span>";
-    }else if(isPending){
-      roleEl.innerHTML="<span class='pill'>pendingOwner 錢包（平台會員無管理權）</span>";
-    }else{
-      roleEl.innerHTML="<span class='pill'>一般錢包</span>";
-    }
+    if(isOwner) roleEl.textContent="合約 Owner";
+    else if(isPending) roleEl.textContent="pendingOwner";
+    else roleEl.textContent="一般錢包";
   }
 
   const historyWallet = $("historyWallet");
@@ -1159,13 +1158,7 @@ $("readBtn").addEventListener("click", async () => {
 
     const allOk = Object.values(checks).every(Boolean);
 
-    // 身分一律依「目前鏈上 owner」動態判定，不再綁死最初部署 Owner。
-    $("role").innerHTML = same(account, owner)
-      ? "<span class='pill'>管理者 Owner</span>"
-      : (!same(pendingOwner, ZERO) && same(account, pendingOwner)
-          ? "<span class='pill'>候任管理者 pendingOwner</span>"
-          : "<span class='pill'>一般錢包</span>");
-
+    // HF45：平台權限與鏈上錢包角色分離，由 setMemberRoleUI 統一處理。
     setMemberRoleUI(owner, pendingOwner);
 
     $("contractState").textContent = allOk ? "正常" : "資料不一致";
@@ -3317,11 +3310,13 @@ $("goHistoryBtn")?.addEventListener("click", () => {
 });
 
 $("goAdminBtn")?.addEventListener("click", () => {
+  if(!iptPlatformAdmin) return;
   const target = document.querySelector(".owner-only, .ownership-only");
   target?.scrollIntoView({ behavior: "smooth", block: "start" });
 });
 
 $("toggleAdvancedBtn")?.addEventListener("click", () => {
+  if(!iptPlatformAdmin) return;
   const on = document.body.classList.toggle("show-advanced");
   document.body.classList.toggle("show-tech", on);
   $("toggleAdvancedBtn").textContent = on ? "收合進階功能" : "進階功能";
@@ -3505,7 +3500,7 @@ $("armSecurityGuardBtn")?.addEventListener("click",async()=>{
 });
 
 $("openSecurityOpsBtn")?.addEventListener("click",()=>{
-  location.href="./security-ops-v4.12.html?v=4142hf44";
+  location.href="./security-ops-v4.12.html?v=4142hf45";
 });
 
 // Capture high-risk sends before the existing transaction handlers.
@@ -3616,7 +3611,7 @@ v48RenderGuardLocal();
   }
 
   $("v41HomeBtn")?.addEventListener("click", () => {
-    location.href = "./index.html?v=4142hf44";
+    location.href = "./index.html?v=4142hf45";
   });
 
   $("v41TopReadBtn")?.addEventListener("click", () => {
@@ -3712,7 +3707,7 @@ v48RenderGuardLocal();
 (() => {
   const $ = (id) => document.getElementById(id);
 
-  $("v42BackHomeBtn")?.addEventListener("click",()=>location.href="./index.html?v=4142hf44");
+  $("v42BackHomeBtn")?.addEventListener("click",()=>location.href="./index.html?v=4142hf45");
   $("v42ReadNowBtn")?.addEventListener("click",()=>{
     const b=$("readBtn");
     if(b && !b.disabled){ b.click(); return; }
@@ -3768,7 +3763,7 @@ v48RenderGuardLocal();
 
 <script>
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js?v=4142hf44",{updateViaCache:"none"}).catch(()=>{}));
+  window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js?v=4142hf45",{updateViaCache:"none"}).catch(()=>{}));
 }
 </script>
 
