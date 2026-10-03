@@ -1,0 +1,15 @@
+V4.14.2 HF46｜會員帳號 × 主錢包 × 鏈上資產一致性驗證
+
+資料來源沿用現有平台：
+- member_wallets：wallet_address / is_primary / chain_id
+- verified_wallets：wallet_address / verified_at
+- Ethereum Sepolia chain_id = 11155111
+
+規則：
+1. 已驗證主錢包 = 目前 Trust Wallet，才顯示「我的 IPT」。
+2. 未綁定、未驗證或地址不一致時，改顯示「目前連線錢包 IPT」並顯示警告。
+3. 地址不一致時禁止 IPT Transfer 與 Burn。
+4. HF45 平台 Admin × 鏈上 Owner UI 分流保留。
+5. HF44 高風險 Admin + MFA AAL2 驗證保留。
+
+本版不會自動改變任何會員的綁定錢包資料。

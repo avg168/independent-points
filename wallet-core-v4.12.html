@@ -11,7 +11,7 @@ html.ipt-auth-pending body > *:not(#iptAuthGuardOverlay){
 </style>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.min.js"></script>
-<script src="./auth-guard-v4.12.js?v=4142hf45"></script>
+<script src="./auth-guard-v4.12.js?v=4142hf46"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Independent Points V4.14.2 CORE｜錢包核心</title>
@@ -459,7 +459,7 @@ body.platform-admin.v41-route.route-ownership.show-ownership #securityGuardSecti
 
 </style>
 
-<link rel="manifest" href="./manifest.webmanifest?v=4142hf45">
+<link rel="manifest" href="./manifest.webmanifest?v=4142hf46">
 <meta name="theme-color" content="#10243d">
 <meta name="application-name" content="Independent Points">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -469,7 +469,7 @@ body.platform-admin.v41-route.route-ownership.show-ownership #securityGuardSecti
 <link rel="icon" type="image/svg+xml" href="./ipt-icon-192.png">
 
 <link rel="apple-touch-icon" href="./ipt-apple-touch-180.png">
-<script src="./i18n-v4.10.js?v=4142hf45" defer></script>
+<script src="./i18n-v4.10.js?v=4142hf46" defer></script>
 </head>
 <body>
 <div class="v42-sticky-nav">
@@ -538,13 +538,16 @@ body.platform-admin.v41-route.route-ownership.show-ownership #securityGuardSecti
 <section id="identitySection">
   <h2>② 我的帳戶</h2>
   <div class="row"><div class="label">平台權限</div><div id="platformRole">確認中…</div></div>
+  <div class="row"><div class="label">會員主錢包</div><div id="memberPrimaryWallet" class="addr">確認中…</div></div>
+  <div class="row"><div class="label">錢包一致性</div><div id="memberWalletMatch">確認中…</div></div>
   <div class="row"><div class="label">鏈上錢包角色</div><div id="role">尚未連線</div></div>
   <div class="row"><div class="label">合約狀態</div><div id="contractState">尚未讀取</div></div>
+  <div id="memberWalletWarning" class="box warn" style="display:none"></div>
   <button id="readBtn" class="green" type="button" disabled>讀取 IPT 鏈上資料</button>
 </section>
 
 <section id="balanceSection">
-  <h2>③ 我的 IPT</h2>
+  <h2 id="balanceTitle">③ 我的 IPT</h2>
   <div id="balance" class="balance">— IPT</div>
   <div class="row"><div class="label">鏈上總供給量</div><div id="supply">—</div></div>
   <div class="row"><div class="label">剩餘可發行</div><div id="remaining">—</div></div>
@@ -840,6 +843,110 @@ const ZERO_ADDRESS_UI = "0x0000000000000000000000000000000000000000";
 let iptPlatformAdmin = false;
 let iptPlatformAdminUserId = "";
 
+// HF46: member account × primary wallet × verified wallet consistency.
+let iptMemberPrimaryWallet = "";
+let iptMemberPrimaryVerified = false;
+let iptMemberWalletMatched = false;
+let iptMemberWalletStateLoaded = false;
+
+function iptRenderMemberWalletState(){
+  const primaryEl=document.getElementById("memberPrimaryWallet");
+  const matchEl=document.getElementById("memberWalletMatch");
+  const warnEl=document.getElementById("memberWalletWarning");
+  const titleEl=document.getElementById("balanceTitle");
+
+  if(primaryEl){
+    primaryEl.textContent=iptMemberPrimaryWallet || "尚未綁定";
+  }
+
+  const matched = !!account &&
+    !!iptMemberPrimaryWallet &&
+    iptMemberPrimaryVerified &&
+    same(account,iptMemberPrimaryWallet);
+
+  iptMemberWalletMatched=matched;
+
+  if(matchEl){
+    if(!iptMemberWalletStateLoaded) matchEl.textContent="確認中…";
+    else if(!iptMemberPrimaryWallet) matchEl.textContent="未綁定主錢包";
+    else if(!iptMemberPrimaryVerified) matchEl.textContent="主錢包尚未驗證";
+    else if(!account) matchEl.textContent="尚未連接 Trust Wallet";
+    else if(matched) matchEl.textContent="一致 ✓";
+    else matchEl.textContent="目前連線錢包與會員主錢包不一致";
+  }
+
+  if(titleEl){
+    titleEl.textContent = matched ? "③ 我的 IPT" : "③ 目前連線錢包 IPT";
+  }
+
+  if(warnEl){
+    if(!iptMemberWalletStateLoaded){
+      warnEl.style.display="block";
+      warnEl.textContent="正在確認會員主錢包資料…";
+    }else if(!iptMemberPrimaryWallet){
+      warnEl.style.display="block";
+      warnEl.textContent="此會員尚未綁定 Sepolia 主錢包。現在連線錢包的鏈上餘額不會被認定為此會員資產，轉帳與 Burn 已鎖定。";
+    }else if(!iptMemberPrimaryVerified){
+      warnEl.style.display="block";
+      warnEl.textContent="會員主錢包尚未完成驗證。鏈上餘額暫不認定為會員資產，轉帳與 Burn 已鎖定。";
+    }else if(account && !matched){
+      warnEl.style.display="block";
+      warnEl.textContent="目前 Trust Wallet 與此會員已驗證主錢包不一致。畫面餘額只代表目前連線地址，不代表此會員資產；轉帳與 Burn 已鎖定。";
+    }else if(matched){
+      warnEl.style.display="none";
+      warnEl.textContent="";
+    }else{
+      warnEl.style.display="block";
+      warnEl.textContent="請連接此會員已驗證的主錢包。";
+    }
+  }
+}
+
+async function iptRefreshMemberWalletState(){
+  iptMemberPrimaryWallet="";
+  iptMemberPrimaryVerified=false;
+  iptMemberWalletMatched=false;
+  iptMemberWalletStateLoaded=false;
+  try{
+    if(!window.supabase?.createClient) return false;
+    const sb=window.supabase.createClient(
+      "https://uccexvgqmoxhgykkjdcy.supabase.co",
+      "sb_publishable_FBsN1DYTQMv2_bWhpbXHAA_qdAq7ri7",
+      {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}
+    );
+    const {data:{user},error:userErr}=await sb.auth.getUser();
+    if(userErr||!user) return false;
+
+    const [{data:wallets,error:wErr},{data:verified,error:vErr}]=await Promise.all([
+      sb.from("member_wallets")
+        .select("wallet_address,is_primary,chain_id,created_at")
+        .eq("user_id",user.id)
+        .eq("chain_id",11155111)
+        .order("is_primary",{ascending:false})
+        .order("created_at",{ascending:true}),
+      sb.from("verified_wallets")
+        .select("wallet_address,verified_at")
+        .eq("user_id",user.id)
+        .eq("chain_id",11155111)
+    ]);
+    if(wErr||vErr) return false;
+
+    const list=wallets||[];
+    const primary=list.find(w=>w.is_primary)||list[0]||null;
+    iptMemberPrimaryWallet=String(primary?.wallet_address||"");
+    iptMemberPrimaryVerified=(verified||[]).some(v=>
+      same(v.wallet_address,iptMemberPrimaryWallet)
+    );
+    iptMemberWalletStateLoaded=true;
+    iptRenderMemberWalletState();
+    return true;
+  }catch(_){
+    return false;
+  }finally{
+    iptRenderMemberWalletState();
+  }
+}
+
 async function iptRefreshPlatformAdmin(){
   iptPlatformAdmin=false;
   iptPlatformAdminUserId="";
@@ -886,6 +993,7 @@ function setMemberRoleUI(owner = "", pendingOwner = "") {
   document.body.classList.toggle("show-owner", allowOwner);
   document.body.classList.toggle("show-ownership", allowOwnership);
   document.body.classList.add("chain-ok");
+  iptRenderMemberWalletState();
 
   const roleEl=$("role");
   if(roleEl){
@@ -965,7 +1073,10 @@ async function chainIdOf(p) {
 }
 
 async function renderSession() {
-  await iptRefreshPlatformAdmin();
+  await Promise.all([
+    iptRefreshPlatformAdmin(),
+    iptRefreshMemberWalletState()
+  ]);
   if (!wc?.session) {
     resetDisconnected();
     return;
@@ -1004,6 +1115,7 @@ function resetDisconnected() {
   $("remaining").textContent = "—";
   $("contractData").className = "box info";
   $("contractData").textContent = "連線後按「讀取 IPT 鏈上資料」。";
+  iptRenderMemberWalletState();
   resetMemberRoleUI();
 }
 
@@ -1086,6 +1198,7 @@ $("readBtn").addEventListener("click", async () => {
   const btn = $("readBtn");
 
   try {
+    await iptRefreshMemberWalletState();
     btn.disabled = true;
     btn.textContent = "正在讀取 Sepolia…";
     $("contractState").textContent = "讀取中…";
@@ -1361,6 +1474,20 @@ async function latestGasPriceHex() {
 async function verifyTransferPreflight() {
   resetTransferCheck("正在檢查…");
 
+  await iptRefreshMemberWalletState();
+  if(!iptMemberWalletStateLoaded){
+    throw new Error("無法確認會員主錢包資料，已鎖定轉帳。");
+  }
+  if(!iptMemberPrimaryWallet){
+    throw new Error("此會員尚未綁定 Sepolia 主錢包，不能從目前錢包轉帳。");
+  }
+  if(!iptMemberPrimaryVerified){
+    throw new Error("會員主錢包尚未完成驗證，不能轉帳。");
+  }
+  if(!same(account,iptMemberPrimaryWallet)){
+    throw new Error("目前 Trust Wallet 不是此會員已驗證的主錢包，不能轉帳。");
+  }
+
   if (!wc?.session || !account) {
     throw new Error("WalletConnect 尚未連線。");
   }
@@ -1614,7 +1741,10 @@ $("sendTransferBtn").addEventListener("click", async () => {
 const originalReadHandlerEnable = () => {
   const connected = !!(wc?.session && account);
   const contractOk = $("contractState").textContent === "正常";
-  $("preflightTransferBtn").disabled = !(connected && contractOk);
+  const memberWalletOk = iptMemberWalletStateLoaded &&
+    iptMemberPrimaryVerified &&
+    same(account,iptMemberPrimaryWallet);
+  $("preflightTransferBtn").disabled = !(connected && contractOk && memberWalletOk);
 };
 
 // Observe read result only; no self-observing loop.
@@ -1687,6 +1817,14 @@ function clearBurnGuard(fp) {
 
 async function verifyBurnPreflight() {
   resetBurnCheck("正在檢查 Burn…");
+
+  await iptRefreshMemberWalletState();
+  if(!iptMemberWalletStateLoaded ||
+     !iptMemberPrimaryWallet ||
+     !iptMemberPrimaryVerified ||
+     !same(account,iptMemberPrimaryWallet)){
+    throw new Error("目前錢包不是此會員已驗證的主錢包，不能執行 Burn。");
+  }
 
   if (!wc?.session || !account) {
     throw new Error("WalletConnect 尚未連線。");
@@ -1921,7 +2059,10 @@ $("sendBurnBtn").addEventListener("click", async () => {
 const enableBurnPreflight = () => {
   const connected = !!(wc?.session && account);
   const contractOk = $("contractState").textContent === "正常";
-  $("preflightBurnBtn").disabled = !(connected && contractOk);
+  const memberWalletOk = iptMemberWalletStateLoaded &&
+    iptMemberPrimaryVerified &&
+    same(account,iptMemberPrimaryWallet);
+  $("preflightBurnBtn").disabled = !(connected && contractOk && memberWalletOk);
 };
 
 new MutationObserver(enableBurnPreflight).observe(
@@ -3500,7 +3641,7 @@ $("armSecurityGuardBtn")?.addEventListener("click",async()=>{
 });
 
 $("openSecurityOpsBtn")?.addEventListener("click",()=>{
-  location.href="./security-ops-v4.12.html?v=4142hf45";
+  location.href="./security-ops-v4.12.html?v=4142hf46";
 });
 
 // Capture high-risk sends before the existing transaction handlers.
@@ -3611,7 +3752,7 @@ v48RenderGuardLocal();
   }
 
   $("v41HomeBtn")?.addEventListener("click", () => {
-    location.href = "./index.html?v=4142hf45";
+    location.href = "./index.html?v=4142hf46";
   });
 
   $("v41TopReadBtn")?.addEventListener("click", () => {
@@ -3707,7 +3848,7 @@ v48RenderGuardLocal();
 (() => {
   const $ = (id) => document.getElementById(id);
 
-  $("v42BackHomeBtn")?.addEventListener("click",()=>location.href="./index.html?v=4142hf45");
+  $("v42BackHomeBtn")?.addEventListener("click",()=>location.href="./index.html?v=4142hf46");
   $("v42ReadNowBtn")?.addEventListener("click",()=>{
     const b=$("readBtn");
     if(b && !b.disabled){ b.click(); return; }
@@ -3763,7 +3904,7 @@ v48RenderGuardLocal();
 
 <script>
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js?v=4142hf45",{updateViaCache:"none"}).catch(()=>{}));
+  window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js?v=4142hf46",{updateViaCache:"none"}).catch(()=>{}));
 }
 </script>
 
