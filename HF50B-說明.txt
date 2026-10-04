@@ -1,0 +1,2 @@
+HF50-B｜首頁統一資產模型
+只覆蓋 index.html。首頁顯示 P／平台 IPT／鏈上 IPT／IPT 顯示合計；我的資產導向 asset-overview-v4.14.2.html。資料來源沿用 platform-wallet 與 member-asset-detail。不修改資料庫、RBAC、MFA、Wallet Core 或交易後端。

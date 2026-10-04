@@ -335,7 +335,7 @@ button{
 
 </style>
 
-<link rel="manifest" href="./manifest.webmanifest?v=4142hf43">
+<link rel="manifest" href="./manifest.webmanifest?v=4142hf32">
 <meta name="theme-color" content="#10243d">
 <meta name="application-name" content="Independent Points">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -345,7 +345,7 @@ button{
 <link rel="icon" type="image/svg+xml" href="./ipt-icon-192.png">
 
 <link rel="apple-touch-icon" href="./ipt-apple-touch-180.png">
-<script src="./i18n-v4.10.js?v=4142hf43" defer></script>
+<script src="./i18n-v4.10.js?v=4142hf38" defer></script>
 <!-- V4.14.2 Homepage Signed-Out Fail-Closed Hotfix 17 + Trusted Device Hotfix 19 -->
 </head>
 <body>
@@ -387,32 +387,21 @@ button{
   </section>
 
   <section id="assetSummarySection" class="panel" style="display:none">
-    <h2>我的 IPT</h2>
+    <h2>我的資產</h2>
     <div class="summary">
-      <div class="card green">
-        <div class="label">目前餘額</div>
-        <div id="iptBalance" class="value">—</div>
-      </div>
-      <div class="card">
-        <div class="label">累計轉入</div>
-        <div id="iptIncoming" class="value">—</div>
-      </div>
-      <div class="card">
-        <div class="label">累計轉出</div>
-        <div id="iptOutgoing" class="value">—</div>
-      </div>
-      <div class="card">
-        <div class="label">交易筆數</div>
-        <div id="iptTxCount" class="value">—</div>
-      </div>
+      <div class="card"><div class="label">P 點數｜平台帳本</div><div id="iptPBalance" class="value">—</div></div>
+      <div class="card green"><div class="label">平台 IPT｜Off-chain</div><div id="iptPlatformBalance" class="value">—</div></div>
+      <div class="card"><div class="label">鏈上 IPT｜On-chain</div><div id="iptBalance" class="value">—</div></div>
+      <div class="card"><div class="label">IPT 顯示合計</div><div id="iptDisplayTotal" class="value">—</div></div>
     </div>
+    <div style="display:none"><span id="iptIncoming">—</span><span id="iptOutgoing">—</span><span id="iptTxCount">—</span></div>
     <div id="assetSummaryNote" class="note">
       為避免手機首頁卡住，完整鏈上統計改為手動更新。
     </div>
     <button id="assetSummaryRefreshBtn" class="secondary" type="button" style="width:100%;margin-top:10px">
-      更新完整資產摘要
+      更新統一資產摘要
     </button>
-    <div id="assetUpdatedAt" class="note" style="margin-top:8px">尚未更新完整資產摘要。</div>
+    <div id="assetUpdatedAt" class="note" style="margin-top:8px">尚未更新統一資產摘要。</div>
   </section>
 
   <section class="panel">
@@ -662,7 +651,7 @@ button{
       marked=q.get("signedout")==="1" || sessionStorage.getItem("ipt_just_signed_out")==="1";
       if(marked){
         sessionStorage.removeItem("ipt_just_signed_out");
-        history.replaceState(null,"","./index.html?v=4142hf43");
+        history.replaceState(null,"","./index.html?v=4142hf32");
       }
     }catch(_){}
     return marked;
@@ -737,20 +726,25 @@ button{
   }
 
   function renderAssetSummary(asset, fromCache=false){
-    $("iptBalance").textContent=fmtNumber(asset?.member?.ipt_balance||0)+" IPT";
-    $("iptIncoming").textContent=fmtNumber(asset?.asset?.total_incoming||0)+" IPT";
-    $("iptOutgoing").textContent=fmtNumber(asset?.asset?.total_outgoing||0)+" IPT";
-    $("iptTxCount").textContent=asset?.asset?.total_transactions??0;
+    const platform=asset?.platform||{}, chain=asset?.chain||{};
+    const pUnits=Number(platform?.balances?.p?.available_units||0);
+    const platformUnits=Number(platform?.balances?.platform_ipt?.available_units||0);
+    const chainIpt=Number(chain?.member?.ipt_balance||0);
+    const platformIpt=platformUnits/100, safeChain=Number.isFinite(chainIpt)?chainIpt:0;
+    $("iptPBalance").textContent=pUnits.toLocaleString("zh-TW")+" P";
+    $("iptPlatformBalance").textContent=platformIpt.toLocaleString("zh-TW",{minimumFractionDigits:2,maximumFractionDigits:2})+" IPT";
+    $("iptBalance").textContent=safeChain.toLocaleString("zh-TW",{minimumFractionDigits:6,maximumFractionDigits:6})+" IPT";
+    $("iptDisplayTotal").textContent=(platformIpt+safeChain).toLocaleString("zh-TW",{minimumFractionDigits:2,maximumFractionDigits:6})+" IPT";
+    $("iptIncoming").textContent=fmtNumber(chain?.asset?.total_incoming||0)+" IPT";
+    $("iptOutgoing").textContent=fmtNumber(chain?.asset?.total_outgoing||0)+" IPT";
+    $("iptTxCount").textContent=chain?.asset?.total_transactions??0;
     $("assetSummarySection").style.display="block";
     $("assetSummaryNote").textContent=fromCache
-      ? "目前先顯示上次成功讀取的資產摘要；需要最新資料時再按下方更新。"
-      : "資產摘要已更新。首頁其餘功能不會等待鏈上交易掃描。";
-    const saved = fromCache ? localStorage.getItem(assetCacheKey(currentUserId)) : null;
-    let ts = Date.now();
-    try{
-      if(fromCache && saved) ts = JSON.parse(saved)?.saved_at || ts;
-    }catch(_){}
-    $("assetUpdatedAt").textContent = "最後更新：" + new Date(ts).toLocaleString("zh-TW",{hour12:false});
+      ?"目前先顯示上次成功讀取的統一資產摘要；需要最新資料時再按下方更新。"
+      :"平台 IPT 與鏈上 IPT 分開保存、分開記帳；顯示合計僅供資產總覽。";
+    const saved=fromCache?localStorage.getItem(assetCacheKey(currentUserId)):null;
+    let ts=Date.now();try{if(fromCache&&saved)ts=JSON.parse(saved)?.saved_at||ts}catch(_){}
+    $("assetUpdatedAt").textContent="最後更新："+new Date(ts).toLocaleString("zh-TW",{hour12:false});
   }
 
   function loadCachedAssetSummary(uid){
@@ -772,17 +766,19 @@ button{
     const btn=$("assetSummaryRefreshBtn");
     btn.disabled=true;
     btn.textContent="正在更新資產摘要…";
-    $("assetSummaryNote").textContent="正在讀取 Sepolia IPT 餘額與交易統計；其他按鈕仍可使用。";
+    $("assetSummaryNote").textContent="正在讀取平台帳本與 Sepolia 鏈上資產；其他按鈕仍可使用。";
 
     try{
       const client=await getSupabaseClient();
-      const {data:asset,error:assetError}=await withTimeout(
-        client.functions.invoke("member-asset-detail",{body:{}}),
-        12000,
-        "資產摘要讀取"
-      );
-      if(assetError) throw assetError;
-      if(!asset?.ok) throw new Error(asset?.error||"資產摘要讀取失敗");
+      const [platformRes,chainRes]=await withTimeout(Promise.all([
+        client.functions.invoke("platform-wallet",{body:{action:"summary"}}),
+        client.functions.invoke("member-asset-detail",{body:{}})
+      ]),12000,"統一資產摘要讀取");
+      if(platformRes.error) throw platformRes.error;
+      if(chainRes.error) throw chainRes.error;
+      if(!platformRes.data?.ok) throw new Error(platformRes.data?.error||"平台資產摘要讀取失敗");
+      if(!chainRes.data?.ok) throw new Error(chainRes.data?.error||"鏈上資產摘要讀取失敗");
+      const asset={platform:platformRes.data,chain:chainRes.data};
       renderAssetSummary(asset,false);
       try{
         const savedAt=Date.now();
@@ -798,7 +794,7 @@ button{
     }finally{
       assetSummaryLoading=false;
       btn.disabled=false;
-      btn.textContent="更新完整資產摘要";
+      btn.textContent="更新統一資產摘要";
     }
   }
 
@@ -846,32 +842,28 @@ button{
     $("assetSummarySection").style.display="none";
     setMemberActionsEnabled(false);
 
+    if(consumeSignedOutMarker()){
+      markSignedOut();
+      return;
+    }
+
     accountUiState="checking";
     renderAccountUiState();
 
     try{
       const client=await getSupabaseClient();
 
-      // HF39: Supabase session is the source of truth.
-      // A stale signed-out UI marker must never override a valid persisted session.
+      // Local session is used only to short-circuit a definite signed-out state.
+      // A present session is NEVER trusted as identity; getUser() still validates it with Supabase.
       const {data:sessionData,error:sessionError}=await withTimeout(
         client.auth.getSession(),
-        5000,
+        3000,
         "本機登入狀態確認"
       );
       if(sessionError) throw sessionError;
-
-      const hasSession=!!sessionData?.session;
-      const signedOutMarker=consumeSignedOutMarker();
-
-      if(!hasSession){
+      if(!sessionData?.session){
         markSignedOut();
         return;
-      }
-
-      // If a valid session exists, any old signed-out marker is stale UI state only.
-      if(signedOutMarker){
-        try{sessionStorage.removeItem("ipt_just_signed_out")}catch(_){}
       }
 
       const {data:{user},error}=await withTimeout(
@@ -976,11 +968,11 @@ button{
 
       $("assetSummarySection").style.display="block";
       if(!loadCachedAssetSummary(uid)){
+        $("iptPBalance").textContent="按下更新";
+        $("iptPlatformBalance").textContent="按下更新";
         $("iptBalance").textContent="按下更新";
-        $("iptIncoming").textContent="按下更新";
-        $("iptOutgoing").textContent="按下更新";
-        $("iptTxCount").textContent="按下更新";
-        $("assetSummaryNote").textContent="首頁已就緒。需要完整鏈上統計時，再按「更新完整資產摘要」。";
+        $("iptDisplayTotal").textContent="按下更新";
+        $("assetSummaryNote").textContent="首頁已就緒。需要最新平台與鏈上資產時，再按「更新統一資產摘要」。";
       }
     }catch(err){
       console.error(err);
@@ -996,32 +988,32 @@ button{
 
   $("refreshBtn").addEventListener("click",load);
   $("assetSummaryRefreshBtn").addEventListener("click",refreshAssetSummary);
-  $("loginBtn").addEventListener("click",()=>go("./auth-security-v4.14.2.html?v=4142hf43"));
-  $("changePasswordBtn").addEventListener("click",()=>go("./change-password-v4.14.2.html?v=4142hf43"));
+  $("loginBtn").addEventListener("click",()=>go("./auth-security-v4.14.2.html?v=4142hf32"));
+  $("changePasswordBtn").addEventListener("click",()=>go("./change-password-v4.14.2.html?v=4142hf32"));
 
-  $("myAssetBtn").addEventListener("click",()=>go("./member-assets-v4.12.html?v=4142hf43"));
-  $("platformWalletBtn").addEventListener("click",()=>go("./wallet-dual-v4.14.2.html?v=4142hf43"));
+  $("myAssetBtn").addEventListener("click",()=>go("./asset-overview-v4.14.2.html?v=4142hf50b"));
+  $("platformWalletBtn").addEventListener("click",()=>go("./wallet-dual-v4.14.2.html?v=4142hf32"));
   $("historyBtn").addEventListener("click",()=>go("./wallet-core-v4.12.html?go=history"));
-  $("assetCenterBtn").addEventListener("click",()=>go("./asset-center-v4.12.html?v=4142hf43"));
-  $("accountSecurityBtn").addEventListener("click",()=>go("./auth-security-v4.14.2.html?v=4142hf43"));
-  $("systemInfoBtn").addEventListener("click",()=>go("./system-info-v4.12.html?v=4142hf43"));
-  $("maintenanceBtn")?.addEventListener("click",()=>go("./maintenance-v4.12.html?v=4142hf43"));
+  $("assetCenterBtn").addEventListener("click",()=>go("./asset-center-v4.12.html?v=4142hf33"));
+  $("accountSecurityBtn").addEventListener("click",()=>go("./auth-security-v4.14.2.html?v=4142hf32"));
+  $("systemInfoBtn").addEventListener("click",()=>go("./system-info-v4.12.html?v=4142hf32"));
+  $("maintenanceBtn")?.addEventListener("click",()=>go("./maintenance-v4.12.html?v=4142hf32"));
 
   $("balanceBtn").addEventListener("click",()=>go("./wallet-core-v4.12.html?go=balance"));
   $("transferBtn").addEventListener("click",()=>go("./wallet-core-v4.12.html?go=transfer"));
   $("receiveBtn").addEventListener("click",()=>go("./wallet-core-v4.12.html?go=receive"));
 
-  $("adminAssetBtn").addEventListener("click",()=>go("./admin-assets-v4.12.html?v=4142hf43"));
-  $("adminMemberBtn").addEventListener("click",()=>go("./admin-members-v4.12.html?v=4142hf43"));
-  $("withdrawalAdminBtn").addEventListener("click",()=>go("./withdrawal-admin-v4.14.2.html?v=4142hf43"));
+  $("adminAssetBtn").addEventListener("click",()=>go("./admin-assets-v4.12.html?v=4142hf32"));
+  $("adminMemberBtn").addEventListener("click",()=>go("./admin-members-v4.12.html?v=4142hf32"));
+  $("withdrawalAdminBtn").addEventListener("click",()=>go("./withdrawal-admin-v4.14.2.html?v=4142hf32"));
   $("mintBtn").addEventListener("click",()=>go("./wallet-core-v4.12.html?go=mint"));
   $("pauseBtn").addEventListener("click",()=>go("./wallet-core-v4.12.html?go=pause"));
   $("ownershipBtn").addEventListener("click",()=>go("./wallet-core-v4.12.html?go=ownership"));
   $("advancedBtn").addEventListener("click",()=>go("./wallet-core-v4.12.html?go=advanced"));
-  $("updateCenterBtn")?.addEventListener("click",()=>go("./update-center-v4.12.html?v=4142hf43"));
-  $("securityCenterBtn")?.addEventListener("click",()=>go("./security-center-v4.12.html?v=4142hf43"));
-  $("securityOpsBtn")?.addEventListener("click",()=>go("./security-ops-v4.12.html?v=4142hf43"));
-  $("eventCenterBtn")?.addEventListener("click",()=>go("./event-center-v4.12.html?v=4142hf43"));
+  $("updateCenterBtn")?.addEventListener("click",()=>go("./update-center-v4.12.html?v=4142hf32"));
+  $("securityCenterBtn")?.addEventListener("click",()=>go("./security-center-v4.12.html?v=4142hf32"));
+  $("securityOpsBtn")?.addEventListener("click",()=>go("./security-ops-v4.12.html?v=4142hf32"));
+  $("eventCenterBtn")?.addEventListener("click",()=>go("./event-center-v4.12.html?v=4142hf32"));
   $("v43NavAssets")?.addEventListener("click",()=>{
     if(!$("myAssetBtn").disabled) $("myAssetBtn").click();
   });
@@ -1075,8 +1067,8 @@ button{
 <script>
 (() => {
   /* V4.14.2 Production Seal */
-  const OFFICIAL_URL = "https://avg168.github.io/independent-points/?v=4142hf43";
-  const CHROME_INTENT = "intent://avg168.github.io/independent-points/?v=4142hf43#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=https%3A%2F%2Favg168.github.io%2Findependent-points%2F%3Fv%3D441;end";
+  const OFFICIAL_URL = "https://avg168.github.io/independent-points/?v=4142hf32";
+  const CHROME_INTENT = "intent://avg168.github.io/independent-points/?v=4142hf32#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=https%3A%2F%2Favg168.github.io%2Findependent-points%2F%3Fv%3D441;end";
   let deferredInstallPrompt = null;
 
   const installBtn = document.getElementById("installAppBtn");
@@ -1212,7 +1204,7 @@ button{
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", async () => {
       try {
-        const reg = await navigator.serviceWorker.register("./service-worker.js?v=4142hf43", {
+        const reg = await navigator.serviceWorker.register("./service-worker.js?v=4142hf38", {
           updateViaCache: "none"
         });
         await reg.update().catch(()=>{});
