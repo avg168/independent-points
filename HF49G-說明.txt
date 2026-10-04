@@ -1,0 +1,14 @@
+HF49-G｜Trust Wallet 簽章相容性修正
+
+後端 bind-wallet 已升級：
+- ACTIVE Version 3
+- verify_jwt=true
+- Challenge 改為單行訊息
+- 保留 Trusted Device、Active Member、Sepolia 11155111、跨會員唯一性、10 分鐘 Challenge、簽章地址驗證與原子化 finalize
+
+前端：
+- personal_sign 最多等待 45 秒
+- Trust Wallet 無回應時恢復按鈕並明確顯示「尚未建立任何錢包綁定」
+- 保留 HF49-D Session reset 與 HF49-E Android 地址換行修正
+
+只需覆蓋 wallet-bind-v4.14.2.html。
