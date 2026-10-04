@@ -376,6 +376,8 @@ button{
   }
 }
 
+/* Keep words intact; allow long member data to wrap. */
+.sub{word-break:normal!important;overflow-wrap:anywhere!important}
 </style>
 
 <link rel="manifest" href="./manifest.webmanifest?v=4142hf43">
@@ -388,12 +390,12 @@ button{
 <link rel="icon" type="image/svg+xml" href="./ipt-icon-192.png">
 
 <link rel="apple-touch-icon" href="./ipt-apple-touch-180.png">
-<script src="./i18n-v4.10.js?v=4142hf43" defer></script>
+<script src="./i18n-v4.10.js?v=4142hf50c34" defer></script>
 <script src="./auth-guard-v4.12.js?v=4142hf43"></script>
 </head>
 <body>
 <header>
-  <div class="version">V4.14.2</div>
+  <div class="version">V4.14.2 | HF50-C34</div>
   <h1>Independent Points 資產中心</h1>
   <p>會員資產報表與管理員彙總報表的統一入口</p>
 </header>
@@ -401,11 +403,11 @@ button{
 <main>
   <section class="panel">
     <h2>登入狀態</h2>
-    <div id="statusBox" class="status">正在確認會員登入狀態…</div>
+    <div id="statusBox" data-raw-data="1" class="status">正在確認會員登入狀態…</div>
     <div id="profileBox" class="profile" style="display:none;margin-top:12px">
-      <div id="profileName" class="name">—</div>
-      <div id="profileEmail" class="sub">—</div>
-      <div id="profileChips" class="chips"></div>
+      <div id="profileName" data-raw-data="1" class="name">—</div>
+      <div id="profileEmail" data-raw-data="1" class="sub">—</div>
+      <div id="profileChips" data-raw-data="1" class="chips"></div>
     </div>
   </section>
 
@@ -446,10 +448,25 @@ button{
   });
   const $=id=>document.getElementById(id);
 
-  function setStatus(kind,text){
+  const TEXTS=[["Independent Points 資產中心", "Independent Points 资产中心", "Independent Points Asset Center"], ["資產中心", "资产中心", "Asset Center"], ["會員資產報表與管理員彙總報表的統一入口", "会员资产报表与管理员汇总报表的统一入口", "One place for member asset reports and administrator summary reports"], ["登入狀態", "登录状态", "Sign-in Status"], ["正在確認會員登入狀態…", "正在确认会员登录状态…", "Checking member sign-in status…"], ["選擇資產報表", "选择资产报表", "Choose an Asset Report"], ["我的資產報表", "我的资产报表", "My Asset Report"], ["查看自己的 IPT 餘額、累計轉入／轉出、交易紀錄、日期篩選，以及 CSV／PDF 報表。", "查看自己的 IPT 余额、累计转入／转出、交易记录、日期筛选，以及 CSV／PDF 报表。", "View your IPT balance, incoming and outgoing totals, transaction history, date filters and CSV / PDF reports."], ["進入我的資產", "进入我的资产", "Open My Assets"], ["管理員資產彙總", "管理员资产汇总", "Administrator Asset Summary"], ["只有管理員可進入。查看全站會員資產、區間交易彙總、搜尋篩選，以及 CSV／PDF 報表。", "仅管理员可进入。查看全站会员资产、区间交易汇总、搜索筛选，以及 CSV／PDF 报表。", "Administrators can view member assets, transaction summaries for a selected period, search filters and CSV / PDF reports."], ["進入管理員報表", "进入管理员报表", "Open Admin Report"], ["重新整理", "刷新", "Refresh"], ["返回會員頁", "返回会员页面", "Back to Member Home"], ["一般會員只會開放「我的資產報表」；管理員帳號會額外開放管理員彙總報表。", "普通会员可打开“我的资产报表”；管理员账户还可打开管理员汇总报表。", "Members can open My Asset Report. Administrators can also open the administrator summary report."], ["尚未登入會員。請先返回會員頁登入。", "尚未登录。请先返回会员页面登录。", "You are not signed in. Return to Member Home to sign in."], ["找不到會員資料。", "找不到会员资料。", "Member profile not found."], ["管理員", "管理员", "Admin"], ["會員", "会员", "Member"], ["正常", "正常", "Normal"], ["已停權", "已停权", "Suspended"], ["會員目前為停權狀態，資產報表入口已停用。", "会员当前已停权，资产报表入口已停用。", "This member is suspended. Asset report access is disabled."], ["登入成功：已開放會員資產與管理員彙總報表。", "登录成功：已开放会员资产与管理员汇总报表。", "Signed in. Member asset reports and administrator summary reports are available."], ["登入成功：已開放我的資產報表。", "登录成功：已开放我的资产报表。", "Signed in. My Asset Report is available."], ["載入失敗：", "加载失败：", "Load failed: "]];
+  function tr(text){
+    let lang;try{lang=window.IPTI18N?.getLang()||localStorage.getItem("ipt_language");}catch{};
+    const row=TEXTS.find(r=>r.includes(text));
+    return row ? row[lang==="en"?2:lang==="zh-CN"?1:0] : text;
+  }
+  let statusState=null,profileState=null;
+  function renderChips(){
+    if(!profileState)return;
+    const {role,status}=profileState;
+    $("profileChips").innerHTML=
+      `<span class="chip ${role==="admin"?"admin":""}">${tr(role==="admin"?"管理員":"會員")}</span>`+
+      `<span class="chip ${status==="active"?"ok":""}">${tr(status==="active"?"正常":"已停權")}</span>`;
+  }
+  function setStatus(kind,text,detail=""){
+    statusState={kind,text,detail};
     const el=$("statusBox");
     el.className="status "+kind;
-    el.textContent=text;
+    el.textContent=tr(text)+detail;
   }
 
   async function load(){
@@ -478,16 +495,15 @@ button{
 
       if(pRes.error) throw pRes.error;
       if(rRes.error) throw rRes.error;
-      if(!pRes.data) throw new Error("找不到會員資料。");
+      if(!pRes.data) throw new Error(tr("找不到會員資料。"));
 
       const p=pRes.data;
       const role=rRes.data?.role||"member";
 
       $("profileName").textContent=`${p.member_number||"—"}｜${p.display_name||"—"}`;
       $("profileEmail").textContent=user.email||"—";
-      $("profileChips").innerHTML=
-        `<span class="chip ${role==="admin"?"admin":""}">${role==="admin"?"管理員":"會員"}</span>`+
-        `<span class="chip ${p.status==="active"?"ok":""}">${p.status==="active"?"正常":"已停權"}</span>`;
+      profileState={role,status:p.status};
+      renderChips();
       $("profileBox").style.display="block";
 
       if(p.status!=="active"){
@@ -505,7 +521,7 @@ button{
       );
     }catch(err){
       console.error(err);
-      setStatus("err","載入失敗："+(err?.message||String(err)));
+      setStatus("err","載入失敗：",err?.message||String(err));
     }
   }
 
@@ -518,6 +534,10 @@ button{
   $("refreshBtn").addEventListener("click",load);
   $("backBtn").addEventListener("click",()=>{location.href="./index.html?v=4142hf43";});
 
+  window.addEventListener("ipt-language-change",()=>{
+    renderChips();
+    if(statusState){const {kind,text,detail}=statusState;setStatus(kind,text,detail);}
+  });
   load();
 })();
 </script>
@@ -530,3 +550,4 @@ if ("serviceWorker" in navigator) {
 
 </body>
 </html>
+
