@@ -849,3 +849,52 @@
     installHF36();
   }
 })();
+
+
+// HF50-C1: Home wallet and unified asset summary translations.
+;(() => {
+  function installHF50C1(){
+    const api=window.IPTI18N;
+    if(!api?.dictionaries) return;
+    Object.assign(api.dictionaries["zh-CN"],{
+  "🔗 綁定我的 Trust Wallet": "🔗 绑定我的 Trust Wallet",
+  "👛 管理我的 Trust Wallet": "👛 管理我的 Trust Wallet",
+  "P 點數｜平台帳本": "P 点数｜平台账本",
+  "平台 IPT｜Off-chain": "平台 IPT｜Off-chain",
+  "鏈上 IPT｜On-chain": "链上 IPT｜On-chain",
+  "IPT 顯示合計": "IPT 显示合计",
+  "更新統一資產摘要": "更新统一资产摘要",
+  "尚未更新統一資產摘要。": "尚未更新统一资产摘要。",
+  "目前先顯示上次成功讀取的統一資產摘要；需要最新資料時再按下方更新。": "当前先显示上次成功读取的统一资产摘要；需要最新数据时再点击下方更新。",
+  "平台 IPT 與鏈上 IPT 分開保存、分開記帳；顯示合計僅供資產總覽。": "平台 IPT 与链上 IPT 分开保存、分开记账；显示合计仅供资产总览。",
+  "正在更新資產摘要…": "正在更新资产摘要…",
+  "正在讀取平台帳本與 Sepolia 鏈上資產；其他按鈕仍可使用。": "正在读取平台账本与 Sepolia 链上资产；其他按钮仍可使用。",
+  "資產摘要暫時無法更新，可直接使用下方功能或進入「我的資產」查看。": "资产摘要暂时无法更新，可直接使用下方功能或进入“我的资产”查看。",
+  "按下更新": "点击更新",
+  "首頁已就緒。需要最新平台與鏈上資產時，再按「更新統一資產摘要」。": "首页已就绪。需要最新平台与链上资产时，再点击“更新统一资产摘要”。"
+});
+    Object.assign(api.dictionaries.en,{
+  "🔗 綁定我的 Trust Wallet": "🔗 Link My Trust Wallet",
+  "👛 管理我的 Trust Wallet": "👛 Manage My Trust Wallet",
+  "P 點數｜平台帳本": "P Points | Platform Ledger",
+  "平台 IPT｜Off-chain": "Platform IPT | Off-chain",
+  "鏈上 IPT｜On-chain": "On-chain IPT",
+  "IPT 顯示合計": "Combined IPT Display",
+  "更新統一資產摘要": "Update Unified Asset Summary",
+  "尚未更新統一資產摘要。": "The unified asset summary has not been updated yet.",
+  "目前先顯示上次成功讀取的統一資產摘要；需要最新資料時再按下方更新。": "Showing the last successfully loaded unified asset summary. Use the update button below for the latest data.",
+  "平台 IPT 與鏈上 IPT 分開保存、分開記帳；顯示合計僅供資產總覽。": "Platform IPT and on-chain IPT are stored in separate ledgers. The combined display is for asset overview only.",
+  "正在更新資產摘要…": "Updating asset summary…",
+  "正在讀取平台帳本與 Sepolia 鏈上資產；其他按鈕仍可使用。": "Loading the platform ledger and Sepolia on-chain assets. Other buttons remain available.",
+  "資產摘要暫時無法更新，可直接使用下方功能或進入「我的資產」查看。": "The asset summary cannot be updated right now. Use the features below or open My Assets.",
+  "按下更新": "Tap to Update",
+  "首頁已就緒。需要最新平台與鏈上資產時，再按「更新統一資產摘要」。": "Home is ready. Tap Update Unified Asset Summary for the latest platform and on-chain assets."
+});
+    api.apply?.(document);
+  }
+  if(document.readyState==="loading"){
+    window.addEventListener("DOMContentLoaded",installHF50C1,{once:true});
+  }else{
+    installHF50C1();
+  }
+})();
