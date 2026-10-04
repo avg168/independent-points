@@ -469,7 +469,7 @@ body.platform-admin.v41-route.route-ownership.show-ownership #securityGuardSecti
 <link rel="icon" type="image/svg+xml" href="./ipt-icon-192.png">
 
 <link rel="apple-touch-icon" href="./ipt-apple-touch-180.png">
-<script src="./i18n-v4.10.js?v=4142hf48" defer></script>
+<script src="./i18n-v4.10.js?v=4142hf50c5" defer></script>
 </head>
 <body>
 <div class="v42-sticky-nav">
@@ -478,7 +478,7 @@ body.platform-admin.v41-route.route-ownership.show-ownership #securityGuardSecti
 </div>
 <header>
   <div class="v43-product-tag">正式鏈上操作模組</div><div class="v43-module-note">Ethereum Sepolia｜Trust Wallet / WalletConnect</div>
-  <div id="versionBadge" style="display:inline-block;margin-bottom:10px;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.78rem;font-weight:800;letter-spacing:.04em">V4.14.2 CORE</div>
+  <div id="versionBadge" style="display:inline-block;margin-bottom:10px;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.78rem;font-weight:800;letter-spacing:.04em">V4.14.2 CORE | HF50-C5</div>
   <h1 id="v41RouteTitle">IPT 錢包中心</h1>
   <p id="v41RouteSubtitle">會員帳號 × 主錢包 × 鏈上錢包獨立驗證</p>
   <div class="v41-head-actions">
@@ -1783,7 +1783,7 @@ $("sendTransferBtn").addEventListener("click", async () => {
     $("sendTransferBtn").disabled = true;
 
   } catch (e) {
-    if (!$("transferCheck").textContent.includes("結果不明")) {
+    if (!$("transferCheck").textContent.match(/結果不明|结果不明|unknown|uncertain/i)) {
       $("transferCheck").className = "box err";
       $("transferCheck").textContent =
         "送出失敗：" + (e?.message || String(e));
@@ -2102,7 +2102,7 @@ $("sendBurnBtn").addEventListener("click", async () => {
     $("sendBurnBtn").disabled = true;
 
   } catch (e) {
-    if (!$("burnCheck").textContent.includes("結果不明")) {
+    if (!$("burnCheck").textContent.match(/結果不明|结果不明|unknown|uncertain/i)) {
       $("burnCheck").className = "box err";
       $("burnCheck").textContent =
         "Burn 送出失敗：" + (e?.message || String(e));
@@ -2494,7 +2494,7 @@ $("sendMintBtn").addEventListener("click", async () => {
     $("sendMintBtn").disabled = true;
 
   } catch (e) {
-    if (!$("mintCheck").textContent.includes("結果不明")) {
+    if (!$("mintCheck").textContent.match(/結果不明|结果不明|unknown|uncertain/i)) {
       $("mintCheck").className = "box err";
       $("mintCheck").textContent =
         "Mint 送出失敗：" + (e?.message || String(e));
@@ -2919,7 +2919,7 @@ async function sendAdminAction(expectedAction) {
     $("sendUnpauseBtn").disabled = true;
 
   } catch (e) {
-    if (!$("adminPauseCheck").textContent.includes("結果不明")) {
+    if (!$("adminPauseCheck").textContent.match(/結果不明|结果不明|unknown|uncertain/i)) {
       $("adminPauseCheck").className = "box err";
       $("adminPauseCheck").textContent =
         "管理交易失敗：" + (e?.message || String(e));
@@ -3459,7 +3459,7 @@ async function sendOwnershipAction(expectedAction) {
     $("sendAcceptOwnerBtn").disabled = true;
 
   } catch (e) {
-    if (!$("ownershipCheck").textContent.includes("結果不明")) {
+    if (!$("ownershipCheck").textContent.match(/結果不明|结果不明|unknown|uncertain/i)) {
       $("ownershipCheck").className = "box err";
       $("ownershipCheck").textContent =
         "管理權交易失敗：" + (e?.message || String(e));
@@ -3819,7 +3819,7 @@ v48RenderGuardLocal();
       return;
     }
     const connect = $("connectBtn");
-    if(connect && !$("sessionState")?.textContent?.includes("已建立")){
+    if(connect && !/已建立|established/i.test($("sessionState")?.textContent || "")){
       connect.scrollIntoView({behavior:"smooth",block:"center"});
       return;
     }
