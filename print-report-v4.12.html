@@ -342,6 +342,24 @@ button{
   }
 }
 
+
+/* HF50-C32: readable mobile tables and full-width print output */
+.table-note{font-size:.8rem;color:#64748b;margin:0 0 10px}
+.table-scroll{width:100%;max-width:100%;overflow-x:auto;touch-action:pan-x pan-y;-webkit-overflow-scrolling:touch}
+.table-scroll table{width:100%!important;min-width:760px;max-width:none!important;table-layout:auto!important;font-size:.82rem}
+.table-scroll th,.table-scroll td{max-width:none;word-break:normal!important;overflow-wrap:normal!important;white-space:normal!important;padding:8px}
+.table-scroll th,.table-scroll td.number{white-space:nowrap!important}
+.meta{word-break:normal!important;overflow-wrap:anywhere!important}
+@media print{
+  @page{size:A4 landscape;margin:12mm}
+  html,body{overflow:visible!important;width:auto;max-width:none}
+  .table-note{display:none}
+  .sheet{overflow:visible}
+  .table-scroll{overflow:visible;max-width:none}
+  .table-scroll table{min-width:0;font-size:9pt}
+  .table-scroll th,.table-scroll td{padding:5px}
+}
+
 </style>
 
 <link rel="manifest" href="./manifest.webmanifest?v=4142">
@@ -354,11 +372,12 @@ button{
 <link rel="icon" type="image/svg+xml" href="./ipt-icon-192.png">
 
 <link rel="apple-touch-icon" href="./ipt-apple-touch-180.png">
-<script src="./i18n-v4.10.js?v=4142" defer></script>
+<script src="./i18n-v4.10.js?v=4142hf50c31" defer></script>
 </head>
 <body>
-<div class="top">
+<div class="top" data-raw-data="1">
   <div class="top-inner">
+    <div class="v43-product-tag">V4.14.2 | HF50-C32</div>
     <h1>列印／PDF 預覽</h1>
     <div class="actions">
       <button id="printBtn" class="print" type="button">開啟系統列印／另存 PDF</button>
@@ -370,7 +389,8 @@ button{
   </div>
 </div>
 <main>
-  <div id="sheet" class="sheet"></div>
+  <div id="tableNote" class="table-note" data-raw-data="1"></div>
+  <div id="sheet" class="sheet" data-raw-data="1"></div>
 </main>
 <script>
 (() => {
@@ -399,65 +419,88 @@ button{
     return a.length<20?a:a.slice(0,10)+"…"+a.slice(-8);
   }
 
+
+  const TEXTS = [["列印／PDF 預覽", "打印／PDF 预览", "Print / PDF Preview"], ["開啟系統列印／另存 PDF", "打开系统打印／另存 PDF", "Open System Print / Save PDF"], ["返回報表", "返回报表", "Back to Report"], ["若 Android 沒有跳出系統列印畫面，仍可在此預覽報表；可再使用瀏覽器右上角選單的分享／列印功能。", "若 Android 没有打开系统打印界面，仍可在此预览报表；可使用浏览器菜单的分享／打印功能。", "If Android does not open the system print dialog, preview the report here and use the browser menu for Share / Print."], ["找不到列印資料，請返回資產報表重新按「列印／PDF 預覽」。", "找不到打印数据，请返回资产报表重新点击“打印／PDF 预览”。", "No print data found. Return to the asset report and select Print / PDF Preview again."], ["我的資產報表", "我的资产报表", "My Asset Report"], ["管理員資產彙總報表", "管理员资产汇总报表", "Administrator Asset Summary Report"], ["版本", "版本", "Version"], ["產生時間", "生成时间", "Generated At"], ["會員", "会员", "Member"], ["錢包", "钱包", "Wallet"], ["尚未綁定", "尚未绑定", "Not Linked"], ["篩選", "筛选", "Filters"], ["會員搜尋", "会员搜索", "Member Search"], ["全部", "全部", "All"], ["全部交易", "全部交易", "All Transactions"], ["目前餘額", "当前余额", "Current Balance"], ["累計轉入", "累计转入", "Total Incoming"], ["累計轉出", "累计转出", "Total Outgoing"], ["資產淨變動", "资产净变化", "Net Asset Change"], ["交易筆數", "交易笔数", "Transactions"], ["符合會員數", "符合会员数", "Matching Members"], ["區間轉入", "区间转入", "Incoming During Period"], ["區間轉出", "区间转出", "Outgoing During Period"], ["區間淨變動", "区间净变化", "Net Change During Period"], ["資產變動筆數", "资产变动笔数", "Asset Transactions"], ["會員區間彙總", "会员区间汇总", "Member Summary for Period"], ["交易紀錄", "交易记录", "Transaction History"], ["類型", "类型", "Type"], ["時間", "时间", "Time"], ["數量", "数量", "Amount"], ["區塊", "区块", "Block"], ["轉入", "转入", "Incoming"], ["轉出", "转出", "Outgoing"], ["淨變動", "净变化", "Net Change"], ["筆數", "笔数", "Count"], ["無交易紀錄", "无交易记录", "No transactions"], ["無會員資料", "无会员数据", "No member data"], ["Mint 收入", "Mint 收入", "Mint Received"], ["Burn 支出", "Burn 支出", "Burn Sent"], ["其他", "其他", "Other"], ["已送出系統列印要求。若仍沒有跳出，請使用右上角選單的分享／列印功能。", "已发送系统打印请求。若仍未打开，请使用浏览器菜单的分享／打印功能。", "System print requested. If the dialog does not open, use the browser menu for Share / Print."], ["此瀏覽器不支援 window.print()。請使用右上角選單的分享／列印功能。", "此浏览器不支持 window.print()。请使用浏览器菜单的分享／打印功能。", "This browser does not support window.print(). Use the browser menu for Share / Print."], ["手機可左右滑動表格查看完整欄位。", "手机可左右滑动表格查看完整字段。", "Swipe tables horizontally to view all columns."]];
+  function lang(){return window.IPTI18N?.getLang?.() || localStorage.getItem("ipt_language") || "zh-TW";}
+  function tr(value){
+    const row=TEXTS.find(r=>r.includes(value));
+    return row?row[lang()==="en"?2:lang()==="zh-CN"?1:0]:String(value??"");
+  }
+  function txLabel(value){
+    const labels={mint:"Mint 收入",burn:"Burn 支出",in:"轉入",incoming:"轉入",out:"轉出",outgoing:"轉出",other:"其他"};
+    return tr(labels[value]||value||"其他");
+  }
+  function render(){
+    document.title="Independent Points｜"+tr("列印／PDF 預覽");
+    document.documentElement.dataset.iptOriginalTitle=document.title;
+    document.querySelector(".top h1").textContent=tr("列印／PDF 預覽");
+    $("printBtn").textContent=tr("開啟系統列印／另存 PDF");
+    $("backBtn").textContent=tr("返回報表");
+    $("printNote").textContent=tr("若 Android 沒有跳出系統列印畫面，仍可在此預覽報表；可再使用瀏覽器右上角選單的分享／列印功能。");
+    $("tableNote").textContent=tr("手機可左右滑動表格查看完整欄位。");
   if(!report){
-    $("sheet").innerHTML='<div class="empty">找不到列印資料，請返回資產報表重新按「列印／PDF 預覽」。</div>';
+    $("sheet").innerHTML=`<div class="empty">${esc(tr("找不到列印資料，請返回資產報表重新按「列印／PDF 預覽」。"))}</div>`;
   }else if(report.kind==="member"){
     const m=report.member||{},s=report.summary||{},f=report.filters||{},txs=report.transactions||[];
     $("sheet").innerHTML=`
-      <h2>${esc(report.title||"我的資產報表")}</h2>
+      <h2>${esc(tr(report.title||"我的資產報表"))}</h2>
       <div class="meta">
-        版本：${esc(report.version||"")}<br>
-        產生時間：${esc(time(report.generated_at))}<br>
-        會員：${esc(m.member_number)}｜${esc(m.display_name)}<br>
+        ${esc(tr("版本"))}: ${esc(report.version||"")}<br>
+        ${esc(tr("產生時間"))}: ${esc(time(report.generated_at))}<br>
+        ${esc(tr("會員"))}: <span data-member-data="1">${esc(m.member_number)}｜${esc(m.display_name)}</span><br>
         Email：${esc(m.email)}<br>
-        錢包：<span style="overflow-wrap:anywhere;word-break:break-word">${esc(m.wallet_address||"尚未綁定")}</span><br>
-        篩選：${esc(f.from||"全部")} ～ ${esc(f.to||"全部")}｜${esc(f.type||"全部交易")}
+        ${esc(tr("錢包"))}: <span style="overflow-wrap:anywhere;word-break:break-word">${esc(m.wallet_address||tr("尚未綁定"))}</span><br>
+        ${esc(tr("篩選"))}: ${esc(f.from||tr("全部"))} ～ ${esc(f.to||tr("全部"))}｜${esc(tr(f.type||"全部交易"))}
       </div>
       <div class="grid">
-        <div class="card"><div class="k">目前餘額</div><div class="v">${esc(fmt6(s.current_balance))} IPT</div></div>
-        <div class="card"><div class="k">累計轉入</div><div class="v">${esc(fmt6(s.incoming))} IPT</div></div>
-        <div class="card"><div class="k">累計轉出</div><div class="v">${esc(fmt6(s.outgoing))} IPT</div></div>
-        <div class="card"><div class="k">資產淨變動</div><div class="v">${esc(fmt6(s.net))} IPT</div></div>
-        <div class="card"><div class="k">交易筆數</div><div class="v">${esc(s.count)}</div></div>
+        <div class="card"><div class="k">${esc(tr("目前餘額"))}</div><div class="v">${esc(fmt6(s.current_balance))} IPT</div></div>
+        <div class="card"><div class="k">${esc(tr("累計轉入"))}</div><div class="v">${esc(fmt6(s.incoming))} IPT</div></div>
+        <div class="card"><div class="k">${esc(tr("累計轉出"))}</div><div class="v">${esc(fmt6(s.outgoing))} IPT</div></div>
+        <div class="card"><div class="k">${esc(tr("資產淨變動"))}</div><div class="v">${esc(fmt6(s.net))} IPT</div></div>
+        <div class="card"><div class="k">${esc(tr("交易筆數"))}</div><div class="v">${esc(s.count)}</div></div>
         <div class="card"><div class="k">Mint / Burn</div><div class="v">${esc(s.mint_burn)}</div></div>
       </div>
-      <h3>交易紀錄</h3>
-      ${txs.length?`<table><thead><tr><th>類型</th><th>時間</th><th>數量</th><th>From</th><th>To</th><th>區塊</th></tr></thead><tbody>${
-        txs.map(tx=>`<tr><td>${esc(tx.type)}</td><td>${esc(time(tx.timestamp))}</td><td>${esc(tx.amount)} IPT</td><td>${esc(shortAddr(tx.from))}</td><td>${esc(shortAddr(tx.to))}</td><td>${esc(tx.block_number)}</td></tr>`).join("")
-      }</tbody></table>`:'<div class="empty">無交易紀錄</div>'}
+      <h3>${esc(tr("交易紀錄"))}</h3>
+      ${txs.length?`<div class="table-scroll" tabindex="0" role="region" aria-label="${esc(tr("交易紀錄"))}"><table><thead><tr><th>${esc(tr("類型"))}</th><th>${esc(tr("時間"))}</th><th>${esc(tr("數量"))}</th><th>From</th><th>To</th><th>${esc(tr("區塊"))}</th></tr></thead><tbody>${
+        txs.map(tx=>`<tr><td>${esc(txLabel(tx.type))}</td><td>${esc(time(tx.timestamp))}</td><td class="number">${esc(tx.amount)} IPT</td><td>${esc(shortAddr(tx.from))}</td><td>${esc(shortAddr(tx.to))}</td><td>${esc(tx.block_number)}</td></tr>`).join("")
+      }</tbody></table></div>`:`<div class="empty">${esc(tr("無交易紀錄"))}</div>`}
     `;
   }else{
     const c=report.criteria||{},s=report.summary||{},members=report.members||[],txs=report.transactions||[];
     $("sheet").innerHTML=`
-      <h2>${esc(report.title||"管理員資產彙總報表")}</h2>
+      <h2>${esc(tr(report.title||"管理員資產彙總報表"))}</h2>
       <div class="meta">
-        版本：${esc(report.version||"")}<br>
-        產生時間：${esc(time(report.generated_at))}<br>
-        篩選：${esc(c.from||"全部")} ～ ${esc(c.to||"全部")}｜${esc(c.type||"全部交易")}｜會員搜尋：${esc(c.query||"全部")}
+        ${esc(tr("版本"))}: ${esc(report.version||"")}<br>
+        ${esc(tr("產生時間"))}: ${esc(time(report.generated_at))}<br>
+        ${esc(tr("篩選"))}: ${esc(c.from||tr("全部"))} ～ ${esc(c.to||tr("全部"))}｜${esc(tr(c.type||"全部交易"))}｜${esc(tr("會員搜尋"))}: ${esc(c.query||tr("全部"))}
       </div>
       <div class="grid">
-        <div class="card"><div class="k">符合會員數</div><div class="v">${esc(s.members)}</div></div>
-        <div class="card"><div class="k">區間轉入</div><div class="v">${esc(fmt6(s.incoming))} IPT</div></div>
-        <div class="card"><div class="k">區間轉出</div><div class="v">${esc(fmt6(s.outgoing))} IPT</div></div>
-        <div class="card"><div class="k">區間淨變動</div><div class="v">${esc(fmt6(s.net))} IPT</div></div>
-        <div class="card"><div class="k">資產變動筆數</div><div class="v">${esc(s.count)}</div></div>
+        <div class="card"><div class="k">${esc(tr("符合會員數"))}</div><div class="v">${esc(s.members)}</div></div>
+        <div class="card"><div class="k">${esc(tr("區間轉入"))}</div><div class="v">${esc(fmt6(s.incoming))} IPT</div></div>
+        <div class="card"><div class="k">${esc(tr("區間轉出"))}</div><div class="v">${esc(fmt6(s.outgoing))} IPT</div></div>
+        <div class="card"><div class="k">${esc(tr("區間淨變動"))}</div><div class="v">${esc(fmt6(s.net))} IPT</div></div>
+        <div class="card"><div class="k">${esc(tr("資產變動筆數"))}</div><div class="v">${esc(s.count)}</div></div>
         <div class="card"><div class="k">Mint / Burn</div><div class="v">${esc(s.mint)} / ${esc(s.burn)}</div></div>
       </div>
-      <h3>會員區間彙總</h3>
-      ${members.length?`<table><thead><tr><th>會員</th><th>目前餘額</th><th>轉入</th><th>轉出</th><th>淨變動</th><th>筆數</th></tr></thead><tbody>${
-        members.map(x=>`<tr><td>${esc(x.member?.member_number)}｜${esc(x.member?.display_name)}</td><td>${esc(fmt6(x.member?.ipt_balance))} IPT</td><td>${esc(fmt6(x.incoming))} IPT</td><td>${esc(fmt6(x.outgoing))} IPT</td><td>${esc(fmt6(x.net))} IPT</td><td>${esc(x.count)}</td></tr>`).join("")
-      }</tbody></table>`:'<div class="empty">無會員資料</div>'}
-      <h3>交易紀錄</h3>
-      ${txs.length?`<table><thead><tr><th>會員</th><th>類型</th><th>時間</th><th>數量</th><th>區塊</th></tr></thead><tbody>${
-        txs.map(x=>`<tr><td>${esc(x.member?.member_number)}｜${esc(x.member?.display_name)}</td><td>${esc(x.tx?.type)}</td><td>${esc(time(x.tx?.timestamp))}</td><td>${esc(x.tx?.amount)} IPT</td><td>${esc(x.tx?.block_number)}</td></tr>`).join("")
-      }</tbody></table>`:'<div class="empty">無交易紀錄</div>'}
+      <h3>${esc(tr("會員區間彙總"))}</h3>
+      ${members.length?`<div class="table-scroll" tabindex="0" role="region" aria-label="${esc(tr("會員區間彙總"))}"><table><thead><tr><th>${esc(tr("會員"))}</th><th>${esc(tr("目前餘額"))}</th><th>${esc(tr("轉入"))}</th><th>${esc(tr("轉出"))}</th><th>${esc(tr("淨變動"))}</th><th>${esc(tr("筆數"))}</th></tr></thead><tbody>${
+        members.map(x=>`<tr><td>${esc(x.member?.member_number)}｜${esc(x.member?.display_name)}</td><td class="number">${esc(fmt6(x.member?.ipt_balance))} IPT</td><td class="number">${esc(fmt6(x.incoming))} IPT</td><td class="number">${esc(fmt6(x.outgoing))} IPT</td><td class="number">${esc(fmt6(x.net))} IPT</td><td>${esc(x.count)}</td></tr>`).join("")
+      }</tbody></table></div>`:`<div class="empty">${esc(tr("無會員資料"))}</div>`}
+      <h3>${esc(tr("交易紀錄"))}</h3>
+      ${txs.length?`<div class="table-scroll" tabindex="0" role="region" aria-label="${esc(tr("交易紀錄"))}"><table><thead><tr><th>${esc(tr("會員"))}</th><th>${esc(tr("類型"))}</th><th>${esc(tr("時間"))}</th><th>${esc(tr("數量"))}</th><th>${esc(tr("區塊"))}</th></tr></thead><tbody>${
+        txs.map(x=>`<tr><td>${esc(x.member?.member_number)}｜${esc(x.member?.display_name)}</td><td>${esc(txLabel(x.tx?.type))}</td><td>${esc(time(x.tx?.timestamp))}</td><td class="number">${esc(x.tx?.amount)} IPT</td><td>${esc(x.tx?.block_number)}</td></tr>`).join("")
+      }</tbody></table></div>`:`<div class="empty">${esc(tr("無交易紀錄"))}</div>`}
     `;
   }
 
+
+  }
+  render();
+  window.addEventListener("ipt-language-change",render);
   $("printBtn").addEventListener("click",()=>{
-    $("printNote").textContent="已送出系統列印要求。若仍沒有跳出，請使用右上角選單的分享／列印功能。";
+    $("printNote").textContent=tr("已送出系統列印要求。若仍沒有跳出，請使用右上角選單的分享／列印功能。");
     try{window.print()}catch(err){
-      $("printNote").textContent="此瀏覽器不支援 window.print()。請使用右上角選單的分享／列印功能。";
+      $("printNote").textContent=tr("此瀏覽器不支援 window.print()。請使用右上角選單的分享／列印功能。");
     }
   });
   $("backBtn").addEventListener("click",()=>history.back());
@@ -472,3 +515,4 @@ if ("serviceWorker" in navigator) {
 
 </body>
 </html>
+
