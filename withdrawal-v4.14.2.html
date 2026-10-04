@@ -125,7 +125,7 @@ pre{
 }
 </style>
 
-<script src="https://avg168.github.io/independent-points/i18n-v4.10.js?v=4142hf43" defer></script>
+<script src="https://avg168.github.io/independent-points/i18n-v4.10.js?v=4142hf50c12" defer></script>
 </head>
 <body>
 <div id="authOverlay">
@@ -232,6 +232,7 @@ pre{
     auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
   });
   const $=id=>document.getElementById(id);
+  const tr=text=>window.IPTI18N?.t(text)||text;
 
   let data=null;
   let busy=false;
@@ -530,22 +531,22 @@ pre{
     const available=Number(data?.platform_ipt?.available_units||0);
     if(!Number.isSafeInteger(units)||units<=0) return;
     if(units>available){
-      alert("可用平台 IPT 不足。");
+      alert(tr("可用平台 IPT 不足。"));
       return;
     }
     if(!data?.chain_wallet?.canonical_verified){
-      alert("需要已驗證的 Sepolia Primary Wallet。");
+      alert(tr("需要已驗證的 Sepolia Primary Wallet。"));
       return;
     }
 
     const amount=fmtUnits(units);
     const address=data.chain_wallet.wallet_address;
     if(!confirm(
-      `確認建立提領申請？\n\n`+
-      `數量：${amount} 平台 IPT\n`+
-      `目的錢包：${address}\n`+
-      `網路：Ethereum Sepolia\n\n`+
-      `此步只會鎖定平台 IPT，不會 Mint、不會送出鏈上交易。`
+      tr("確認建立提領申請？")+"\n\n"+
+      tr("數量：")+amount+" "+tr("平台 IPT")+"\n"+
+      tr("目的錢包：")+address+"\n"+
+      tr("網路：")+"Ethereum Sepolia\n\n"+
+      tr("此步只會鎖定平台 IPT，不會 Mint、不會送出鏈上交易。")
     )) return;
 
     busy=true;
@@ -594,7 +595,7 @@ pre{
   }
 
   async function cancelWithdrawal(id){
-    if(!confirm("確認取消這筆 pending 提領？鎖定的 IPT 會立即回到可用餘額。")) return;
+    if(!confirm(tr("確認取消這筆 pending 提領？鎖定的 IPT 會立即回到可用餘額。"))) return;
 
     busy=true;
     try{
@@ -658,3 +659,4 @@ pre{
 </script>
 </body>
 </html>
+
