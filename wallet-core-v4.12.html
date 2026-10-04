@@ -478,7 +478,7 @@ body.platform-admin.v41-route.route-ownership.show-ownership #securityGuardSecti
 </div>
 <header>
   <div class="v43-product-tag">正式鏈上操作模組</div><div class="v43-module-note">Ethereum Sepolia｜Trust Wallet / WalletConnect</div>
-  <div id="versionBadge" style="display:inline-block;margin-bottom:10px;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.78rem;font-weight:800;letter-spacing:.04em">V4.14.2 CORE | HF50-C5</div>
+  <div id="versionBadge" style="display:inline-block;margin-bottom:10px;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.78rem;font-weight:800;letter-spacing:.04em">V4.14.2 CORE | HF50-C6</div>
   <h1 id="v41RouteTitle">IPT 錢包中心</h1>
   <p id="v41RouteSubtitle">會員帳號 × 主錢包 × 鏈上錢包獨立驗證</p>
   <div class="v41-head-actions">
@@ -840,6 +840,9 @@ const ABI = [
 let wc = null;
 let ep = null;
 let account = "";
+// HF50-C6: readiness is data, independent of translated display text.
+let iptContractReady = false;
+let iptContractReadAccount = "";
 const READ_RPCS = [
   "https://ethereum-sepolia-rpc.publicnode.com",
   "https://ethereum-sepolia.publicnode.com",
@@ -1105,11 +1108,15 @@ async function initWC() {
   });
 
   wc.on("accountsChanged", async (accounts) => {
+    iptContractReady = false;
+    iptContractReadAccount = "";
     account = accounts?.[0] || "";
     await renderSession();
   });
 
   wc.on("chainChanged", async () => {
+    iptContractReady = false;
+    iptContractReadAccount = "";
     await renderSession();
   });
 
@@ -1160,6 +1167,8 @@ async function renderSession() {
 }
 
 function resetDisconnected() {
+  iptContractReady = false;
+  iptContractReadAccount = "";
   account = "";
   ep = null;
   setSessionBox("warn", "尚未連線。");
@@ -1255,6 +1264,8 @@ $("readBtn").addEventListener("click", async () => {
   const btn = $("readBtn");
 
   try {
+    iptContractReady = false;
+    iptContractReadAccount = "";
     await iptRefreshMemberWalletState();
     btn.disabled = true;
     btn.textContent = "正在讀取 Sepolia…";
@@ -1275,6 +1286,9 @@ $("readBtn").addEventListener("click", async () => {
       throw new Error("沒有取得目前錢包地址。");
     }
 
+    const readAccount = account;
+    const readChain = await chainIdOf(wc);
+    if (Number(readChain) !== 11155111) throw new Error("請切換至 Ethereum Sepolia。");
     const rp = await getWorkingReadProvider();
 
     const code = await withTimeout(
@@ -1303,12 +1317,15 @@ $("readBtn").addEventListener("click", async () => {
         c.paused(),
         c.totalSupply(),
         c.cap(),
-        c.balanceOf(account)
+        c.balanceOf(readAccount)
       ]),
       15000,
       "讀取 IPT 合約資料"
     );
 
+    if (!wc?.session || !same(account, readAccount) || Number(await chainIdOf(wc)) !== 11155111) {
+      throw new Error("錢包或網路已變更，請重新讀取鏈上資料。");
+    }
     const d = Number(decimals);
     const supplyText = fmtIPT6(totalSupply, d);
     const balText = fmtIPT6(bal, d);
@@ -1335,6 +1352,10 @@ $("readBtn").addEventListener("click", async () => {
     $("balance").textContent = balText + " IPT";
     $("supply").textContent = supplyText + " IPT";
     $("remaining").textContent = remainText + " IPT";
+    iptContractReady = allOk;
+    iptContractReadAccount = allOk ? readAccount : "";
+    iptRenderMemberWalletState();
+    originalReadHandlerEnable();
 
     $("contractData").className = "box " + (allOk ? "ok" : "err");
     $("contractData").innerHTML =
@@ -1349,6 +1370,8 @@ $("readBtn").addEventListener("click", async () => {
       "<span class='muted'>Owner 採鏈上動態驗證；管理權合法交接後，不會再因與最初部署 Owner 不同而誤判。</span>";
 
   } catch (e) {
+    iptContractReady = false;
+    iptContractReadAccount = "";
     $("contractState").textContent = "讀取失敗";
     $("contractData").className = "box err";
     $("contractData").textContent =
@@ -1797,7 +1820,7 @@ $("sendTransferBtn").addEventListener("click", async () => {
 // Enable transfer preflight after a successful contract read and active session.
 const originalReadHandlerEnable = () => {
   const connected = !!(wc?.session && account);
-  const contractOk = $("contractState").textContent === "正常";
+  const contractOk = iptContractReady && same(account, iptContractReadAccount);
   const memberWalletOk = iptMemberWalletStateLoaded &&
     iptMemberPrimaryVerified &&
     same(account,iptMemberPrimaryWallet);
@@ -2115,7 +2138,7 @@ $("sendBurnBtn").addEventListener("click", async () => {
 
 const enableBurnPreflight = () => {
   const connected = !!(wc?.session && account);
-  const contractOk = $("contractState").textContent === "正常";
+  const contractOk = iptContractReady && same(account, iptContractReadAccount);
   const memberWalletOk = iptMemberWalletStateLoaded &&
     iptMemberPrimaryVerified &&
     same(account,iptMemberPrimaryWallet);
@@ -2508,7 +2531,7 @@ $("sendMintBtn").addEventListener("click", async () => {
 const enableMintPreflight = async () => {
   try {
     const connected = !!(wc?.session && account);
-    const contractOk = $("contractState").textContent === "正常";
+    const contractOk = iptContractReady && same(account, iptContractReadAccount);
 
     if (!connected || !contractOk) {
       $("preflightMintBtn").disabled = true;
@@ -2600,7 +2623,7 @@ async function readAdminPauseState() {
 
   try {
     const connected = !!(wc?.session && account);
-    const contractOk = $("contractState").textContent === "正常";
+    const contractOk = iptContractReady && same(account, iptContractReadAccount);
 
     if (!connected || !contractOk) {
       $("adminPausedState").textContent = "尚未連線或合約尚未驗證";
@@ -3027,7 +3050,7 @@ async function readOwnershipState() {
 
   try {
     const connected = !!(wc?.session && account);
-    const contractOk = $("contractState").textContent === "正常";
+    const contractOk = iptContractReady && same(account, iptContractReadAccount);
 
     if (!connected || !contractOk) {
       $("ownershipOwner").textContent = "尚未連線或合約尚未驗證";
@@ -3967,3 +3990,4 @@ if ("serviceWorker" in navigator) {
 
 </body>
 </html>
+
