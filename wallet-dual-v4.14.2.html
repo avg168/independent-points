@@ -1089,10 +1089,15 @@ h2{margin:0 0 12px;font-size:1.12rem}
     const member=platformData?.member||{};
     const memberNumber=String(member.member_number||"").trim();
     if(!memberNumber) return;
-    const text=`Independent Points 平台 IPT 收款\n收款人：${member.display_name||tr("IPT 會員")}\n會員編號：${memberNumber}\n${paymentLinkUrl||""}`;
+    const shareLabels=activeLang()==="en"
+      ? {title:"Independent Points Platform IPT Receive",recipient:"Recipient",number:"Member Number",fallback:"IPT Member"}
+      : activeLang()==="zh-CN"
+      ? {title:"Independent Points 平台 IPT 收款",recipient:"收款人",number:"会员编号",fallback:"IPT 会员"}
+      : {title:"Independent Points 平台 IPT 收款",recipient:"收款人",number:"會員編號",fallback:"IPT 會員"};
+    const text=`${shareLabels.title}\n${shareLabels.recipient}: ${member.display_name||shareLabels.fallback}\n${shareLabels.number}: ${memberNumber}\n${paymentLinkUrl||""}`;
     try{
       if(navigator.share){
-        await navigator.share({title:"Independent Points 平台 IPT 收款",text});
+        await navigator.share({title:shareLabels.title,text});
       }else{
         await navigator.clipboard.writeText(text);
         $("receiveStatus").className="status ok";
@@ -1131,5 +1136,6 @@ h2{margin:0 0 12px;font-size:1.12rem}
 </script>
 </body>
 </html>
+
 
 
