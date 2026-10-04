@@ -84,7 +84,7 @@ input{
 </head>
 <body>
 <header>
-  <div class="badge">V4.14.2 | HF50-C22</div>
+  <div class="badge">V4.14.2 | HF50-C23</div>
   <h1>帳戶安全與權限中心</h1>
   <p>集中管理管理員權限、會員停權、錢包驗證狀態、會員稽核與高風險操作入口。</p>
 </header>
@@ -272,7 +272,7 @@ input{
       const statusBtn=m.is_self||m.role==="admin"?"":(
         m.status==="suspended"
         ?`<button class="primary statusActionBtn" data-id="${esc(m.user_id)}" data-status="active" data-number="${esc(m.member_number)}">恢復會員</button>`
-        :`<button class="danger statusActionBtn" data-id="${esc(m.user_id)}" data-status="suspended" data-number="${esc(m.member_number)}">停權會員</button>`
+        :`<button class="danger statusActionBtn" data-id="${esc(m.user_id)}" data-status="suspended" data-number="${esc(m.member_number)}">${esc(L("停權會員","停权会员","Suspend Member"))}</button>`
       );
       const roleBtn=m.is_self?"":(
         m.role==="admin"
@@ -389,7 +389,7 @@ input{
         <h2 style="margin-top:20px">錢包驗證</h2>
         ${wallets.length?wallets.map(w=>`<div class="detail-box" style="margin-bottom:8px">
           <div class="k">${w.label?`<span data-raw-data="1">${esc(w.label)}</span>`:esc(tr("錢包"))}${w.is_primary?"｜主錢包":""}</div>
-          <div class="v"><span data-raw-data="1">${esc(w.wallet_address)}</span><br>${w.verified_at?"已驗證："+esc(time(w.verified_at)):"未驗證"}</div>
+          <div class="v"><span data-raw-data="1">${esc(w.wallet_address)}</span><br>${w.verified_at?esc(L("已驗證：","已验证：","Verified: "))+esc(time(w.verified_at)):esc(L("未驗證","未验证","Unverified"))}</div>
         </div>`).join(""):'<div class="detail-box"><div class="v">尚未綁定錢包</div></div>'}
         <h2 style="margin-top:20px">最近管理稽核</h2>
         ${audit.length?audit.slice(0,30).map(a=>`<div class="audit" data-raw-data="1">${esc(time(a.created_at))}｜${esc(a.action)}｜${esc(a.note||"")}</div>`).join(""):'<div class="detail-box"><div class="v">尚無管理紀錄</div></div>'}
@@ -442,4 +442,5 @@ if("serviceWorker" in navigator){
 </script>
 </body>
 </html>
+
 
