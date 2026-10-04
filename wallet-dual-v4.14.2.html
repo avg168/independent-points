@@ -232,7 +232,7 @@ h2{margin:0 0 12px;font-size:1.12rem}
     <h2>平台 IPT 收款</h2>
     <div class="receive-card">
       <div class="note">我的平台會員編號</div>
-      <div id="receiveDisplayName" class="receive-member">—</div>
+      <div id="receiveDisplayName" data-member-data="1" class="receive-member">—</div>
       <div id="receiveMemberNumber" class="receive-number">—</div>
       <div id="platformReceiveQr"></div>
       <div class="note">對方掃描後可直接帶入你的會員編號，再確認轉帳。</div>
@@ -264,7 +264,7 @@ h2{margin:0 0 12px;font-size:1.12rem}
     <button id="lookupRecipientBtn" class="btn light" type="button">查詢收款會員</button>
 
     <div id="recipientCard" class="recipient-card">
-      <div class="recipient-name" id="recipientName">—</div>
+      <div class="recipient-name" id="recipientName" data-member-data="1">—</div>
       <div class="recipient-number" id="recipientNumber">—</div>
     </div>
 
@@ -576,7 +576,7 @@ h2{margin:0 0 12px;font-size:1.12rem}
   async function renderReceive(){
     const member=platformData?.member||{};
     const memberNumber=String(member.member_number||"").trim();
-    $("receiveDisplayName").textContent=member.display_name||"IPT 會員";
+    $("receiveDisplayName").textContent=member.display_name||tr("IPT 會員");
     $("receiveMemberNumber").textContent=memberNumber||"—";
 
     const qrBox=$("platformReceiveQr");
@@ -769,7 +769,7 @@ h2{margin:0 0 12px;font-size:1.12rem}
       if(!data?.recipient?.member_number) throw new Error("找不到收款會員");
 
       recipient=data.recipient;
-      $("recipientName").textContent=recipient.display_name||"IPT 會員";
+      $("recipientName").textContent=recipient.display_name||tr("IPT 會員");
       $("recipientNumber").textContent=recipient.member_number;
       $("recipientCard").classList.add("show");
       $("transferStatus").className="status ok";
@@ -991,7 +991,7 @@ h2{margin:0 0 12px;font-size:1.12rem}
       }catch(_){}
 
       $("recipientMemberNumber").value=recipient.member_number;
-      $("recipientName").textContent=recipient.display_name||"IPT 會員";
+      $("recipientName").textContent=recipient.display_name||tr("IPT 會員");
       $("recipientNumber").textContent=recipient.member_number;
       $("recipientCard").classList.add("show");
 
@@ -1089,7 +1089,7 @@ h2{margin:0 0 12px;font-size:1.12rem}
     const member=platformData?.member||{};
     const memberNumber=String(member.member_number||"").trim();
     if(!memberNumber) return;
-    const text=`Independent Points 平台 IPT 收款\n收款人：${member.display_name||"IPT 會員"}\n會員編號：${memberNumber}\n${paymentLinkUrl||""}`;
+    const text=`Independent Points 平台 IPT 收款\n收款人：${member.display_name||tr("IPT 會員")}\n會員編號：${memberNumber}\n${paymentLinkUrl||""}`;
     try{
       if(navigator.share){
         await navigator.share({title:"Independent Points 平台 IPT 收款",text});
@@ -1131,4 +1131,5 @@ h2{margin:0 0 12px;font-size:1.12rem}
 </script>
 </body>
 </html>
+
 
