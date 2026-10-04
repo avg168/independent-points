@@ -1,0 +1,1 @@
+HF49-C 會員錢包綁定中心。先只新增 wallet-bind-v4.14.2.html 做 Android/Trust Wallet 獨立驗收；本包不覆蓋 index.html。後端使用 bind-wallet，簽章成功才建立 Primary + Verified Wallet。
