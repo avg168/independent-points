@@ -469,7 +469,7 @@ body.platform-admin.v41-route.route-ownership.show-ownership #securityGuardSecti
 <link rel="icon" type="image/svg+xml" href="./ipt-icon-192.png">
 
 <link rel="apple-touch-icon" href="./ipt-apple-touch-180.png">
-<script src="./i18n-v4.10.js?v=4142hf50c7" defer></script>
+<script src="./i18n-v4.10.js?v=4142hf50c19" defer></script>
 </head>
 <body>
 <div class="v42-sticky-nav">
@@ -478,7 +478,7 @@ body.platform-admin.v41-route.route-ownership.show-ownership #securityGuardSecti
 </div>
 <header>
   <div class="v43-product-tag">正式鏈上操作模組</div><div class="v43-module-note">Ethereum Sepolia｜Trust Wallet / WalletConnect</div>
-  <div id="versionBadge" style="display:inline-block;margin-bottom:10px;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.78rem;font-weight:800;letter-spacing:.04em">V4.14.2 CORE | HF50-C17</div>
+  <div id="versionBadge" style="display:inline-block;margin-bottom:10px;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.78rem;font-weight:800;letter-spacing:.04em">V4.14.2 CORE | HF50-C19</div>
   <h1 id="v41RouteTitle">IPT 錢包中心</h1>
   <p id="v41RouteSubtitle">會員帳號 × 主錢包 × 鏈上錢包獨立驗證</p>
   <div class="v41-head-actions">
@@ -1723,11 +1723,11 @@ $("sendTransferBtn").addEventListener("click", async () => {
 
     const amountText = fmtIPT6(transferState.amountRaw, 2);
     const ok = window.confirm(
-      "確認在 Ethereum Sepolia 轉出 " +
+      window.IPTI18N.t("確認在 Ethereum Sepolia 轉出 ") +
       amountText +
-      " IPT 到：\n" +
+      window.IPTI18N.t(" IPT 到：")+"\n" +
       transferState.to +
-      "\n\n這是測試網交易，仍會消耗 Sepolia Gas。"
+      "\n\n"+window.IPTI18N.t("這是測試網交易，仍會消耗 Sepolia Gas。")
     );
     if (!ok) return;
 
@@ -3992,6 +3992,7 @@ if ("serviceWorker" in navigator) {
 
 </body>
 </html>
+
 
 
 
