@@ -72,10 +72,11 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
 .langbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.langbar button{min-height:38px;padding:7px 10px}
 @media(max-width:520px){.grid,.actions{grid-template-columns:1fr}}
 </style>
+<script src="./auth-i18n-hf50c4.js?v=4142hf50c4"></script>
 </head>
 <body>
 <header>
-  <div class="version">V4.14.2｜正式登入、密碼與 MFA</div>
+  <div class="version">V4.14.2｜HF50-C4</div>
   <h1 id="title">帳戶安全與 MFA</h1>
   <p id="subtitle">每次登入重新確認身分；管理員使用驗證器 App 進行第二因素驗證。</p>
   <div class="langbar">
@@ -283,7 +284,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
     const box=$("paymentReturnStatus");
     if(!box) return;
     box.className="status"+(kind?" "+kind:"");
-    box.textContent=text;
+    box.textContent=window.IPTAuthTranslate(text,lang);
   }
 
   async function updatePaymentReturn(autoReturn=true){
@@ -463,8 +464,14 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
   };
 
   function T(k){return (S[lang]||S["zh-TW"])[k]||k}
-  function status(id,kind,text){const e=$(id);e.className="status "+kind;e.textContent=text}
+  function status(id,kind,text){const e=$(id);e.className="status "+kind;e.textContent=window.IPTAuthTranslate(text,lang)}
   function applyLang(){
+    document.title=lang==="en"?"Independent Points V4.14.2 | Account Security & MFA":lang==="zh-CN"?"Independent Points V4.14.2｜账户安全与 MFA":"Independent Points V4.14.2｜帳戶安全與 MFA";
+    const returnTitle=$("paymentReturnPanel")?.querySelector("h2");
+    if(returnTitle) returnTitle.textContent=window.IPTAuthTranslate("返回平台 IPT 付款",lang);
+    for(const [id,text] of [["paymentReturnStatus","正在確認登入、MFA 與受信任裝置…"],["paymentReturnBtn","返回付款頁"],["paymentDeviceBtn","完成受信任裝置驗證"]]){
+      if($(id)) $(id).textContent=window.IPTAuthTranslate(text,lang);
+    }
     localStorage.setItem("ipt_language",lang);
     document.documentElement.lang=lang==="en"?"en":(lang==="zh-CN"?"zh-Hans":"zh-Hant");
     ["title","subtitle","hLogin","loginNote","hIdentity","kEmail","kUser","kAal","kFactor","hPassword","passwordNote","hMfa","enrollNote","challengeNote","hTrustedDevice","trustedDeviceNote","trustedDeviceHelp","hSession","sessionPolicy","rolloutNote"].forEach(id=>{
@@ -642,7 +649,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       <div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;border:1px solid #e1e7ef;border-radius:12px;padding:10px;margin-top:8px;background:#f8fafc">
         <div>
           <strong>${escFactorName(f.friendly_name)||`${T("factorLabel")} ${i+1}`}</strong>
-          <div class="note" style="margin-top:3px">TOTP · verified</div>
+          <div class="note" style="margin-top:3px">TOTP · ${lang==="en"?"Verified":lang==="zh-CN"?"已验证":"已驗證"}</div>
         </div>
         <button class="light removeVerifiedFactorBtn" data-factor-id="${f.id}" type="button" ${verifiedFactors.length<=1?"disabled":""} style="min-height:40px;padding:7px 10px">${T("removeFactor")}</button>
       </div>
@@ -899,7 +906,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
   };
 
   $("signOutBtn").onclick=async()=>{
-    if(!confirm(lang==="en"?"Sign out on this device?":"確定要登出此裝置嗎？"))return;
+    if(!confirm(window.IPTAuthTranslate("確定要登出此裝置嗎？",lang)))return;
     const btn=$("signOutBtn");
     btn.disabled=true;
     try{
@@ -937,7 +944,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
     const msg=prefix+(e?.message||String(e));
     ["identityStatus","mfaStatus","passwordStatus","loginStatus"].forEach(id=>{
       const el=document.getElementById(id);
-      if(el){el.className="status err";el.textContent=msg;}
+      if(el){el.className="status err";el.textContent=window.IPTAuthTranslate(msg,langSafe);}
     });
   }
 })();
