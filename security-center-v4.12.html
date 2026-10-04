@@ -79,12 +79,12 @@ input{
 .hidden{display:none!important}
 @media(min-width:720px){.grid{grid-template-columns:repeat(6,minmax(0,1fr))}}
 </style>
-<script src="./i18n-v4.10.js?v=4142hf43" defer></script>
+<script src="./i18n-v4.10.js?v=4142hf50c22" defer></script>
 <script src="./auth-guard-v4.12.js?v=4142hf43"></script>
 </head>
 <body>
 <header>
-  <div class="badge">V4.14.2</div>
+  <div class="badge">V4.14.2 | HF50-C22</div>
   <h1>帳戶安全與權限中心</h1>
   <p>集中管理管理員權限、會員停權、錢包驗證狀態、會員稽核與高風險操作入口。</p>
 </header>
@@ -160,6 +160,8 @@ input{
 <script>
 /* V4.14.2 Production Seal */
 (() => {
+  const tr=s=>window.IPTI18N?.t?.(s)??s;
+  const tf=(key,values)=>tr(key).replace(/\{(\w+)\}/g,(_,name)=>String(values[name]??""));
   const URL="https://uccexvgqmoxhgykkjdcy.supabase.co";
   const KEY="sb_publishable_FBsN1DYTQMv2_bWhpbXHAA_qdAq7ri7";
   const sb=window.supabase.createClient(URL,KEY,{
@@ -214,19 +216,19 @@ input{
 
     const self=members.find(x=>x.is_self);
     const issues=[];
-    if(admin<1) issues.push("沒有管理員");
-    if(!self) issues.push("找不到目前管理員帳戶");
-    if(self?.status==="suspended") issues.push("目前管理員狀態為停權");
-    if(unverified>0) issues.push(`${unverified} 位會員錢包尚未驗證`);
-    if(suspended>0) issues.push(`${suspended} 位會員目前停權`);
+    if(admin<1) issues.push(tr("沒有管理員"));
+    if(!self) issues.push(tr("找不到目前管理員帳戶"));
+    if(self?.status==="suspended") issues.push(tr("目前管理員狀態為停權"));
+    if(unverified>0) issues.push(tf("{count} 位會員錢包尚未驗證",{count:unverified}));
+    if(suspended>0) issues.push(tf("{count} 位會員目前停權",{count:suspended}));
 
     const box=$("securitySummary");
     if(!issues.length){
       box.className="safe";
-      box.textContent="目前帳戶與權限狀態沒有發現需要立即處理的項目。";
+      box.textContent=tr("目前帳戶與權限狀態沒有發現需要立即處理的項目。");
     }else{
       box.className="risk";
-      box.textContent="需留意："+issues.join("；")+"。";
+      box.textContent=tr("需留意：")+issues.join("；")+"。";
     }
   }
 
@@ -248,7 +250,7 @@ input{
           <div class="member-title"><span data-member-data="1">${esc(m.member_number)}｜${esc(m.display_name)}</span></div>
         </div>
         <div class="chips">${memberBadges(m)}</div>
-        <div class="meta">Email：${esc(m.email||"—")}<br>錢包：${esc(m.wallet_address||L("尚未綁定","尚未绑定","Not Linked"))}</div>
+        <div class="meta">Email：<span data-raw-data="1">${esc(m.email||"—")}</span><br>錢包：<span data-raw-data="1">${esc(m.wallet_address||L("尚未綁定","尚未绑定","Not Linked"))}</span></div>
         <div class="actions" style="margin-top:10px">
           <button class="light detailBtn" data-id="${esc(m.user_id)}">查看稽核</button>
           ${demote}
@@ -281,8 +283,8 @@ input{
         <div class="member-title"><span data-member-data="1">${esc(m.member_number)}｜${esc(m.display_name)}</span></div>
         <div class="chips">${memberBadges(m)}</div>
         <div class="meta">
-          Email：${esc(m.email||"—")}<br>
-          錢包：${esc(m.wallet_address||L("尚未綁定","尚未绑定","Not Linked"))}<br>
+          Email：<span data-raw-data="1">${esc(m.email||"—")}</span><br>
+          錢包：<span data-raw-data="1">${esc(m.wallet_address||L("尚未綁定","尚未绑定","Not Linked"))}</span><br>
           常用收款人：${esc(m.contacts_count??0)} 筆
         </div>
         <div class="actions" style="margin-top:10px">
@@ -317,7 +319,7 @@ input{
     $("walletList").innerHTML=list.map(m=>`<article class="member">
       <div class="member-title"><span data-member-data="1">${esc(m.member_number)}｜${esc(m.display_name)}</span></div>
       <div class="chips">${memberBadges(m)}</div>
-      <div class="meta">錢包：${esc(m.wallet_address||L("尚未綁定","尚未绑定","Not Linked"))}</div>
+      <div class="meta">錢包：<span data-raw-data="1">${esc(m.wallet_address||L("尚未綁定","尚未绑定","Not Linked"))}</span></div>
       <button class="light detailBtn" data-id="${esc(m.user_id)}" style="width:100%;margin-top:10px">查看錢包明細</button>
     </article>`).join("");
     bindDetailButtons();
@@ -332,40 +334,40 @@ input{
   }
 
   async function confirmTyped(memberNumber,actionText){
-    const first=confirm(`${actionText}會直接改變會員權限。是否繼續？`);
+    const first=confirm(tf("{action}會直接改變會員權限。是否繼續？",{action:tr(actionText)}));
     if(!first)return false;
-    const typed=prompt(`請輸入會員編號 ${memberNumber} 以確認：`);
+    const typed=prompt(tf("請輸入會員編號 {number} 以確認：",{number:memberNumber}));
     if(typed===null)return false;
     if(typed.trim()!==memberNumber){
-      alert("會員編號不一致，操作已取消。");
+      alert(tr("會員編號不一致，操作已取消。"));
       return false;
     }
     return true;
   }
 
   async function changeStatus(id,newStatus,memberNumber){
-    const actionText=newStatus==="suspended"?"停權會員":"恢復會員";
+    const actionText=newStatus==="suspended"?L("停權會員","停权会员","Suspend Member"):L("恢復會員","恢复会员","Restore Member");
     if(!await confirmTyped(memberNumber,actionText))return;
-    status("","正在更新會員狀態…");
+    status("",tr("正在更新會員狀態…"));
     try{
       await invoke("admin-member-actions",{
         action:"set_status",target_user_id:id,status:newStatus,
         note:"安全與權限中心"
       });
       await load($("queryInput").value.trim());
-    }catch(e){status("err","更新失敗："+(e?.message||String(e)))}
+    }catch(e){status("err",tr("更新失敗：")+(e?.message||String(e)))}
   }
 
   async function changeRole(id,newRole,memberNumber,actionText){
     if(!await confirmTyped(memberNumber,actionText))return;
-    status("","正在更新會員角色…");
+    status("",tr("正在更新會員角色…"));
     try{
       await invoke("admin-member-actions",{
         action:"set_role",target_user_id:id,role:newRole,
         note:"安全與權限中心"
       });
       await load($("queryInput").value.trim());
-    }catch(e){status("err","更新失敗："+(e?.message||String(e)))}
+    }catch(e){status("err",tr("更新失敗：")+(e?.message||String(e)))}
   }
 
   async function loadDetail(id){
@@ -381,16 +383,16 @@ input{
         <div class="detail-grid">
           <div class="detail-box"><div class="k">會員</div><div class="v"><span data-member-data="1">${esc(m.member_number)}｜${esc(m.display_name)}</span></div></div>
           <div class="detail-box"><div class="k">角色／狀態</div><div class="v">${esc(m.role||"member")}／${esc(m.status||"active")}</div></div>
-          <div class="detail-box"><div class="k">Email</div><div class="v">${esc(m.email||"—")}</div></div>
+          <div class="detail-box"><div class="k">Email</div><div class="v"><span data-raw-data="1">${esc(m.email||"—")}</span></div></div>
           <div class="detail-box"><div class="k">最近登入</div><div class="v">${esc(time(m.last_sign_in_at))}</div></div>
         </div>
         <h2 style="margin-top:20px">錢包驗證</h2>
         ${wallets.length?wallets.map(w=>`<div class="detail-box" style="margin-bottom:8px">
-          <div class="k">${esc(w.label||"錢包")}${w.is_primary?"｜主錢包":""}</div>
-          <div class="v">${esc(w.wallet_address)}<br>${w.verified_at?"已驗證："+esc(time(w.verified_at)):"未驗證"}</div>
+          <div class="k">${w.label?`<span data-raw-data="1">${esc(w.label)}</span>`:esc(tr("錢包"))}${w.is_primary?"｜主錢包":""}</div>
+          <div class="v"><span data-raw-data="1">${esc(w.wallet_address)}</span><br>${w.verified_at?"已驗證："+esc(time(w.verified_at)):"未驗證"}</div>
         </div>`).join(""):'<div class="detail-box"><div class="v">尚未綁定錢包</div></div>'}
         <h2 style="margin-top:20px">最近管理稽核</h2>
-        ${audit.length?audit.slice(0,30).map(a=>`<div class="audit">${esc(time(a.created_at))}｜${esc(a.action)}｜${esc(a.note||"")}</div>`).join(""):'<div class="detail-box"><div class="v">尚無管理紀錄</div></div>'}
+        ${audit.length?audit.slice(0,30).map(a=>`<div class="audit" data-raw-data="1">${esc(time(a.created_at))}｜${esc(a.action)}｜${esc(a.note||"")}</div>`).join(""):'<div class="detail-box"><div class="v">尚無管理紀錄</div></div>'}
       `;
     }catch(e){
       $("detailContent").innerHTML=`<div class="status err">載入失敗：${esc(e?.message||String(e))}</div>`;
@@ -398,7 +400,7 @@ input{
   }
 
   async function load(query=""){
-    status("","正在載入安全與權限資料…");
+    status("",tr("正在載入安全與權限資料…"));
     try{
       const data=await invoke("admin-members",{query});
       members=data.members||[];
@@ -411,7 +413,7 @@ input{
       status("ok",L(`V4.14.2 安全中心已載入｜管理員：${data.admin?.email||"已登入"}`,`V4.14.2 安全中心已加载｜管理员：${data.admin?.email||"已登录"}`,`V4.14.2 Security Center loaded | Admin: ${data.admin?.email||"Signed in"}`));
     }catch(e){
       $("contentArea").classList.add("hidden");
-      status("err","載入失敗："+(e?.message||String(e)));
+      status("err",tr("載入失敗：")+(e?.message||String(e)));
     }
   }
 
@@ -440,3 +442,4 @@ if("serviceWorker" in navigator){
 </script>
 </body>
 </html>
+
