@@ -23,26 +23,144 @@ button{
   .value,#candidate,#walletState,#bindState{font-size:.96rem;line-height:1.65}
 }
 </style>
+<script src="./i18n-v4.10.js?v=4142hf50c1" defer></script>
 </head>
-<body><header><div>V4.14.2｜HF49-G</div><h1>會員錢包綁定中心</h1><p>Trust Wallet × Ethereum Sepolia × 簽章所有權驗證</p></header><main>
-<section class="panel"><h2>① 會員身分</h2><div id="memberState" class="status">正在確認…</div><div class="row"><div class="label">會員</div><div id="memberName" class="value">—</div></div><div class="row"><div class="label">目前主錢包</div><div id="currentPrimary" class="value">—</div></div><div class="row"><div class="label">驗證狀態</div><div id="currentVerified" class="value">—</div></div></section>
+<body><header><div>V4.14.2｜HF50-C2</div><h1>會員錢包綁定中心</h1><p>Trust Wallet × Ethereum Sepolia × 簽章所有權驗證</p></header><main>
+<section class="panel"><h2>① 會員身分</h2><div id="memberState" class="status">正在確認…</div><div class="row"><div class="label">會員</div><div id="memberName" class="value" data-member-data="1">—</div></div><div class="row"><div class="label">目前主錢包</div><div id="currentPrimary" class="value" data-member-data="1">—</div></div><div class="row"><div class="label">驗證狀態</div><div id="currentVerified" class="value">—</div></div></section>
 <section class="panel"><h2>② 連接 Trust Wallet</h2><div id="walletState" class="status warn">尚未連線。</div><button id="connectBtn" class="blue" disabled>連接 Trust Wallet</button><button id="disconnectBtn" class="light" disabled>中斷連線／切換錢包</button><div class="note">請選擇這位會員自己的錢包。已屬於其他會員的地址無法綁定。</div></section>
-<section class="panel"><h2>③ 簽章驗證並綁定</h2><div id="bindState" class="status warn">請先確認會員身分並連接 Trust Wallet。</div><div class="row"><div class="label">即將綁定地址</div><div id="candidate" class="value">—</div></div><div class="row"><div class="label">網路</div><div class="value">Ethereum Sepolia｜11155111</div></div><button id="bindBtn" class="primary" disabled>簽署驗證並設為我的主錢包</button><div class="note"><b>簽署不是轉帳。</b>不扣 IPT、不送出鏈上交易，也不需要 Gas。簽章成功後才建立正式主錢包與驗證紀錄。</div></section>
+<section class="panel"><h2>③ 簽章驗證並綁定</h2><div id="bindState" class="status warn">請先確認會員身分並連接 Trust Wallet。</div><div class="row"><div class="label">即將綁定地址</div><div id="candidate" class="value" data-member-data="1">—</div></div><div class="row"><div class="label">網路</div><div class="value">Ethereum Sepolia｜11155111</div></div><button id="bindBtn" class="primary" disabled>簽署驗證並設為我的主錢包</button><div class="note"><b>簽署不是轉帳。</b>不扣 IPT、不送出鏈上交易，也不需要 Gas。簽章成功後才建立正式主錢包與驗證紀錄。</div></section>
 <section class="panel"><button id="homeBtn" class="light">返回首頁</button></section></main>
+
+<script id="hf50c2-wallet-i18n">
+(() => {
+  const dictionaries={"zh-CN":{
+  "IPT｜會員錢包綁定中心": "IPT｜会员钱包绑定中心",
+  "會員錢包綁定中心": "会员钱包绑定中心",
+  "Trust Wallet × Ethereum Sepolia × 簽章所有權驗證": "Trust Wallet × Ethereum Sepolia × 签名所有权验证",
+  "① 會員身分": "① 会员身份",
+  "② 連接 Trust Wallet": "② 连接 Trust Wallet",
+  "③ 簽章驗證並綁定": "③ 签名验证并绑定",
+  "正在確認…": "正在确认…",
+  "目前主錢包": "当前主钱包",
+  "驗證狀態": "验证状态",
+  "尚未連線。": "尚未连接。",
+  "中斷連線／切換錢包": "断开连接／切换钱包",
+  "請選擇這位會員自己的錢包。已屬於其他會員的地址無法綁定。": "请选择这位会员自己的钱包。已属于其他会员的地址无法绑定。",
+  "請先確認會員身分並連接 Trust Wallet。": "请先确认会员身份并连接 Trust Wallet。",
+  "即將綁定地址": "即将绑定地址",
+  "簽署驗證並設為我的主錢包": "签名验证并设为我的主钱包",
+  "簽署不是轉帳。": "签名不是转账。",
+  "不扣 IPT、不送出鏈上交易，也不需要 Gas。簽章成功後才建立正式主錢包與驗證紀錄。": "不扣 IPT、不发送链上交易，也不需要 Gas。签名成功后才建立正式主钱包与验证记录。",
+  "請先登入會員。": "请先登录会员。",
+  "這個瀏覽器尚未通過受信任裝置驗證。": "此浏览器尚未通过可信设备验证。",
+  "會員不是正常狀態。": "会员不是正常状态。",
+  "尚未綁定": "尚未绑定",
+  "已驗證 ✓": "已验证 ✓",
+  "未驗證": "未验证",
+  "會員身分與受信任裝置驗證通過。": "会员身份与可信设备验证通过。",
+  "舊 WalletConnect 連線已清除。請按「連接 Trust Wallet」重新選擇錢包。": "旧 WalletConnect 连接已清除。请点击“连接 Trust Wallet”重新选择钱包。",
+  "尚未建立新的錢包連線；不要使用舊 Owner Wallet 進行綁定。": "尚未建立新的钱包连接；请勿使用旧 Owner Wallet 进行绑定。",
+  "目前地址已是會員主錢包，可重新驗證。": "当前地址已是会员主钱包，可重新验证。",
+  "請核對完整地址後再簽署驗證。": "请核对完整地址后再签名验证。",
+  "確定要清除目前 WalletConnect 連線並重新選擇錢包嗎？\n\n這不會刪除 Trust Wallet，也不會移動任何 IPT。": "确定要清除当前 WalletConnect 连接并重新选择钱包吗？\n\n这不会删除 Trust Wallet，也不会移动任何 IPT。",
+  "Trust Wallet 45 秒內沒有回應。尚未建立任何錢包綁定，請確認 Trust Wallet 已開啟後重新嘗試。": "Trust Wallet 在 45 秒内未响应。尚未建立任何钱包绑定，请确认 Trust Wallet 已打开后重试。",
+  "會員或錢包尚未就緒。": "会员或钱包尚未就绪。",
+  "確認把畫面上的完整地址設為這位會員的主錢包？\n\n接下來只簽署驗證訊息，不會轉帳、不會扣 IPT。": "确认将画面上的完整地址设为这位会员的主钱包？\n\n接下来仅签署验证消息，不会转账，也不会扣 IPT。",
+  "建立驗證訊息…": "创建验证消息…",
+  "此錢包已屬於目前會員且已驗證。": "此钱包已属于当前会员且已验证。",
+  "請在 Trust Wallet 簽署…": "请在 Trust Wallet 中签名…",
+  "沒有取得簽章。": "未取得签名。",
+  "驗證簽章…": "验证签名…",
+  "驗證失敗。": "验证失败。",
+  "✓ 綁定完成：已成為目前會員的已驗證主錢包。": "✓ 绑定完成：已成为当前会员的已验证主钱包。"
+},en:{
+  "IPT｜會員錢包綁定中心": "IPT | Member Wallet Binding Center",
+  "會員錢包綁定中心": "Member Wallet Binding Center",
+  "Trust Wallet × Ethereum Sepolia × 簽章所有權驗證": "Trust Wallet × Ethereum Sepolia × Signature Ownership Verification",
+  "① 會員身分": "① Member Identity",
+  "② 連接 Trust Wallet": "② Connect Trust Wallet",
+  "③ 簽章驗證並綁定": "③ Verify Signature and Link Wallet",
+  "正在確認…": "Checking…",
+  "目前主錢包": "Current Primary Wallet",
+  "驗證狀態": "Verification Status",
+  "尚未連線。": "Not connected.",
+  "中斷連線／切換錢包": "Disconnect / Switch Wallet",
+  "請選擇這位會員自己的錢包。已屬於其他會員的地址無法綁定。": "Select this member’s own wallet. An address belonging to another member cannot be linked.",
+  "請先確認會員身分並連接 Trust Wallet。": "Confirm your member identity and connect Trust Wallet first.",
+  "即將綁定地址": "Wallet Address to Link",
+  "簽署驗證並設為我的主錢包": "Sign to Verify and Set as My Primary Wallet",
+  "簽署不是轉帳。": "Signing is not a transfer.",
+  "不扣 IPT、不送出鏈上交易，也不需要 Gas。簽章成功後才建立正式主錢包與驗證紀錄。": "No IPT is deducted, no on-chain transaction is sent, and no gas is needed. Your primary wallet and verification record are saved only after successful signature verification.",
+  "請先登入會員。": "Sign in as a member first.",
+  "這個瀏覽器尚未通過受信任裝置驗證。": "This browser has not passed trusted device verification.",
+  "會員不是正常狀態。": "This member account is not active.",
+  "尚未綁定": "Not linked",
+  "已驗證 ✓": "Verified ✓",
+  "未驗證": "Not verified",
+  "會員身分與受信任裝置驗證通過。": "Member identity and trusted device verification passed.",
+  "舊 WalletConnect 連線已清除。請按「連接 Trust Wallet」重新選擇錢包。": "The previous WalletConnect session has been cleared. Tap Connect Trust Wallet to select a wallet again.",
+  "尚未建立新的錢包連線；不要使用舊 Owner Wallet 進行綁定。": "No new wallet connection has been established. Do not link the previous Owner Wallet.",
+  "目前地址已是會員主錢包，可重新驗證。": "This address is already your primary wallet. You can verify it again.",
+  "請核對完整地址後再簽署驗證。": "Check the full address before signing to verify.",
+  "確定要清除目前 WalletConnect 連線並重新選擇錢包嗎？\n\n這不會刪除 Trust Wallet，也不會移動任何 IPT。": "Clear the current WalletConnect session and select a wallet again?\n\nThis will not delete Trust Wallet or move any IPT.",
+  "Trust Wallet 45 秒內沒有回應。尚未建立任何錢包綁定，請確認 Trust Wallet 已開啟後重新嘗試。": "Trust Wallet did not respond within 45 seconds. No wallet has been linked. Make sure Trust Wallet is open and try again.",
+  "會員或錢包尚未就緒。": "The member account or wallet is not ready.",
+  "確認把畫面上的完整地址設為這位會員的主錢包？\n\n接下來只簽署驗證訊息，不會轉帳、不會扣 IPT。": "Set the full address shown on screen as this member’s primary wallet?\n\nYou will only sign a verification message. No transfer will be made and no IPT will be deducted.",
+  "建立驗證訊息…": "Creating verification message…",
+  "此錢包已屬於目前會員且已驗證。": "This wallet already belongs to the current member and is verified.",
+  "請在 Trust Wallet 簽署…": "Please sign in Trust Wallet…",
+  "沒有取得簽章。": "No signature was received.",
+  "驗證簽章…": "Verifying signature…",
+  "驗證失敗。": "Verification failed.",
+  "✓ 綁定完成：已成為目前會員的已驗證主錢包。": "✓ Wallet linked: it is now the current member’s verified primary wallet."
+}};
+  function translate(text){
+    const lang=window.IPTI18N?.getLang?.() || localStorage.getItem("ipt_language") || "zh-TW";
+    if(lang==="zh-TW") return text;
+    const dict=dictionaries[lang];
+    if(!dict) return text;
+    if(Object.prototype.hasOwnProperty.call(dict,text)) return dict[text];
+    let m=String(text).match(/^目前 Chain ID (\d+)，請切換到 Sepolia（11155111）。$/);
+    if(m) return lang==="en" ? `Current Chain ID ${m[1]}. Switch to Sepolia (11155111).` : `当前 Chain ID ${m[1]}，请切换到 Sepolia（11155111）。`;
+    m=String(text).match(/^已連線：(.+)｜Ethereum Sepolia$/);
+    if(m) return (lang==="en" ? "Connected: " : "已连接：")+m[1]+"｜Ethereum Sepolia";
+    m=String(text).match(/^(連線失敗：|綁定失敗：)([\s\S]+)$/);
+    if(m) return (lang==="en" ? (m[1]==="連線失敗：" ? "Connection failed: " : "Wallet linking failed: ") : (m[1]==="連線失敗：" ? "连接失败：" : "绑定失败："))+translate(m[2]);
+    return text;
+  }
+  window.IPTWalletTranslate=translate;
+  const originals=new Map();
+  window.IPTWalletSetText=(el,text)=>{originals.set(el,text);el.textContent=translate(text);};
+  function install(){
+    const api=window.IPTI18N;
+    if(!api?.dictionaries) return;
+    Object.assign(api.dictionaries["zh-CN"],dictionaries["zh-CN"]);
+    Object.assign(api.dictionaries.en,dictionaries.en);
+    api.apply(document);
+  }
+  window.addEventListener("ipt-language-change",()=>{
+    for(const [el,text] of originals) el.textContent=translate(text);
+  });
+  if(document.readyState==="loading") window.addEventListener("DOMContentLoaded",install,{once:true});
+  else install();
+})();
+</script>
 <script type="module">
+const T=window.IPTWalletTranslate, setWalletText=window.IPTWalletSetText;
+
 import { EthereumProvider } from "https://esm.sh/@walletconnect/ethereum-provider@2.25.0?bundle";
 const U="https://uccexvgqmoxhgykkjdcy.supabase.co",K="sb_publishable_FBsN1DYTQMv2_bWhpbXHAA_qdAq7ri7",P="80a61b62ea34b975d7d27a037fc55fa8",C=11155111;
 const sb=window.supabase.createClient(U,K,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}),$=id=>document.getElementById(id);
 let wc=null,account="",ready=false,primary="";
 const same=(a,b)=>String(a||"").toLowerCase()===String(b||"").toLowerCase();
-function st(id,k,t){const e=$(id);e.className="status "+k;e.textContent=t}
+function st(id,k,t){const e=$(id);e.className="status "+k;setWalletText(e,t)}
 async function member(){
  try{const {data:{user},error}=await sb.auth.getUser();if(error||!user)throw new Error("請先登入會員。");
  const {data:a,error:ae}=await sb.rpc("ipt_device_access_allowed");if(ae)throw ae;if(a!==true)throw new Error("這個瀏覽器尚未通過受信任裝置驗證。");
  const [p,w,v]=await Promise.all([sb.from("member_profiles").select("member_number,display_name,status").eq("id",user.id).maybeSingle(),sb.from("member_wallets").select("wallet_address,is_primary,created_at").eq("user_id",user.id).eq("chain_id",C).order("is_primary",{ascending:false}).order("created_at",{ascending:true}),sb.from("verified_wallets").select("wallet_address,verified_at").eq("user_id",user.id).eq("chain_id",C)]);
  if(p.error||w.error||v.error)throw(p.error||w.error||v.error);if(!p.data||p.data.status!=="active")throw new Error("會員不是正常狀態。");
  const x=(w.data||[]).find(z=>z.is_primary)||(w.data||[])[0]||null;primary=String(x?.wallet_address||"");const verified=(v.data||[]).some(z=>same(z.wallet_address,primary));
- $("memberName").textContent=`${p.data.member_number}｜${p.data.display_name}`;$("currentPrimary").textContent=primary||"尚未綁定";$("currentVerified").textContent=verified?"已驗證 ✓":"未驗證";ready=true;$("connectBtn").disabled=false;st("memberState","ok","會員身分與受信任裝置驗證通過。");
+ $("memberName").textContent=`${p.data.member_number}｜${p.data.display_name}`;setWalletText($("currentPrimary"),primary||"尚未綁定");setWalletText($("currentVerified"),verified?"已驗證 ✓":"未驗證");ready=true;$("connectBtn").disabled=false;st("memberState","ok","會員身分與受信任裝置驗證通過。");
  }catch(e){ready=false;$("connectBtn").disabled=true;st("memberState","err",e?.message||String(e))}}
 async function init(){if(wc)return wc;wc=await EthereumProvider.init({projectId:P,chains:[C],showQrModal:true,methods:["personal_sign"],optionalMethods:["eth_accounts","eth_requestAccounts","eth_chainId","wallet_switchEthereumChain"],events:["chainChanged","accountsChanged"],optionalEvents:["connect","disconnect","message"],metadata:{name:"Independent Points V4.14.2",description:"Member wallet binding on Ethereum Sepolia",url:"https://avg168.github.io",icons:[]},qrModalOptions:{themeMode:"light"}});wc.on("accountsChanged",a=>{account=a?.[0]||"";render()});wc.on("chainChanged",render);wc.on("disconnect",()=>{account="";render()});return wc}
 async function cid(){try{return Number(BigInt(await wc.request({method:"eth_chainId"})))}catch(_){return Number(wc?.chainId||0)}}
@@ -78,7 +196,7 @@ $("connectBtn").onclick=async()=>{try{
   await render();
 }catch(e){st("walletState","err","連線失敗："+(e?.message||String(e)))}};
 $("disconnectBtn").onclick=async()=>{
-  if(!confirm("確定要清除目前 WalletConnect 連線並重新選擇錢包嗎？\n\n這不會刪除 Trust Wallet，也不會移動任何 IPT。"))return;
+  if(!confirm(T("確定要清除目前 WalletConnect 連線並重新選擇錢包嗎？\n\n這不會刪除 Trust Wallet，也不會移動任何 IPT。")))return;
   await resetWalletConnect();
 };
 function withWalletTimeout(promise,ms=45000){
@@ -87,14 +205,14 @@ function withWalletTimeout(promise,ms=45000){
     new Promise((_,reject)=>setTimeout(()=>reject(new Error("Trust Wallet 45 秒內沒有回應。尚未建立任何錢包綁定，請確認 Trust Wallet 已開啟後重新嘗試。")),ms))
   ]);
 }
-$("bindBtn").onclick=async()=>{const b=$("bindBtn");try{if(!ready||!account)throw new Error("會員或錢包尚未就緒。");if(!confirm("確認把畫面上的完整地址設為這位會員的主錢包？\n\n接下來只簽署驗證訊息，不會轉帳、不會扣 IPT。"))return;b.disabled=true;b.textContent="建立驗證訊息…";
+$("bindBtn").onclick=async()=>{const b=$("bindBtn");try{if(!ready||!account)throw new Error("會員或錢包尚未就緒。");if(!confirm(T("確認把畫面上的完整地址設為這位會員的主錢包？\n\n接下來只簽署驗證訊息，不會轉帳、不會扣 IPT。")))return;b.disabled=true;setWalletText(b,"建立驗證訊息…");
  const {data:ch,error:ce}=await sb.functions.invoke("bind-wallet",{body:{action:"challenge",wallet_address:account,chain_id:C}});if(ce)throw ce;if(ch?.error)throw new Error(ch.error);if(ch?.action==="already_verified"){st("bindState","ok","此錢包已屬於目前會員且已驗證。");await member();return}
- b.textContent="請在 Trust Wallet 簽署…";const sig=await withWalletTimeout(
+ setWalletText(b,"請在 Trust Wallet 簽署…");const sig=await withWalletTimeout(
       wc.request({method:"personal_sign",params:[ch.message,account]}),
       45000
     );if(!sig)throw new Error("沒有取得簽章。");
- b.textContent="驗證簽章…";const {data:v,error:ve}=await sb.functions.invoke("bind-wallet",{body:{action:"verify",challenge_id:ch.challenge_id,signature:sig}});if(ve)throw ve;if(!v?.ok||!v?.verified)throw new Error(v?.error||"驗證失敗。");
- st("bindState","ok","✓ 綁定完成：已成為目前會員的已驗證主錢包。");await member();setTimeout(()=>location.href="./index.html?v=4142hf49g",1200);
- }catch(e){st("bindState","err","綁定失敗："+(e?.message||String(e)))}finally{b.disabled=!(ready&&account);b.textContent="簽署驗證並設為我的主錢包"}};
-$("homeBtn").onclick=()=>location.href="./index.html?v=4142hf49g";await member();
+ setWalletText(b,"驗證簽章…");const {data:v,error:ve}=await sb.functions.invoke("bind-wallet",{body:{action:"verify",challenge_id:ch.challenge_id,signature:sig}});if(ve)throw ve;if(!v?.ok||!v?.verified)throw new Error(v?.error||"驗證失敗。");
+ st("bindState","ok","✓ 綁定完成：已成為目前會員的已驗證主錢包。");await member();setTimeout(()=>location.href="./index.html?v=4142hf50c2",1200);
+ }catch(e){st("bindState","err","綁定失敗："+(e?.message||String(e)))}finally{b.disabled=!(ready&&account);setWalletText(b,"簽署驗證並設為我的主錢包")}};
+$("homeBtn").onclick=()=>location.href="./index.html?v=4142hf50c2";await member();
 </script></body></html>
