@@ -469,7 +469,7 @@ body.platform-admin.v41-route.route-ownership.show-ownership #securityGuardSecti
 <link rel="icon" type="image/svg+xml" href="./ipt-icon-192.png">
 
 <link rel="apple-touch-icon" href="./ipt-apple-touch-180.png">
-<script src="./i18n-v4.10.js?v=4142hf50c19" defer></script>
+<script src="./i18n-v4.10.js?v=4142hf50c20" defer></script>
 </head>
 <body>
 <div class="v42-sticky-nav">
@@ -478,7 +478,7 @@ body.platform-admin.v41-route.route-ownership.show-ownership #securityGuardSecti
 </div>
 <header>
   <div class="v43-product-tag">正式鏈上操作模組</div><div class="v43-module-note">Ethereum Sepolia｜Trust Wallet / WalletConnect</div>
-  <div id="versionBadge" style="display:inline-block;margin-bottom:10px;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.78rem;font-weight:800;letter-spacing:.04em">V4.14.2 CORE | HF50-C19</div>
+  <div id="versionBadge" style="display:inline-block;margin-bottom:10px;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.78rem;font-weight:800;letter-spacing:.04em">V4.14.2 CORE | HF50-C20</div>
   <h1 id="v41RouteTitle">IPT 錢包中心</h1>
   <p id="v41RouteSubtitle">會員帳號 × 主錢包 × 鏈上錢包獨立驗證</p>
   <div class="v41-head-actions">
@@ -2042,11 +2042,11 @@ $("sendBurnBtn").addEventListener("click", async () => {
 
     const amountText = fmtIPT6(burnState.amountRaw, 2);
     const ok = window.confirm(
-      "確認在 Ethereum Sepolia 永久銷毀 " +
+      window.IPTI18N.t("確認在 Ethereum Sepolia 永久銷毀 ") +
       amountText +
-      " IPT？\n\n" +
-      "Burn 會永久減少你的 IPT 與 totalSupply，不能復原。\n" +
-      "這是測試網交易，仍會消耗 Sepolia Gas。"
+      window.IPTI18N.t(" IPT？\n\n") +
+      window.IPTI18N.t("Burn 會永久減少你的 IPT 與 totalSupply，不能復原。\n") +
+      window.IPTI18N.t("這是測試網交易，仍會消耗 Sepolia Gas。")
     );
 
     if (!ok) return;
@@ -2431,12 +2431,12 @@ $("sendMintBtn").addEventListener("click", async () => {
 
     const amountText = fmtIPT6(mintState.amountRaw, 2);
     const ok = window.confirm(
-      "確認在 Ethereum Sepolia 發行 " +
+      window.IPTI18N.t("確認在 Ethereum Sepolia 發行 ") +
       amountText +
-      " IPT 到：\n" +
+      window.IPTI18N.t(" IPT 到：\n") +
       mintState.to +
-      "\n\nMint 會增加 totalSupply，只有鏈上 Owner 可以執行。\n" +
-      "這是測試網交易，仍會消耗 Sepolia Gas。"
+      window.IPTI18N.t("\n\nMint 會增加 totalSupply，只有鏈上 Owner 可以執行。\n") +
+      window.IPTI18N.t("這是測試網交易，仍會消耗 Sepolia Gas。")
     );
 
     if (!ok) return;
@@ -2854,15 +2854,15 @@ async function sendAdminAction(expectedAction) {
     adminPauseState.nonce = nonceNow;
     adminPauseState.gasPrice = gasPriceHex;
 
-    const actionLabel = expectedAction === "pause" ? "暫停合約" : "恢復合約";
+    const actionLabel = expectedAction === "pause" ? window.IPTI18N.t("暫停合約") : window.IPTI18N.t("恢復合約");
     const expectedPaused = expectedAction === "pause" ? "true" : "false";
 
     const ok = window.confirm(
-      "確認在 Ethereum Sepolia " + actionLabel + "？\n\n" +
-      "目前 totalSupply：" + fmtIPT6(supplyNow, 2) + " IPT\n" +
-      "操作後 paused 將變成：" + expectedPaused + "\n" +
-      "IPT 餘額與 totalSupply 不會因這筆管理操作改變。\n\n" +
-      "這是測試網交易，仍會消耗 Sepolia Gas。"
+      window.IPTI18N.t("確認在 Ethereum Sepolia ") + actionLabel + window.IPTI18N.t("？\n\n") +
+      window.IPTI18N.t("目前 totalSupply：") + fmtIPT6(supplyNow, 2) + " IPT\n" +
+      window.IPTI18N.t("操作後 paused 將變成：") + expectedPaused + "\n" +
+      window.IPTI18N.t("IPT 餘額與 totalSupply 不會因這筆管理操作改變。\n\n") +
+      window.IPTI18N.t("這是測試網交易，仍會消耗 Sepolia Gas。")
     );
 
     if (!ok) return;
@@ -3387,18 +3387,18 @@ async function sendOwnershipAction(expectedAction) {
 
     if (isPropose) {
       message =
-        "確認在 Ethereum Sepolia 提出管理權交接？\n\n" +
-        "目前 Owner：\n" + ownerNow + "\n\n" +
-        "新 pendingOwner：\n" + ownershipState.candidate + "\n\n" +
-        "這一步不會立即更換 Owner；候任管理者仍需自己簽名接任。\n" +
-        "這是測試網交易，仍會消耗 Sepolia Gas。";
+        window.IPTI18N.t("確認在 Ethereum Sepolia 提出管理權交接？\n\n") +
+        window.IPTI18N.t("目前 Owner：\n") + ownerNow + "\n\n" +
+        window.IPTI18N.t("新 pendingOwner：\n") + ownershipState.candidate + "\n\n" +
+        window.IPTI18N.t("這一步不會立即更換 Owner；候任管理者仍需自己簽名接任。\n") +
+        window.IPTI18N.t("這是測試網交易，仍會消耗 Sepolia Gas。");
     } else {
       message =
-        "確認在 Ethereum Sepolia 接任 IPT 管理權？\n\n" +
-        "目前 Owner：\n" + ownerNow + "\n\n" +
-        "目前 pendingOwner：\n" + pendingNow + "\n\n" +
-        "核准後，連線錢包將成為新的 Owner。\n" +
-        "這是測試網交易，仍會消耗 Sepolia Gas。";
+        window.IPTI18N.t("確認在 Ethereum Sepolia 接任 IPT 管理權？\n\n") +
+        window.IPTI18N.t("目前 Owner：\n") + ownerNow + "\n\n" +
+        window.IPTI18N.t("目前 pendingOwner：\n") + pendingNow + "\n\n" +
+        window.IPTI18N.t("核准後，連線錢包將成為新的 Owner。\n") +
+        window.IPTI18N.t("這是測試網交易，仍會消耗 Sepolia Gas。");
     }
 
     const ok = window.confirm(message);
@@ -3704,9 +3704,9 @@ $("armSecurityGuardBtn")?.addEventListener("click",async()=>{
     }
 
     const suffix=String(account).slice(-6).toLowerCase();
-    if(!confirm("將啟用 60 秒高風險操作視窗。倒數只在本機執行，不會持續讀取鏈上資料。是否繼續？")) return;
+    if(!confirm(window.IPTI18N.t("將啟用 60 秒高風險操作視窗。倒數只在本機執行，不會持續讀取鏈上資料。是否繼續？"))) return;
 
-    const typed=prompt("請輸入目前錢包地址最後 6 碼以再次確認：\n"+suffix);
+    const typed=prompt(window.IPTI18N.t("請輸入目前錢包地址最後 6 碼以再次確認：")+"\n"+suffix);
     if(typed===null) return;
     if(typed.trim().toLowerCase()!==suffix){
       v48LogSecurityEvent("guard_arm_failed",{reason:"wallet_suffix_mismatch"});
@@ -3718,7 +3718,7 @@ $("armSecurityGuardBtn")?.addEventListener("click",async()=>{
     v48LogSecurityEvent("guard_armed",{seconds:60,role,mode:"local_timer"});
     v48RenderGuardLocal();
   }catch(e){
-    alert(e?.message||String(e));
+    alert(window.IPTI18N.t(e?.message||String(e)));
   }
 });
 
@@ -3736,7 +3736,7 @@ document.addEventListener("click",(e)=>{
     e.stopPropagation();
     e.stopImmediatePropagation();
     v48LogSecurityEvent("high_risk_blocked",{button:btn.id,reason:"guard_locked"});
-    alert("營運安全保護尚未解鎖。請先完成前置檢查，再按「啟用 60 秒操作視窗」。");
+    alert(window.IPTI18N.t("營運安全保護尚未解鎖。請先完成前置檢查，再按「啟用 60 秒操作視窗」。"));
     $("securityGuardSection")?.scrollIntoView({behavior:"smooth",block:"start"});
     return;
   }
@@ -3968,7 +3968,7 @@ v48RenderGuardLocal();
     btn.addEventListener("click",(e)=>{
       // only intercept when it is actually enabled and would proceed
       if(btn.disabled) return;
-      if(!confirm(message)){
+      if(!confirm(window.IPTI18N.t(message))){
         e.stopImmediatePropagation();
         e.preventDefault();
       }
@@ -3992,6 +3992,7 @@ if ("serviceWorker" in navigator) {
 
 </body>
 </html>
+
 
 
 
