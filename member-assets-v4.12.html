@@ -431,6 +431,9 @@ button{
   }
 }
 
+
+/* HF50-C33: wrap wallet labels at word boundaries */
+.wallet{word-break:normal;overflow-wrap:anywhere}
 </style>
 
 <link rel="manifest" href="./manifest.webmanifest?v=4142hf43">
@@ -443,12 +446,12 @@ button{
 <link rel="icon" type="image/svg+xml" href="./ipt-icon-192.png">
 
 <link rel="apple-touch-icon" href="./ipt-apple-touch-180.png">
-<script src="./i18n-v4.10.js?v=4142hf43" defer></script>
+<script src="./i18n-v4.10.js?v=4142hf50c33" defer></script>
 <script src="./auth-guard-v4.12.js?v=4142hf43"></script>
 </head>
 <body>
 <header>
-  <div class="version">V4.14.2</div>
+  <div class="version">V4.14.2 | HF50-C33</div>
   <h1>我的資產報表</h1>
   <p>我的 IPT 資產 × 報表篩選 × CSV 匯出 × 列印／PDF</p>
 </header>
@@ -456,7 +459,7 @@ button{
 <main>
   <section id="systemSection" class="panel">
     <h2>系統狀態</h2>
-    <div id="statusBox" class="status warn">
+    <div id="statusBox" data-raw-data="1" class="status warn">
       正在讀取會員身分與 IPT 鏈上資產…
     </div>
     <div class="actions">
@@ -469,9 +472,9 @@ button{
   <section id="memberSection" class="panel hidden">
     <h2>我的會員資料</h2>
     <div class="member-card">
-      <div id="memberTitle" class="member-title">—</div>
-      <div id="memberEmail" class="member-email">—</div>
-      <div id="memberWallet" class="wallet">—</div>
+      <div id="memberTitle" data-raw-data="1" class="member-title">—</div>
+      <div id="memberEmail" data-raw-data="1" class="member-email">—</div>
+      <div id="memberWallet" data-raw-data="1" class="wallet">—</div>
       <div id="memberChips" class="chips"></div>
     </div>
   </section>
@@ -571,6 +574,15 @@ button{
   });
 
   const $ = id => document.getElementById(id);
+
+  const TEXTS=[["我的資產報表", "我的资产报表", "My Asset Report"], ["我的 IPT 資產 × 報表篩選 × CSV 匯出 × 列印／PDF", "我的 IPT 资产 × 报表筛选 × CSV 导出 × 打印／PDF", "My IPT Assets × Report Filters × CSV Export × Print / PDF"], ["系統狀態", "系统状态", "System Status"], ["正在讀取會員身分與 IPT 鏈上資產…", "正在读取会员身份与 IPT 链上资产…", "Loading member identity and on-chain IPT assets…"], ["重新整理", "刷新", "Refresh"], ["資產中心", "资产中心", "Asset Center"], ["返回會員頁", "返回会员页面", "Back to Member Home"], ["我的會員資料", "我的会员资料", "My Member Profile"], ["我的 IPT 資產", "我的 IPT 资产", "My IPT Assets"], ["目前 IPT 餘額", "当前 IPT 余额", "Current IPT Balance"], ["累計轉入", "累计转入", "Total Incoming"], ["累計轉出", "累计转出", "Total Outgoing"], ["資產淨變動", "资产净变化", "Net Asset Change"], ["交易筆數", "交易笔数", "Transactions"], ["交易報表篩選", "交易报表筛选", "Transaction Report Filters"], ["開始日期", "开始日期", "Start Date"], ["結束日期", "结束日期", "End Date"], ["交易類型", "交易类型", "Transaction Type"], ["全部交易", "全部交易", "All Transactions"], ["全部", "全部", "All"], ["轉入", "转入", "Incoming"], ["轉出", "转出", "Outgoing"], ["套用報表篩選", "应用报表筛选", "Apply Report Filters"], ["清除條件", "清除条件", "Clear Filters"], ["日期留空代表目前已載入的全部交易範圍。", "日期留空代表当前已加载的全部交易范围。", "Leave dates blank to include all currently loaded transactions."], ["報表匯出", "报表导出", "Report Export"], ["可將目前畫面上的篩選結果匯出成 CSV，或使用「列印／PDF」開啟手機列印功能並另存 PDF。", "可将当前筛选结果导出为 CSV，或使用“打印／PDF”打开手机打印功能并另存 PDF。", "Export the current filtered results as CSV, or use Print / PDF to open system printing and save a PDF."], ["CSV 匯出／分享", "CSV 导出／分享", "Export / Share CSV"], ["列印／PDF 預覽", "打印／PDF 预览", "Print / PDF Preview"], ["Android 手機會優先開啟原生分享／儲存介面；PDF 會先進入列印版預覽。", "Android 手机会优先打开系统分享／保存界面；PDF 会先进入打印预览。", "Android uses the system share / save dialog when available. PDF opens in the print preview first."], ["我的交易紀錄", "我的交易记录", "My Transactions"], ["Mint 轉入", "Mint 转入", "Mint Received"], ["Burn 銷毀", "Burn 销毁", "Burn Sent"], ["其他", "其他", "Other"], ["主錢包：", "主钱包：", "Primary Wallet: "], ["尚未綁定錢包", "尚未绑定钱包", "Wallet Not Linked"], ["開始日期不能晚於結束日期。", "开始日期不能晚于结束日期。", "Start date must not be later than end date."], ["正在開啟 Android 分享／儲存視窗…", "正在打开 Android 分享／保存窗口…", "Opening Android share / save dialog…"], ["Independent Points 資產報表 CSV", "Independent Points 资产报表 CSV", "Independent Points Asset Report CSV"], ["CSV 已交給 Android 分享／儲存功能。", "CSV 已交给 Android 分享／保存功能。", "CSV handed to Android share / save."], ["已取消分享 CSV。", "已取消分享 CSV。", "CSV sharing cancelled."], ["已送出 CSV 下載要求；同時已把 CSV 內容複製到剪貼簿，若瀏覽器沒有跳出下載，可直接貼到試算表。", "已发送 CSV 下载请求；CSV 内容也已复制到剪贴板，若浏览器未开始下载，可粘贴到电子表格。", "CSV download requested. The CSV was also copied to the clipboard; paste it into a spreadsheet if no download appears."], ["已送出 CSV 下載要求。若手機仍未顯示下載，請改用支援下載的 Chrome 開啟此頁。", "已发送 CSV 下载请求。若手机仍未显示下载，请使用支持下载的 Chrome 打开此页。", "CSV download requested. If no download appears, open this page in Chrome with download support."], ["此瀏覽器不支援直接下載，CSV 內容已複製到剪貼簿，可貼到 Google 試算表或 Excel。", "此浏览器不支持直接下载，CSV 内容已复制到剪贴板，可粘贴到 Google 表格或 Excel。", "This browser cannot download directly. The CSV was copied to the clipboard for Google Sheets or Excel."], ["CSV 匯出失敗：", "CSV 导出失败：", "CSV export failed: "], ["資產資料尚未載入。", "资产数据尚未加载。", "Asset data has not loaded yet."], ["會員編號", "会员编号", "Member Number"], ["暱稱", "昵称", "Nickname"], ["錢包地址", "钱包地址", "Wallet Address"], ["錢包驗證", "钱包验证", "Wallet Verification"], ["已驗證", "已验证", "Verified"], ["未驗證", "未验证", "Unverified"], ["時間", "时间", "Time"], ["IPT 數量", "IPT 数量", "IPT Amount"], ["區塊", "区块", "Block"], ["正在開啟列印／PDF 預覽…", "正在打开打印／PDF 预览…", "Opening Print / PDF Preview…"], ["正在讀取你的會員資料與 Sepolia IPT 資產…", "正在读取你的会员资料与 Sepolia IPT 资产…", "Loading your member profile and Sepolia IPT assets…"], ["尚未登入會員。請先返回會員頁登入。", "尚未登录。请先返回会员页面登录。", "You are not signed in. Return to Member Home to sign in."], ["資產報表載入失敗", "资产报表加载失败", "Asset report failed to load"], ["目前尚未綁定錢包，因此鏈上資產與交易紀錄均為 0。", "当前尚未绑定钱包，因此链上资产与交易记录均为 0。", "No wallet is linked, so on-chain assets and transactions are 0."], ["目前餘額已讀取，但鏈上交易歷史暫時無法完整載入。", "当前余额已读取，但链上交易历史暂时无法完整加载。", "The current balance loaded, but the full on-chain transaction history is temporarily unavailable."], ["會員資產服務拒絕存取或登入狀態已失效。", "会员资产服务拒绝访问或登录状态已失效。", "The member asset service denied access or your sign-in session has expired."], ["載入失敗：", "加载失败：", "Load failed: "], ["此條件下沒有 IPT 交易紀錄。", "此条件下没有 IPT 交易记录。", "No IPT transactions match these filters."], ["查看鏈上交易", "查看链上交易", "View On-chain Transaction"], ["管理員", "管理员", "Admin"], ["會員", "会员", "Member"], ["正常", "正常", "Normal"], ["錢包已驗證", "钱包已验证", "Wallet Verified"], ["錢包未驗證", "钱包未验证", "Wallet Unverified"], ["目前鏈上共有 {total} 筆，本頁載入最近 {loaded} 筆；篩選結果以已載入紀錄為準。", "当前链上共有 {total} 笔，本页加载最近 {loaded} 笔；筛选结果以已加载记录为准。", "There are {total} on-chain transactions; the latest {loaded} are loaded. Filters apply to loaded records."], ["符合條件：{count} 筆｜轉入 {incoming} 筆｜轉出 {outgoing} 筆。", "符合条件：{count} 笔｜转入 {incoming} 笔｜转出 {outgoing} 笔。", "Matching transactions: {count} | Incoming: {incoming} | Outgoing: {outgoing}."], ["最近交易時間：{time}｜轉入 {incoming} 筆｜轉出 {outgoing} 筆。", "最近交易时间：{time}｜转入 {incoming} 笔｜转出 {outgoing} 笔。", "Latest Transaction: {time} | Incoming: {incoming} | Outgoing: {outgoing}."], ["V4.14.2 已載入｜{number}｜{name}", "V4.14.2 已加载｜{number}｜{name}", "V4.14.2 loaded | {number} | {name}"]];
+  function tr(value){
+    const lang=window.IPTI18N?.getLang?.() || localStorage.getItem("ipt_language") || "zh-TW";
+    const row=TEXTS.find(r=>r.includes(value));
+    return row?row[lang==="en"?2:lang==="zh-CN"?1:0]:String(value??"");
+  }
+  function tf(key,values){return tr(key).replace(/\{(\w+)\}/g,(_,name)=>String(values[name]??""));}
+
   let loadedData = null;
   let currentTxs = [];
 
@@ -627,11 +639,11 @@ button{
   }
 
   function typeInfo(type){
-    if(type==="mint") return {label:"Mint 轉入",cls:"mint",sign:"+"};
-    if(type==="burn") return {label:"Burn 銷毀",cls:"burn",sign:"-"};
-    if(type==="in") return {label:"轉入",cls:"in",sign:"+"};
-    if(type==="out") return {label:"轉出",cls:"out",sign:"-"};
-    return {label:"其他",cls:"",sign:""};
+    if(type==="mint") return {label:tr("Mint 轉入"),cls:"mint",sign:"+"};
+    if(type==="burn") return {label:tr("Burn 銷毀"),cls:"burn",sign:"-"};
+    if(type==="in") return {label:tr("轉入"),cls:"in",sign:"+"};
+    if(type==="out") return {label:tr("轉出"),cls:"out",sign:"-"};
+    return {label:tr("其他"),cls:"",sign:""};
   }
 
   function dateRange(){
@@ -654,7 +666,7 @@ button{
   function renderTransactions(txs){
     currentTxs = Array.isArray(txs) ? txs.slice() : [];
     if(!txs.length){
-      $("txList").innerHTML='<div class="empty">此條件下沒有 IPT 交易紀錄。</div>';
+      $("txList").innerHTML=`<div class="empty">${esc(tr("此條件下沒有 IPT 交易紀錄。"))}</div>`;
       return;
     }
 
@@ -670,13 +682,13 @@ button{
             </span>
           </div>
           <div class="tx-meta">
-            時間：${esc(fmtTime(tx.timestamp))}<br>
-            區塊：${esc(tx.block_number)}<br>
+            ${esc(tr("時間"))}: ${esc(fmtTime(tx.timestamp))}<br>
+            ${esc(tr("區塊"))}: ${esc(tx.block_number)}<br>
             From：<span class="tx-address">${esc(shortAddr(tx.from))}</span><br>
             To：<span class="tx-address">${esc(shortAddr(tx.to))}</span>
           </div>
           <button class="light txLinkBtn" type="button"
-            data-tx="${esc(tx.tx_hash)}">查看鏈上交易</button>
+            data-tx="${esc(tx.tx_hash)}">${esc(tr("查看鏈上交易"))}</button>
         </div>
       `;
     }).join("");
@@ -707,17 +719,17 @@ button{
     $("memberTitle").textContent=`${m.member_number||"—"}｜${m.display_name||"—"}`;
     $("memberEmail").textContent=m.email||"—";
     $("memberWallet").textContent=m.wallet_address
-      ? "主錢包："+m.wallet_address
-      : "尚未綁定錢包";
+      ? tr("主錢包：")+m.wallet_address
+      : tr("尚未綁定錢包");
 
     const role=m.role==="admin"
-      ? '<span class="chip admin">管理員</span>'
-      : '<span class="chip">會員</span>';
+      ? `<span class="chip admin">${esc(tr("管理員"))}</span>`
+      : `<span class="chip">${esc(tr("會員"))}</span>`;
     const verified=m.wallet_verified
-      ? '<span class="chip ok">錢包已驗證</span>'
-      : '<span class="chip">錢包未驗證</span>';
+      ? `<span class="chip ok">${esc(tr("錢包已驗證"))}</span>`
+      : `<span class="chip">${esc(tr("錢包未驗證"))}</span>`;
 
-    $("memberChips").innerHTML=role+'<span class="chip ok">正常</span>'+verified;
+    $("memberChips").innerHTML=role+`<span class="chip ok">${esc(tr("正常"))}</span>`+verified;
   }
 
   function applyFilters(){
@@ -725,7 +737,7 @@ button{
 
     const {fromTs,toTs}=dateRange();
     if(fromTs && toTs && fromTs>toTs){
-      $("filterNote").textContent="開始日期不能晚於結束日期。";
+      $("filterNote").textContent=tr("開始日期不能晚於結束日期。");
       return;
     }
 
@@ -765,10 +777,10 @@ button{
 
     if(!complete && (fromTs||toTs||type!=="all")){
       $("filterNote").textContent=
-        `目前鏈上共有 ${asset.total_transactions} 筆，本頁載入最近 ${allTx.length} 筆；篩選結果以已載入紀錄為準。`;
+        tf("目前鏈上共有 {total} 筆，本頁載入最近 {loaded} 筆；篩選結果以已載入紀錄為準。",{total:asset.total_transactions,loaded:allTx.length});
     }else{
       $("filterNote").textContent=
-        `符合條件：${filtered.length} 筆｜轉入 ${inCount} 筆｜轉出 ${outCount} 筆。`;
+        tf("符合條件：{count} 筆｜轉入 {incoming} 筆｜轉出 {outgoing} 筆。",{count:filtered.length,incoming:inCount,outgoing:outCount});
     }
   }
 
@@ -779,7 +791,7 @@ button{
     if(loadedData){
       renderFullSummary(loadedData);
       renderTransactions(loadedData.asset?.transactions||[]);
-      $("filterNote").textContent="日期留空代表目前已載入的全部交易範圍。";
+      $("filterNote").textContent=tr("日期留空代表目前已載入的全部交易範圍。");
     }
   }
 
@@ -818,18 +830,18 @@ button{
 
     try{
       if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
-        setExportStatus("正在開啟 Android 分享／儲存視窗…","ok");
+        setExportStatus(tr("正在開啟 Android 分享／儲存視窗…"),"ok");
         await navigator.share({
           title:filename,
-          text:"Independent Points 資產報表 CSV",
+          text:tr("Independent Points 資產報表 CSV"),
           files:[file]
         });
-        setExportStatus("CSV 已交給 Android 分享／儲存功能。","ok");
+        setExportStatus(tr("CSV 已交給 Android 分享／儲存功能。"),"ok");
         return;
       }
     }catch(err){
       if(err?.name==="AbortError"){
-        setExportStatus("已取消分享 CSV。","warn");
+        setExportStatus(tr("已取消分享 CSV。"),"warn");
         return;
       }
     }
@@ -849,55 +861,55 @@ button{
       const copied=copyTextFallback(csv);
       setExportStatus(
         copied
-          ?"已送出 CSV 下載要求；同時已把 CSV 內容複製到剪貼簿，若瀏覽器沒有跳出下載，可直接貼到試算表。"
-          :"已送出 CSV 下載要求。若手機仍未顯示下載，請改用支援下載的 Chrome 開啟此頁。",
+          ?tr("已送出 CSV 下載要求；同時已把 CSV 內容複製到剪貼簿，若瀏覽器沒有跳出下載，可直接貼到試算表。")
+          :tr("已送出 CSV 下載要求。若手機仍未顯示下載，請改用支援下載的 Chrome 開啟此頁。"),
         "ok"
       );
     }catch(err){
       const copied=copyTextFallback(csv);
       setExportStatus(
         copied
-          ?"此瀏覽器不支援直接下載，CSV 內容已複製到剪貼簿，可貼到 Google 試算表或 Excel。"
-          :"CSV 匯出失敗："+(err?.message||String(err)),
+          ?tr("此瀏覽器不支援直接下載，CSV 內容已複製到剪貼簿，可貼到 Google 試算表或 Excel。")
+          :tr("CSV 匯出失敗：")+(err?.message||String(err)),
         copied?"warn":"err"
       );
     }
   }
 
   function currentFilterLabel(){
-    const f=$("fromDate").value || "全部";
-    const t=$("toDate").value || "全部";
-    const typeText=$("txType").options[$("txType").selectedIndex]?.text || "全部交易";
+    const f=$("fromDate").value || tr("全部");
+    const t=$("toDate").value || tr("全部");
+    const typeText=$("txType").options[$("txType").selectedIndex]?.text || tr("全部交易");
     return {from:f,to:t,type:typeText};
   }
 
   async function exportMemberCsv(){
     if(!loadedData){
-      setExportStatus("資產資料尚未載入。","err");
+      setExportStatus(tr("資產資料尚未載入。"),"err");
       return;
     }
 
     const m=loadedData.member||{};
     const f=currentFilterLabel();
     const rows=[
-      ["Independent Points","我的資產報表","V4.14.2"],
-      ["會員編號",m.member_number||""],
-      ["暱稱",m.display_name||""],
+      ["Independent Points",tr("我的資產報表"),"V4.14.2"],
+      [tr("會員編號"),m.member_number||""],
+      [tr("暱稱"),m.display_name||""],
       ["Email",m.email||""],
-      ["錢包地址",m.wallet_address||""],
-      ["錢包驗證",m.wallet_verified?"已驗證":"未驗證"],
-      ["開始日期",f.from],
-      ["結束日期",f.to],
-      ["交易類型",f.type],
+      [tr("錢包地址"),m.wallet_address||""],
+      [tr("錢包驗證"),m.wallet_verified?tr("已驗證"):tr("未驗證")],
+      [tr("開始日期"),f.from],
+      [tr("結束日期"),f.to],
+      [tr("交易類型"),f.type],
       [],
-      ["目前 IPT 餘額",$("currentBalance").textContent],
-      ["累計轉入",$("totalIncoming").textContent],
-      ["累計轉出",$("totalOutgoing").textContent],
-      ["資產淨變動",$("netChange").textContent],
-      ["交易筆數",$("totalCount").textContent],
+      [tr("目前 IPT 餘額"),$("currentBalance").textContent],
+      [tr("累計轉入"),$("totalIncoming").textContent],
+      [tr("累計轉出"),$("totalOutgoing").textContent],
+      [tr("資產淨變動"),$("netChange").textContent],
+      [tr("交易筆數"),$("totalCount").textContent],
       ["Mint / Burn",$("mintBurn").textContent],
       [],
-      ["交易類型","時間","IPT 數量","From","To","區塊","Tx Hash"]
+      [tr("交易類型"),tr("時間"),tr("IPT 數量"),"From","To",tr("區塊"),"Tx Hash"]
     ];
 
     for(const tx of currentTxs){
@@ -915,13 +927,13 @@ button{
 
     const csv="\ufeff"+rows.map(r=>r.map(csvCell).join(",")).join("\r\n");
     const stamp=new Date().toISOString().replace(/[-:T]/g,"").slice(0,12);
-    const filename=`IPT-我的資產報表-${m.member_number||"member"}-${stamp}.csv`;
+    const filename=`IPT-${tr("我的資產報表").replaceAll(" ","-")}-${m.member_number||"member"}-${stamp}.csv`;
     await shareOrDownloadCsv(csv,filename);
   }
 
   function printMemberReport(){
     if(!loadedData){
-      setExportStatus("資產資料尚未載入。","err");
+      setExportStatus(tr("資產資料尚未載入。"),"err");
       return;
     }
 
@@ -930,7 +942,7 @@ button{
     const report={
       kind:"member",
       version:"V4.14.2",
-      title:"我的資產報表",
+      title:tr("我的資產報表"),
       generated_at:new Date().toISOString(),
       member:{
         member_number:m.member_number||"",
@@ -952,25 +964,25 @@ button{
     };
 
     sessionStorage.setItem("ipt_print_report",JSON.stringify(report));
-    setExportStatus("正在開啟列印／PDF 預覽…","ok");
+    setExportStatus(tr("正在開啟列印／PDF 預覽…"),"ok");
     location.href="./print-report-v4.12.html?v=4142hf43";
   }
 
   async function loadMyAssets(){
     $("refreshBtn").disabled=true;
-    setStatus("warn","正在讀取你的會員資料與 Sepolia IPT 資產…");
+    setStatus("warn",tr("正在讀取你的會員資料與 Sepolia IPT 資產…"));
 
     try{
       const {data:{user},error:sessionError}=await sb.auth.getUser();
       if(sessionError) throw sessionError;
       if(!user){
-        setStatus("err","尚未登入會員。請先返回會員頁登入。");
+        setStatus("err",tr("尚未登入會員。請先返回會員頁登入。"));
         return;
       }
 
       const {data,error}=await sb.functions.invoke("member-asset-detail",{body:{}});
       if(error) throw error;
-      if(!data?.ok) throw new Error(data?.error||"資產報表載入失敗");
+      if(!data?.ok) throw new Error(data?.error||tr("資產報表載入失敗"));
 
       loadedData=data;
       renderMember(data);
@@ -981,12 +993,12 @@ button{
       const m=data.member||{};
 
       if(!m.wallet_address){
-        $("rangeNote").textContent="目前尚未綁定錢包，因此鏈上資產與交易紀錄均為 0。";
+        $("rangeNote").textContent=tr("目前尚未綁定錢包，因此鏈上資產與交易紀錄均為 0。");
       }else if(a.history_available===false){
-        $("rangeNote").textContent="目前餘額已讀取，但鏈上交易歷史暫時無法完整載入。";
+        $("rangeNote").textContent=tr("目前餘額已讀取，但鏈上交易歷史暫時無法完整載入。");
       }else{
         $("rangeNote").textContent=
-          `最近交易時間：${fmtTime(a.latest_transaction_at)}｜轉入 ${a.incoming_count??0} 筆｜轉出 ${a.outgoing_count??0} 筆。`;
+          tf("最近交易時間：{time}｜轉入 {incoming} 筆｜轉出 {outgoing} 筆。",{time:fmtTime(a.latest_transaction_at),incoming:a.incoming_count??0,outgoing:a.outgoing_count??0});
       }
 
       $("memberSection").classList.remove("hidden");
@@ -996,14 +1008,14 @@ button{
       $("txSection").classList.remove("hidden");
 
       setStatus("ok",
-        `V4.14.2 已載入｜${m.member_number||""}｜${m.display_name||""}`);
+        tf("V4.14.2 已載入｜{number}｜{name}",{number:m.member_number||"",name:m.display_name||""}));
       $("refreshBtn").disabled=false;
 
     }catch(err){
       console.error(err);
       let msg=err?.message||String(err);
-      if(msg.includes("non-2xx")) msg="會員資產服務拒絕存取或登入狀態已失效。";
-      setStatus("err","載入失敗："+msg);
+      if(msg.includes("non-2xx")) msg=tr("會員資產服務拒絕存取或登入狀態已失效。");
+      setStatus("err",tr("載入失敗：")+msg);
       $("refreshBtn").disabled=false;
     }
   }
@@ -1016,6 +1028,16 @@ button{
   $("clearFilterBtn").addEventListener("click",(e)=>{e.preventDefault();clearFilters();});
   $("backBtn").addEventListener("click",()=>{location.href="./index.html?v=4142hf43";});
 
+  window.addEventListener("ipt-language-change",()=>{
+    if(!loadedData) return;
+    renderMember(loadedData);
+    applyFilters();
+    const m=loadedData.member||{},a=loadedData.asset||{};
+    if(!m.wallet_address) $("rangeNote").textContent=tr("目前尚未綁定錢包，因此鏈上資產與交易紀錄均為 0。");
+    else if(a.history_available===false) $("rangeNote").textContent=tr("目前餘額已讀取，但鏈上交易歷史暫時無法完整載入。");
+    else $("rangeNote").textContent=tf("最近交易時間：{time}｜轉入 {incoming} 筆｜轉出 {outgoing} 筆。",{time:fmtTime(a.latest_transaction_at),incoming:a.incoming_count??0,outgoing:a.outgoing_count??0});
+    if($("statusBox").className==="status ok") setStatus("ok",tf("V4.14.2 已載入｜{number}｜{name}",{number:m.member_number||"",name:m.display_name||""}));
+  });
   loadMyAssets();
 })();
 </script>
@@ -1031,3 +1053,4 @@ if ("serviceWorker" in navigator) {
 
 </body>
 </html>
+
