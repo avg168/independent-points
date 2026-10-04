@@ -478,7 +478,7 @@ body.platform-admin.v41-route.route-ownership.show-ownership #securityGuardSecti
 </div>
 <header>
   <div class="v43-product-tag">正式鏈上操作模組</div><div class="v43-module-note">Ethereum Sepolia｜Trust Wallet / WalletConnect</div>
-  <div id="versionBadge" style="display:inline-block;margin-bottom:10px;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.78rem;font-weight:800;letter-spacing:.04em">V4.14.2 CORE | HF50-C7</div>
+  <div id="versionBadge" style="display:inline-block;margin-bottom:10px;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.78rem;font-weight:800;letter-spacing:.04em">V4.14.2 CORE | HF50-C16</div>
   <h1 id="v41RouteTitle">IPT 錢包中心</h1>
   <p id="v41RouteSubtitle">會員帳號 × 主錢包 × 鏈上錢包獨立驗證</p>
   <div class="v41-head-actions">
@@ -1355,6 +1355,8 @@ $("readBtn").addEventListener("click", async () => {
     iptContractReady = allOk;
     iptContractReadAccount = allOk ? readAccount : "";
     iptRenderMemberWalletState();
+    // A fresh read invalidates any previous transfer preflight and its stale hint.
+    resetTransferCheck();
     originalReadHandlerEnable();
 
     $("contractData").className = "box " + (allOk ? "ok" : "err");
@@ -3990,4 +3992,5 @@ if ("serviceWorker" in navigator) {
 
 </body>
 </html>
+
 
