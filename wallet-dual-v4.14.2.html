@@ -161,7 +161,7 @@ h2{margin:0 0 12px;font-size:1.12rem}
   header{padding:22px 16px 26px}
 }
 </style>
-<script src="https://avg168.github.io/independent-points/i18n-v4.10.js?v=4142hf50c8" defer></script>
+<script src="https://avg168.github.io/independent-points/i18n-v4.10.js?v=4142hf50c18" defer></script>
 </head>
 <body>
 <div id="authOverlay">
@@ -795,29 +795,29 @@ h2{margin:0 0 12px;font-size:1.12rem}
     const note=String($("transferNote").value||"").trim();
 
     if(!recipient || recipient.member_number!==memberNumber){
-      alert("請先重新查詢並確認收款會員。");
+      alert(tr("請先重新查詢並確認收款會員。"));
       return;
     }
     if(!Number.isSafeInteger(units)||units<=0){
-      alert("請輸入正確的 IPT 數量，最多兩位小數。");
+      alert(tr("請輸入正確的 IPT 數量，最多兩位小數。"));
       return;
     }
     if(units>available){
-      alert("平台 IPT 餘額不足。");
+      alert(tr("平台 IPT 餘額不足。"));
       return;
     }
     if(note.length>200){
-      alert("備註最多 200 字。");
+      alert(tr("備註最多 200 字。"));
       return;
     }
 
     const amountText=formatIptUnits(units);
     const ok=confirm(
-      `確認平台轉帳？\n\n`+
-      `收款人：${recipient.display_name}\n`+
-      `會員編號：${recipient.member_number}\n`+
-      `轉出：${amountText} 平台 IPT\n\n`+
-      `此為平台內部轉帳，不會上鏈，也不產生 Gas。`
+      tr("確認平台轉帳？")+"\n\n"+
+      tr("收款人：")+recipient.display_name+"\n"+
+      tr("會員編號：")+recipient.member_number+"\n"+
+      tr("轉出：")+amountText+" "+tr("平台 IPT")+"\n\n"+
+      tr("此為平台內部轉帳，不會上鏈，也不產生 Gas。")
     );
     if(!ok) return;
 
@@ -914,15 +914,15 @@ h2{margin:0 0 12px;font-size:1.12rem}
     const p=Number($("pAmount").value||0);
     const available=Number(platformData?.balances?.p?.available_units||0);
     if(!Number.isSafeInteger(p)||p<=0||p%120!==0){
-      alert("兌換數量必須是 120 P 的整數倍。");
+      alert(tr("兌換數量必須是 120 P 的整數倍。"));
       return;
     }
     if(p>available){
-      alert("P 餘額不足。");
+      alert(tr("P 餘額不足。"));
       return;
     }
     const ipt=(p/120)*100;
-    if(!confirm(`確認兌換？\n\n使用：${p} P\n獲得：${ipt.toFixed(2)} 平台 IPT\n\n此操作完成後會留下正式帳本紀錄。`)){
+    if(!confirm(tr("確認兌換？")+"\n\n"+tr("使用：")+p+" P\n"+tr("獲得：")+ipt.toFixed(2)+" "+tr("平台 IPT")+"\n\n"+tr("此操作完成後會留下正式帳本紀錄。"))){
       return;
     }
 
@@ -1143,6 +1143,7 @@ h2{margin:0 0 12px;font-size:1.12rem}
 </script>
 </body>
 </html>
+
 
 
 
