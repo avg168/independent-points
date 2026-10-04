@@ -1,0 +1,35 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>IPT｜統一資產總覽</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.min.js"></script>
+<style>:root{font-family:system-ui,-apple-system,"Noto Sans TC",sans-serif;color:#172033;background:#f4f7fb}*{box-sizing:border-box;min-width:0}body{margin:0}header{background:#10243d;color:#fff;padding:24px 18px 30px;border-radius:0 0 26px 26px}h1{font-size:1.5rem;margin:10px 0 6px}header p{margin:0;line-height:1.6;opacity:.9}main{max-width:780px;margin:auto;padding:16px 14px 70px}.panel{background:#fff;border:1px solid #dde5ef;border-radius:18px;padding:16px;margin-bottom:14px}.status{border-radius:12px;padding:12px 14px;line-height:1.65;background:#edf4ff;border:1px solid #ccddf5}.ok{background:#ebf8f2;color:#17694f}.warn{background:#fff7df;color:#7e5a08}.err{background:#fff0f0;color:#922c2c}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.card{border:1px solid #dfe6ef;border-radius:15px;padding:14px;background:#f8fafc}.k{font-size:.78rem;color:#64748b}.v{font-size:1.16rem;font-weight:900;color:#17365d;margin-top:6px;overflow-wrap:anywhere}.s{font-size:.78rem;color:#64748b;line-height:1.5;margin-top:6px}.row{padding:10px 0;border-bottom:1px solid #edf1f5}.row:last-child{border:0}.label{font-size:.78rem;color:#64748b}.value{font-weight:850;overflow-wrap:anywhere;margin-top:4px}button{width:100%;min-height:50px;border-radius:12px;border:1px solid #cbd5e1;padding:11px;font:inherit;font-weight:900;margin-top:10px}.primary{background:#176c59;color:#fff}.light{background:#fff;color:#29445f}.note{font-size:.83rem;color:#64748b;line-height:1.7;margin-top:10px}@media(min-width:680px){.grid{grid-template-columns:repeat(4,1fr)}}</style></head>
+<body><header><div>V4.14.2｜HF50-A</div><h1>我的資產總覽</h1><p>平台帳本與 Sepolia 鏈上資產分開保存、統一查看。</p></header><main>
+<section class="panel"><h2>會員</h2><div id="status" class="status">正在讀取會員與資產…</div><div class="row"><div class="label">會員</div><div id="member" class="value">—</div></div><div class="row"><div class="label">Trust Wallet</div><div id="wallet" class="value">—</div></div><div class="row"><div class="label">錢包驗證</div><div id="verified" class="value">—</div></div></section>
+<section class="panel"><h2>資產</h2><div class="grid">
+<div class="card"><div class="k">P 點數｜平台帳本</div><div id="p" class="v">—</div><div class="s">Supabase 平台帳本</div></div>
+<div class="card"><div class="k">平台 IPT｜Off-chain</div><div id="platform" class="v">—</div><div class="s">可用於平台會員互轉</div></div>
+<div class="card"><div class="k">鏈上 IPT｜On-chain</div><div id="chain" class="v">—</div><div class="s">Ethereum Sepolia 智慧合約</div></div>
+<div class="card"><div class="k">IPT 顯示合計</div><div id="total" class="v">—</div><div class="s">僅供總覽，不代表同一本帳</div></div>
+</div><div class="note"><b>重要：</b>平台 IPT 與鏈上 IPT 是兩本不同帳。這裡的「顯示合計」只方便查看，不能直接拿合計數字進行單一轉帳。</div></section>
+<section class="panel"><h2>資料來源</h2><div class="row"><div class="label">平台資產</div><div class="value">platform-wallet｜正式平台帳本</div></div><div class="row"><div class="label">鏈上資產</div><div class="value">member-asset-detail｜Ethereum Sepolia</div></div><button id="refresh" class="primary">重新整理資產</button><button id="home" class="light">返回首頁</button></section>
+</main><script>
+const U="https://uccexvgqmoxhgykkjdcy.supabase.co",K="sb_publishable_FBsN1DYTQMv2_bWhpbXHAA_qdAq7ri7";
+const sb=window.supabase.createClient(U,K,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}),$=x=>document.getElementById(x);
+function ipt(units){return (Number(units||0)/100).toLocaleString("zh-TW",{minimumFractionDigits:2,maximumFractionDigits:2})+" IPT"}
+function chain(v){const n=Number(v||0);return (Number.isFinite(n)?n:0).toLocaleString("zh-TW",{minimumFractionDigits:6,maximumFractionDigits:6})+" IPT"}
+async function load(){
+ $("refresh").disabled=true;$("status").className="status";$("status").textContent="正在讀取平台帳本與 Sepolia 鏈上資產…";
+ try{
+  const {data:{user},error}=await sb.auth.getUser();if(error||!user)throw new Error("請先登入會員。");
+  const {data:a,error:ae}=await sb.rpc("ipt_device_access_allowed");if(ae)throw ae;if(a!==true)throw new Error("這個瀏覽器尚未通過受信任裝置驗證。");
+  const [pr,cr]=await Promise.all([sb.functions.invoke("platform-wallet",{body:{action:"summary"}}),sb.functions.invoke("member-asset-detail",{body:{}})]);
+  if(pr.error)throw pr.error;if(cr.error)throw cr.error;if(pr.data?.error)throw new Error(pr.data.error);if(cr.data?.error)throw new Error(cr.data.error);
+  const p=pr.data||{},c=cr.data||{},m=c.member||p.member||{};
+  const pu=Number(p?.balances?.p?.available_units||0),iu=Number(p?.balances?.platform_ipt?.available_units||0),cv=Number(c?.member?.ipt_balance||0);
+  $("member").textContent=`${m.member_number||"—"}｜${m.display_name||"—"}`;$("wallet").textContent=m.wallet_address||"尚未綁定 Trust Wallet";$("verified").textContent=m.wallet_verified?"已驗證 ✓":"未驗證";
+  $("p").textContent=pu.toLocaleString("zh-TW")+" P";$("platform").textContent=ipt(iu);$("chain").textContent=chain(cv);
+  const total=iu/100+(Number.isFinite(cv)?cv:0);$("total").textContent=total.toLocaleString("zh-TW",{minimumFractionDigits:2,maximumFractionDigits:6})+" IPT";
+  $("status").className="status ok";$("status").textContent="資產已更新。平台與鏈上資料分開讀取、分開記帳。";
+ }catch(e){$("status").className="status err";$("status").textContent="讀取失敗："+(e?.message||String(e))}
+ finally{$("refresh").disabled=false}
+}
+$("refresh").onclick=load;$("home").onclick=()=>location.href="./index.html?v=4142hf50a";load();
+</script></body></html>
