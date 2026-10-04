@@ -492,12 +492,12 @@ button{
 <link rel="icon" type="image/svg+xml" href="./ipt-icon-192.png">
 
 <link rel="apple-touch-icon" href="./ipt-apple-touch-180.png">
-<script src="./i18n-v4.10.js?v=4142hf43" defer></script>
+<script src="./i18n-v4.10.js?v=4142hf50c31" defer></script>
 <script src="./auth-guard-v4.12.js?v=4142hf43"></script>
 </head>
 <body>
 <header>
-  <div class="version">V4.14.2</div>
+  <div class="version">V4.14.2 | HF50-C31</div>
   <h1>管理員資產彙總</h1>
   <p>管理員資產總覽 × 彙總報表 × CSV 匯出 × 列印／PDF</p>
 </header>
@@ -505,7 +505,7 @@ button{
 <main>
   <section id="systemSection" class="panel">
     <h2>系統狀態</h2>
-    <div id="statusBox" class="status warn">正在檢查管理員登入狀態…</div>
+    <div id="statusBox" class="status warn" data-raw-data="1">正在檢查管理員登入狀態…</div>
     <div class="actions">
       <button id="refreshBtn" class="primary" type="button" disabled>重新整理資產</button>
       <button id="assetCenterBtn" class="secondary" type="button">資產中心</button>
@@ -670,6 +670,8 @@ button{
     if(x==="zh-CN") return zhCN;
     return zhTW;
   }
+  const tr=s=>window.IPTI18N?.t?.(s)||s;
+  const tf=(key,values)=>tr(key).replace(/\{(\w+)\}/g,(_,name)=>String(values[name]??""));
   let allMembers = [];
   let lastReportMembers = [];
   let lastReportTxs = [];
@@ -760,7 +762,7 @@ button{
     }
 
     $("memberList").innerHTML = list.map((m) => {
-      const wallet = m.wallet_address || "尚未綁定";
+      const wallet = m.wallet_address || tr("尚未綁定");
       const roleChip = m.role === "admin"
         ? '<span class="chip admin">管理員</span>'
         : '<span class="chip">會員</span>';
@@ -774,14 +776,14 @@ button{
       return `
         <article class="member">
           <div class="member-head">
-            <div class="member-title">${esc(m.member_number)}｜${esc(m.display_name)}</div>
+            <div class="member-title" data-member-data="1">${esc(m.member_number)}｜${esc(m.display_name)}</div>
             <div class="chips">${roleChip}${statusChip}${verifyChip}</div>
           </div>
 
           <div class="member-grid">
             <div class="row">
               <div class="k">Email</div>
-              <div class="v">${esc(m.email || "—")}</div>
+              <div class="v" data-raw-data="1">${esc(m.email || "—")}</div>
             </div>
             <div class="row">
               <div class="k">IPT 餘額</div>
@@ -789,7 +791,7 @@ button{
             </div>
             <div class="row">
               <div class="k">主錢包地址</div>
-              <div class="v">${esc(wallet)}</div>
+              <div class="v" data-raw-data="1">${esc(wallet)}</div>
             </div>
             <div class="row">
               <div class="k">錢包驗證</div>
@@ -819,11 +821,11 @@ button{
   }
 
   function typeInfo(type) {
-    if (type === "mint") return { label:"鑄造轉入", cls:"mint", sign:"+" };
-    if (type === "burn") return { label:"銷毀轉出", cls:"burn", sign:"-" };
-    if (type === "in") return { label:"轉入", cls:"in", sign:"+" };
-    if (type === "out") return { label:"轉出", cls:"out", sign:"-" };
-    return { label:"其他", cls:"", sign:"" };
+    if (type === "mint") return { label:tr("鑄造轉入"), cls:"mint", sign:"+" };
+    if (type === "burn") return { label:tr("銷毀轉出"), cls:"burn", sign:"-" };
+    if (type === "in") return { label:tr("轉入"), cls:"in", sign:"+" };
+    if (type === "out") return { label:tr("轉出"), cls:"out", sign:"-" };
+    return { label:tr("其他"), cls:"", sign:"" };
   }
 
   function renderDetail(data) {
@@ -849,12 +851,12 @@ button{
           <button class="light txBtn" type="button" data-tx="${esc(tx.tx_hash)}">查看鏈上交易</button>
         </div>
       `;
-    }).join("") : '<div class="empty">目前沒有 IPT Transfer 紀錄。</div>';
+    }).join("") : `<div class="empty">${esc(tr("目前沒有 IPT Transfer 紀錄。"))}</div>`;
 
     $("detailContent").innerHTML = `
       <div class="detail-hero">
-        <div class="detail-name">${esc(m.member_number)}｜${esc(m.display_name)}</div>
-        <div class="detail-wallet">${esc(m.wallet_address || "尚未綁定錢包")}</div>
+        <div class="detail-name" data-member-data="1">${esc(m.member_number)}｜${esc(m.display_name)}</div>
+        <div class="detail-wallet" data-raw-data="1">${esc(m.wallet_address || tr("尚未綁定錢包"))}</div>
       </div>
 
       <div class="detail-summary">
@@ -873,9 +875,7 @@ button{
       </div>
 
       <div class="footer-note">
-        最近交易時間：${esc(fmtTime(a.latest_transaction_at))}｜
-        Mint：${esc(a.mint_count ?? 0)} 筆｜
-        Burn：${esc(a.burn_count ?? 0)} 筆
+        ${esc(tf("最近交易時間：{time}｜Mint：{mint} 筆｜Burn：{burn} 筆",{time:fmtTime(a.latest_transaction_at),mint:a.mint_count??0,burn:a.burn_count??0}))}
       </div>
 
       <h2 style="margin-top:20px">最近交易紀錄</h2>
@@ -894,7 +894,7 @@ button{
     if (!userId) return;
     $("detailSection").classList.remove("hidden");
     $("detailContent").innerHTML =
-      '<div class="loading"><span class="spinner"></span>正在讀取此會員完整 IPT 鏈上交易紀錄…</div>';
+      `<div class="loading"><span class="spinner"></span>${esc(tr("正在讀取此會員完整 IPT 鏈上交易紀錄…"))}</div>`;
     $("detailSection").scrollIntoView({ behavior:"smooth", block:"start" });
 
     try {
@@ -902,12 +902,12 @@ button{
         body: { target_user_id:userId }
       });
       if (error) throw error;
-      if (!data?.ok) throw new Error(data?.error || "資產明細載入失敗");
+      if (!data?.ok) throw new Error(data?.error || tr("資產明細載入失敗"));
       renderDetail(data);
     } catch (err) {
       console.error(err);
       $("detailContent").innerHTML =
-        `<div class="status err">明細載入失敗：${esc(err?.message || String(err))}</div>`;
+        `<div class="status err">${esc(tr("明細載入失敗："))}${esc(err?.message || String(err))}</div>`;
     }
   }
 
@@ -971,7 +971,7 @@ button{
 
   function renderReportTransactions(txs) {
     if (!txs.length) {
-      $("reportTxList").innerHTML = '<div class="empty">此條件下沒有交易紀錄。</div>';
+      $("reportTxList").innerHTML = `<div class="empty">${esc(tr("此條件下沒有交易紀錄。"))}</div>`;
       return;
     }
 
@@ -988,7 +988,7 @@ button{
             <span class="tx-amount ${amountClass}">${t.sign}${esc(fmtNumber(tx.amount))} IPT</span>
           </div>
           <div class="tx-meta">
-            會員：${esc(member.member_number)}｜${esc(member.display_name)}<br>
+            會員：<span data-member-data="1">${esc(member.member_number)}｜${esc(member.display_name)}</span><br>
             時間：${esc(fmtTime(tx.timestamp))}<br>
             區塊：${esc(tx.block_number)}<br>
             From：<span class="tx-address">${esc(shortAddr(tx.from))}</span><br>
@@ -1010,13 +1010,13 @@ button{
 
   function renderReportMembers(items) {
     if (!items.length) {
-      $("reportMemberList").innerHTML = '<div class="empty">此條件下沒有會員資產變動。</div>';
+      $("reportMemberList").innerHTML = `<div class="empty">${esc(tr("此條件下沒有會員資產變動。"))}</div>`;
       return;
     }
 
     $("reportMemberList").innerHTML = items.map((x) => `
       <div class="report-member">
-        <div class="report-member-title">${esc(x.member.member_number)}｜${esc(x.member.display_name)}</div>
+        <div class="report-member-title" data-member-data="1">${esc(x.member.member_number)}｜${esc(x.member.display_name)}</div>
         <div class="report-member-grid">
           <div class="mini"><div class="k">目前餘額</div>
             <div class="v">${esc(fmtNumber(x.member.ipt_balance || 0))} IPT</div></div>
@@ -1040,7 +1040,7 @@ button{
       body: { target_user_id:userId }
     });
     if (error) throw error;
-    if (!data?.ok) throw new Error(data?.error || "資產明細載入失敗");
+    if (!data?.ok) throw new Error(data?.error || tr("資產明細載入失敗"));
     return data;
   }
 
@@ -1079,18 +1079,18 @@ button{
 
     try{
       if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
-        setExportStatus("正在開啟 Android 分享／儲存視窗…","ok");
+        setExportStatus(tr("正在開啟 Android 分享／儲存視窗…"),"ok");
         await navigator.share({
           title:filename,
-          text:"Independent Points 資產報表 CSV",
+          text:tr("Independent Points 資產報表 CSV"),
           files:[file]
         });
-        setExportStatus("CSV 已交給 Android 分享／儲存功能。","ok");
+        setExportStatus(tr("CSV 已交給 Android 分享／儲存功能。"),"ok");
         return;
       }
     }catch(err){
       if(err?.name==="AbortError"){
-        setExportStatus("已取消分享 CSV。","warn");
+        setExportStatus(tr("已取消分享 CSV。"),"warn");
         return;
       }
     }
@@ -1110,16 +1110,16 @@ button{
       const copied=copyTextFallback(csv);
       setExportStatus(
         copied
-          ?"已送出 CSV 下載要求；同時已把 CSV 內容複製到剪貼簿，若瀏覽器沒有跳出下載，可直接貼到試算表。"
-          :"已送出 CSV 下載要求。若手機仍未顯示下載，請改用支援下載的 Chrome 開啟此頁。",
+          ?tr("已送出 CSV 下載要求；同時已把 CSV 內容複製到剪貼簿，若瀏覽器沒有跳出下載，可直接貼到試算表。")
+          :tr("已送出 CSV 下載要求。若手機仍未顯示下載，請改用支援下載的 Chrome 開啟此頁。"),
         "ok"
       );
     }catch(err){
       const copied=copyTextFallback(csv);
       setExportStatus(
         copied
-          ?"此瀏覽器不支援直接下載，CSV 內容已複製到剪貼簿，可貼到 Google 試算表或 Excel。"
-          :"CSV 匯出失敗："+(err?.message||String(err)),
+          ?tr("此瀏覽器不支援直接下載，CSV 內容已複製到剪貼簿，可貼到 Google 試算表或 Excel。")
+          :tr("CSV 匯出失敗：")+(err?.message||String(err)),
         copied?"warn":"err"
       );
     }
@@ -1127,27 +1127,27 @@ button{
 
   async function exportAdminCsv(){
     if(!lastReportSummary){
-      setExportStatus("請先產生彙總報表。","warn");
+      setExportStatus(tr("請先產生彙總報表。"),"warn");
       return;
     }
 
     const c=lastReportCriteria||{};
     const rows=[
-      ["Independent Points","管理員資產彙總報表","V4.14.2"],
-      ["開始日期",c.from||"全部"],
-      ["結束日期",c.to||"全部"],
-      ["交易類型",c.type||"全部交易"],
-      ["會員搜尋",c.query||"全部"],
+      ["Independent Points",tr("管理員資產彙總報表"),"V4.14.2"],
+      [tr("開始日期"),c.from||tr("全部")],
+      [tr("結束日期"),c.to||tr("全部")],
+      [tr("交易類型"),c.type||tr("全部交易")],
+      [tr("會員搜尋"),c.query||tr("全部")],
       [],
-      ["符合會員數",lastReportSummary.members],
-      ["區間累計轉入",lastReportSummary.incoming+" IPT"],
-      ["區間累計轉出",lastReportSummary.outgoing+" IPT"],
-      ["區間淨變動",lastReportSummary.net+" IPT"],
-      ["資產變動筆數",lastReportSummary.count],
+      [tr("符合會員數"),lastReportSummary.members],
+      [tr("區間累計轉入"),lastReportSummary.incoming+" IPT"],
+      [tr("區間累計轉出"),lastReportSummary.outgoing+" IPT"],
+      [tr("區間淨變動"),lastReportSummary.net+" IPT"],
+      [tr("資產變動筆數"),lastReportSummary.count],
       ["Mint",lastReportSummary.mint],
       ["Burn",lastReportSummary.burn],
       [],
-      ["會員編號","暱稱","Email","錢包","目前餘額","區間轉入","區間轉出","區間淨變動","交易筆數","轉入筆數","轉出筆數","Mint","Burn"]
+      [tr("會員編號"),tr("暱稱"),"Email",tr("錢包"),tr("目前餘額"),tr("區間轉入"),tr("區間轉出"),tr("區間淨變動"),tr("交易筆數"),tr("轉入筆數"),tr("轉出筆數"),"Mint","Burn"]
     ];
 
     for(const x of lastReportMembers){
@@ -1165,7 +1165,7 @@ button{
     }
 
     rows.push([]);
-    rows.push(["交易會員","暱稱","交易類型","時間","IPT 數量","From","To","區塊","Tx Hash"]);
+    rows.push([tr("交易會員"),tr("暱稱"),tr("交易類型"),tr("時間"),tr("IPT 數量"),"From","To",tr("區塊"),"Tx Hash"]);
 
     for(const item of lastReportTxs){
       const t=typeInfo(item.tx.type);
@@ -1184,19 +1184,19 @@ button{
 
     const csv="\ufeff"+rows.map(r=>r.map(csvCell).join(",")).join("\r\n");
     const stamp=new Date().toISOString().replace(/[-:T]/g,"").slice(0,12);
-    await shareOrDownloadCsv(csv,`IPT-管理員資產彙總-${stamp}.csv`);
+    await shareOrDownloadCsv(csv,`IPT-${L("管理員資產彙總","管理员资产汇总","Admin-Asset-Summary")}-${stamp}.csv`);
   }
 
   function printAdminReport(){
     if(!lastReportSummary){
-      setExportStatus("請先產生彙總報表。","warn");
+      setExportStatus(tr("請先產生彙總報表。"),"warn");
       return;
     }
 
     const report={
       kind:"admin",
       version:"V4.14.2",
-      title:"管理員資產彙總報表",
+      title:tr("管理員資產彙總報表"),
       generated_at:new Date().toISOString(),
       criteria:lastReportCriteria||{},
       summary:lastReportSummary,
@@ -1215,7 +1215,7 @@ button{
     };
 
     sessionStorage.setItem("ipt_print_report",JSON.stringify(report));
-    setExportStatus("正在開啟列印／PDF 預覽…","ok");
+    setExportStatus(tr("正在開啟列印／PDF 預覽…"),"ok");
     location.href="./print-report-v4.12.html?v=4142hf43";
   }
 
@@ -1223,13 +1223,13 @@ button{
     const btn = $("generateReportBtn");
     btn.disabled = true;
     $("reportStatus").className = "report-status";
-    $("reportStatus").textContent = "正在彙整會員鏈上資產紀錄…";
+    $("reportStatus").textContent = tr("正在彙整會員鏈上資產紀錄…");
     $("reportResult").classList.add("hidden");
 
     try {
       const { fromTs, toTs } = reportDateRange();
       if (fromTs && toTs && fromTs > toTs) {
-        throw new Error("開始日期不能晚於結束日期。");
+        throw new Error(tr("開始日期不能晚於結束日期。"));
       }
 
       const txType = $("reportType").value;
@@ -1337,7 +1337,7 @@ button{
       lastReportCriteria = {
         from:$("reportFromDate").value,
         to:$("reportToDate").value,
-        type:$("reportType").options[$("reportType").selectedIndex]?.text || "全部交易",
+        type:$("reportType").options[$("reportType").selectedIndex]?.text || tr("全部交易"),
         query:q
       };
       $("exportAdminCsvBtn").disabled = false;
@@ -1355,10 +1355,10 @@ button{
       $("reportResult").classList.remove("hidden");
 
       const notes = [];
-      if (!targets.length) notes.push("沒有符合條件且已綁定錢包的會員。");
-      else notes.push(`已完成 ${details.length} 位已綁定錢包會員的彙總。`);
-      if (failures.length) notes.push(`${failures.length} 位會員讀取失敗。`);
-      if (truncated) notes.push(`${truncated} 位會員交易筆數超過目前明細載入上限，報表以已載入的最近交易為準。`);
+      if (!targets.length) notes.push(tr("沒有符合條件且已綁定錢包的會員。"));
+      else notes.push(tf("已完成 {count} 位已綁定錢包會員的彙總。",{count:details.length}));
+      if (failures.length) notes.push(tf("{count} 位會員讀取失敗。",{count:failures.length}));
+      if (truncated) notes.push(tf("{count} 位會員交易筆數超過目前明細載入上限，報表以已載入的最近交易為準。",{count:truncated}));
 
       $("reportStatus").className =
         "report-status " + ((failures.length || truncated) ? "warn" : "ok");
@@ -1367,7 +1367,7 @@ button{
     } catch (err) {
       console.error(err);
       $("reportStatus").className = "report-status err";
-      $("reportStatus").textContent = "報表產生失敗：" + (err?.message || String(err));
+      $("reportStatus").textContent = tr("報表產生失敗：") + (err?.message || String(err));
     } finally {
       btn.disabled = false;
     }
@@ -1387,7 +1387,7 @@ button{
     $("printAdminBtn").disabled = true;
     $("reportStatus").className = "report-status";
     $("reportStatus").textContent =
-      "尚未產生報表。日期留空代表目前可載入的全部鏈上交易範圍。";
+      tr("尚未產生報表。日期留空代表目前可載入的全部鏈上交易範圍。");
   }
 
 
@@ -1440,7 +1440,7 @@ button{
       });
 
       if (error) throw error;
-      if (!data?.ok) throw new Error(data?.error || "資產報表載入失敗");
+      if (!data?.ok) throw new Error(data?.error || tr("資產報表載入失敗"));
 
       allMembers = Array.isArray(data.members) ? data.members : [];
       setSummary(data.summary || {});
@@ -1498,3 +1498,4 @@ if ("serviceWorker" in navigator) {
 
 </body>
 </html>
+
