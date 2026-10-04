@@ -1094,7 +1094,14 @@ h2{margin:0 0 12px;font-size:1.12rem}
       : activeLang()==="zh-CN"
       ? {title:"Independent Points 平台 IPT 收款",recipient:"收款人",number:"会员编号",fallback:"IPT 会员"}
       : {title:"Independent Points 平台 IPT 收款",recipient:"收款人",number:"會員編號",fallback:"IPT 會員"};
-    const text=`${shareLabels.title}\n${shareLabels.recipient}: ${member.display_name||shareLabels.fallback}\n${shareLabels.number}: ${memberNumber}\n${paymentLinkUrl||""}`;
+    let shareUrl=paymentLinkUrl||"";
+    if(shareUrl){
+      const localizedUrl=new URL(shareUrl,location.href);
+      localizedUrl.pathname=localizedUrl.pathname.replace(/pay-v4\.14\.2\.html$/,activeLang()==="en"?"pay-v4.14.2-en.html":activeLang()==="zh-CN"?"pay-v4.14.2-zh-cn.html":"pay-v4.14.2.html");
+      localizedUrl.searchParams.set("v","4142hf50c11");
+      shareUrl=localizedUrl.href;
+    }
+    const text=`${shareLabels.title}\n${shareLabels.recipient}: ${member.display_name||shareLabels.fallback}\n${shareLabels.number}: ${memberNumber}\n${shareUrl}`;
     try{
       if(navigator.share){
         await navigator.share({title:shareLabels.title,text});
@@ -1136,6 +1143,7 @@ h2{margin:0 0 12px;font-size:1.12rem}
 </script>
 </body>
 </html>
+
 
 
 
