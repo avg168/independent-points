@@ -39,10 +39,10 @@ button:disabled{opacity:.45}
 .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
 .chip{padding:4px 8px;border-radius:999px;font-size:.74rem;font-weight:800;background:#eef2f7;color:#475569}
 .chip.ok{background:#e8f7ef;color:#17694f}.chip.admin{background:#e8efff;color:#284b88}.chip.off{background:#fdecec;color:#9b2b2b}
-.meta{margin-top:10px;color:#64748b;font-size:.86rem;line-height:1.7;word-break:break-all}
+.meta{margin-top:10px;color:#64748b;font-size:.86rem;line-height:1.7;word-break:normal;overflow-wrap:anywhere}
 .detail-grid{display:grid;grid-template-columns:1fr;gap:10px}
 .detail-box{border:1px solid #e1e7ef;border-radius:13px;padding:12px;background:#f8fafc}
-.detail-box .k{font-size:.77rem;color:#64748b}.detail-box .v{margin-top:4px;font-weight:800;word-break:break-all}
+.detail-box .k{font-size:.77rem;color:#64748b}.detail-box .v{margin-top:4px;font-weight:800;word-break:normal;overflow-wrap:anywhere}
 .audit{font-size:.82rem;line-height:1.6;border-top:1px solid #edf0f4;padding:9px 0}
 .hidden{display:none!important}
 @media(min-width:680px){.summary{grid-template-columns:repeat(3,1fr)}.search{grid-template-columns:1fr auto auto}.detail-grid{grid-template-columns:repeat(2,1fr)}}
@@ -320,12 +320,12 @@ button{
 <link rel="icon" type="image/svg+xml" href="./ipt-icon-192.png">
 
 <link rel="apple-touch-icon" href="./ipt-apple-touch-180.png">
-<script src="./i18n-v4.10.js?v=4142hf43" defer></script>
+<script src="./i18n-v4.10.js?v=4142hf50c30" defer></script>
 <script src="./auth-guard-v4.12.js?v=4142hf43"></script>
 </head>
 <body>
 <header>
-  <div class="version">V4.14.2</div>
+  <div class="version">V4.14.2 | HF50-C30</div>
   <h1>會員管理</h1>
   <p>Supabase 雲端會員狀態、角色、錢包驗證與管理紀錄</p>
 </header>
@@ -336,7 +336,7 @@ button{
   </div>
   <section class="panel">
     <h2>管理員狀態</h2>
-    <div id="statusBox" class="status">正在載入…</div>
+    <div id="statusBox" class="status" data-raw-data="1">正在載入…</div>
     <div class="actions">
       <button id="homeBtn" class="light" type="button">返回 V4.14.2 首頁</button>
       <button id="refreshBtn" class="primary" type="button">重新整理</button>
@@ -403,6 +403,8 @@ button{
     return zhTW;
   }
 
+  const tr=s=>window.IPTI18N?.t?.(s)||s;
+  const tf=(key,values)=>tr(key).replace(/\{(\w+)\}/g,(_,name)=>String(values[name]??""));
   let currentDetailId=null;
   let members=[];
 
@@ -427,8 +429,8 @@ button{
   }
 
   function renderMembers(list){
-    $("countNote").textContent=`顯示 ${list.length} 位會員。`;
-    if(!list.length){$("memberList").innerHTML='<div style="text-align:center;color:#64748b;padding:20px">沒有符合條件的會員。</div>';return}
+    $("countNote").textContent=tf("顯示 {count} 位會員。",{count:list.length});
+    if(!list.length){$("memberList").innerHTML=`<div style="text-align:center;color:#64748b;padding:20px">${esc(tr("沒有符合條件的會員。"))}</div>`;return}
     $("memberList").innerHTML=list.map(m=>{
       const role=m.role==="admin"?'<span class="chip admin">管理員</span>':'<span class="chip">會員</span>';
       const st=m.status==="suspended"?'<span class="chip off">已停權</span>':'<span class="chip ok">正常</span>';
@@ -436,7 +438,7 @@ button{
       const statusBtn=m.is_self||m.role==="admin"?"":(
         m.status==="suspended"
           ?`<button class="primary statusBtn" data-id="${esc(m.user_id)}" data-status="active">恢復會員</button>`
-          :`<button class="danger statusBtn" data-id="${esc(m.user_id)}" data-status="suspended">停權會員</button>`
+          :`<button class="danger statusBtn" data-id="${esc(m.user_id)}" data-status="suspended" data-ipt-i18n-skip="1">${esc(L("停權會員","停权会员","Suspend Member"))}</button>`
       );
       const roleBtn=m.is_self?"":(
         m.role==="admin"
@@ -447,10 +449,10 @@ button{
         <div class="member-title"><span data-member-data="1">${esc(m.member_number)}｜${esc(m.display_name)}</span></div>
         <div class="chips">${role}${st}${w}</div>
         <div class="meta">
-          Email：${esc(m.email||"—")}<br>
+          Email: <span data-raw-data="1">${esc(m.email||"—")}</span><br>
           <span>錢包：</span>${m.wallet_address ? '<span data-raw-data="1">'+esc(m.wallet_address)+'</span>' : '<span>尚未綁定</span>'}<br>
-          常用收款人：${esc(m.contacts_count??0)} 筆<br>
-          加入時間：${esc(time(m.created_at))}
+          ${esc(tf("常用收款人：{count} 筆",{count:m.contacts_count??0}))}<br>
+          ${esc(tr("加入時間："))}${esc(time(m.created_at))}
         </div>
         <div class="actions">
           <button class="light detailBtn" data-id="${esc(m.user_id)}">查看詳細</button>
@@ -466,37 +468,35 @@ button{
   }
 
   async function load(query=""){
-    status("","正在載入會員資料…");
+    status("",tr("正在載入會員資料…"));
     try{
       const data=await invoke("admin-members",{query});
       members=data.members||[];
       renderSummary(data.summary||{});
       renderMembers(members);
-      status("ok",`V4.14.2 會員管理已載入｜管理員：${data.admin?.email||"已登入"}`);
+      status("ok",tr("V4.14.2 會員管理已載入｜管理員：")+(data.admin?.email||tr("已登入")));
     }catch(e){
       console.error(e);
-      status("err","載入失敗："+(e?.message||String(e)));
+      status("err",tr("載入失敗：")+(e?.message||String(e)));
     }
   }
 
   async function setMemberStatus(id,newStatus){
-    const label=newStatus==="suspended"?"停權":"恢復";
-    if(!confirm(`確定要${label}這位會員嗎？`)) return;
-    status("","正在更新會員狀態…");
+    if(!confirm(tr(newStatus==="suspended"?"確定要停權這位會員嗎？":"確定要恢復這位會員嗎？"))) return;
+    status("",tr("正在更新會員狀態…"));
     try{
       await invoke("admin-member-actions",{action:"set_status",target_user_id:id,status:newStatus,note:"會員管理中心"});
       await load($("queryInput").value.trim());
-    }catch(e){status("err","更新失敗："+(e?.message||String(e)))}
+    }catch(e){status("err",tr("更新失敗：")+(e?.message||String(e)))}
   }
 
   async function setMemberRole(id,newRole){
-    const label=newRole==="admin"?"升級為管理員":"降為一般會員";
-    if(!confirm(`確定要${label}嗎？`)) return;
-    status("","正在更新會員角色…");
+    if(!confirm(tr(newRole==="admin"?"確定要升級為管理員嗎？":"確定要降為一般會員嗎？"))) return;
+    status("",tr("正在更新會員角色…"));
     try{
       await invoke("admin-member-actions",{action:"set_role",target_user_id:id,role:newRole,note:"會員管理中心"});
       await load($("queryInput").value.trim());
-    }catch(e){status("err","更新失敗："+(e?.message||String(e)))}
+    }catch(e){status("err",tr("更新失敗：")+(e?.message||String(e)))}
   }
 
   async function loadDetail(id){
@@ -522,7 +522,7 @@ button{
           </div>
           <div class="detail-box">
             <div class="k">Email</div>
-            <div class="v">${esc(m.email||"—")}</div>
+            <div class="v" data-raw-data="1">${esc(m.email||"—")}</div>
           </div>
           <div class="detail-box">
             <div class="k">${L("角色／狀態","角色／状态","Role / Status")}</div>
@@ -536,12 +536,12 @@ button{
 
         <h2 style="margin-top:20px">${L("錢包","钱包","Wallet")}</h2>
         ${wallets.length?wallets.map(w=>`<div class="detail-box" style="margin-bottom:8px">
-          <div class="k">${
+          <div class="k" data-raw-data="1">${
             esc(w.label||L("錢包","钱包","Wallet"))
           }${
             w.is_primary?L("｜主錢包","｜主钱包"," | Primary Wallet"):""
           }</div>
-          <div class="v">${esc(w.wallet_address)}<br>${
+          <div class="v" data-raw-data="1">${esc(w.wallet_address)}<br>${
             w.verified_at
               ?L("已驗證：","已验证：","Verified: ")+esc(time(w.verified_at))
               :L("未驗證","未验证","Unverified")
@@ -554,7 +554,7 @@ button{
 
         <h2 style="margin-top:20px">${L("常用收款人","常用收款人","Saved Recipients")}</h2>
         ${contacts.length?contacts.map(c=>`<div class="detail-box" style="margin-bottom:8px">
-          <div class="v">${esc(c.contact_name)}<br>${esc(c.wallet_address)}</div>
+          <div class="v" data-raw-data="1">${esc(c.contact_name)}<br>${esc(c.wallet_address)}</div>
         </div>`).join(""):
           `<div class="detail-box"><div class="v">${
             L("0 筆","0 笔","0")
@@ -562,7 +562,7 @@ button{
         }
 
         <h2 style="margin-top:20px">${L("最近管理紀錄","最近管理记录","Recent Admin History")}</h2>
-        ${audit.length?audit.slice(0,20).map(a=>`<div class="audit">${
+        ${audit.length?audit.slice(0,20).map(a=>`<div class="audit" data-raw-data="1">${
           esc(time(a.created_at))
         }｜${esc(a.action)}｜${esc(a.note||"")}</div>`).join(""):
           `<div class="detail-box"><div class="v">${
@@ -605,3 +605,4 @@ if ("serviceWorker" in navigator) {
 
 </body>
 </html>
+
