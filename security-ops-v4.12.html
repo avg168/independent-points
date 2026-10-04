@@ -34,19 +34,19 @@ button.danger{background:#a83b45;color:#fff;border-color:#a83b45}
 .hidden{display:none!important}
 @media(min-width:760px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
 </style>
-<script src="./i18n-v4.10.js?v=4142hf43" defer></script>
+<script src="./i18n-v4.10.js?v=4142hf50c21" defer></script>
 <script src="./auth-guard-v4.12.js?v=4142hf43"></script>
 </head>
 <body>
 <header>
-  <div class="badge">V4.14.2</div>
+  <div class="badge">V4.14.2 | HF50-C21</div>
   <h1>營運安全中心</h1>
   <p>正式營運狀態、高風險操作保護、錢包切換紀錄、管理員稽核與快速維運入口。</p>
 </header>
 <main>
   <section class="panel">
     <h2>管理員驗證</h2>
-    <div id="adminStatus" class="status">正在確認管理員權限…</div>
+    <div data-raw-data="1" id="adminStatus" class="status">正在確認管理員權限…</div>
     <div class="actions" style="margin-top:10px">
       <button id="homeBtn" class="light" type="button">返回首頁</button>
       <button id="refreshBtn" class="primary" type="button">重新檢查</button>
@@ -108,6 +108,7 @@ button.danger{background:#a83b45;color:#fff;border-color:#a83b45}
 /* V4.14.2 Production Seal */
 (() => {
   const tr=(s)=>window.IPTI18N?.t?window.IPTI18N.t(s):s;
+  const tf=(key,values)=>tr(key).replace(/\{(\w+)\}/g,(_,name)=>String(values[name]??""));
   const SUPABASE_URL="https://uccexvgqmoxhgykkjdcy.supabase.co";
   const SUPABASE_KEY="sb_publishable_FBsN1DYTQMv2_bWhpbXHAA_qdAq7ri7";
   const CONTRACT="0xd3fb2480aadb8b168ec7e88a0e5c847d9750cb87";
@@ -150,26 +151,26 @@ button.danger{background:#a83b45;color:#fff;border-color:#a83b45}
   }
   function eventName(t){
     return ({
-      wallet_changed:"錢包切換",
-      guard_armed:"高風險操作視窗啟用",
-      guard_locked:"高風險操作重新鎖定",
-      guard_expired:"60 秒操作視窗逾時",
-      guard_arm_failed:"安全核對失敗",
-      high_risk_blocked:"高風險操作遭阻擋",
-      high_risk_approval_started:"高風險送簽開始"
+      wallet_changed:tr("錢包切換"),
+      guard_armed:tr("高風險操作視窗啟用"),
+      guard_locked:tr("高風險操作重新鎖定"),
+      guard_expired:tr("60 秒操作視窗逾時"),
+      guard_arm_failed:tr("安全核對失敗"),
+      high_risk_blocked:tr("高風險操作遭阻擋"),
+      high_risk_approval_started:tr("高風險送簽開始")
     })[t]||t;
   }
 
   async function load(){
     $("adminStatus").className="status";
-    $("adminStatus").textContent="正在確認管理員權限…";
+    $("adminStatus").textContent=tr("正在確認管理員權限…");
     try{
       const data=await invoke("admin-members",{query:""});
       const members=data.members||[];
       const self=members.find(x=>x.is_self);
-      if(!self||self.role!=="admin") throw new Error("此頁只開放管理員。");
+      if(!self||self.role!=="admin") throw new Error(tr("此頁只開放管理員。"));
       $("adminStatus").className="status ok";
-      $("adminStatus").textContent=`管理員驗證通過：${self.member_number}｜${self.display_name}`;
+      $("adminStatus").textContent=tr("管理員驗證通過：")+self.member_number+"｜"+self.display_name;
       $("contentArea").classList.remove("hidden");
 
       const admins=members.filter(x=>x.role==="admin");
@@ -181,42 +182,42 @@ button.danger{background:#a83b45;color:#fff;border-color:#a83b45}
       $("unverifiedCount").textContent=unverified.length;
 
       const accountIssues=[];
-      if(self.status!=="active") accountIssues.push("目前管理員不是 active 狀態");
-      if(!self.wallet_verified) accountIssues.push("目前管理員錢包尚未驗證");
-      if(unverified.length) accountIssues.push(`${unverified.length} 位會員錢包尚未驗證`);
-      if(suspended.length) accountIssues.push(`${suspended.length} 位會員目前停權`);
+      if(self.status!=="active") accountIssues.push(tr("目前管理員不是 active 狀態"));
+      if(!self.wallet_verified) accountIssues.push(tr("目前管理員錢包尚未驗證"));
+      if(unverified.length) accountIssues.push(tf("{count} 位會員錢包尚未驗證",{count:unverified.length}));
+      if(suspended.length) accountIssues.push(tf("{count} 位會員目前停權",{count:suspended.length}));
       $("accountAlert").className=accountIssues.length?"status warn":"status ok";
-      $("accountAlert").textContent=accountIssues.length?"需留意："+accountIssues.join("；")+"。":"目前帳戶安全摘要沒有需要立即處理的項目。";
+      $("accountAlert").textContent=accountIssues.length?tr("需留意：")+accountIssues.join("；")+"。":tr("目前帳戶安全摘要沒有需要立即處理的項目。");
 
       // release
       try{
         const release=await fetch("./release.json?t="+Date.now(),{cache:"no-store"}).then(r=>r.json());
-        $("versionV").textContent=release.version||"未知";
-      }catch(_){$("versionV").textContent="讀取失敗"}
+        $("versionV").textContent=release.version||tr("未知");
+      }catch(_){$("versionV").textContent=tr("讀取失敗")}
 
       // chain state — read through Supabase Edge Function to avoid mobile-browser RPC/CORS failures.
       try{
         const chain=await invoke("admin-security-state",{});
         const paused=!!chain.paused;
         const pending=String(chain.pending_owner||ZERO);
-        $("contractV").textContent=paused?"已暫停":"正常";
+        $("contractV").textContent=paused?tr("已暫停"):"正常";
         $("pendingV").textContent=chain.has_pending_owner
           ? pending.slice(0,8)+"…"+pending.slice(-6)
-          : "無候任管理者";
+          : tr("無候任管理者");
         const issues=[];
-        if(paused) issues.push("IPT 合約目前 paused = true");
-        if(chain.has_pending_owner) issues.push("目前存在 pendingOwner");
-        $("opsV").textContent=issues.length?"需注意":"正常";
+        if(paused) issues.push(tr("IPT 合約目前 paused = true"));
+        if(chain.has_pending_owner) issues.push(tr("目前存在 pendingOwner"));
+        $("opsV").textContent=issues.length?tr("需注意"):"正常";
         $("opsStatus").className=issues.length?"status warn":"status ok";
         $("opsStatus").textContent=issues.length
-          ?"營運安全提醒："+issues.join("；")+"。"
+          ?tr("營運安全提醒：")+issues.join("；")+"。"
           :tr("正式營運狀態正常：合約未暫停、目前沒有 pendingOwner。");
       }catch(e){
-        $("contractV").textContent="檢查失敗";
-        $("pendingV").textContent="檢查失敗";
-        $("opsV").textContent="需檢查";
+        $("contractV").textContent=tr("檢查失敗");
+        $("pendingV").textContent=tr("檢查失敗");
+        $("opsV").textContent=tr("需檢查");
         $("opsStatus").className="status err";
-        $("opsStatus").textContent="鏈上安全狀態讀取失敗："+(e?.message||String(e));
+        $("opsStatus").textContent=tr("鏈上安全狀態讀取失敗：")+(e?.message||String(e));
       }
 
       // local security events
@@ -234,18 +235,18 @@ button.danger{background:#a83b45;color:#fff;border-color:#a83b45}
         }).length;
         $("auditStatus").className=changed24?"status warn":"status ok";
         $("auditStatus").textContent=changed24
-          ?`近 24 小時有 ${changed24} 筆角色／狀態相關稽核，請確認是否為預期操作。`
-          :`已讀取 ${recent.length} 筆最近管理稽核；近 24 小時未發現角色／狀態異動。`;
-        $("auditList").innerHTML=recent.length?recent.map(a=>`<div class="audit">${esc(time(a.created_at))}｜${esc(a.action||"")}｜${esc(a.note||"")}</div>`).join(""):"<div class='status'>尚無稽核紀錄。</div>";
+          ?tf("近 24 小時有 {count} 筆角色／狀態相關稽核，請確認是否為預期操作。",{count:changed24})
+          :tf("已讀取 {count} 筆最近管理稽核；近 24 小時未發現角色／狀態異動。",{count:recent.length});
+        $("auditList").innerHTML=recent.length?recent.map(a=>`<div class="audit" data-raw-data="1">${esc(time(a.created_at))}｜${esc(a.action||"")}｜${esc(a.note||"")}</div>`).join(""):"<div class='status'>"+esc(tr("尚無稽核紀錄。"))+"</div>";
       }catch(e){
         $("auditStatus").className="status warn";
-        $("auditStatus").textContent="目前管理員稽核讀取失敗："+(e?.message||String(e));
+        $("auditStatus").textContent=tr("目前管理員稽核讀取失敗：")+(e?.message||String(e));
         $("auditList").innerHTML="";
       }
     }catch(e){
       $("contentArea").classList.add("hidden");
       $("adminStatus").className="status err";
-      $("adminStatus").textContent="管理員驗證失敗："+(e?.message||String(e));
+      $("adminStatus").textContent=tr("管理員驗證失敗：")+(e?.message||String(e));
     }
   }
 
@@ -256,15 +257,15 @@ button.danger{background:#a83b45;color:#fff;border-color:#a83b45}
     const blocked=last24.filter(x=>x.type==="high_risk_blocked").length;
     const sends=last24.filter(x=>x.type==="high_risk_approval_started").length;
     $("eventSummary").className=(walletChanges||blocked)?"status warn":"status ok";
-    $("eventSummary").textContent=`近 24 小時：錢包切換 ${walletChanges} 次｜安全阻擋 ${blocked} 次｜高風險送簽 ${sends} 次。`;
+    $("eventSummary").textContent=tf("近 24 小時：錢包切換 {wallet} 次｜安全阻擋 {blocked} 次｜高風險送簽 {sends} 次。",{wallet:walletChanges,blocked,sends});
     $("eventList").innerHTML=list.length?list.slice(0,40).map(x=>{
       const detail=Object.entries(x.detail||{}).map(([k,v])=>`${k}: ${v}`).join("｜");
-      return `<div class="event"><div class="t">${esc(eventName(x.type))}</div><div class="m">${esc(time(x.time))}${x.account?`｜${esc(x.account.slice(0,8)+"…"+x.account.slice(-6))}`:""}${detail?`<br>${esc(detail)}`:""}</div></div>`;
-    }).join(""):"<div class='status'>目前沒有本機高風險操作紀錄。</div>";
+      return `<div class="event"><div class="t">${esc(eventName(x.type))}</div><div class="m" data-raw-data="1">${esc(time(x.time))}${x.account?`｜${esc(x.account.slice(0,8)+"…"+x.account.slice(-6))}`:""}${detail?`<br>${esc(detail)}`:""}</div></div>`;
+    }).join(""):"<div class='status'>"+esc(tr("目前沒有本機高風險操作紀錄。"))+"</div>";
   }
 
   $("clearEventsBtn").addEventListener("click",()=>{
-    if(!confirm("確定要清除這台裝置上的營運安全紀錄嗎？這不會刪除 Supabase 稽核或鏈上交易。"))return;
+    if(!confirm(tr("確定要清除這台裝置上的營運安全紀錄嗎？這不會刪除 Supabase 稽核或鏈上交易。")))return;
     localStorage.removeItem(EVENT_KEY); renderEvents();
   });
   $("homeBtn").addEventListener("click",()=>location.href="./index.html?v=4142hf43");
@@ -285,3 +286,4 @@ if("serviceWorker" in navigator){
 </script>
 </body>
 </html>
+
