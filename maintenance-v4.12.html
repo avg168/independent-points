@@ -62,11 +62,11 @@ pre{
 }
 @media(min-width:720px){.grid{grid-template-columns:repeat(4,1fr)}}
 </style>
-<script src="./i18n-v4.10.js?v=4142hf43" defer></script>
+<script src="./i18n-v4.10.js?v=4142hf50c24" defer></script>
 </head>
 <body>
 <header>
-  <div class="badge">V4.14.2</div>
+  <div class="badge">V4.14.2 | HF50-C24</div>
   <h1>維運中心</h1>
   <p>版本、快取、PWA、Supabase、Sepolia 與 IPT 合約健康檢查。</p>
 </header>
@@ -99,7 +99,7 @@ pre{
       </div>
       <div class="check">
         <div class="check-head"><div class="check-title">登入會員</div><span id="memberPill" class="pill">待檢查</span></div>
-        <div id="memberDetail" class="detail">Supabase Session / 會員資料</div>
+        <div id="memberDetail" data-raw-data="1" class="detail">Supabase Session / 會員資料</div>
       </div>
     </div>
     <button id="healthBtn" class="primary" type="button" style="width:100%;margin-top:12px">重新執行健康檢查</button>
@@ -157,6 +157,9 @@ pre{
     return zhTW;
   }
 
+  const tr=s=>window.IPTI18N?.t?.(s)||s;
+  const tf=(key,values)=>tr(key).replace(/\{(\w+)\}/g,(_,name)=>String(values[name]??""));
+
   function updateDiagnosticsLabel(){
     const s=$("diagSummary");
     if(s){
@@ -182,7 +185,7 @@ pre{
   function hexBig(x){return BigInt(String(x||"0x0"))}
   function formatUnits(rawValue,decimals){
     const raw=BigInt(rawValue),d=Number(decimals);
-    if(!Number.isInteger(d)||d<0||d>255) throw new Error("無效 decimals");
+    if(!Number.isInteger(d)||d<0||d>255) throw new Error(tr("無效 decimals"));
     const base=10n**BigInt(d);
     const negative=raw<0n;
     const abs=negative?-raw:raw;
@@ -219,14 +222,14 @@ pre{
     try{
       const res=await fetch("./release.json?t="+Date.now(),{cache:"no-store"});
       const data=await res.json();
-      $("releaseVersion").textContent=data.version||"未知";
+      $("releaseVersion").textContent=data.version||tr("未知");
       diag.release=data;
       if(data.version==="V4.14.2"){
         $("versionStatus").className="status ok";
         $("versionStatus").textContent=L("目前已是正式最新版本。","当前已是正式最新版本。","You are on the latest production release.");
       }else{
         $("versionStatus").className="status warn";
-        $("versionStatus").textContent=L(`目前 V4.14.2｜正式版本 ${data.version||"未知"}，建議重新整理或更新 App。`,`目前 V4.14.2｜正式版本 ${data.version||"未知"}，建议重新整理或更新 App。`,`Current page: V4.14.2 | Production release: ${data.version||"Unknown"}. Refresh or update the app.`);
+        $("versionStatus").textContent=L(`目前 V4.14.2｜正式版本 ${data.version||tr("未知")}，建議重新整理或更新 App。`,`目前 V4.14.2｜正式版本 ${data.version||tr("未知")}，建议重新整理或更新 App。`,`Current page: V4.14.2 | Production release: ${data.version||"Unknown"}. Refresh or update the app.`);
       }
     }catch(e){
       $("releaseVersion").textContent=L("無法讀取","无法读取","Unavailable");
@@ -295,7 +298,7 @@ pre{
         diag.checks.member={ok:true,signed_in:false};
       }else{
         const {data:{user},error:userError}=await sb.auth.getUser();
-        if(userError||!user) throw userError||new Error("登入身分驗證失敗");
+        if(userError||!user) throw userError||new Error(tr("登入身分驗證失敗"));
 
         $("supabaseDetail").textContent=L(
           "Supabase 可連線；登入 Session 正常。",
@@ -323,7 +326,7 @@ pre{
       }
     }catch(e){
       pill("supabasePill","err",L("異常","异常","Error"));
-      $("supabaseDetail").textContent=String(e?.message||e);
+      $("supabaseDetail").textContent=tr(String(e?.message||e));
       pill("memberPill","err",L("無法檢查","无法检查","Unavailable"));
       $("memberDetail").textContent=L(
         "Supabase 登入／會員資料檢查失敗",
@@ -407,33 +410,33 @@ pre{
 
   $("updateSwBtn").addEventListener("click",async()=>{
     $("cacheStatus").className="status";
-    $("cacheStatus").textContent="正在檢查 Service Worker 更新…";
+    $("cacheStatus").textContent=tr("正在檢查 Service Worker 更新…");
     try{
       const reg=await navigator.serviceWorker.getRegistration();
-      if(!reg) throw new Error("尚未註冊 Service Worker");
+      if(!reg) throw new Error(tr("尚未註冊 Service Worker"));
       await reg.update();
       $("cacheStatus").className="status ok";
       $("cacheStatus").textContent=reg.waiting
-        ?"發現新版本，重新載入後套用。"
-        :"已完成更新檢查。";
+        ?tr("發現新版本，重新載入後套用。")
+        :tr("已完成更新檢查。");
       await checkSw();
     }catch(e){
       $("cacheStatus").className="status warn";
-      $("cacheStatus").textContent="更新檢查失敗："+(e?.message||String(e));
+      $("cacheStatus").textContent=tr("更新檢查失敗：")+(e?.message||String(e));
     }
   });
 
   $("clearCacheBtn").addEventListener("click",async()=>{
-    if(!confirm("確定要清除 Independent Points 的網站快取嗎？會員登入資料不會因此刪除，但頁面會重新下載。")) return;
+    if(!confirm(tr("確定要清除 Independent Points 的網站快取嗎？會員登入資料不會因此刪除，但頁面會重新下載。"))) return;
     try{
       const keys=await caches.keys();
       const targets=keys.filter(k=>k.startsWith("ipt-"));
       await Promise.all(targets.map(k=>caches.delete(k)));
       $("cacheStatus").className="status ok";
-      $("cacheStatus").textContent=`已清除 ${targets.length} 個 IPT 快取。建議現在重新載入。`;
+      $("cacheStatus").textContent=tf("已清除 {count} 個 IPT 快取。建議現在重新載入。",{count:targets.length});
     }catch(e){
       $("cacheStatus").className="status err";
-      $("cacheStatus").textContent="清除快取失敗："+(e?.message||String(e));
+      $("cacheStatus").textContent=tr("清除快取失敗：")+(e?.message||String(e));
     }
   });
 
@@ -445,12 +448,12 @@ pre{
     try{
       await navigator.clipboard.writeText(text);
       $("cacheStatus").className="status ok";
-      $("cacheStatus").textContent="診斷資訊已複製。";
+      $("cacheStatus").textContent=tr("診斷資訊已複製。");
     }catch(_){
       const ta=document.createElement("textarea");
       ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand("copy");ta.remove();
       $("cacheStatus").className="status ok";
-      $("cacheStatus").textContent="診斷資訊已複製。";
+      $("cacheStatus").textContent=tr("診斷資訊已複製。");
     }
   });
 
@@ -466,3 +469,4 @@ pre{
 </script>
 </body>
 </html>
+
