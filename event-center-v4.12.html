@@ -32,7 +32,7 @@ button.warn{background:#a46a08;color:#fff;border-color:#a46a08}button.danger{bac
 .events{display:grid;gap:9px}
 .event{border:1px solid #dfe6ef;border-left:5px solid #94a3b8;border-radius:14px;padding:12px;background:#fff}
 .event.critical{border-left-color:#b4232e}.event.warn{border-left-color:#b77905}.event.info{border-left-color:#2a5f91}.event.success{border-left-color:#17694f}
-.event-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.event-title{font-weight:900;color:#17365d}
+.event-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:6px 10px}.event-title{flex:1 1 220px;overflow-wrap:anywhere;font-weight:900;color:#17365d}
 .event-time{font-size:.72rem;color:#64748b;white-space:nowrap}.event-meta{font-size:.8rem;color:#64748b;line-height:1.55;margin-top:6px;word-break:break-word}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}.chip{display:inline-block;border-radius:999px;padding:4px 8px;font-size:.7rem;font-weight:850;background:#eef2f7;color:#475569}
 .chip.critical{background:#fdecec;color:#9b2b2b}.chip.warn{background:#fff3d5;color:#8a5a00}.chip.info{background:#e9f1fc;color:#245a91}.chip.success{background:#e8f7ef;color:#17694f}.chip.unread{background:#17365d;color:white}
@@ -56,7 +56,7 @@ button.warn{background:#a46a08;color:#fff;border-color:#a46a08}button.danger{bac
 <body>
 <div id="fallbackToast" class="fallback-toast"><div id="fallbackToastTitle" class="t"></div><div id="fallbackToastMsg" class="m"></div></div>
 <header>
-  <div class="badge">V4.14.2 | HF50-C28</div>
+  <div class="badge">V4.14.2 | HF50-C29</div>
   <h1>營運事件與通知中心</h1>
   <p>集中查看安全事件、錢包切換、管理員異動、鏈上營運狀態與裝置通知。</p>
 </header>
@@ -447,4 +447,5 @@ if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.se
 </script>
 </body>
 </html>
+
 
