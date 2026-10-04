@@ -50,20 +50,20 @@ button.warn{background:#a46a08;color:#fff;border-color:#a46a08}button.danger{bac
 .fallback-toast .m{font-size:.86rem;line-height:1.5;margin-top:5px;opacity:.92}
 
 </style>
-<script src="./i18n-v4.10.js?v=4142hf43" defer></script>
+<script src="./i18n-v4.10.js?v=4142hf50c28" defer></script>
 <script src="./auth-guard-v4.12.js?v=4142hf43"></script>
 </head>
 <body>
 <div id="fallbackToast" class="fallback-toast"><div id="fallbackToastTitle" class="t"></div><div id="fallbackToastMsg" class="m"></div></div>
 <header>
-  <div class="badge">V4.14.2</div>
+  <div class="badge">V4.14.2 | HF50-C28</div>
   <h1>營運事件與通知中心</h1>
   <p>集中查看安全事件、錢包切換、管理員異動、鏈上營運狀態與裝置通知。</p>
 </header>
 <main>
   <section class="panel">
     <h2>管理員驗證</h2>
-    <div id="adminStatus" class="status">正在確認管理員身分…</div>
+    <div id="adminStatus" class="status" data-raw-data="1">正在確認管理員身分…</div>
     <div class="actions" style="margin-top:10px">
       <button id="homeBtn" class="light" type="button">返回首頁</button>
       <button id="refreshBtn" class="primary" type="button">重新整理事件</button>
@@ -167,6 +167,8 @@ button.warn{background:#a46a08;color:#fff;border-color:#a46a08}button.danger{bac
     if(x==="zh-CN") return zhCN;
     return zhTW;
   }
+  const tr=s=>window.IPTI18N?.t?.(s)||s;
+  const tf=(key,values)=>tr(key).replace(/\{(\w+)\}/g,(_,name)=>String(values[name]??""));
   const esc=v=>String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
   const big=x=>BigInt(String(x||"0x0"));
   let events=[];let members=[];let selfMember=null;let loadingAllAudit=false;
@@ -229,6 +231,7 @@ button.warn{background:#a46a08;color:#fff;border-color:#a46a08}button.danger{bac
 
 
   function fallbackAlert(title,body){
+    title=tr(title);
     const box=$("fallbackToast");
     const t=$("fallbackToastTitle");
     const m=$("fallbackToastMsg");
@@ -249,6 +252,7 @@ button.warn{background:#a46a08;color:#fff;border-color:#a46a08}button.danger{bac
   }
 
   async function notify(title,body,tag="ipt-v49"){
+    title=tr(title);
     if(!notificationSupported()){
       return fallbackAlert(title,body);
     }
@@ -270,19 +274,26 @@ button.warn{background:#a46a08;color:#fff;border-color:#a46a08}button.danger{bac
     const newest=events.filter(x=>["critical","warn"].includes(x.severity)&&isoMs(x.time)>last);
     if(!newest.length)return;
     const x=newest[0];
-    const ok=await notify("IPT 營運提醒",`${x.title}${x.detail?"｜"+x.detail:""}`,"ipt-"+x.id);
+    const ok=await notify("IPT 營運提醒",`${displayTitle(x)}${x.detail?"｜"+x.detail:""}`,"ipt-"+x.id);
     if(ok)localStorage.setItem(LAST_NOTIFY_KEY,String(Date.now()));
   }
   function isUnread(x){return isoMs(x.time)>Number(localStorage.getItem(LAST_READ_KEY)||"0")}
   function sourceName(s){return s==="security"?L("高風險安全","高风险安全","High-risk Security"):s==="admin"?L("管理稽核","管理稽核","Admin Audit"):L("系統／鏈上","系统／链上","System / On-chain")}
   function severityName(s){return s==="critical"?L("重要","重要","Critical"):s==="warn"?L("警告","警告","Warning"):s==="success"?L("正常","正常","Normal"):L("一般","一般","Info")}
 
+  function displayTitle(x){
+    const systemTitles={version_changed:"正式版本已更新",contract_paused:"IPT 合約已暫停",contract_unpaused:"IPT 合約已恢復",pending_owner:"出現候任管理者",pending_owner_cleared:"候任管理者已清除",chain_check_failed:"鏈上營運狀態檢查失敗",release_check_failed:"正式版本資訊讀取失敗"};
+    if(x.source==="security")return tr(securityTitle(x.type));
+    if(x.source==="system"&&systemTitles[x.type])return tr(systemTitles[x.type]);
+    return x.type==="admin_audit"?tr("管理員操作"):x.title;
+  }
+
   function filtered(){
     const q=$("searchInput").value.trim().toLowerCase(),sf=$("sourceFilter").value,vf=$("severityFilter").value,rf=$("readFilter").value;
     return events.filter(x=>{
       if(sf&&x.source!==sf)return false;if(vf&&x.severity!==vf)return false;
       if(rf==="unread"&&!isUnread(x))return false;if(rf==="read"&&isUnread(x))return false;
-      if(q){const hay=[x.title,x.detail,x.type,x.account,sourceName(x.source)].join(" ").toLowerCase();if(!hay.includes(q))return false}
+      if(q){const hay=[displayTitle(x),x.title,x.detail,x.type,x.account,sourceName(x.source)].join(" ").toLowerCase();if(!hay.includes(q))return false}
       return true;
     });
   }
@@ -293,9 +304,9 @@ button.warn{background:#a46a08;color:#fff;border-color:#a46a08}button.danger{bac
     $("summaryStatus").textContent=risks?L(`目前共 ${events.length} 筆事件，其中 ${risks} 筆為重要／警告；未讀 ${unread} 筆。`,`目前共 ${events.length} 笔事件，其中 ${risks} 笔为重要／警告；未读 ${unread} 笔。`,`There are ${events.length} events, including ${risks} critical/warning events; ${unread} unread.`):L(`目前共 ${events.length} 筆事件，沒有重要／警告事件；未讀 ${unread} 筆。`,`目前共 ${events.length} 笔事件，没有重要／警告事件；未读 ${unread} 笔。`,`There are ${events.length} events, no critical/warning events, and ${unread} unread.`);
     $("eventList").innerHTML=list.length?list.map(x=>`
       <article class="event ${esc(x.severity)}">
-        <div class="event-head"><div class="event-title">${esc(x.title)}</div><div class="event-time">${esc(time(x.time))}</div></div>
+        <div class="event-head"><div class="event-title" data-raw-data="1">${esc(displayTitle(x))}</div><div class="event-time">${esc(time(x.time))}</div></div>
         <div class="chips"><span class="chip ${esc(x.severity)}">${esc(severityName(x.severity))}</span><span class="chip">${esc(sourceName(x.source))}</span>${isUnread(x)?`<span class="chip unread">${esc(L("未讀","未读","Unread"))}</span>`:""}</div>
-        <div class="event-meta">${esc(x.detail||L("無附加說明","无附加说明","No additional details"))}${x.account?`<br>${esc(L("錢包：","钱包：","Wallet: "))}${esc(x.account)}`:""}</div>
+        <div class="event-meta" data-raw-data="1">${esc(x.detail||L("無附加說明","无附加说明","No additional details"))}${x.account?`<br>${esc(L("錢包：","钱包：","Wallet: "))}${esc(x.account)}`:""}</div>
       </article>`).join(""):`<div class="empty">${esc(L("目前沒有符合條件的事件。","目前没有符合条件的事件。","No events match the current filters."))}</div>`;
   }
 
@@ -330,28 +341,28 @@ button.warn{background:#a46a08;color:#fff;border-color:#a46a08}button.danger{bac
     }catch(_){return {rows:[],direct:false}}
   }
   async function loadAllAuditFallback(){
-    if(loadingAllAudit)return;loadingAllAudit=true;$("loadAllAuditBtn").disabled=true;$("loadAllAuditBtn").textContent="正在載入會員稽核…";
+    if(loadingAllAudit)return;loadingAllAudit=true;$("loadAllAuditBtn").disabled=true;$("loadAllAuditBtn").textContent=tr("正在載入會員稽核…");
     try{
       const targets=members.slice(0,50),collected=[],seen=new Set(),chunk=4;
       for(let i=0;i<targets.length;i+=chunk){
         const res=await Promise.all(targets.slice(i,i+chunk).map(async m=>{try{return await invoke("admin-member-detail",{target_user_id:m.user_id})}catch(_){return null}}));
         res.forEach(d=>(d?.audit||[]).forEach(a=>{const key=String(a.id||`${a.created_at}-${a.action}-${a.target_user_id||""}`);if(!seen.has(key)){seen.add(key);collected.push(a)}}));
       }
-      events=dedupSort([...normalizeSecurity(),...normalizeOps(),...normalizeAudit(collected)]);render();await maybeNotifyNew();$("loadAllAuditBtn").textContent=`已載入 ${targets.length} 位會員稽核`;
+      events=dedupSort([...normalizeSecurity(),...normalizeOps(),...normalizeAudit(collected)]);render();await maybeNotifyNew();$("loadAllAuditBtn").textContent=tf("已載入 {count} 位會員稽核",{count:targets.length});
     }finally{loadingAllAudit=false;$("loadAllAuditBtn").disabled=false}
   }
 
   async function load(){
-    $("adminStatus").className="status";$("adminStatus").textContent="正在確認管理員身分…";
+    $("adminStatus").className="status";$("adminStatus").textContent=tr("正在確認管理員身分…");
     try{
       const data=await invoke("admin-members",{query:""});members=data.members||[];selfMember=members.find(x=>x.is_self);
-      if(!selfMember||selfMember.role!=="admin")throw new Error("此頁只開放管理員。");
+      if(!selfMember||selfMember.role!=="admin")throw new Error(tr("此頁只開放管理員。"));
       $("adminStatus").className="status ok";$("adminStatus").textContent=L(`管理員驗證通過：${selfMember.member_number}｜${selfMember.display_name}`,`管理员验证通过：${selfMember.member_number}｜${selfMember.display_name}`,`Admin verified: ${selfMember.member_number} | ${selfMember.display_name}`);$("contentArea").classList.remove("hidden");
       await collectSystemState();
       const direct=await tryDirectAudit();let audits=direct.rows;
-      if(!direct.direct){audits=await loadCurrentAdminAudit();$("loadAllAuditBtn").textContent="載入更多會員管理稽核"}else{$("loadAllAuditBtn").textContent=`已直接讀取 ${audits.length} 筆管理稽核`}
+      if(!direct.direct){audits=await loadCurrentAdminAudit();$("loadAllAuditBtn").textContent=tr("載入更多會員管理稽核")}else{$("loadAllAuditBtn").textContent=tf("已直接讀取 {count} 筆管理稽核",{count:audits.length})}
       events=dedupSort([...normalizeSecurity(),...normalizeOps(),...normalizeAudit(audits)]);render();await maybeNotifyNew();updateNotifyStatus();
-    }catch(e){$("contentArea").classList.add("hidden");$("adminStatus").className="status err";$("adminStatus").textContent="載入失敗："+(e?.message||String(e))}
+    }catch(e){$("contentArea").classList.add("hidden");$("adminStatus").className="status err";$("adminStatus").textContent=tr("載入失敗：")+(e?.message||String(e))}
   }
 
   function updateNotifyStatus(){
@@ -383,7 +394,7 @@ button.warn{background:#a46a08;color:#fff;border-color:#a46a08}button.danger{bac
 
   $("enableNotifyBtn").addEventListener("click",async()=>{
     if(!notificationSupported()){
-      fallbackAlert("IPT 提醒已啟用","此瀏覽器將使用頁面內提醒＋震動。");
+      fallbackAlert("IPT 提醒已啟用",tr("此瀏覽器將使用頁面內提醒＋震動。"));
       updateNotifyStatus();
       return;
     }
@@ -392,32 +403,32 @@ button.warn{background:#a46a08;color:#fff;border-color:#a46a08}button.danger{bac
         await Notification.requestPermission();
       }
       if(Notification.permission!=="granted"){
-        fallbackAlert("IPT 提醒模式","系統通知未啟用，已改用頁面內提醒＋震動。");
+        fallbackAlert("IPT 提醒模式",tr("系統通知未啟用，已改用頁面內提醒＋震動。"));
       }
     }catch(_){
-      fallbackAlert("IPT 提醒模式","無法取得系統通知權限，已改用頁面內提醒＋震動。");
+      fallbackAlert("IPT 提醒模式",tr("無法取得系統通知權限，已改用頁面內提醒＋震動。"));
     }
     updateNotifyStatus();
   });
   $("testNotifyBtn").addEventListener("click",async()=>{
     let ok=false;
     if(notificationSupported() && Notification.permission==="granted"){
-      ok=await notify("IPT 測試通知","V4.14.2 營運事件與通知中心運作正常。","ipt-v491-test");
+      ok=await notify("IPT 測試通知",tr("V4.14.2 營運事件與通知中心運作正常。"),"ipt-v491-test");
     }else{
-      ok=fallbackAlert("IPT 測試提醒","V4.14.2 頁面內提醒運作正常。");
+      ok=fallbackAlert("IPT 測試提醒",tr("V4.14.2 頁面內提醒運作正常。"));
     }
     $("notifyStatus").className=ok?"status ok":"status warn";
     $("notifyStatus").textContent=ok
-      ?(notificationSupported()&&Notification.permission==="granted"?"測試系統通知已送出。":"測試頁面內提醒已送出。")
-      :"提醒送出失敗。";
+      ?(notificationSupported()&&Notification.permission==="granted"?tr("測試系統通知已送出。"):tr("測試頁面內提醒已送出。"))
+      :tr("提醒送出失敗。");
   });
   $("markReadBtn").addEventListener("click",()=>{localStorage.setItem(LAST_READ_KEY,String(Date.now()));render()});
   $("exportBtn").addEventListener("click",()=>{
-    const rows=[["時間","等級","來源","事件","說明","錢包"]];
-    filtered().forEach(x=>rows.push([time(x.time),severityName(x.severity),sourceName(x.source),x.title,x.detail||"",x.account||""]));
+    const rows=[[tr("時間"),tr("等級"),tr("來源"),tr("事件"),tr("說明"),tr("錢包")]];
+    filtered().forEach(x=>rows.push([time(x.time),severityName(x.severity),sourceName(x.source),displayTitle(x),x.detail||"",x.account||""]));
     const csv="\ufeff"+rows.map(r=>r.map(v=>`"${String(v??"").replaceAll('"','""')}"`).join(",")).join("\r\n");
     const blob=new Blob([csv],{type:"text/csv;charset=utf-8"}),a=document.createElement("a");
-    a.href=URL.createObjectURL(blob);a.download=`IPT-事件-${new Date().toISOString().slice(0,10)}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+    a.href=URL.createObjectURL(blob);a.download=`IPT-${L("事件","事件","Events")}-${new Date().toISOString().slice(0,10)}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
   });
   ["searchInput","sourceFilter","severityFilter","readFilter"].forEach(id=>$(id).addEventListener(id==="searchInput"?"input":"change",render));
   $("loadAllAuditBtn").addEventListener("click",loadAllAuditFallback);
@@ -427,6 +438,7 @@ button.warn{background:#a46a08;color:#fff;border-color:#a46a08}button.danger{bac
   $("securityCenterBtn").addEventListener("click",()=>location.href="./security-center-v4.12.html?v=4142hf43");
   $("maintenanceBtn").addEventListener("click",()=>location.href="./maintenance-v4.12.html?v=4142hf43");
   $("updateCenterBtn").addEventListener("click",()=>location.href="./update-center-v4.12.html?v=4142hf43");
+  window.addEventListener("ipt-language-change",()=>{render();updateNotifyStatus();if(selfMember?.role==="admin"&&$("adminStatus").className==="status ok"){$("adminStatus").textContent=L(`管理員驗證通過：${selfMember.member_number}｜${selfMember.display_name}`,`管理员验证通过：${selfMember.member_number}｜${selfMember.display_name}`,`Admin verified: ${selfMember.member_number} | ${selfMember.display_name}`)}});
   updateNotifyStatus();load();
 })();
 </script>
@@ -435,3 +447,4 @@ if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.se
 </script>
 </body>
 </html>
+
