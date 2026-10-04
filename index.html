@@ -384,6 +384,7 @@ button{
       <button id="loginBtn" class="light" type="button">會員登入／帳戶安全</button>
     </div>
     <button id="changePasswordBtn" class="secondary" type="button" style="width:100%;margin-top:10px">🔑 變更密碼</button>
+    <button id="memberWalletBindBtn" class="secondary" type="button" style="width:100%;margin-top:10px;display:none">🔗 綁定我的 Trust Wallet</button>
   </section>
 
   <section id="assetSummarySection" class="panel" style="display:none">
@@ -640,6 +641,7 @@ button{
     document.body.classList.remove("is-admin");
     $("profileBox").style.display="none";
     $("assetSummarySection").style.display="none";
+    $("memberWalletBindBtn").style.display="none";
     setMemberActionsEnabled(false);
     renderAccountUiState();
   }
@@ -942,6 +944,10 @@ button{
         `<span class="chip ${p.status==="active"?"ok":""}">${p.status==="active"?"正常":"已停權"}</span>`+
         `<span class="chip ${verified?"ok":""}">${verified?"錢包已驗證":"錢包未驗證"}</span>`;
       $("profileBox").style.display="block";
+      $("memberWalletBindBtn").style.display="block";
+      $("memberWalletBindBtn").textContent=(address && verified)
+        ?"👛 管理我的 Trust Wallet"
+        :"🔗 綁定我的 Trust Wallet";
 
       if(p.status!=="active"){
         setMemberActionsEnabled(false);
@@ -990,6 +996,7 @@ button{
   $("assetSummaryRefreshBtn").addEventListener("click",refreshAssetSummary);
   $("loginBtn").addEventListener("click",()=>go("./auth-security-v4.14.2.html?v=4142hf32"));
   $("changePasswordBtn").addEventListener("click",()=>go("./change-password-v4.14.2.html?v=4142hf32"));
+  $("memberWalletBindBtn").addEventListener("click",()=>go("./wallet-bind-v4.14.2.html?v=4142hf49f"));
 
   $("myAssetBtn").addEventListener("click",()=>go("./asset-overview-v4.14.2.html?v=4142hf50b"));
   $("platformWalletBtn").addEventListener("click",()=>go("./wallet-dual-v4.14.2.html?v=4142hf32"));

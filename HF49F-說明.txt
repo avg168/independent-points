@@ -1,0 +1,15 @@
+HF49-F｜首頁 Trust Wallet 綁定／管理入口
+
+基底：已驗收 HF50-B 首頁。
+只覆蓋 index.html。
+
+新增：
+- 未綁定或未驗證：🔗 綁定我的 Trust Wallet
+- 已綁定且已驗證：👛 管理我的 Trust Wallet
+- 登入會員資料完成後才顯示
+- 導向 wallet-bind-v4.14.2.html
+
+完整保留：
+- HF50-B：P／平台 IPT／鏈上 IPT／IPT 顯示合計
+- 我的資產仍導向 asset-overview-v4.14.2.html
+- RBAC / MFA / Wallet Core / 資產帳本均不修改
