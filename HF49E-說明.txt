@@ -1,0 +1,15 @@
+HF49-E｜Android 錢包地址響應式版面修正
+只覆蓋 wallet-bind-v4.14.2.html。
+
+修正：
+- 完整 Wallet Address 可在手機卡片內自動換行。
+- overflow-wrap:anywhere + word-break:break-word。
+- main / panel / status / row / button 限制 max-width:100%。
+- 防止整頁水平溢出。
+- ③即將綁定地址同樣完整顯示並換行。
+
+不修改：
+- HF49-A 資料庫唯一性
+- HF49-B bind-wallet
+- HF49-D WalletConnect reset
+- 會員資料、Owner Wallet、IPT 資產
