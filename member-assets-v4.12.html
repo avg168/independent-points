@@ -452,7 +452,7 @@ button{
 </head>
 <body>
 <header>
-  <div class="version">V4.14.2 | HF50-C35</div>
+  <div class="version">V4.14.2 | HF50-C38</div>
   <h1>我的資產報表</h1>
   <p>我的 IPT 資產 × 報表篩選 × CSV 匯出 × 列印／PDF</p>
 </header>
@@ -797,6 +797,15 @@ button{
   }
 
 
+  // CSV: exact decimal rounding, six places, no thousands separators.
+  function csvAmount6(value){
+    const raw=decimalToScaled(String(value ?? "0").replace(/ IPT$/, "").replaceAll(",", ""),7);
+    const negative=raw<0n;
+    const magnitude=negative?-raw:raw;
+    const rounded=(magnitude+5n)/10n;
+    return (negative&&rounded!==0n?"-":"")+(rounded/1000000n).toString()+"."+(rounded%1000000n).toString().padStart(6,"0");
+  }
+
   function csvCell(v){
     const s=String(v ?? "");
     return '"' + s.replaceAll('"','""') + '"';
@@ -903,10 +912,10 @@ button{
       [tr("結束日期"),f.to],
       [tr("交易類型"),f.type],
       [],
-      [tr("目前 IPT 餘額"),$("currentBalance").textContent],
-      [tr("累計轉入"),$("totalIncoming").textContent],
-      [tr("累計轉出"),$("totalOutgoing").textContent],
-      [tr("資產淨變動"),$("netChange").textContent],
+      [tr("目前 IPT 餘額"),csvAmount6($("currentBalance").textContent)+" IPT"],
+      [tr("累計轉入"),csvAmount6($("totalIncoming").textContent)+" IPT"],
+      [tr("累計轉出"),csvAmount6($("totalOutgoing").textContent)+" IPT"],
+      [tr("資產淨變動"),csvAmount6($("netChange").textContent)+" IPT"],
       [tr("交易筆數"),$("totalCount").textContent],
       ["Mint / Burn",$("mintBurn").textContent],
       [],
@@ -918,7 +927,7 @@ button{
       rows.push([
         t.label,
         fmtTime(tx.timestamp),
-        (t.sign||"")+String(tx.amount||"0"),
+        (t.sign||"")+csvAmount6(tx.amount||"0"),
         tx.from||"",
         tx.to||"",
         tx.block_number||"",
@@ -966,7 +975,7 @@ button{
 
     sessionStorage.setItem("ipt_print_report",JSON.stringify(report));
     setExportStatus(tr("正在開啟列印／PDF 預覽…"),"ok");
-    location.href="./print-report-v4.12.html?v=4142hf43";
+    location.href="./print-report-v4.12.html?v=4142hf50c38";
   }
 
   async function loadMyAssets(){
@@ -1054,5 +1063,6 @@ if ("serviceWorker" in navigator) {
 
 </body>
 </html>
+
 
 

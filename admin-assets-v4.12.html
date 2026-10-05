@@ -498,7 +498,7 @@ button{
 </head>
 <body>
 <header>
-  <div class="version">V4.14.2 | HF50-C35</div>
+  <div class="version">V4.14.2 | HF50-C38</div>
   <h1>管理員資產彙總</h1>
   <p>管理員資產總覽 × 彙總報表 × CSV 匯出 × 列印／PDF</p>
 </header>
@@ -1046,6 +1046,15 @@ button{
   }
 
 
+  // CSV: exact decimal rounding, six places, no thousands separators.
+  function csvAmount6(value){
+    const raw=decimalToScaled(String(value ?? "0").replace(/ IPT$/, "").replaceAll(",", ""),7);
+    const negative=raw<0n;
+    const magnitude=negative?-raw:raw;
+    const rounded=(magnitude+5n)/10n;
+    return (negative&&rounded!==0n?"-":"")+(rounded/1000000n).toString()+"."+(rounded%1000000n).toString().padStart(6,"0");
+  }
+
   function csvCell(v){
     const s=String(v ?? "");
     return '"' + s.replaceAll('"','""') + '"';
@@ -1141,9 +1150,9 @@ button{
       [tr("會員搜尋"),c.query||tr("全部")],
       [],
       [tr("符合會員數"),lastReportSummary.members],
-      [tr("區間累計轉入"),lastReportSummary.incoming+" IPT"],
-      [tr("區間累計轉出"),lastReportSummary.outgoing+" IPT"],
-      [tr("區間淨變動"),lastReportSummary.net+" IPT"],
+      [tr("區間累計轉入"),csvAmount6(lastReportSummary.incoming)+" IPT"],
+      [tr("區間累計轉出"),csvAmount6(lastReportSummary.outgoing)+" IPT"],
+      [tr("區間淨變動"),csvAmount6(lastReportSummary.net)+" IPT"],
       [tr("資產變動筆數"),lastReportSummary.count],
       ["Mint",lastReportSummary.mint],
       ["Burn",lastReportSummary.burn],
@@ -1157,10 +1166,10 @@ button{
         x.member.display_name||"",
         x.member.email||"",
         x.member.wallet_address||"",
-        String(x.member.ipt_balance||0),
-        scaledToDecimal(x.inRaw),
-        scaledToDecimal(x.outRaw),
-        scaledToDecimal(x.inRaw-x.outRaw),
+        csvAmount6(x.member.ipt_balance||0),
+        csvAmount6(scaledToDecimal(x.inRaw)),
+        csvAmount6(scaledToDecimal(x.outRaw)),
+        csvAmount6(scaledToDecimal(x.inRaw-x.outRaw)),
         x.count,x.inCount,x.outCount,x.mintCount,x.burnCount
       ]);
     }
@@ -1175,7 +1184,7 @@ button{
         item.member.display_name||"",
         t.label,
         fmtTime(item.tx.timestamp),
-        (t.sign||"")+String(item.tx.amount||0),
+        (t.sign||"")+csvAmount6(item.tx.amount||0),
         item.tx.from||"",
         item.tx.to||"",
         item.tx.block_number||"",
@@ -1217,7 +1226,7 @@ button{
 
     sessionStorage.setItem("ipt_print_report",JSON.stringify(report));
     setExportStatus(tr("正在開啟列印／PDF 預覽…"),"ok");
-    location.href="./print-report-v4.12.html?v=4142hf43";
+    location.href="./print-report-v4.12.html?v=4142hf50c38";
   }
 
   async function generateReport() {
@@ -1499,5 +1508,6 @@ if ("serviceWorker" in navigator) {
 
 </body>
 </html>
+
 
 

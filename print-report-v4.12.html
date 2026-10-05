@@ -344,7 +344,7 @@ button{
 }
 
 
-/* HF50-C36: readable mobile tables and full-width print output */
+/* HF50-C38: readable mobile tables and full-width print output */
 .table-note{font-size:.8rem;color:#64748b;margin:0 0 10px}
 .table-scroll{width:100%;max-width:100%;overflow-x:auto;touch-action:pan-x pan-y;-webkit-overflow-scrolling:touch}
 .table-scroll table{width:100%!important;min-width:760px;max-width:none!important;table-layout:auto!important;font-size:.82rem}
@@ -356,7 +356,12 @@ button{
   html,body{overflow:visible!important;width:auto;max-width:none}
   .table-note,.ipt-langbar{display:none!important}
   .sheet{overflow:visible}
-  .table-scroll{overflow:visible;max-width:none}
+  /* Keep section headings with the first rows; let long tables paginate. */
+  h3{break-after:avoid;page-break-after:avoid}
+  .table-scroll{overflow:visible;max-width:none;break-inside:auto;break-before:avoid;page-break-before:avoid}
+  table{break-inside:auto;page-break-inside:auto}
+  thead{display:table-header-group;break-after:avoid}
+  tr{break-inside:avoid;page-break-inside:avoid}
   .table-scroll table{min-width:0;font-size:9pt}
   .table-scroll th,.table-scroll td{padding:5px}
 }
@@ -378,7 +383,7 @@ button{
 <body>
 <div class="top" data-raw-data="1">
   <div class="top-inner">
-    <div class="v43-product-tag">V4.14.2 | HF50-C36</div>
+    <div class="v43-product-tag">V4.14.2 | HF50-C38</div>
     <h1>列印／PDF 預覽</h1>
     <div class="actions">
       <button id="printBtn" class="print" type="button">開啟系統列印／另存 PDF</button>
@@ -516,5 +521,6 @@ if ("serviceWorker" in navigator) {
 
 </body>
 </html>
+
 
 
