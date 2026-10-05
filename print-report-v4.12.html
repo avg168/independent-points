@@ -1,7 +1,8 @@
 <!doctype html>
-<html lang="zh-Hant">
+<html lang="zh-Hant" translate="no" class="notranslate">
 <head>
 <meta charset="utf-8">
+<meta name="google" content="notranslate">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Independent Points｜列印／PDF 預覽</title>
 <style>
@@ -343,7 +344,7 @@ button{
 }
 
 
-/* HF50-C32: readable mobile tables and full-width print output */
+/* HF50-C36: readable mobile tables and full-width print output */
 .table-note{font-size:.8rem;color:#64748b;margin:0 0 10px}
 .table-scroll{width:100%;max-width:100%;overflow-x:auto;touch-action:pan-x pan-y;-webkit-overflow-scrolling:touch}
 .table-scroll table{width:100%!important;min-width:760px;max-width:none!important;table-layout:auto!important;font-size:.82rem}
@@ -353,7 +354,7 @@ button{
 @media print{
   @page{size:A4 landscape;margin:12mm}
   html,body{overflow:visible!important;width:auto;max-width:none}
-  .table-note{display:none}
+  .table-note,.ipt-langbar{display:none!important}
   .sheet{overflow:visible}
   .table-scroll{overflow:visible;max-width:none}
   .table-scroll table{min-width:0;font-size:9pt}
@@ -372,12 +373,12 @@ button{
 <link rel="icon" type="image/svg+xml" href="./ipt-icon-192.png">
 
 <link rel="apple-touch-icon" href="./ipt-apple-touch-180.png">
-<script src="./i18n-v4.10.js?v=4142hf50c31" defer></script>
+<script src="./i18n-v4.10.js?v=4142hf50c35" defer></script>
 </head>
 <body>
 <div class="top" data-raw-data="1">
   <div class="top-inner">
-    <div class="v43-product-tag">V4.14.2 | HF50-C32</div>
+    <div class="v43-product-tag">V4.14.2 | HF50-C36</div>
     <h1>列印／PDF 預覽</h1>
     <div class="actions">
       <button id="printBtn" class="print" type="button">開啟系統列印／另存 PDF</button>
@@ -462,7 +463,7 @@ button{
       </div>
       <h3>${esc(tr("交易紀錄"))}</h3>
       ${txs.length?`<div class="table-scroll" tabindex="0" role="region" aria-label="${esc(tr("交易紀錄"))}"><table><thead><tr><th>${esc(tr("類型"))}</th><th>${esc(tr("時間"))}</th><th>${esc(tr("數量"))}</th><th>From</th><th>To</th><th>${esc(tr("區塊"))}</th></tr></thead><tbody>${
-        txs.map(tx=>`<tr><td>${esc(txLabel(tx.type))}</td><td>${esc(time(tx.timestamp))}</td><td class="number">${esc(tx.amount)} IPT</td><td>${esc(shortAddr(tx.from))}</td><td>${esc(shortAddr(tx.to))}</td><td>${esc(tx.block_number)}</td></tr>`).join("")
+        txs.map(tx=>`<tr><td>${esc(txLabel(tx.type))}</td><td>${esc(time(tx.timestamp))}</td><td class="number">${esc(fmt6(tx.amount))} IPT</td><td>${esc(shortAddr(tx.from))}</td><td>${esc(shortAddr(tx.to))}</td><td>${esc(tx.block_number)}</td></tr>`).join("")
       }</tbody></table></div>`:`<div class="empty">${esc(tr("無交易紀錄"))}</div>`}
     `;
   }else{
@@ -488,7 +489,7 @@ button{
       }</tbody></table></div>`:`<div class="empty">${esc(tr("無會員資料"))}</div>`}
       <h3>${esc(tr("交易紀錄"))}</h3>
       ${txs.length?`<div class="table-scroll" tabindex="0" role="region" aria-label="${esc(tr("交易紀錄"))}"><table><thead><tr><th>${esc(tr("會員"))}</th><th>${esc(tr("類型"))}</th><th>${esc(tr("時間"))}</th><th>${esc(tr("數量"))}</th><th>${esc(tr("區塊"))}</th></tr></thead><tbody>${
-        txs.map(x=>`<tr><td>${esc(x.member?.member_number)}｜${esc(x.member?.display_name)}</td><td>${esc(txLabel(x.tx?.type))}</td><td>${esc(time(x.tx?.timestamp))}</td><td class="number">${esc(x.tx?.amount)} IPT</td><td>${esc(x.tx?.block_number)}</td></tr>`).join("")
+        txs.map(x=>`<tr><td>${esc(x.member?.member_number)}｜${esc(x.member?.display_name)}</td><td>${esc(txLabel(x.tx?.type))}</td><td>${esc(time(x.tx?.timestamp))}</td><td class="number">${esc(fmt6(x.tx?.amount))} IPT</td><td>${esc(x.tx?.block_number)}</td></tr>`).join("")
       }</tbody></table></div>`:`<div class="empty">${esc(tr("無交易紀錄"))}</div>`}
     `;
   }
@@ -515,4 +516,5 @@ if ("serviceWorker" in navigator) {
 
 </body>
 </html>
+
 
