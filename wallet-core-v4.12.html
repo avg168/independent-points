@@ -478,7 +478,7 @@ body.platform-admin.v41-route.route-ownership.show-ownership #securityGuardSecti
 </div>
 <header>
   <div class="v43-product-tag">正式鏈上操作模組</div><div class="v43-module-note">Ethereum Sepolia｜Trust Wallet / WalletConnect</div>
-  <div id="versionBadge" style="display:inline-block;margin-bottom:10px;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.78rem;font-weight:800;letter-spacing:.04em">V4.14.2 CORE | HF50-C20</div>
+  <div id="versionBadge" style="display:inline-block;margin-bottom:10px;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.78rem;font-weight:800;letter-spacing:.04em">V4.14.2 CORE | HF52-C1</div>
   <h1 id="v41RouteTitle">IPT 錢包中心</h1>
   <p id="v41RouteSubtitle">會員帳號 × 主錢包 × 鏈上錢包獨立驗證</p>
   <div class="v41-head-actions">
@@ -840,6 +840,23 @@ const ABI = [
 let wc = null;
 let ep = null;
 let account = "";
+// HF52: reject stale asynchronous session/read results after wallet changes.
+let iptSessionRevision = 0;
+let iptReadRevision = 0;
+let iptChainRole = "disconnected";
+function iptRenderChainRole(){
+  const lang = window.IPTI18N?.getLang?.() || "zh-TW";
+  const labels = {
+    owner:["合約 Owner","合约 Owner","Contract Owner"],
+    pending:["pendingOwner","pendingOwner","pendingOwner"],
+    wallet:["一般錢包","一般钱包","Regular Wallet"],
+    waiting:["待讀取鏈上 Owner","待读取链上 Owner","Waiting for On-chain Owner"],
+    disconnected:["尚未連線","尚未连接","Not Connected"]
+  };
+  const el=document.getElementById("role");
+  if(el) el.textContent=labels[iptChainRole][lang==="en"?2:lang==="zh-CN"?1:0];
+}
+window.addEventListener("ipt-language-change",iptRenderChainRole);
 // HF50-C6: readiness is data, independent of translated display text.
 let iptContractReady = false;
 let iptContractReadAccount = "";
@@ -1055,12 +1072,8 @@ function setMemberRoleUI(owner = "", pendingOwner = "") {
   document.body.classList.add("chain-ok");
   iptRenderMemberWalletState();
 
-  const roleEl=$("role");
-  if(roleEl){
-    if(isOwner) roleEl.textContent="合約 Owner";
-    else if(isPending) roleEl.textContent="pendingOwner";
-    else roleEl.textContent="一般錢包";
-  }
+  iptChainRole = isOwner ? "owner" : isPending ? "pending" : "wallet";
+  iptRenderChainRole();
 
   const historyWallet = $("historyWallet");
   if (historyWallet) historyWallet.textContent = account || "尚未連線";
@@ -1137,17 +1150,27 @@ async function chainIdOf(p) {
 }
 
 async function renderSession() {
+  const revision = ++iptSessionRevision;
+  ++iptReadRevision;
+  iptContractReady = false;
+  iptContractReadAccount = "";
+  account = wc?.session ? (wc.accounts?.[0] || "") : "";
+  resetMemberRoleUI();
+  iptRenderMemberWalletState();
   await Promise.all([
     iptRefreshPlatformAdmin(),
     iptRefreshMemberWalletState()
   ]);
+  if (revision !== iptSessionRevision) return;
   if (!wc?.session) {
     resetDisconnected();
     return;
   }
 
-  account = wc.accounts?.[0] || account || "";
+  account = wc.accounts?.[0] || "";
+  iptRenderMemberWalletState();
   const cid = await chainIdOf(wc);
+  if (revision !== iptSessionRevision) return;
   const ok = cid === CHAIN_ID;
 
   setSessionBox(
@@ -1160,13 +1183,16 @@ async function renderSession() {
 
   $("disconnectBtn").disabled = false;
   $("readBtn").disabled = !ok || !account;
-  $("role").innerHTML =
-    "<span class='pill'>待讀取鏈上 Owner</span>";
+  iptChainRole = "waiting";
+  iptRenderChainRole();
   if ($("historyWallet")) $("historyWallet").textContent = account || "尚未連線";
   if ($("openHistoryBtn")) $("openHistoryBtn").disabled = !ok || !account;
+  if (ok && account) await loadIptOnChainData();
 }
 
 function resetDisconnected() {
+  ++iptSessionRevision;
+  ++iptReadRevision;
   iptContractReady = false;
   iptContractReadAccount = "";
   account = "";
@@ -1174,7 +1200,8 @@ function resetDisconnected() {
   setSessionBox("warn", "尚未連線。");
   $("disconnectBtn").disabled = true;
   $("readBtn").disabled = true;
-  $("role").textContent = "尚未連線";
+  iptChainRole = "disconnected";
+  iptRenderChainRole();
   $("contractState").textContent = "尚未讀取";
   $("balance").textContent = "— IPT";
   $("supply").textContent = "—";
@@ -1260,13 +1287,16 @@ $("disconnectBtn").addEventListener("click", async () => {
   resetDisconnected();
 });
 
-$("readBtn").addEventListener("click", async () => {
+async function loadIptOnChainData() {
+  const revision = ++iptReadRevision;
+  const sessionRevision = iptSessionRevision;
   const btn = $("readBtn");
 
   try {
     iptContractReady = false;
     iptContractReadAccount = "";
     await iptRefreshMemberWalletState();
+    if (revision !== iptReadRevision || sessionRevision !== iptSessionRevision) return;
     btn.disabled = true;
     btn.textContent = "正在讀取 Sepolia…";
     $("contractState").textContent = "讀取中…";
@@ -1323,7 +1353,9 @@ $("readBtn").addEventListener("click", async () => {
       "讀取 IPT 合約資料"
     );
 
-    if (!wc?.session || !same(account, readAccount) || Number(await chainIdOf(wc)) !== 11155111) {
+    const finalChain = await chainIdOf(wc);
+    if (revision !== iptReadRevision || sessionRevision !== iptSessionRevision) return;
+    if (!wc?.session || !same(account, readAccount) || Number(finalChain) !== 11155111) {
       throw new Error("錢包或網路已變更，請重新讀取鏈上資料。");
     }
     const d = Number(decimals);
@@ -1372,6 +1404,7 @@ $("readBtn").addEventListener("click", async () => {
       "<span class='muted'>Owner 採鏈上動態驗證；管理權合法交接後，不會再因與最初部署 Owner 不同而誤判。</span>";
 
   } catch (e) {
+    if (revision !== iptReadRevision || sessionRevision !== iptSessionRevision) return;
     iptContractReady = false;
     iptContractReadAccount = "";
     $("contractState").textContent = "讀取失敗";
@@ -1379,10 +1412,13 @@ $("readBtn").addEventListener("click", async () => {
     $("contractData").textContent =
       "讀取失敗：" + (e?.message || String(e));
   } finally {
-    btn.disabled = false;
-    btn.textContent = "重新讀取 IPT 鏈上資料";
+    if (revision === iptReadRevision && sessionRevision === iptSessionRevision) {
+      btn.disabled = !wc?.session || !account;
+      btn.textContent = "重新讀取 IPT 鏈上資料";
+    }
   }
-});
+}
+$("readBtn").addEventListener("click", () => { void loadIptOnChainData(); });
 
 const transferState = {
   checked: false,
