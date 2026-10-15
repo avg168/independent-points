@@ -679,6 +679,73 @@ button{
   let lastReportSummary = null;
   let lastReportCriteria = null;
 
+  // Report return state: one tab, same authorized user, at most 30 minutes.
+  const REPORT_RETURN_KEY = "ipt_admin_report_return_hf51";
+  let reportUserId = null;
+
+  function discardReportReturn() {
+    try { sessionStorage.removeItem(REPORT_RETURN_KEY); } catch (_) {}
+  }
+
+  function saveReportReturn() {
+    if (!reportUserId || !lastReportSummary) return;
+    try {
+      const state = {
+        userId:reportUserId, savedAt:Date.now(), language:uiLang(),
+        members:lastReportMembers.map(x => ({...x,
+          inRaw:x.inRaw.toString(), outRaw:x.outRaw.toString()})),
+        transactions:lastReportTxs, summary:lastReportSummary,
+        criteria:lastReportCriteria,
+        filters:["reportFromDate","reportToDate","reportType","reportQuery"]
+          .map(id => [id,$(id).value]),
+        status:$("reportStatus").textContent,
+        statusClass:$("reportStatus").className,
+        scrollY:window.scrollY
+      };
+      sessionStorage.setItem(REPORT_RETURN_KEY,JSON.stringify(state));
+    } catch (_) { discardReportReturn(); }
+  }
+
+  function restoreReportReturn() {
+    try {
+      const raw = sessionStorage.getItem(REPORT_RETURN_KEY);
+      if (!raw) return;
+      discardReportReturn(); // Consume once; never revive a cleared report.
+      const state = JSON.parse(raw);
+      const age = Date.now() - state.savedAt;
+      if (state.userId !== reportUserId || state.language !== uiLang()
+          || !Number.isFinite(age) || age < 0 || age > 30*60*1000
+          || !state.summary || !Array.isArray(state.members)
+          || !Array.isArray(state.transactions) || !Array.isArray(state.filters)) return;
+      const members = state.members.map(x => ({...x,
+        inRaw:BigInt(x.inRaw), outRaw:BigInt(x.outRaw)}));
+      const allowed = ["reportFromDate","reportToDate","reportType","reportQuery"];
+      for (const [id,value] of state.filters) {
+        if (allowed.includes(id)) $(id).value = value;
+      }
+      lastReportMembers = members;
+      lastReportTxs = state.transactions;
+      lastReportSummary = state.summary;
+      lastReportCriteria = state.criteria;
+      const s = state.summary;
+      $("rMembers").textContent = s.members;
+      $("rIncoming").textContent = fmtNumber(s.incoming) + " IPT";
+      $("rOutgoing").textContent = fmtNumber(s.outgoing) + " IPT";
+      $("rNet").textContent = fmtNumber(s.net) + " IPT";
+      $("rCount").textContent = s.count;
+      $("rMintBurn").textContent = `${s.mint} / ${s.burn}`;
+      renderReportMembers(members);
+      renderReportTransactions(lastReportTxs);
+      $("reportStatus").className = ["report-status ok","report-status warn"]
+        .includes(state.statusClass) ? state.statusClass : "report-status";
+      $("reportStatus").textContent = state.status;
+      $("reportResult").classList.remove("hidden");
+      $("exportAdminCsvBtn").disabled = false;
+      $("printAdminBtn").disabled = false;
+      requestAnimationFrame(() => window.scrollTo(0,Number(state.scrollY)||0));
+    } catch (_) { discardReportReturn(); }
+  }
+
   function esc(v) {
     return String(v ?? "")
       .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
@@ -1225,11 +1292,13 @@ button{
     };
 
     sessionStorage.setItem("ipt_print_report",JSON.stringify(report));
+    saveReportReturn();
     setExportStatus(tr("正在開啟列印／PDF 預覽…"),"ok");
     location.href="./print-report-v4.12.html?v=4142hf50c38";
   }
 
   async function generateReport() {
+    discardReportReturn();
     const btn = $("generateReportBtn");
     btn.disabled = true;
     $("reportStatus").className = "report-status";
@@ -1384,6 +1453,7 @@ button{
   }
 
   function clearReport() {
+    discardReportReturn();
     $("reportFromDate").value = "";
     $("reportToDate").value = "";
     $("reportType").value = "all";
@@ -1437,9 +1507,10 @@ button{
 
     try {
       const { data:{user}, error:sessionError } = await sb.auth.getUser();
-      if (sessionError) throw sessionError;
+      if (sessionError) { discardReportReturn(); throw sessionError; }
 
       if (!user) {
+        discardReportReturn();
         setStatus("err",L("尚未登入雲端會員。請先完成會員登入。","尚未登录云端会员。请先完成会员登录。","You are not signed in. Please complete member sign-in first."));
         $("memberList").innerHTML = `<div class="empty">${L("需要管理員登入。","需要管理员登录。","Administrator sign-in required.")}</div>`;
         return;
@@ -1452,9 +1523,11 @@ button{
       if (error) throw error;
       if (!data?.ok) throw new Error(data?.error || tr("資產報表載入失敗"));
 
+      reportUserId = user.id;
       allMembers = Array.isArray(data.members) ? data.members : [];
       setSummary(data.summary || {});
       resetFilters();
+      restoreReportReturn();
 
       setStatus("ok",L(
         `V4.14.2 已載入。管理員：${data.admin?.email || "已登入"}｜共 ${allMembers.length} 位會員。`,
@@ -1463,6 +1536,7 @@ button{
       ));
       $("refreshBtn").disabled = false;
     } catch (err) {
+      discardReportReturn();
       console.error(err);
       setStatus("err",L("載入失敗：","加载失败：","Load failed: ") + (err?.message || String(err)));
       $("refreshBtn").disabled = false;
