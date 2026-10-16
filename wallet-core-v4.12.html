@@ -145,6 +145,11 @@ body.v41-route.route-history #v41RouteGuide,
 body.v41-route.route-receive #v41RouteGuide{
   display:none!important;
 }
+/* HF52-C2: advanced route retains server admin and chain role gates. */
+body.platform-admin.v41-route.route-advanced.show-owner #mintSection,
+body.platform-admin.v41-route.route-advanced.show-owner #pauseSection,
+body.platform-admin.v41-route.route-advanced.show-ownership #ownershipSection,
+body.platform-admin.v41-route.route-advanced.show-owner .tech-only{display:block!important}
 body.v41-route main{padding-top:6px}
 body.v41-route section{margin:12px 0}
 body.v41-route header h1{font-size:1.48rem}
@@ -478,7 +483,7 @@ body.platform-admin.v41-route.route-ownership.show-ownership #securityGuardSecti
 </div>
 <header>
   <div class="v43-product-tag">正式鏈上操作模組</div><div class="v43-module-note">Ethereum Sepolia｜Trust Wallet / WalletConnect</div>
-  <div id="versionBadge" style="display:inline-block;margin-bottom:10px;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.78rem;font-weight:800;letter-spacing:.04em">V4.14.2 CORE | HF52-C1</div>
+  <div id="versionBadge" style="display:inline-block;margin-bottom:10px;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.78rem;font-weight:800;letter-spacing:.04em">V4.14.2 CORE | HF52-C2</div>
   <h1 id="v41RouteTitle">IPT 錢包中心</h1>
   <p id="v41RouteSubtitle">會員帳號 × 主錢包 × 鏈上錢包獨立驗證</p>
   <div class="v41-head-actions">
@@ -1023,6 +1028,24 @@ async function iptRefreshMemberWalletState(){
     iptRenderMemberWalletState();
   }
 }
+
+// HF52-C2: member metadata must load even before connecting Trust Wallet.
+async function iptInitializeMemberMetadata(){
+  const [adminResult,walletResult]=await Promise.allSettled([
+    iptRefreshPlatformAdmin(),iptRefreshMemberWalletState()
+  ]);
+  if(walletResult.status!=="fulfilled" || !walletResult.value){
+    const lang=window.IPTI18N?.getLang?.() || "zh-TW";
+    const message=lang==="en" ? "Unable to load member wallet. Return to Account Security and check your sign-in."
+      : lang==="zh-CN" ? "无法载入会员钱包，请返回账户安全确认登录状态。"
+      : "無法載入會員錢包，請返回帳戶安全確認登入狀態。";
+    for(const id of ["memberPrimaryWallet","memberWalletVerification","memberAssetWallet"]){
+      const el=document.getElementById(id);
+      if(el) el.textContent=message;
+    }
+  }
+}
+window.addEventListener("load",()=>{iptInitializeMemberMetadata().catch(console.error);},{once:true});
 
 async function iptRefreshPlatformAdmin(){
   iptPlatformAdmin=false;
@@ -3864,9 +3887,27 @@ v48RenderGuardLocal();
 
   if(routeMeta[route]){
     document.body.classList.add("v41-route", routeMeta[route].cls);
-    $("v41RouteTitle").textContent = routeMeta[route].title;
-    $("v41RouteSubtitle").textContent = routeMeta[route].subtitle;
-    $("v41GuideText").textContent = routeMeta[route].guide;
+    function renderRouteMetadata(){
+      const lang=window.IPTI18N?.getLang?.() || "zh-TW";
+      const meta=routeMeta[route];
+      const advanced=lang==="en" ? {
+        title:"Advanced Administration",subtitle:"High-risk administration requires MFA AAL2",
+        guide:"Connect your verified primary wallet and load on-chain data. Administrator access and the on-chain Owner or pendingOwner role are checked before management controls appear. MFA AAL2 is required for high-risk actions."
+      } : lang==="zh-CN" ? {
+        title:"进阶管理功能",subtitle:"高风险管理操作需要 MFA AAL2",
+        guide:"请连接已验证的主钱包并载入链上资料。系统确认管理员权限及链上 Owner 或 pendingOwner 身份后，才会显示管理功能。高风险操作仍须通过 MFA AAL2。"
+      } : {
+        title:meta.title,subtitle:meta.subtitle,
+        guide:"請連接已驗證的主錢包並載入鏈上資料。系統確認管理員權限及鏈上 Owner 或 pendingOwner 身分後，才會顯示管理功能。高風險操作仍須通過 MFA AAL2。"
+      };
+      const text=route==="advanced" ? advanced : meta;
+      $("v41RouteTitle").textContent=text.title;
+      $("v41RouteSubtitle").textContent=text.subtitle;
+      $("v41GuideText").textContent=text.guide;
+    }
+    renderRouteMetadata();
+    window.addEventListener("ipt-language-change",renderRouteMetadata);
+    window.addEventListener("load",renderRouteMetadata,{once:true});
   }
 
   $("v41HomeBtn")?.addEventListener("click", () => {
