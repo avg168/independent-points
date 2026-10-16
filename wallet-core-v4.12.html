@@ -483,7 +483,7 @@ body.platform-admin.v41-route.route-ownership.show-ownership #securityGuardSecti
 </div>
 <header>
   <div class="v43-product-tag">正式鏈上操作模組</div><div class="v43-module-note">Ethereum Sepolia｜Trust Wallet / WalletConnect</div>
-  <div id="versionBadge" style="display:inline-block;margin-bottom:10px;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.78rem;font-weight:800;letter-spacing:.04em">V4.14.2 CORE | HF52-C2</div>
+  <div id="versionBadge" style="display:inline-block;margin-bottom:10px;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.78rem;font-weight:800;letter-spacing:.04em">V4.14.2 CORE | HF52-C3</div>
   <h1 id="v41RouteTitle">IPT 錢包中心</h1>
   <p id="v41RouteSubtitle">會員帳號 × 主錢包 × 鏈上錢包獨立驗證</p>
   <div class="v41-head-actions">
@@ -3933,60 +3933,103 @@ v48RenderGuardLocal();
     return /^0x[a-fA-F0-9]{40}$/.test(v) ? v : "";
   }
 
-  function syncReceive(){
-    const a = currentAddress();
-    if($("v41ReceiveAddress")) $("v41ReceiveAddress").textContent = a || "尚未連線";
-    if($("v41ReceiveStatus")){
-      $("v41ReceiveStatus").className = "box " + (a ? "ok" : "info");
-      $("v41ReceiveStatus").textContent = a
-        ? "收款地址已準備完成。"
-        : "連接 Trust Wallet 後即可取得收款地址。";
+  // HF52-C3: render complete receive messages in the selected language.
+  const receiveMessages = {
+    'zh-TW': {
+      disconnected:'尚未連線', ready:'收款地址已準備完成。',
+      connect:'連接 Trust Wallet 後即可取得收款地址。', missing:'目前尚未取得錢包地址。',
+      copied:'錢包地址已複製。', copyFailed:'複製未完成，請再試一次。', shared:'分享已完成。',
+      fallback:'此瀏覽器不支援分享，內容已複製。', failed:'分享未完成，可改用複製錢包地址。',
+      title:'IPT 收款地址', label:'Independent Points IPT 收款地址（Ethereum Sepolia）'
+    },
+    'zh-CN': {
+      disconnected:'尚未连接', ready:'收款地址已准备完成。',
+      connect:'连接 Trust Wallet 后即可取得收款地址。', missing:'目前尚未取得钱包地址。',
+      copied:'钱包地址已复制。', copyFailed:'复制未完成，请重试。', shared:'分享已完成。',
+      fallback:'此浏览器不支持分享，内容已复制。', failed:'分享未完成，可改用复制钱包地址。',
+      title:'IPT 收款地址', label:'Independent Points IPT 收款地址（Ethereum Sepolia）'
+    },
+    en: {
+      disconnected:'Not Connected', ready:'Receiving address is ready.',
+      connect:'Connect Trust Wallet to get your receiving address.', missing:'No wallet address is available yet.',
+      copied:'Wallet address copied.', copyFailed:'Could not copy. Please try again.', shared:'Sharing completed.',
+      fallback:'Sharing is not supported in this browser. The text has been copied.',
+      failed:'Sharing was not completed. You can copy the wallet address instead.',
+      title:'IPT Receiving Address', label:'Independent Points IPT receiving address (Ethereum Sepolia)'
+    }
+  };
+  const receiveText=()=>receiveMessages[window.IPTI18N?.getLang?.()] || receiveMessages['zh-TW'];
+  let receiveAddress=null;
+  let receiveStatusKey='connect';
+  let receiveStatusClass='info';
+  for(const id of ['v41ReceiveAddress','v41ReceiveStatus']){
+    $(id)?.setAttribute('translate','no');
+    $(id)?.classList.add('notranslate');
+  }
+  function renderReceive(){
+    const messages=receiveText();
+    const address=$('v41ReceiveAddress');
+    const status=$('v41ReceiveStatus');
+    if(address) address.textContent=receiveAddress || messages.disconnected;
+    if(status){
+      status.className='box notranslate '+receiveStatusClass;
+      status.textContent=messages[receiveStatusKey];
     }
   }
-
-  $("v41CopyReceiveBtn")?.addEventListener("click", async () => {
-    const a = currentAddress();
-    if(!a){
-      $("v41ReceiveStatus").className="box warn";
-      $("v41ReceiveStatus").textContent="目前尚未取得錢包地址。";
-      return;
+  function setReceiveStatus(key,kind){
+    receiveStatusKey=key;
+    receiveStatusClass=kind;
+    renderReceive();
+  }
+  function syncReceive(){
+    const a=currentAddress();
+    if(a!==receiveAddress){
+      receiveAddress=a;
+      receiveStatusKey=a?'ready':'connect';
+      receiveStatusClass=a?'ok':'info';
     }
+    renderReceive();
+  }
+  window.addEventListener('ipt-language-change',syncReceive);
+  syncReceive();
+
+  $('v41CopyReceiveBtn')?.addEventListener('click',async()=>{
+    syncReceive();
+    const a=currentAddress();
+    if(!a){ setReceiveStatus('missing','warn'); return; }
+    let copied=false;
     try{
       await navigator.clipboard.writeText(a);
-      $("v41ReceiveStatus").className="box ok";
-      $("v41ReceiveStatus").textContent="錢包地址已複製。";
+      copied=true;
     }catch(_){
-      const ta=document.createElement("textarea");
+      const ta=document.createElement('textarea');
       ta.value=a; document.body.appendChild(ta); ta.select();
-      document.execCommand("copy"); ta.remove();
-      $("v41ReceiveStatus").className="box ok";
-      $("v41ReceiveStatus").textContent="錢包地址已複製。";
+      try{ copied=document.execCommand('copy'); }finally{ ta.remove(); }
     }
+    if(a!==currentAddress()){ syncReceive(); return; }
+    setReceiveStatus(copied?'copied':'copyFailed',copied?'ok':'warn');
   });
 
-  $("v41ShareReceiveBtn")?.addEventListener("click", async () => {
-    const a = currentAddress();
-    if(!a){
-      $("v41ReceiveStatus").className="box warn";
-      $("v41ReceiveStatus").textContent="目前尚未取得錢包地址。";
-      return;
-    }
-    const text = "Independent Points IPT 收款地址（Ethereum Sepolia）\\n" + a;
+  $('v41ShareReceiveBtn')?.addEventListener('click',async()=>{
+    syncReceive();
+    const a=currentAddress();
+    if(!a){ setReceiveStatus('missing','warn'); return; }
+    const messages=receiveText();
+    const text=messages.label+'\n'+a;
     try{
+      let key;
       if(navigator.share){
-        await navigator.share({title:"IPT 收款地址",text});
-        $("v41ReceiveStatus").className="box ok";
-        $("v41ReceiveStatus").textContent="已開啟分享功能。";
+        await navigator.share({title:messages.title,text});
+        key='shared';
       }else{
         await navigator.clipboard.writeText(text);
-        $("v41ReceiveStatus").className="box ok";
-        $("v41ReceiveStatus").textContent="此瀏覽器不支援分享，內容已複製。";
+        key='fallback';
       }
+      if(a!==currentAddress()){ syncReceive(); return; }
+      setReceiveStatus(key,'ok');
     }catch(e){
-      if(e?.name!=="AbortError"){
-        $("v41ReceiveStatus").className="box warn";
-        $("v41ReceiveStatus").textContent="分享未完成，可改用複製錢包地址。";
-      }
+      if(a!==currentAddress()){ syncReceive(); return; }
+      if(e?.name!=='AbortError') setReceiveStatus('failed','warn');
     }
   });
 
