@@ -73,7 +73,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
 </head>
 <body>
 <header>
-  <div class="badge">V4.14.2｜正式受信任裝置</div>
+  <div class="badge" id="releaseBadge">V4.14.2 | HF52-D1｜正式受信任裝置</div>
   <h1 id="title">受信任裝置</h1>
   <p id="subtitle">用已驗證的手機／瀏覽器降低密碼被盜後的帳戶風險。</p>
   <div class="langbar">
@@ -227,6 +227,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
 
   const S={
     "zh-TW":{
+      releaseBadge:"V4.14.2 | HF52-D1｜正式受信任裝置",
       title:"受信任裝置",subtitle:"用已驗證的手機／瀏覽器降低密碼被盜後的帳戶風險。",
       hState:"目前裝置狀態",kProtection:"裝置保護",kTrusted:"目前裝置",kAal:"驗證等級",kName:"裝置名稱",
       enabled:"已啟用",disabled:"未啟用",trusted:"已信任",untrusted:"未信任",checking:"正在檢查…",
@@ -241,6 +242,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       disableOk:"受信任裝置保護已停用。",removeConfirm:"確定要移除此受信任裝置嗎？",removeCurrentConfirm:"確定要移除目前這支裝置的信任嗎？移除後，本機需要重新完成 MFA 才能再次加入受信任裝置。",failed:"操作失敗："
     },
     "zh-CN":{
+      releaseBadge:"V4.14.2 | HF52-D1｜正式受信任设备",
       title:"受信任设备",subtitle:"用已验证的手机／浏览器降低密码被盗后的账户风险。",
       hState:"当前设备状态",kProtection:"设备保护",kTrusted:"当前设备",kAal:"验证等级",kName:"设备名称",
       enabled:"已启用",disabled:"未启用",trusted:"已信任",untrusted:"未信任",checking:"正在检查…",
@@ -255,6 +257,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       disableOk:"受信任设备保护已停用。",removeConfirm:"确定要移除此受信任设备吗？",removeCurrentConfirm:"确定要移除当前设备的信任吗？移除后，本机需要重新完成 MFA 才能再次加入受信任设备。",failed:"操作失败："
     },
     "en":{
+      releaseBadge:"V4.14.2 | HF52-D1｜Trusted Devices",
       title:"Trusted Devices",subtitle:"Use a verified phone/browser to reduce account takeover risk after password theft.",
       hState:"Current Device Status",kProtection:"Device Protection",kTrusted:"Current Device",kAal:"Assurance Level",kName:"Device Name",
       enabled:"Enabled",disabled:"Disabled",trusted:"Trusted",untrusted:"Untrusted",checking:"Checking…",
@@ -317,7 +320,7 @@ button,input{min-height:48px;border-radius:12px;border:1px solid #cbd5e1;padding
       b.classList.toggle("active",b.dataset.lang===lang);
       b.setAttribute("aria-pressed",b.dataset.lang===lang?"true":"false");
     });
-    ["title","subtitle","hState","kProtection","kTrusted","kAal","kName","hManage","manageNote","kActiveDevices","kTrustDays","kExpiresAt","hExplain","explain"].forEach(id=>$(id).textContent=T(id));
+    ["releaseBadge","title","subtitle","hState","kProtection","kTrusted","kAal","kName","hManage","manageNote","kActiveDevices","kTrustDays","kExpiresAt","hExplain","explain"].forEach(id=>$(id).textContent=T(id));
     $("enableBtn").textContent=T("enable"); $("trustBtn").textContent=T("trust"); $("mfaBtn").textContent=T("mfa");
     $("refreshBtn").textContent=T("refresh"); $("disableBtn").textContent=T("disable");
     $("securityBtn").textContent=T("security"); $("homeBtn").textContent=T("home");
