@@ -483,7 +483,7 @@ body.platform-admin.v41-route.route-ownership.show-ownership #securityGuardSecti
 </div>
 <header>
   <div class="v43-product-tag">正式鏈上操作模組</div><div class="v43-module-note">Ethereum Sepolia｜Trust Wallet / WalletConnect</div>
-  <div id="versionBadge" style="display:inline-block;margin-bottom:10px;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.78rem;font-weight:800;letter-spacing:.04em">V4.14.2 CORE | HF52-C3</div>
+  <div id="versionBadge" style="display:inline-block;margin-bottom:10px;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.78rem;font-weight:800;letter-spacing:.04em">V4.14.2 CORE | HF52-C4</div>
   <h1 id="v41RouteTitle">IPT 錢包中心</h1>
   <p id="v41RouteSubtitle">會員帳號 × 主錢包 × 鏈上錢包獨立驗證</p>
   <div class="v41-head-actions">
@@ -2627,7 +2627,35 @@ const adminPauseState = {
 
 let adminPauseRefreshBusy = false;
 
+// HF52-C4: presentation only; preflight and transaction guards remain unchanged.
+let adminPauseSummary = null;
+const adminPauseSummaryMessages = {
+  "zh-TW": {pause:"暫停",unpause:"恢復",passed:"前置檢查通過",owner:"目前 Owner",paused:"目前 paused",supply:"目前 totalSupply",expected:"操作後預期 paused",pausedState:"已暫停",normal:"正常",unchanged:"不變",gas:"預估 Gas",limit:"送出 Gas Limit",nonce:"送出前再核對"},
+  "zh-CN": {pause:"暂停",unpause:"恢复",passed:"前置检查通过",owner:"当前 Owner",paused:"当前 paused",supply:"当前 totalSupply",expected:"操作后预期 paused",pausedState:"已暂停",normal:"正常",unchanged:"不变",gas:"预估 Gas",limit:"提交 Gas Limit",nonce:"提交前再次核对"},
+  "en": {pause:"Pause",unpause:"Unpause",passed:"pre-check passed",owner:"Current Owner",paused:"Current paused",supply:"Current totalSupply",expected:"Expected paused after operation",pausedState:"Paused",normal:"Normal",unchanged:"Unchanged",gas:"Estimated Gas",limit:"Transaction Gas Limit",nonce:"Recheck before sending"}
+};
+function renderAdminPauseSummary() {
+  if (!adminPauseSummary) return;
+  const m=adminPauseSummaryMessages[window.IPTI18N?.getLang?.()] || adminPauseSummaryMessages["zh-TW"];
+  const v=adminPauseSummary;
+  const expected=v.action === "pause" ? "true ("+m.pausedState+")" : "false ("+m.normal+")";
+  $("adminPauseCheck").innerHTML = '<div data-ipt-pause-summary="true" translate="no" class="notranslate">' +
+    "✓ " + m[v.action] + " " + m.passed + "<br>" +
+    m.owner + ": <span class='addr'>" + v.owner + "</span><br>" +
+    m.paused + ": <b>" + String(v.paused) + "</b><br>" +
+    m.supply + ": <b>" + v.supply + " IPT</b><br>" +
+    m.expected + ": <b>" + expected + "</b><br>" +
+    "totalSupply: <b>" + m.unchanged + "</b><br>" +
+    m.gas + ": <b>" + v.gas + "</b><br>" +
+    m.limit + ": <b>" + v.gasLimit + "</b><br>" +
+    "Nonce: <b>" + m.nonce + "</b></div>";
+}
+window.addEventListener("ipt-language-change", () => {
+  if (adminPauseSummary && $("adminPauseCheck").querySelector("[data-ipt-pause-summary]")) renderAdminPauseSummary();
+});
+
 function resetAdminPauseCheck(message = "請重新檢查管理操作。") {
+  adminPauseSummary = null;
   adminPauseState.action = "";
   adminPauseState.data = "";
   adminPauseState.nonce = null;
@@ -2811,20 +2839,12 @@ async function verifyAdminAction(action) {
   adminPauseState.gasPrice = null;
   adminPauseState.fingerprint = fp;
 
-  const actionLabel = action === "pause" ? "暫停 Pause" : "恢復 Unpause";
-  const expected = action === "pause" ? "true（已暫停）" : "false（正常）";
-
+  adminPauseSummary = {
+    action, owner, paused, supply: fmtIPT6(supply, 2),
+    gas: gas.toString(), gasLimit: gasLimit.toString()
+  };
   $("adminPauseCheck").className = "box ok";
-  $("adminPauseCheck").innerHTML =
-    "✓ " + actionLabel + " 前檢查通過<br>" +
-    "目前 Owner：<span class='addr'>" + owner + "</span><br>" +
-    "目前 paused：<b>" + String(paused) + "</b><br>" +
-    "目前 totalSupply：<b>" + fmtIPT6(supply, 2) + " IPT</b><br>" +
-    "操作後預期 paused：<b>" + expected + "</b><br>" +
-    "totalSupply：<b>不變</b><br>" +
-    "預估 Gas：<b>" + gas.toString() + "</b><br>" +
-    "送出 Gas Limit：<b>" + gasLimit.toString() + "</b><br>" +
-    "Nonce：<b>送出前再核對</b>";
+  renderAdminPauseSummary();
 
   $("sendPauseBtn").disabled = action !== "pause";
   $("sendUnpauseBtn").disabled = action !== "unpause";
@@ -3933,7 +3953,7 @@ v48RenderGuardLocal();
     return /^0x[a-fA-F0-9]{40}$/.test(v) ? v : "";
   }
 
-  // HF52-C3: render complete receive messages in the selected language.
+  // HF52-C4: render complete receive messages in the selected language.
   const receiveMessages = {
     'zh-TW': {
       disconnected:'尚未連線', ready:'收款地址已準備完成。',
