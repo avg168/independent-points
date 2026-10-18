@@ -483,7 +483,7 @@ body.platform-admin.v41-route.route-ownership.show-ownership #securityGuardSecti
 </div>
 <header>
   <div class="v43-product-tag">正式鏈上操作模組</div><div class="v43-module-note">Ethereum Sepolia｜Trust Wallet / WalletConnect</div>
-  <div id="versionBadge" style="display:inline-block;margin-bottom:10px;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.78rem;font-weight:800;letter-spacing:.04em">V4.14.2 CORE | HF52-C5</div>
+  <div id="versionBadge" style="display:inline-block;margin-bottom:10px;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.78rem;font-weight:800;letter-spacing:.04em">V4.14.2 CORE | HF52-C6</div>
   <h1 id="v41RouteTitle">IPT 錢包中心</h1>
   <p id="v41RouteSubtitle">會員帳號 × 主錢包 × 鏈上錢包獨立驗證</p>
   <div class="v41-head-actions">
@@ -2651,7 +2651,7 @@ const adminPauseState = {
 
 let adminPauseRefreshBusy = false;
 
-// HF52-C5: presentation only; preflight and transaction guards remain unchanged.
+// HF52-C6: presentation only; preflight and transaction guards remain unchanged.
 let adminPauseSummary = null;
 const adminPauseSummaryMessages = {
   "zh-TW": {pause:"暫停",unpause:"恢復",passed:"前置檢查通過",owner:"目前 Owner",paused:"目前 paused",supply:"目前 totalSupply",expected:"操作後預期 paused",pausedState:"已暫停",normal:"正常",unchanged:"不變",gas:"預估 Gas",limit:"送出 Gas Limit",nonce:"送出前再核對"},
@@ -3096,7 +3096,32 @@ const ownershipState = {
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 let ownershipRefreshBusy = false;
 
+let ownershipPreflightError = null;
+const ownershipPreflightErrorMessages = [["WalletConnect 尚未連線。", "WalletConnect 尚未连线。", "WalletConnect is not connected."], ["目前不是 Ethereum Sepolia。", "当前不是 Ethereum Sepolia。", "The current network is not Ethereum Sepolia."], ["候任管理者地址格式錯誤。", "候任管理者地址格式错误。", "Invalid pending owner wallet address."], ["候任管理者不能是零地址。", "候任管理者不能是零地址。", "The pending owner cannot be the zero address."], ["候任管理者不能是 IPT 合約地址。", "候任管理者不能是 IPT 合约地址。", "The pending owner cannot be the IPT contract address."], ["IPT 合約不存在。", "IPT 合约不存在。", "The IPT contract does not exist."], ["候任管理者不能與目前 Owner 相同。", "候任管理者不能与当前 Owner 相同。", "The pending owner cannot be the current Owner."], ["目前沒有 pendingOwner，無法接任。", "当前没有 pendingOwner，无法接任。", "There is no pendingOwner; ownership cannot be accepted."], ["防重複保護：相同候任管理者的交接在 5 分鐘內已嘗試送出。請先重新讀取 owner / pendingOwner。", "防重复保护：相同候任管理者的交接在 5 分钟内已尝试提交。请先重新读取 owner / pendingOwner。", "Duplicate protection: a proposal for the same pending owner was attempted within 5 minutes. Reload owner / pendingOwner first."], ["防重複保護：接任管理權在 5 分鐘內已嘗試送出。請先重新讀取 owner / pendingOwner。", "防重复保护：接任管理权在 5 分钟内已尝试提交。请先重新读取 owner / pendingOwner。", "Duplicate protection: ownership acceptance was attempted within 5 minutes. Reload owner / pendingOwner first."], ["提出交接前檢查 逾時", "提出交接前检查超时", "Ownership proposal pre-check timed out."], ["提出交接交易模擬 逾時", "提出交接交易模拟超时", "Ownership proposal transaction simulation timed out."], ["接任前檢查 逾時", "接任前检查超时", "Ownership acceptance pre-check timed out."], ["接任管理權交易模擬 逾時", "接任管理权交易模拟超时", "Ownership acceptance transaction simulation timed out."], ["目前錢包不是鏈上 Owner，不能提出交接。Owner：", "当前钱包不是链上 Owner，不能提出交接。Owner：", "The current wallet is not the on-chain Owner and cannot propose a handover. Owner: "], ["目前錢包不是 pendingOwner，不能接任。pendingOwner：", "当前钱包不是 pendingOwner，不能接任。pendingOwner：", "The current wallet is not pendingOwner and cannot accept ownership. pendingOwner: "]];
+function ownershipPreflightErrorText(message, lang) {
+  const index = lang === "en" ? 2 : lang === "zh-CN" ? 1 : 0;
+  const row = ownershipPreflightErrorMessages.find(row => message === row[0]);
+  if (row) return row[index];
+  for (const prefix of ownershipPreflightErrorMessages.slice(-2)) {
+    if (message.startsWith(prefix[0])) return prefix[index] + message.slice(prefix[0].length);
+  }
+  return message;
+}
+function renderOwnershipPreflightError() {
+  if (ownershipPreflightError === null) return;
+  const lang = window.IPTI18N?.getLang?.() || "zh-TW";
+  const prefix = lang === "en" ? "Check failed: " : lang === "zh-CN" ? "检查失败：" : "檢查失敗：";
+  const text = prefix + ownershipPreflightErrorText(ownershipPreflightError, lang);
+  const escaped = text.replace(/[&<>"']/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
+  $("ownershipCheck").className = "box err";
+  $("ownershipCheck").innerHTML = '<span data-ipt-ownership-error="true" translate="no" class="notranslate">' + escaped + '</span>';
+}
+window.addEventListener("ipt-language-change", () => {
+  if (ownershipPreflightError !== null && $("ownershipCheck").querySelector("[data-ipt-ownership-error]")) renderOwnershipPreflightError();
+});
+
 function resetOwnershipCheck(message = "請重新檢查管理權操作。") {
+  ownershipPreflightError = null;
   ownershipState.action = "";
   ownershipState.candidate = "";
   ownershipState.data = "";
@@ -3407,9 +3432,8 @@ $("preflightProposeOwnerBtn").addEventListener("click", async () => {
     btn.textContent = "檢查中…";
     await verifyProposeOwnership();
   } catch (e) {
-    $("ownershipCheck").className = "box err";
-    $("ownershipCheck").textContent =
-      "檢查失敗：" + (e?.message || String(e));
+    ownershipPreflightError = e?.message || String(e);
+    renderOwnershipPreflightError();
   } finally {
     btn.textContent = "先檢查提出交接";
     await readOwnershipState();
@@ -3423,9 +3447,8 @@ $("preflightAcceptOwnerBtn").addEventListener("click", async () => {
     btn.textContent = "檢查中…";
     await verifyAcceptOwnership();
   } catch (e) {
-    $("ownershipCheck").className = "box err";
-    $("ownershipCheck").textContent =
-      "檢查失敗：" + (e?.message || String(e));
+    ownershipPreflightError = e?.message || String(e);
+    renderOwnershipPreflightError();
   } finally {
     btn.textContent = "先檢查接任管理權";
     await readOwnershipState();
@@ -3977,7 +4000,7 @@ v48RenderGuardLocal();
     return /^0x[a-fA-F0-9]{40}$/.test(v) ? v : "";
   }
 
-  // HF52-C5: render complete receive messages in the selected language.
+  // HF52-C6: render complete receive messages in the selected language.
   const receiveMessages = {
     'zh-TW': {
       disconnected:'尚未連線', ready:'收款地址已準備完成。',
