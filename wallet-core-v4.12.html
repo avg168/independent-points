@@ -483,7 +483,7 @@ body.platform-admin.v41-route.route-ownership.show-ownership #securityGuardSecti
 </div>
 <header>
   <div class="v43-product-tag">正式鏈上操作模組</div><div class="v43-module-note">Ethereum Sepolia｜Trust Wallet / WalletConnect</div>
-  <div id="versionBadge" style="display:inline-block;margin-bottom:10px;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.78rem;font-weight:800;letter-spacing:.04em">V4.14.2 CORE | HF52-C11</div>
+  <div id="versionBadge" style="display:inline-block;margin-bottom:10px;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.78rem;font-weight:800;letter-spacing:.04em">V4.14.2 CORE | HF52-C12</div>
   <h1 id="v41RouteTitle">IPT 錢包中心</h1>
   <p id="v41RouteSubtitle">會員帳號 × 主錢包 × 鏈上錢包獨立驗證</p>
   <div class="v41-head-actions">
@@ -1454,7 +1454,7 @@ const transferState = {
   fingerprint: ""
 };
 
-// HF52-C11: localize transfer pre-check progress and button labels.
+// HF52-C12: localize transfer pre-check progress and button labels.
 let transferPreflightBusy = false;
 const transferPreflightProgressMessages = {
   "zh-TW": {checking:"正在檢查…",buttonBusy:"檢查中…",buttonReady:"先檢查轉帳"},
@@ -1477,7 +1477,7 @@ window.addEventListener("ipt-language-change", () => {
 });
 renderTransferPreflightButton();
 
-// HF52-C11: localize the successful transfer pre-check summary only.
+// HF52-C12: localize the successful transfer pre-check summary only.
 let transferPreflightSummary = null;
 const transferPreflightSummaryMessages = {
   "zh-TW": {passed:"轉帳前檢查通過",recipient:"收款地址",amount:"數量",balance:"目前餘額",gas:"預估 Gas",limit:"送出 Gas Limit",nonce:"送出前再核對"},
@@ -2322,7 +2322,7 @@ window.addEventListener("ipt-language-change", () => {
   if (mintPreflightError !== null && $("mintCheck").querySelector("[data-ipt-mint-error]")) renderMintPreflightError();
 });
 
-// HF52-C11: localize Mint pre-check summary and progress only.
+// HF52-C12: localize Mint pre-check summary and progress only.
 let mintPreflightSummary = null;
 let mintPreflightBusy = false;
 const mintPreflightSummaryMessages = {"zh-TW": {"passed": "Mint 前檢查通過", "owner": "目前 Owner", "recipient": "領取地址", "amount": "發行數量", "balance": "領取地址目前餘額", "supply": "目前總供給", "remaining": "目前剩餘可發行", "expectedBalance": "Mint 後預期領取餘額", "expectedSupply": "Mint 後預期總供給", "expectedRemaining": "Mint 後預期剩餘可發行", "gas": "預估 Gas", "limit": "送出 Gas Limit", "nonce": "送出前再核對", "checking": "正在檢查 Mint…", "buttonBusy": "檢查中…", "buttonReady": "先檢查 Mint"}, "zh-CN": {"passed": "Mint 前检查通过", "owner": "当前 Owner", "recipient": "领取地址", "amount": "发行数量", "balance": "领取地址当前余额", "supply": "当前总供应量", "remaining": "当前剩余可发行量", "expectedBalance": "Mint 后预计领取余额", "expectedSupply": "Mint 后预计总供应量", "expectedRemaining": "Mint 后预计剩余可发行量", "gas": "预估 Gas", "limit": "提交 Gas Limit", "nonce": "提交前再次核对", "checking": "正在检查 Mint…", "buttonBusy": "检查中…", "buttonReady": "先检查 Mint"}, "en": {"passed": "Mint pre-check passed", "owner": "Current Owner", "recipient": "Recipient address", "amount": "Mint amount", "balance": "Current recipient balance", "supply": "Current total supply", "remaining": "Current remaining mintable supply", "expectedBalance": "Expected recipient balance after mint", "expectedSupply": "Expected total supply after mint", "expectedRemaining": "Expected remaining mintable supply after mint", "gas": "Estimated Gas", "limit": "Transaction Gas Limit", "nonce": "Recheck before sending", "checking": "Checking Mint…", "buttonBusy": "Checking…", "buttonReady": "Pre-check Mint"}};
@@ -3226,7 +3226,51 @@ window.addEventListener("ipt-language-change", () => {
   if (ownershipPreflightError !== null && $("ownershipCheck").querySelector("[data-ipt-ownership-error]")) renderOwnershipPreflightError();
 });
 
+// HF52-C12: localize ownership pre-check presentation only.
+let ownershipPreflightSummary = null;
+let ownershipPreflightBusy = "";
+const ownershipPreflightMessages = {"zh-TW": {"propose": "提出交接前檢查通過", "accept": "接任管理權前檢查通過", "owner": "目前 Owner", "pending": "目前 pendingOwner", "none": "無", "candidate": "新候任管理者", "paused": "目前 paused", "warning": "注意：送出後會把目前 pendingOwner 改成新的候任管理者。", "unchangedLabel": "正式 Owner 在候任管理者接任前", "unchanged": "不變", "wallet": "目前連線錢包", "expectedOwner": "接任後預期 Owner", "expectedPending": "接任後 pendingOwner", "cleared": "清空", "gas": "預估 Gas", "limit": "送出 Gas Limit", "nonce": "送出前再核對", "checkingPropose": "正在檢查提出交接…", "checkingAccept": "正在檢查接任管理權…", "busy": "檢查中…", "readyPropose": "先檢查提出交接", "readyAccept": "先檢查接任管理權"}, "zh-CN": {"propose": "提出交接前检查通过", "accept": "接任管理权前检查通过", "owner": "当前 Owner", "pending": "当前 pendingOwner", "none": "无", "candidate": "新候任管理者", "paused": "当前 paused", "warning": "注意：提交后会把当前 pendingOwner 改为新的候任管理者。", "unchangedLabel": "正式 Owner 在候任管理者接任前", "unchanged": "不变", "wallet": "当前连接钱包", "expectedOwner": "接任后预计 Owner", "expectedPending": "接任后 pendingOwner", "cleared": "清空", "gas": "预估 Gas", "limit": "提交 Gas Limit", "nonce": "提交前再次核对", "checkingPropose": "正在检查提出交接…", "checkingAccept": "正在检查接任管理权…", "busy": "检查中…", "readyPropose": "先检查提出交接", "readyAccept": "先检查接任管理权"}, "en": {"propose": "Ownership proposal pre-check passed", "accept": "Ownership acceptance pre-check passed", "owner": "Current Owner", "pending": "Current pendingOwner", "none": "None", "candidate": "New pending owner", "paused": "Current paused state", "warning": "Warning: submitting this proposal will replace the current pendingOwner with the new pending owner.", "unchangedLabel": "Owner before the pending owner accepts", "unchanged": "Unchanged", "wallet": "Connected wallet", "expectedOwner": "Expected Owner after acceptance", "expectedPending": "pendingOwner after acceptance", "cleared": "Cleared", "gas": "Estimated Gas", "limit": "Transaction Gas Limit", "nonce": "Recheck before sending", "checkingPropose": "Checking ownership proposal…", "checkingAccept": "Checking ownership acceptance…", "busy": "Checking…", "readyPropose": "Pre-check Ownership Proposal", "readyAccept": "Pre-check Ownership Acceptance"}};
+function ownershipPreflightText() {
+  return ownershipPreflightMessages[window.IPTI18N?.getLang?.()] || ownershipPreflightMessages["zh-TW"];
+}
+function renderOwnershipPreflightSummary() {
+  if (!ownershipPreflightSummary) return;
+  const m = ownershipPreflightText(), v = ownershipPreflightSummary;
+  const escape = value => String(value).replace(/[&<>"']/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
+  const addr = (label, value) => label + ": <span class='addr'>" + escape(value) + "</span><br>";
+  const bold = (label, value) => label + ": <b>" + escape(value) + "</b><br>";
+  let html = "✓ " + m[v.action] + "<br>" + addr(m.owner, v.owner);
+  html += addr(m.pending, v.hasPending ? v.pendingOwner : m.none);
+  html += addr(v.action === "propose" ? m.candidate : m.wallet, v.candidate);
+  html += bold(m.paused, v.paused);
+  if (v.action === "propose") {
+    if (v.hasPending) html += "<b>" + m.warning + "</b><br>";
+    html += bold(m.unchangedLabel, m.unchanged);
+  } else {
+    html += addr(m.expectedOwner, v.candidate) + bold(m.expectedPending, m.cleared);
+  }
+  html += bold(m.gas, v.gas) + bold(m.limit, v.gasLimit) + "Nonce: <b>" + m.nonce + "</b>";
+  $("ownershipCheck").innerHTML = '<div data-ipt-ownership-summary="true" translate="no" class="notranslate">' + html + '</div>';
+}
+function renderOwnershipPreflightButtons() {
+  const m = ownershipPreflightText();
+  for (const [action, id, key] of [["propose", "preflightProposeOwnerBtn", "readyPropose"], ["accept", "preflightAcceptOwnerBtn", "readyAccept"]]) {
+    $(id).innerHTML = '<span translate="no" class="notranslate">' + (ownershipPreflightBusy === action ? m.busy : m[key]) + '</span>';
+  }
+}
+function renderOwnershipCheckingStatus(action) {
+  const m = ownershipPreflightText();
+  $("ownershipCheck").innerHTML = '<span data-ipt-ownership-checking="' + action + '" translate="no" class="notranslate">' + m[action === "propose" ? "checkingPropose" : "checkingAccept"] + '</span>';
+}
+window.addEventListener("ipt-language-change", () => {
+  renderOwnershipPreflightButtons();
+  if (ownershipPreflightSummary && $("ownershipCheck").querySelector("[data-ipt-ownership-summary]")) renderOwnershipPreflightSummary();
+  if (ownershipPreflightBusy && $("ownershipCheck").querySelector("[data-ipt-ownership-checking]")) renderOwnershipCheckingStatus(ownershipPreflightBusy);
+});
+renderOwnershipPreflightButtons();
+
 function resetOwnershipCheck(message = "請重新檢查管理權操作。") {
+  ownershipPreflightSummary = null;
   ownershipPreflightError = null;
   ownershipState.action = "";
   ownershipState.candidate = "";
@@ -3336,7 +3380,8 @@ async function readOwnershipState() {
 }
 
 async function verifyProposeOwnership() {
-  resetOwnershipCheck("正在檢查提出交接…");
+  resetOwnershipCheck();
+  renderOwnershipCheckingStatus("propose");
 
   if (!wc?.session || !account) {
     throw new Error("WalletConnect 尚未連線。");
@@ -3424,27 +3469,19 @@ async function verifyProposeOwnership() {
   const hasPending = !same(pendingOwner, ZERO_ADDRESS);
 
   $("ownershipCheck").className = "box ok";
-  $("ownershipCheck").innerHTML =
-    "✓ 提出交接前檢查通過<br>" +
-    "目前 Owner：<span class='addr'>" + owner + "</span><br>" +
-    "目前 pendingOwner：<span class='addr'>" +
-      (hasPending ? pendingOwner : "無") +
-    "</span><br>" +
-    "新候任管理者：<span class='addr'>" + candidate + "</span><br>" +
-    "目前 paused：<b>" + String(paused) + "</b><br>" +
-    (hasPending
-      ? "<b>注意：送出後會把目前 pendingOwner 改成新的候任管理者。</b><br>"
-      : "") +
-    "正式 Owner 在候任管理者接任前：<b>不變</b><br>" +
-    "預估 Gas：<b>" + gas.toString() + "</b><br>" +
-    "送出 Gas Limit：<b>" + gasLimit.toString() + "</b><br>" +
-    "Nonce：<b>送出前再核對</b>";
+  ownershipPreflightSummary = {
+    action: "propose", owner, pendingOwner, candidate: candidate,
+    hasPending: hasPending, paused: String(paused),
+    gas: gas.toString(), gasLimit: gasLimit.toString()
+  };
+  renderOwnershipPreflightSummary();
 
   $("sendProposeOwnerBtn").disabled = false;
 }
 
 async function verifyAcceptOwnership() {
-  resetOwnershipCheck("正在檢查接任管理權…");
+  resetOwnershipCheck();
+  renderOwnershipCheckingStatus("accept");
 
   if (!wc?.session || !account) {
     throw new Error("WalletConnect 尚未連線。");
@@ -3516,17 +3553,12 @@ async function verifyAcceptOwnership() {
   ownershipState.fingerprint = fp;
 
   $("ownershipCheck").className = "box ok";
-  $("ownershipCheck").innerHTML =
-    "✓ 接任管理權前檢查通過<br>" +
-    "目前 Owner：<span class='addr'>" + owner + "</span><br>" +
-    "pendingOwner：<span class='addr'>" + pendingOwner + "</span><br>" +
-    "目前連線錢包：<span class='addr'>" + account + "</span><br>" +
-    "目前 paused：<b>" + String(paused) + "</b><br>" +
-    "接任後預期 Owner：<span class='addr'>" + account + "</span><br>" +
-    "接任後 pendingOwner：<b>清空</b><br>" +
-    "預估 Gas：<b>" + gas.toString() + "</b><br>" +
-    "送出 Gas Limit：<b>" + gasLimit.toString() + "</b><br>" +
-    "Nonce：<b>送出前再核對</b>";
+  ownershipPreflightSummary = {
+    action: "accept", owner, pendingOwner, candidate: account,
+    hasPending: !same(pendingOwner, ZERO_ADDRESS), paused: String(paused),
+    gas: gas.toString(), gasLimit: gasLimit.toString()
+  };
+  renderOwnershipPreflightSummary();
 
   $("sendAcceptOwnerBtn").disabled = false;
 }
@@ -3535,13 +3567,15 @@ $("preflightProposeOwnerBtn").addEventListener("click", async () => {
   const btn = $("preflightProposeOwnerBtn");
   try {
     btn.disabled = true;
-    btn.textContent = "檢查中…";
+    ownershipPreflightBusy = "propose";
+    renderOwnershipPreflightButtons();
     await verifyProposeOwnership();
   } catch (e) {
     ownershipPreflightError = e?.message || String(e);
     renderOwnershipPreflightError();
   } finally {
-    btn.textContent = "先檢查提出交接";
+    ownershipPreflightBusy = "";
+    renderOwnershipPreflightButtons();
     await readOwnershipState();
   }
 });
@@ -3550,13 +3584,15 @@ $("preflightAcceptOwnerBtn").addEventListener("click", async () => {
   const btn = $("preflightAcceptOwnerBtn");
   try {
     btn.disabled = true;
-    btn.textContent = "檢查中…";
+    ownershipPreflightBusy = "accept";
+    renderOwnershipPreflightButtons();
     await verifyAcceptOwnership();
   } catch (e) {
     ownershipPreflightError = e?.message || String(e);
     renderOwnershipPreflightError();
   } finally {
-    btn.textContent = "先檢查接任管理權";
+    ownershipPreflightBusy = "";
+    renderOwnershipPreflightButtons();
     await readOwnershipState();
   }
 });
@@ -4284,7 +4320,7 @@ if ("serviceWorker" in navigator) {
 </script>
 
 <script>
-// HF52-C11: consistent section numbering in all supported languages.
+// HF52-C12: consistent section numbering in all supported languages.
 (() => {
   const titles = {"burnSection": ["⑥ 進階功能：永久銷毀 IPT", "⑥ 高级功能：永久销毁 IPT", "⑥ Advanced: Permanently Burn IPT"], "mintSection": ["⑦ 管理中心：發行 IPT", "⑦ 管理中心：发行 IPT", "⑦ Admin: Mint IPT"], "pauseSection": ["⑧ 管理中心：暫停 / 恢復", "⑧ 管理中心：暂停 / 恢复", "⑧ Admin: Pause / Unpause"], "ownershipSection": ["⑨ 管理中心：管理權交接", "⑨ 管理中心：管理权交接", "⑨ Admin: Ownership Transfer"], "contractVerifySection": ["⑩ 合約驗證資料", "⑩ 合约验证资料", "⑩ Contract Verification Data"]};
   function renderSectionTitles() {
