@@ -483,7 +483,7 @@ body.platform-admin.v41-route.route-ownership.show-ownership #securityGuardSecti
 </div>
 <header>
   <div class="v43-product-tag">正式鏈上操作模組</div><div class="v43-module-note">Ethereum Sepolia｜Trust Wallet / WalletConnect</div>
-  <div id="versionBadge" style="display:inline-block;margin-bottom:10px;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.78rem;font-weight:800;letter-spacing:.04em">V4.14.2 CORE | HF52-C8</div>
+  <div id="versionBadge" style="display:inline-block;margin-bottom:10px;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.78rem;font-weight:800;letter-spacing:.04em">V4.14.2 CORE | HF52-C9</div>
   <h1 id="v41RouteTitle">IPT 錢包中心</h1>
   <p id="v41RouteSubtitle">會員帳號 × 主錢包 × 鏈上錢包獨立驗證</p>
   <div class="v41-head-actions">
@@ -1454,7 +1454,33 @@ const transferState = {
   fingerprint: ""
 };
 
+// HF52-C9: localize the successful transfer pre-check summary only.
+let transferPreflightSummary = null;
+const transferPreflightSummaryMessages = {
+  "zh-TW": {passed:"轉帳前檢查通過",recipient:"收款地址",amount:"數量",balance:"目前餘額",gas:"預估 Gas",limit:"送出 Gas Limit",nonce:"送出前再核對"},
+  "zh-CN": {passed:"转账前检查通过",recipient:"收款地址",amount:"数量",balance:"当前余额",gas:"预估 Gas",limit:"提交 Gas Limit",nonce:"提交前再次核对"},
+  "en": {passed:"Transfer pre-check passed",recipient:"Recipient address",amount:"Amount",balance:"Current balance",gas:"Estimated Gas",limit:"Transaction Gas Limit",nonce:"Recheck before sending"}
+};
+function renderTransferPreflightSummary() {
+  if (!transferPreflightSummary) return;
+  const m = transferPreflightSummaryMessages[window.IPTI18N?.getLang?.()] || transferPreflightSummaryMessages["zh-TW"];
+  const v = transferPreflightSummary;
+  const escape = value => String(value).replace(/[&<>"']/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
+  $("transferCheck").innerHTML = '<div data-ipt-transfer-summary="true" translate="no" class="notranslate">' +
+    "✓ " + m.passed + "<br>" +
+    m.recipient + ": <span class='addr'>" + escape(v.to) + "</span><br>" +
+    m.amount + ": <b>" + escape(v.amount) + " IPT</b><br>" +
+    m.balance + ": <b>" + escape(v.balance) + " IPT</b><br>" +
+    m.gas + ": <b>" + escape(v.gas) + "</b><br>" +
+    m.limit + ": <b>" + escape(v.gasLimit) + "</b><br>" +
+    "Nonce: <b>" + m.nonce + "</b></div>";
+}
+window.addEventListener("ipt-language-change", () => {
+  if (transferPreflightSummary && $("transferCheck").querySelector("[data-ipt-transfer-summary]")) renderTransferPreflightSummary();
+});
+
 function resetTransferCheck(message = (window.IPTI18N?.getLang?.() === "en" ? "Please recheck the transfer." : window.IPTI18N?.getLang?.() === "zh-CN" ? "请重新检查转账。" : "請重新檢查轉帳。")) {
+  transferPreflightSummary = null;
   transferState.checked = false;
   transferState.to = "";
   transferState.amountRaw = 0n;
@@ -1721,14 +1747,11 @@ async function verifyTransferPreflight() {
   transferState.fingerprint = fp;
 
   $("transferCheck").className = "box ok";
-  $("transferCheck").innerHTML =
-    "✓ 轉帳前檢查通過<br>" +
-    "收款地址：<span class='addr'>" + to + "</span><br>" +
-    "數量：<b>" + fmtIPT6(amountRaw, 2) + " IPT</b><br>" +
-    "目前餘額：<b>" + fmtIPT6(bal, 2) + " IPT</b><br>" +
-    "預估 Gas：<b>" + gas.toString() + "</b><br>" +
-    "送出 Gas Limit：<b>" + gasLimit.toString() + "</b><br>" +
-    "Nonce：<b>送出前再核對</b>";
+  transferPreflightSummary = {
+    to, amount: fmtIPT6(amountRaw, 2), balance: fmtIPT6(bal, 2),
+    gas: gas.toString(), gasLimit: gasLimit.toString()
+  };
+  renderTransferPreflightSummary();
 
   $("sendTransferBtn").disabled = false;
 }
@@ -4203,7 +4226,7 @@ if ("serviceWorker" in navigator) {
 </script>
 
 <script>
-// HF52-C8: consistent section numbering in all supported languages.
+// HF52-C9: consistent section numbering in all supported languages.
 (() => {
   const titles = {"burnSection": ["⑥ 進階功能：永久銷毀 IPT", "⑥ 高级功能：永久销毁 IPT", "⑥ Advanced: Permanently Burn IPT"], "mintSection": ["⑦ 管理中心：發行 IPT", "⑦ 管理中心：发行 IPT", "⑦ Admin: Mint IPT"], "pauseSection": ["⑧ 管理中心：暫停 / 恢復", "⑧ 管理中心：暂停 / 恢复", "⑧ Admin: Pause / Unpause"], "ownershipSection": ["⑨ 管理中心：管理權交接", "⑨ 管理中心：管理权交接", "⑨ Admin: Ownership Transfer"], "contractVerifySection": ["⑩ 合約驗證資料", "⑩ 合约验证资料", "⑩ Contract Verification Data"]};
   function renderSectionTitles() {
