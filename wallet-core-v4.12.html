@@ -483,7 +483,7 @@ body.platform-admin.v41-route.route-ownership.show-ownership #securityGuardSecti
 </div>
 <header>
   <div class="v43-product-tag">正式鏈上操作模組</div><div class="v43-module-note">Ethereum Sepolia｜Trust Wallet / WalletConnect</div>
-  <div id="versionBadge" style="display:inline-block;margin-bottom:10px;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.78rem;font-weight:800;letter-spacing:.04em">V4.14.2 CORE | HF52-C7</div>
+  <div id="versionBadge" style="display:inline-block;margin-bottom:10px;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.78rem;font-weight:800;letter-spacing:.04em">V4.14.2 CORE | HF52-C8</div>
   <h1 id="v41RouteTitle">IPT 錢包中心</h1>
   <p id="v41RouteSubtitle">會員帳號 × 主錢包 × 鏈上錢包獨立驗證</p>
   <div class="v41-head-actions">
@@ -628,7 +628,7 @@ body.platform-admin.v41-route.route-ownership.show-ownership #securityGuardSecti
 </section>
 
 <section id="burnSection" class="advanced-feature">
-  <h2>⑤ 進階功能：永久銷毀 IPT</h2>
+  <h2 data-ipt-section-title="burnSection" translate="no" class="notranslate">⑥ 進階功能：永久銷毀 IPT</h2>
   <div class="box warn">
     銷毀會永久減少你的 IPT，且不能復原。只有確定要永久減少點數時才使用。
   </div>
@@ -676,7 +676,7 @@ body.platform-admin.v41-route.route-ownership.show-ownership #securityGuardSecti
 </section>
 
 <section id="mintSection" class="owner-only">
-  <h2>⑥ 管理中心：發行 IPT</h2>
+  <h2 data-ipt-section-title="mintSection" translate="no" class="notranslate">⑦ 管理中心：發行 IPT</h2>
   <div class="v42-risk">⚠️ Mint 會真正改變鏈上總供給量。請再次核對領取地址與發行數量；前置檢查通過後，也不要在驗收時送出真正交易。</div>
   <div class="compact-warning">
     僅管理者可發行 IPT。請確認領取地址與數量後，再由 Trust Wallet 核准。
@@ -700,7 +700,7 @@ body.platform-admin.v41-route.route-ownership.show-ownership #securityGuardSecti
 </section>
 
 <section id="pauseSection" class="owner-only">
-  <h2>⑦ 管理中心：暫停 / 恢復</h2>
+  <h2 data-ipt-section-title="pauseSection" translate="no" class="notranslate">⑧ 管理中心：暫停 / 恢復</h2>
   <div class="v42-risk">⚠️ Pause 會停止 IPT 轉帳；Unpause 會恢復交易。此操作會真正改變合約狀態，驗收時請只做前置檢查。</div>
   <div class="compact-warning">
     暫停會停止 IPT 交易；恢復後可繼續使用。此操作只限管理者。
@@ -723,7 +723,7 @@ body.platform-admin.v41-route.route-ownership.show-ownership #securityGuardSecti
 </section>
 
 <section id="ownershipSection" class="ownership-only">
-  <h2>⑧ 管理中心：管理權交接</h2>
+  <h2 data-ipt-section-title="ownershipSection" translate="no" class="notranslate">⑨ 管理中心：管理權交接</h2>
   <div class="v42-risk">⚠️ 管理權交接屬高風險操作。候任管理者地址必須逐字核對；提出交接後，還需要 pendingOwner 使用自己的錢包簽名接任。</div>
 
   <div class="compact-warning">
@@ -778,7 +778,7 @@ body.platform-admin.v41-route.route-ownership.show-ownership #securityGuardSecti
 </section>
 
 <section id="contractVerifySection" class="tech-only advanced-feature">
-  <h2>⑨ 合約驗證資料</h2>
+  <h2 data-ipt-section-title="contractVerifySection" translate="no" class="notranslate">⑩ 合約驗證資料</h2>
   <div id="contractData" class="box info">連線後按「讀取 IPT 鏈上資料」。</div>
 </section>
 
@@ -4202,6 +4202,23 @@ if ("serviceWorker" in navigator) {
 }
 </script>
 
+<script>
+// HF52-C8: consistent section numbering in all supported languages.
+(() => {
+  const titles = {"burnSection": ["⑥ 進階功能：永久銷毀 IPT", "⑥ 高级功能：永久销毁 IPT", "⑥ Advanced: Permanently Burn IPT"], "mintSection": ["⑦ 管理中心：發行 IPT", "⑦ 管理中心：发行 IPT", "⑦ Admin: Mint IPT"], "pauseSection": ["⑧ 管理中心：暫停 / 恢復", "⑧ 管理中心：暂停 / 恢复", "⑧ Admin: Pause / Unpause"], "ownershipSection": ["⑨ 管理中心：管理權交接", "⑨ 管理中心：管理权交接", "⑨ Admin: Ownership Transfer"], "contractVerifySection": ["⑩ 合約驗證資料", "⑩ 合约验证资料", "⑩ Contract Verification Data"]};
+  function renderSectionTitles() {
+    const lang = window.IPTI18N?.getLang?.() || "zh-TW";
+    const index = lang === "en" ? 2 : lang === "zh-CN" ? 1 : 0;
+    for (const [id, labels] of Object.entries(titles)) {
+      const title = document.querySelector('[data-ipt-section-title="' + id + '"]');
+      if (title) title.textContent = labels[index];
+    }
+  }
+  window.addEventListener("ipt-language-change", renderSectionTitles);
+  window.addEventListener("DOMContentLoaded", renderSectionTitles);
+  renderSectionTitles();
+})();
+</script>
 </body>
 </html>
 
