@@ -483,7 +483,7 @@ body.platform-admin.v41-route.route-ownership.show-ownership #securityGuardSecti
 </div>
 <header>
   <div class="v43-product-tag">正式鏈上操作模組</div><div class="v43-module-note">Ethereum Sepolia｜Trust Wallet / WalletConnect</div>
-  <div id="versionBadge" style="display:inline-block;margin-bottom:10px;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.78rem;font-weight:800;letter-spacing:.04em">V4.14.2 CORE | HF52-C6</div>
+  <div id="versionBadge" style="display:inline-block;margin-bottom:10px;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.78rem;font-weight:800;letter-spacing:.04em">V4.14.2 CORE | HF52-C7</div>
   <h1 id="v41RouteTitle">IPT 錢包中心</h1>
   <p id="v41RouteSubtitle">會員帳號 × 主錢包 × 鏈上錢包獨立驗證</p>
   <div class="v41-head-actions">
@@ -1906,7 +1906,33 @@ const burnState = {
   fingerprint: ""
 };
 
+// HF52-C7: localize Burn pre-check errors without changing validation.
+let burnPreflightError = null;
+const burnPreflightErrorMessages = [["目前錢包不是此會員已驗證的主錢包，不能執行 Burn。", "当前钱包不是此会员已验证的主钱包，不能执行 Burn。", "The current wallet is not this member’s verified primary wallet and cannot burn IPT."], ["WalletConnect 尚未連線。", "WalletConnect 尚未连线。", "WalletConnect is not connected."], ["目前不是 Ethereum Sepolia。", "当前不是 Ethereum Sepolia。", "The current network is not Ethereum Sepolia."], ["數量格式錯誤；IPT 最多 2 位小數。", "数量格式错误；IPT 最多支持 2 位小数。", "Invalid amount. IPT supports up to 2 decimal places."], ["銷毀數量必須大於 0。", "销毁数量必须大于 0。", "The burn amount must be greater than 0."], ["IPT 合約不存在。", "IPT 合约不存在。", "The IPT contract does not exist."], ["IPT 合約目前已暫停。", "IPT 合约当前已暂停。", "The IPT contract is currently paused."], ["防重複保護：相同數量的 Burn 在 5 分鐘內已嘗試送出。請先重新讀取餘額與總供給量。", "防重复保护：相同数量的 Burn 在 5 分钟内已尝试提交。请先重新读取余额与总供应量。", "Duplicate protection: a Burn with the same amount was attempted within 5 minutes. Reload the balance and total supply first."], ["Burn 前檢查 逾時", "Burn 前检查超时", "Burn pre-check timed out."], ["Burn 交易模擬 逾時", "Burn 交易模拟超时", "Burn transaction simulation timed out."], ["IPT 餘額不足。現在餘額：", "IPT 余额不足。当前余额：", "Insufficient IPT balance. Current balance: "]];
+function burnPreflightErrorText(message, lang) {
+  const index = lang === "en" ? 2 : lang === "zh-CN" ? 1 : 0;
+  const row = burnPreflightErrorMessages.find(row => message === row[0]);
+  if (row) return row[index];
+  for (const prefix of burnPreflightErrorMessages.slice(-1)) {
+    if (message.startsWith(prefix[0])) return prefix[index] + message.slice(prefix[0].length);
+  }
+  return message;
+}
+function renderBurnPreflightError() {
+  if (burnPreflightError === null) return;
+  const lang = window.IPTI18N?.getLang?.() || "zh-TW";
+  const prefix = lang === "en" ? "Check failed: " : lang === "zh-CN" ? "检查失败：" : "檢查失敗：";
+  const text = prefix + burnPreflightErrorText(burnPreflightError, lang);
+  const escaped = text.replace(/[&<>"']/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
+  $("burnCheck").className = "box err";
+  $("burnCheck").innerHTML = '<span data-ipt-burn-error="true" translate="no" class="notranslate">' + escaped + '</span>';
+}
+window.addEventListener("ipt-language-change", () => {
+  if (burnPreflightError !== null && $("burnCheck").querySelector("[data-ipt-burn-error]")) renderBurnPreflightError();
+});
+
 function resetBurnCheck(message = "請重新檢查 Burn。") {
+  burnPreflightError = null;
   burnState.checked = false;
   burnState.amountRaw = 0n;
   burnState.data = "";
@@ -2065,9 +2091,8 @@ $("preflightBurnBtn").addEventListener("click", async () => {
     btn.textContent = "檢查中…";
     await verifyBurnPreflight();
   } catch (e) {
-    $("burnCheck").className = "box err";
-    $("burnCheck").textContent =
-      "檢查失敗：" + (e?.message || String(e));
+    burnPreflightError = e?.message || String(e);
+    renderBurnPreflightError();
   } finally {
     btn.disabled = false;
     btn.textContent = "先檢查 Burn";
