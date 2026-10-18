@@ -483,7 +483,7 @@ body.platform-admin.v41-route.route-ownership.show-ownership #securityGuardSecti
 </div>
 <header>
   <div class="v43-product-tag">正式鏈上操作模組</div><div class="v43-module-note">Ethereum Sepolia｜Trust Wallet / WalletConnect</div>
-  <div id="versionBadge" style="display:inline-block;margin-bottom:10px;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.78rem;font-weight:800;letter-spacing:.04em">V4.14.2 CORE | HF52-C9</div>
+  <div id="versionBadge" style="display:inline-block;margin-bottom:10px;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.78rem;font-weight:800;letter-spacing:.04em">V4.14.2 CORE | HF52-C10</div>
   <h1 id="v41RouteTitle">IPT 錢包中心</h1>
   <p id="v41RouteSubtitle">會員帳號 × 主錢包 × 鏈上錢包獨立驗證</p>
   <div class="v41-head-actions">
@@ -1454,7 +1454,30 @@ const transferState = {
   fingerprint: ""
 };
 
-// HF52-C9: localize the successful transfer pre-check summary only.
+// HF52-C10: localize transfer pre-check progress and button labels.
+let transferPreflightBusy = false;
+const transferPreflightProgressMessages = {
+  "zh-TW": {checking:"正在檢查…",buttonBusy:"檢查中…",buttonReady:"先檢查轉帳"},
+  "zh-CN": {checking:"正在检查…",buttonBusy:"检查中…",buttonReady:"先检查转账"},
+  "en": {checking:"Checking…",buttonBusy:"Checking…",buttonReady:"Pre-check Transfer"}
+};
+function transferPreflightProgressText() {
+  return transferPreflightProgressMessages[window.IPTI18N?.getLang?.()] || transferPreflightProgressMessages["zh-TW"];
+}
+function renderTransferPreflightButton() {
+  const m = transferPreflightProgressText();
+  $("preflightTransferBtn").innerHTML = '<span translate="no" class="notranslate">' + (transferPreflightBusy ? m.buttonBusy : m.buttonReady) + '</span>';
+}
+function renderTransferCheckingStatus() {
+  $("transferCheck").innerHTML = '<span data-ipt-transfer-checking="true" translate="no" class="notranslate">' + transferPreflightProgressText().checking + '</span>';
+}
+window.addEventListener("ipt-language-change", () => {
+  renderTransferPreflightButton();
+  if (transferPreflightBusy && $("transferCheck").querySelector("[data-ipt-transfer-checking]")) renderTransferCheckingStatus();
+});
+renderTransferPreflightButton();
+
+// HF52-C10: localize the successful transfer pre-check summary only.
 let transferPreflightSummary = null;
 const transferPreflightSummaryMessages = {
   "zh-TW": {passed:"轉帳前檢查通過",recipient:"收款地址",amount:"數量",balance:"目前餘額",gas:"預估 Gas",limit:"送出 Gas Limit",nonce:"送出前再核對"},
@@ -1639,7 +1662,8 @@ async function latestGasPriceHex() {
 }
 
 async function verifyTransferPreflight() {
-  resetTransferCheck("正在檢查…");
+  resetTransferCheck(transferPreflightProgressText().checking);
+  renderTransferCheckingStatus();
 
   await iptRefreshMemberWalletState();
   if(!iptMemberWalletStateLoaded){
@@ -1760,7 +1784,8 @@ $("preflightTransferBtn").addEventListener("click", async () => {
   const btn = $("preflightTransferBtn");
   try {
     btn.disabled = true;
-    btn.textContent = "檢查中…";
+    transferPreflightBusy = true;
+    renderTransferPreflightButton();
     await verifyTransferPreflight();
   } catch (e) {
     $("transferCheck").className = "box err";
@@ -1768,7 +1793,8 @@ $("preflightTransferBtn").addEventListener("click", async () => {
       "檢查失敗：" + (e?.message || String(e));
   } finally {
     btn.disabled = false;
-    btn.textContent = "先檢查轉帳";
+    transferPreflightBusy = false;
+    renderTransferPreflightButton();
   }
 });
 
@@ -4226,7 +4252,7 @@ if ("serviceWorker" in navigator) {
 </script>
 
 <script>
-// HF52-C9: consistent section numbering in all supported languages.
+// HF52-C10: consistent section numbering in all supported languages.
 (() => {
   const titles = {"burnSection": ["⑥ 進階功能：永久銷毀 IPT", "⑥ 高级功能：永久销毁 IPT", "⑥ Advanced: Permanently Burn IPT"], "mintSection": ["⑦ 管理中心：發行 IPT", "⑦ 管理中心：发行 IPT", "⑦ Admin: Mint IPT"], "pauseSection": ["⑧ 管理中心：暫停 / 恢復", "⑧ 管理中心：暂停 / 恢复", "⑧ Admin: Pause / Unpause"], "ownershipSection": ["⑨ 管理中心：管理權交接", "⑨ 管理中心：管理权交接", "⑨ Admin: Ownership Transfer"], "contractVerifySection": ["⑩ 合約驗證資料", "⑩ 合约验证资料", "⑩ Contract Verification Data"]};
   function renderSectionTitles() {
