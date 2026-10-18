@@ -483,7 +483,7 @@ body.platform-admin.v41-route.route-ownership.show-ownership #securityGuardSecti
 </div>
 <header>
   <div class="v43-product-tag">正式鏈上操作模組</div><div class="v43-module-note">Ethereum Sepolia｜Trust Wallet / WalletConnect</div>
-  <div id="versionBadge" style="display:inline-block;margin-bottom:10px;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.78rem;font-weight:800;letter-spacing:.04em">V4.14.2 CORE | HF52-C10</div>
+  <div id="versionBadge" style="display:inline-block;margin-bottom:10px;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.78rem;font-weight:800;letter-spacing:.04em">V4.14.2 CORE | HF52-C11</div>
   <h1 id="v41RouteTitle">IPT 錢包中心</h1>
   <p id="v41RouteSubtitle">會員帳號 × 主錢包 × 鏈上錢包獨立驗證</p>
   <div class="v41-head-actions">
@@ -1454,7 +1454,7 @@ const transferState = {
   fingerprint: ""
 };
 
-// HF52-C10: localize transfer pre-check progress and button labels.
+// HF52-C11: localize transfer pre-check progress and button labels.
 let transferPreflightBusy = false;
 const transferPreflightProgressMessages = {
   "zh-TW": {checking:"正在檢查…",buttonBusy:"檢查中…",buttonReady:"先檢查轉帳"},
@@ -1477,7 +1477,7 @@ window.addEventListener("ipt-language-change", () => {
 });
 renderTransferPreflightButton();
 
-// HF52-C10: localize the successful transfer pre-check summary only.
+// HF52-C11: localize the successful transfer pre-check summary only.
 let transferPreflightSummary = null;
 const transferPreflightSummaryMessages = {
   "zh-TW": {passed:"轉帳前檢查通過",recipient:"收款地址",amount:"數量",balance:"目前餘額",gas:"預估 Gas",limit:"送出 Gas Limit",nonce:"送出前再核對"},
@@ -2322,7 +2322,40 @@ window.addEventListener("ipt-language-change", () => {
   if (mintPreflightError !== null && $("mintCheck").querySelector("[data-ipt-mint-error]")) renderMintPreflightError();
 });
 
+// HF52-C11: localize Mint pre-check summary and progress only.
+let mintPreflightSummary = null;
+let mintPreflightBusy = false;
+const mintPreflightSummaryMessages = {"zh-TW": {"passed": "Mint 前檢查通過", "owner": "目前 Owner", "recipient": "領取地址", "amount": "發行數量", "balance": "領取地址目前餘額", "supply": "目前總供給", "remaining": "目前剩餘可發行", "expectedBalance": "Mint 後預期領取餘額", "expectedSupply": "Mint 後預期總供給", "expectedRemaining": "Mint 後預期剩餘可發行", "gas": "預估 Gas", "limit": "送出 Gas Limit", "nonce": "送出前再核對", "checking": "正在檢查 Mint…", "buttonBusy": "檢查中…", "buttonReady": "先檢查 Mint"}, "zh-CN": {"passed": "Mint 前检查通过", "owner": "当前 Owner", "recipient": "领取地址", "amount": "发行数量", "balance": "领取地址当前余额", "supply": "当前总供应量", "remaining": "当前剩余可发行量", "expectedBalance": "Mint 后预计领取余额", "expectedSupply": "Mint 后预计总供应量", "expectedRemaining": "Mint 后预计剩余可发行量", "gas": "预估 Gas", "limit": "提交 Gas Limit", "nonce": "提交前再次核对", "checking": "正在检查 Mint…", "buttonBusy": "检查中…", "buttonReady": "先检查 Mint"}, "en": {"passed": "Mint pre-check passed", "owner": "Current Owner", "recipient": "Recipient address", "amount": "Mint amount", "balance": "Current recipient balance", "supply": "Current total supply", "remaining": "Current remaining mintable supply", "expectedBalance": "Expected recipient balance after mint", "expectedSupply": "Expected total supply after mint", "expectedRemaining": "Expected remaining mintable supply after mint", "gas": "Estimated Gas", "limit": "Transaction Gas Limit", "nonce": "Recheck before sending", "checking": "Checking Mint…", "buttonBusy": "Checking…", "buttonReady": "Pre-check Mint"}};
+function mintPreflightSummaryText() {
+  return mintPreflightSummaryMessages[window.IPTI18N?.getLang?.()] || mintPreflightSummaryMessages["zh-TW"];
+}
+function renderMintPreflightSummary() {
+  if (!mintPreflightSummary) return;
+  const m = mintPreflightSummaryText();
+  const v = mintPreflightSummary;
+  const escape = value => String(value).replace(/[&<>"']/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
+  let html = "✓ " + m.passed + "<br>";
+  for (const key of ["owner", "recipient"]) html += m[key] + ": <span class='addr'>" + escape(v[key]) + "</span><br>";
+  for (const key of ["amount", "balance", "supply", "remaining", "expectedBalance", "expectedSupply", "expectedRemaining"]) html += m[key] + ": <b>" + escape(v[key]) + " IPT</b><br>";
+  html += m.gas + ": <b>" + escape(v.gas) + "</b><br>" + m.limit + ": <b>" + escape(v.gasLimit) + "</b><br>" + "Nonce: <b>" + m.nonce + "</b>";
+  $("mintCheck").innerHTML = '<div data-ipt-mint-summary="true" translate="no" class="notranslate">' + html + '</div>';
+}
+function renderMintPreflightButton() {
+  const m = mintPreflightSummaryText();
+  $("preflightMintBtn").innerHTML = '<span translate="no" class="notranslate">' + (mintPreflightBusy ? m.buttonBusy : m.buttonReady) + '</span>';
+}
+function renderMintCheckingStatus() {
+  $("mintCheck").innerHTML = '<span data-ipt-mint-checking="true" translate="no" class="notranslate">' + mintPreflightSummaryText().checking + '</span>';
+}
+window.addEventListener("ipt-language-change", () => {
+  renderMintPreflightButton();
+  if (mintPreflightSummary && $("mintCheck").querySelector("[data-ipt-mint-summary]")) renderMintPreflightSummary();
+  if (mintPreflightBusy && $("mintCheck").querySelector("[data-ipt-mint-checking]")) renderMintCheckingStatus();
+});
+renderMintPreflightButton();
+
 function resetMintCheck(message = "請重新檢查 Mint。") {
+  mintPreflightSummary = null;
   mintPreflightError = null;
   mintState.checked = false;
   mintState.to = "";
@@ -2376,7 +2409,8 @@ function clearMintGuard(fp) {
 }
 
 async function verifyMintPreflight() {
-  resetMintCheck("正在檢查 Mint…");
+  resetMintCheck(mintPreflightSummaryText().checking);
+  renderMintCheckingStatus();
 
   if (!wc?.session || !account) {
     throw new Error("WalletConnect 尚未連線。");
@@ -2477,20 +2511,16 @@ async function verifyMintPreflight() {
   mintState.fingerprint = fp;
 
   $("mintCheck").className = "box ok";
-  $("mintCheck").innerHTML =
-    "✓ Mint 前檢查通過<br>" +
-    "目前 Owner：<span class='addr'>" + owner + "</span><br>" +
-    "領取地址：<span class='addr'>" + to + "</span><br>" +
-    "發行數量：<b>" + fmtIPT6(amountRaw, 2) + " IPT</b><br>" +
-    "領取地址目前餘額：<b>" + fmtIPT6(recipientBalance, 2) + " IPT</b><br>" +
-    "目前總供給：<b>" + fmtIPT6(supply, 2) + " IPT</b><br>" +
-    "目前剩餘可發行：<b>" + fmtIPT6(remaining, 2) + " IPT</b><br>" +
-    "Mint 後預期領取餘額：<b>" + fmtIPT6(recipientBalance + amountRaw, 2) + " IPT</b><br>" +
-    "Mint 後預期總供給：<b>" + fmtIPT6(supply + amountRaw, 2) + " IPT</b><br>" +
-    "Mint 後預期剩餘可發行：<b>" + fmtIPT6(remaining - amountRaw, 2) + " IPT</b><br>" +
-    "預估 Gas：<b>" + gas.toString() + "</b><br>" +
-    "送出 Gas Limit：<b>" + gasLimit.toString() + "</b><br>" +
-    "Nonce：<b>送出前再核對</b>";
+  mintPreflightSummary = {
+    owner, recipient: to, amount: fmtIPT6(amountRaw, 2),
+    balance: fmtIPT6(recipientBalance, 2), supply: fmtIPT6(supply, 2),
+    remaining: fmtIPT6(remaining, 2),
+    expectedBalance: fmtIPT6(recipientBalance + amountRaw, 2),
+    expectedSupply: fmtIPT6(supply + amountRaw, 2),
+    expectedRemaining: fmtIPT6(remaining - amountRaw, 2),
+    gas: gas.toString(), gasLimit: gasLimit.toString()
+  };
+  renderMintPreflightSummary();
 
   $("sendMintBtn").disabled = false;
 }
@@ -2500,14 +2530,16 @@ $("preflightMintBtn").addEventListener("click", async () => {
 
   try {
     btn.disabled = true;
-    btn.textContent = "檢查中…";
+    mintPreflightBusy = true;
+    renderMintPreflightButton();
     await verifyMintPreflight();
   } catch (e) {
     mintPreflightError = e?.message || String(e);
     renderMintPreflightError();
   } finally {
     btn.disabled = false;
-    btn.textContent = "先檢查 Mint";
+    mintPreflightBusy = false;
+    renderMintPreflightButton();
   }
 });
 
@@ -4252,7 +4284,7 @@ if ("serviceWorker" in navigator) {
 </script>
 
 <script>
-// HF52-C10: consistent section numbering in all supported languages.
+// HF52-C11: consistent section numbering in all supported languages.
 (() => {
   const titles = {"burnSection": ["⑥ 進階功能：永久銷毀 IPT", "⑥ 高级功能：永久销毁 IPT", "⑥ Advanced: Permanently Burn IPT"], "mintSection": ["⑦ 管理中心：發行 IPT", "⑦ 管理中心：发行 IPT", "⑦ Admin: Mint IPT"], "pauseSection": ["⑧ 管理中心：暫停 / 恢復", "⑧ 管理中心：暂停 / 恢复", "⑧ Admin: Pause / Unpause"], "ownershipSection": ["⑨ 管理中心：管理權交接", "⑨ 管理中心：管理权交接", "⑨ Admin: Ownership Transfer"], "contractVerifySection": ["⑩ 合約驗證資料", "⑩ 合约验证资料", "⑩ Contract Verification Data"]};
   function renderSectionTitles() {
