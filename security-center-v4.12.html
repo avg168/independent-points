@@ -177,6 +177,14 @@ input{
     if(x==="zh-CN") return zhCN;
     return zhTW;
   }
+
+  // Translate only known system defaults; custom wallet labels remain user data.
+  function walletLabel(label){
+    if(label==="我的錢包"||label==="我的钱包") return L("我的錢包","我的钱包","My Wallet");
+    if(label==="主要 Sepolia 錢包"||label==="主要 Sepolia 钱包") return L("主要 Sepolia 錢包","主要 Sepolia 钱包","Primary Sepolia Wallet");
+    return label||L("錢包","钱包","Wallet");
+  }
+
   let members=[];
   let summary={};
 
@@ -388,7 +396,7 @@ input{
         </div>
         <h2 style="margin-top:20px">錢包驗證</h2>
         ${wallets.length?wallets.map(w=>`<div class="detail-box" style="margin-bottom:8px">
-          <div class="k">${w.label?`<span data-raw-data="1">${esc(w.label)}</span>`:esc(tr("錢包"))}${w.is_primary?"｜主錢包":""}</div>
+          <div class="k" data-raw-data="1">${esc(walletLabel(w.label))}${w.is_primary?L("｜主錢包","｜主钱包"," | Primary Wallet"):""}</div>
           <div class="v"><span data-raw-data="1">${esc(w.wallet_address)}</span><br>${w.verified_at?esc(L("已驗證：","已验证：","Verified: "))+esc(time(w.verified_at)):esc(L("未驗證","未验证","Unverified"))}</div>
         </div>`).join(""):'<div class="detail-box"><div class="v">尚未綁定錢包</div></div>'}
         <h2 style="margin-top:20px">最近管理稽核</h2>

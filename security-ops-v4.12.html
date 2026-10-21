@@ -46,7 +46,7 @@ button.danger{background:#a83b45;color:#fff;border-color:#a83b45}
 <main>
   <section class="panel">
     <h2>管理員驗證</h2>
-    <div data-raw-data="1" id="adminStatus" class="status">正在確認管理員權限…</div>
+    <div data-raw-data="1" id="adminStatus" class="status"></div>
     <div class="actions" style="margin-top:10px">
       <button id="homeBtn" class="light" type="button">返回首頁</button>
       <button id="refreshBtn" class="primary" type="button">重新檢查</button>
@@ -108,6 +108,11 @@ button.danger{background:#a83b45;color:#fff;border-color:#a83b45}
 /* V4.14.2 Production Seal */
 (() => {
   const tr=(s)=>window.IPTI18N?.t?window.IPTI18N.t(s):s;
+  function L(zhTW,zhCN,en){
+    let language="zh-TW";
+    try{language=window.IPTI18N?.getLang?.()||localStorage.getItem("ipt_language")||language}catch(_){}
+    return language==="en"?en:language==="zh-CN"?zhCN:zhTW;
+  }
   const tf=(key,values)=>tr(key).replace(/\{(\w+)\}/g,(_,name)=>String(values[name]??""));
   const SUPABASE_URL="https://uccexvgqmoxhgykkjdcy.supabase.co";
   const SUPABASE_KEY="sb_publishable_FBsN1DYTQMv2_bWhpbXHAA_qdAq7ri7";
@@ -163,7 +168,7 @@ button.danger{background:#a83b45;color:#fff;border-color:#a83b45}
 
   async function load(){
     $("adminStatus").className="status";
-    $("adminStatus").textContent=tr("正在確認管理員權限…");
+    $("adminStatus").textContent=L("正在確認管理員權限…","正在确认管理员权限…","Checking administrator permissions…");
     try{
       const data=await invoke("admin-members",{query:""});
       const members=data.members||[];
@@ -276,6 +281,7 @@ button.danger{background:#a83b45;color:#fff;border-color:#a83b45}
   $("updateCenterBtn").addEventListener("click",()=>location.href="./update-center-v4.12.html?v=4142hf43");
   $("systemInfoBtn").addEventListener("click",()=>location.href="./system-info-v4.12.html?v=4142hf43");
   $("eventCenterBtn")?.addEventListener("click",()=>location.href="./event-center-v4.12.html?v=4142hf43");
+  window.addEventListener("ipt-language-change",()=>{if($("adminStatus").className==="status") $("adminStatus").textContent=L("正在確認管理員權限…","正在确认管理员权限…","Checking administrator permissions…");});
   load();
 })();
 </script>

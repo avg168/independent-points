@@ -403,6 +403,14 @@ button{
     return zhTW;
   }
 
+  // Translate only known system defaults; custom wallet labels remain user data.
+  function walletLabel(label){
+    if(label==="我的錢包"||label==="我的钱包") return L("我的錢包","我的钱包","My Wallet");
+    if(label==="主要 Sepolia 錢包"||label==="主要 Sepolia 钱包") return L("主要 Sepolia 錢包","主要 Sepolia 钱包","Primary Sepolia Wallet");
+    return label||L("錢包","钱包","Wallet");
+  }
+
+
   const tr=s=>window.IPTI18N?.t?.(s)||s;
   const tf=(key,values)=>tr(key).replace(/\{(\w+)\}/g,(_,name)=>String(values[name]??""));
   let currentDetailId=null;
@@ -537,7 +545,7 @@ button{
         <h2 style="margin-top:20px">${L("錢包","钱包","Wallet")}</h2>
         ${wallets.length?wallets.map(w=>`<div class="detail-box" style="margin-bottom:8px">
           <div class="k" data-raw-data="1">${
-            esc(w.label||L("錢包","钱包","Wallet"))
+            esc(walletLabel(w.label))
           }${
             w.is_primary?L("｜主錢包","｜主钱包"," | Primary Wallet"):""
           }</div>

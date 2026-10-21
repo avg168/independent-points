@@ -121,7 +121,7 @@ pre{
       <summary id="diagSummary" data-ipt-i18n-skip="1" style="cursor:pointer;font-weight:850;color:#17365d;font-size:1.12rem">
         進階診斷資訊
       </summary>
-      <pre id="diag" style="margin-top:12px">尚未產生。</pre>
+      <pre data-raw-data="1" id="diag" style="margin-top:12px"></pre>
       <button id="copyDiagBtn" data-ipt-i18n-skip="1" class="light" type="button" style="width:100%">複製診斷資訊</button>
     </details>
   </section>
@@ -157,10 +157,28 @@ pre{
     return zhTW;
   }
 
+  // Localize explanatory release text in the display/export copy only.
+  function renderDiagnostics(){
+    const display=JSON.parse(JSON.stringify(diag));
+    const steps=[
+      ["若 V4.14.2 前端異常，先重新載入並清除 IPT 快取。","若 V4.14.2 前端异常，先重新加载并清除 IPT 缓存。","If the V4.14.2 frontend fails, reload it and clear the IPT cache first."],
+      ["仍異常時，前端可回復 V4.12.4；已完成的 V4.14.x Supabase migrations 與鏈上交易紀錄不得回滾或刪除。","仍异常时，前端可恢复 V4.12.4；已完成的 V4.14.x Supabase migrations 与链上交易记录不得回滚或删除。","If the issue persists, restore the V4.12.4 frontend. Do not roll back or delete completed V4.14.x Supabase migrations or on-chain transaction records."],
+      ["回復前端版本時不修改 Supabase 會員資產、IPT 合約、Owner、pendingOwner、paused 或既有 tx hash。","恢复前端版本时不修改 Supabase 会员资产、IPT 合约、Owner、pendingOwner、paused 或现有 tx hash。","When restoring the frontend, do not modify Supabase member assets, the IPT contract, Owner, pendingOwner, paused, or existing tx hashes."]
+    ];
+    if(Array.isArray(display.release?.rollback_steps)){
+      display.release.rollback_steps=display.release.rollback_steps.map(step=>{
+        const known=steps.find(values=>values[0]===step);
+        return known?L(...known):step;
+      });
+    }
+    $("diag").textContent=JSON.stringify(display,null,2);
+  }
+
   const tr=s=>window.IPTI18N?.t?.(s)||s;
   const tf=(key,values)=>tr(key).replace(/\{(\w+)\}/g,(_,name)=>String(values[name]??""));
 
   function updateDiagnosticsLabel(){
+    if(!$("diag").textContent) $("diag").textContent=L("尚未產生。","尚未生成。","Not generated yet.");
     const s=$("diagSummary");
     if(s){
       s.textContent=L(
@@ -395,7 +413,7 @@ pre{
       diag.checks.contract={ok:false,error:String(e)};
     }
 
-    $("diag").textContent=JSON.stringify(diag,null,2);
+    renderDiagnostics();
   }
 
   let healthPromise=null;
@@ -459,7 +477,8 @@ pre{
 
   window.addEventListener("ipt-language-change",()=>{
     updateDiagnosticsLabel();
-    checkRelease();
+    renderDiagnostics();
+    checkRelease().finally(renderDiagnostics);
     checkSw();
   });
 

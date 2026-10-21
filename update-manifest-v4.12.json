@@ -76,8 +76,8 @@
     },
     {
       "name": "admin-members-v4.12.html",
-      "bytes": 22503,
-      "sha256": "6bd1fa66597c4ed22ea48842be4a5ee7b66b0a34bb47a52e7000623ab368b036"
+      "bytes": 23429,
+      "sha256": "62e9448771b791cd311ec13178ccf3ad298469dc2d6870dfc7e7a0f20b93e2e5"
     },
     {
       "name": "asset-center-v4.12.html",
@@ -111,8 +111,8 @@
     },
     {
       "name": "event-center-v4.12.html",
-      "bytes": 28094,
-      "sha256": "7fede4f1fba90f0757bdeb332b7937f664939ddcfa9e351b0fb3d65e0db974d7"
+      "bytes": 29894,
+      "sha256": "e3d100a14f4e62f29527b034ad9e6c7892606140a902de009f43062d5ac81cb5"
     },
     {
       "name": "i18n-v4.10.js",
@@ -146,8 +146,8 @@
     },
     {
       "name": "maintenance-v4.12.html",
-      "bytes": 19380,
-      "sha256": "2bf183ffa3266f9831358e600729782c939184e9f0f0d5d08f75e3b12d7b2ce5"
+      "bytes": 21294,
+      "sha256": "f205d009f6f8c9161cdd86b245eebd012c4065fab89f9ec39388ab2133895d8d"
     },
     {
       "name": "manifest.webmanifest",
@@ -186,18 +186,18 @@
     },
     {
       "name": "security-center-v4.12.html",
-      "bytes": 21316,
-      "sha256": "aab586140833b027bc38032c0472c6171e69f425070942750dd21e69275be75a"
+      "bytes": 22528,
+      "sha256": "050543aabc2a6e061e3389cbb4c1bd71955a3a08fb06eb13b7d8c6cbd6251a40"
     },
     {
       "name": "security-ops-v4.12.html",
-      "bytes": 15393,
-      "sha256": "54d680ff0d649fddd54524a0740f9c24d47cb6b6020dd5185213fcdbdfc1caa3"
+      "bytes": 16335,
+      "sha256": "5b320b569b26bf26bb4b8b5c2d41f3ef3b909d2521b76aa7fa82e583c8da9517"
     },
     {
       "name": "service-worker.js",
-      "bytes": 1730,
-      "sha256": "6b984b9079843960e03bdcb2702cbdaf546d8d47a90caebe666fcbdc4d7077a1"
+      "bytes": 1684,
+      "sha256": "3b90fb6acfd6aa15f1aba9beae6a2be2001f8a85a4d4f034d317cf4f654bbe48"
     },
     {
       "name": "system-info-v4.12.html",

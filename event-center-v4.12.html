@@ -63,7 +63,7 @@ button.warn{background:#a46a08;color:#fff;border-color:#a46a08}button.danger{bac
 <main>
   <section class="panel">
     <h2>管理員驗證</h2>
-    <div id="adminStatus" class="status" data-raw-data="1">正在確認管理員身分…</div>
+    <div id="adminStatus" class="status" data-raw-data="1"></div>
     <div class="actions" style="margin-top:10px">
       <button id="homeBtn" class="light" type="button">返回首頁</button>
       <button id="refreshBtn" class="primary" type="button">重新整理事件</button>
@@ -353,7 +353,7 @@ button.warn{background:#a46a08;color:#fff;border-color:#a46a08}button.danger{bac
   }
 
   async function load(){
-    $("adminStatus").className="status";$("adminStatus").textContent=tr("正在確認管理員身分…");
+    $("adminStatus").className="status";$("adminStatus").textContent=L("正在確認管理員身分…","正在确认管理员身份…","Checking administrator identity…");
     try{
       const data=await invoke("admin-members",{query:""});members=data.members||[];selfMember=members.find(x=>x.is_self);
       if(!selfMember||selfMember.role!=="admin")throw new Error(tr("此頁只開放管理員。"));
@@ -439,6 +439,7 @@ button.warn{background:#a46a08;color:#fff;border-color:#a46a08}button.danger{bac
   $("maintenanceBtn").addEventListener("click",()=>location.href="./maintenance-v4.12.html?v=4142hf43");
   $("updateCenterBtn").addEventListener("click",()=>location.href="./update-center-v4.12.html?v=4142hf43");
   window.addEventListener("ipt-language-change",()=>{render();updateNotifyStatus();if(selfMember?.role==="admin"&&$("adminStatus").className==="status ok"){$("adminStatus").textContent=L(`管理員驗證通過：${selfMember.member_number}｜${selfMember.display_name}`,`管理员验证通过：${selfMember.member_number}｜${selfMember.display_name}`,`Admin verified: ${selfMember.member_number} | ${selfMember.display_name}`)}});
+  window.addEventListener("ipt-language-change",()=>{if($("adminStatus").className==="status") $("adminStatus").textContent=L("正在確認管理員身分…","正在确认管理员身份…","Checking administrator identity…");});
   updateNotifyStatus();load();
 })();
 </script>
