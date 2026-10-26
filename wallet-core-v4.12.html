@@ -936,6 +936,9 @@ function iptRenderMemberWalletState(){
     }else if(!iptMemberPrimaryVerified){
       memberAssetBalanceEl.textContent="尚未確認";
       memberAssetNoteEl.textContent="會員主錢包尚未完成驗證，暫不認定鏈上 IPT 為會員資產。";
+    }else if(!account){
+      memberAssetBalanceEl.textContent="請以會員主錢包讀取";
+      memberAssetNoteEl.textContent="請連接此會員已驗證的主錢包。";
     }else if(matched){
       memberAssetBalanceEl.textContent=document.getElementById("balance")?.textContent || "讀取鏈上資料後顯示";
       memberAssetNoteEl.textContent="目前連線錢包與會員已驗證主錢包一致。";
