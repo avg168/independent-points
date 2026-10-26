@@ -228,7 +228,7 @@
 
     // Preserve visual alert/status prefixes while translating the complete sentence.
     // Example: "⚠️ 管理權交接..." -> "⚠️ Ownership handover..."
-    const prefixMatch=String(text).match(/^([⚠️✅ℹ️❗❌🔒🔐📌📢]+\s*)(.+)$/s);
+    const prefixMatch=String(text).match(/^([✓✗⚠️✅ℹ️❗❌🔒🔐📌📢]+\s*)(.+)$/s);
     if(prefixMatch){
       const prefix=prefixMatch[1];
       const core=prefixMatch[2];
