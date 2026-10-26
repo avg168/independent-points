@@ -125,7 +125,7 @@ pre{
 }
 </style>
 
-<script src="https://avg168.github.io/independent-points/i18n-v4.10.js?v=4142hf50c12" defer></script>
+<script src="https://avg168.github.io/independent-points/i18n-v4.10.js?v=4142hf6" defer></script>
 </head>
 <body>
 <div id="authOverlay">
@@ -139,7 +139,7 @@ pre{
 <header>
   <span class="badge">V4.14.2｜正式提領申請</span>
   <h1>平台 IPT → Trust Wallet</h1>
-  <p>這一版只做申請、鎖定與取消；不會 Mint、不會送鏈、不會呼叫 Trust Wallet 簽署。</p>
+  <p>本頁只處理提領申請、鎖定與取消；不會鑄造代幣、不會送出鏈上交易，也不會呼叫 Trust Wallet 簽署。</p>
 </header>
 
 <main>
@@ -210,13 +210,13 @@ pre{
   <section>
     <h2>本版安全範圍</h2>
     <div class="status ok">
-      ✓ 不保存 Owner 私鑰<br>
-      ✓ 不自動 Mint<br>
+      ✓ 不保存合約擁有者私鑰<br>
+      ✓ 不自動鑄造代幣<br>
       ✓ 不送 Sepolia 交易<br>
-      ✓ pending 可由會員取消並全額解鎖
+      ✓ 待處理的申請可由會員取消並全額解鎖
     </div>
     <p class="note">
-      V4.14.2 已整合管理員核准、Trust Wallet Owner Mint 與 Sepolia 鏈上驗證；本頁只建立或取消提領申請，不直接送鏈。
+      V4.14.2 已整合管理員核准、合約擁有者透過 Trust Wallet 鑄造代幣，以及 Sepolia 鏈上驗證；本頁只建立或取消提領申請，不直接送出鏈上交易。
     </p>
   </section>
 </main>
@@ -477,7 +477,7 @@ pre{
       return `<div class="row">
         <div>
           <div class="title">${fmtUnits(w.ipt_units)} IPT
-            <span class="chip ${chipClass}">${w.status}</span>
+            <span class="chip ${chipClass}">${tr(({completed:"已完成",cancelled:"已取消",pending:"待處理",approved:"已核准",processing:"處理中",rejected:"已拒絕",failed:"失敗"})[w.status]||w.status)}</span>
           </div>
           <div class="meta">
             ${fmtTime(w.requested_at)}<br>

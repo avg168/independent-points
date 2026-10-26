@@ -161,7 +161,7 @@ h2{margin:0 0 12px;font-size:1.12rem}
   header{padding:22px 16px 26px}
 }
 </style>
-<script src="https://avg168.github.io/independent-points/i18n-v4.10.js?v=4142hf50c18" defer></script>
+<script src="https://avg168.github.io/independent-points/i18n-v4.10.js?v=4142hf6" defer></script>
 </head>
 <body>
 <div id="authOverlay">
@@ -607,6 +607,7 @@ h2{margin:0 0 12px;font-size:1.12rem}
   }
 
   function renderTransferHistory(){
+    if(!platformData){ $("platformTransferHistory").textContent=tr("正在讀取資產資料…"); return; }
     const me=String(platformData?.member?.id||"");
     const rows=(platformData?.transfers||[]).filter(t=>{
       if(historyFilter==="out") return t.from_user_id===me;
@@ -637,7 +638,7 @@ h2{margin:0 0 12px;font-size:1.12rem}
             <div class="tx-title">${title}｜${counterparty}</div>
             <div class="tx-meta">
               ${fmtTime(t.created_at)}<br>
-              ${tr("狀態")}：completed
+              ${tr("狀態")}：${tr("已完成")}
             </div>
           </div>
           <div class="tx-amount ${cls}">${sign}${amount} IPT</div>
@@ -648,6 +649,11 @@ h2{margin:0 0 12px;font-size:1.12rem}
   }
 
   function renderPlatform(){
+    if(!platformData){
+      $("platformTransferHistory").textContent=tr("正在讀取資產資料…");
+      $("ledgerList").textContent=tr("正在讀取資產資料…");
+      return;
+    }
     const p=Number(platformData?.balances?.p?.available_units||0);
     const iptUnits=Number(platformData?.balances?.platform_ipt?.available_units||0);
     $("pBalance").textContent=p.toLocaleString(numberLocale())+" P";
@@ -672,7 +678,7 @@ h2{margin:0 0 12px;font-size:1.12rem}
       const label=r.reference_type==="p_ipt_conversion"?tr("P → IPT 兌換"):
                   r.reference_type==="platform_p_credit"?tr("P 發放"):
                   r.reference_type==="platform_ipt_transfer"?tr("平台 IPT 轉帳"):
-                  tr(r.entry_type||"交易");
+                  tr(r.entry_type==="withdrawal"?"提領":(r.entry_type||"交易"));
       const counterparty=r?.metadata?.counterparty_member_number
         ? `｜${tr("對方")} ${r.metadata.counterparty_member_number}` : "";
       return `<div class="ledger-row">
@@ -686,6 +692,12 @@ h2{margin:0 0 12px;font-size:1.12rem}
   }
 
   function renderChain(){
+    if(!chainData){
+      $("walletAddress").textContent=tr("正在讀取資產資料…");
+      $("walletVerified").textContent=tr("正在確認錢包…");
+      $("chainTxCount").textContent="—";
+      return;
+    }
     const m=chainData?.member||{};
     const a=chainData?.asset||{};
     $("chainIptBalance").textContent=formatChain(m.ipt_balance)+" IPT";
@@ -697,6 +709,7 @@ h2{margin:0 0 12px;font-size:1.12rem}
   }
 
   function renderTotal(){
+    if(!platformData || !chainData) return;
     const platform=Number(platformData?.balances?.platform_ipt?.available_units||0)/100;
     const chain=Number(chainData?.member?.ipt_balance||0);
     const total=(Number.isFinite(platform)?platform:0)+(Number.isFinite(chain)?chain:0);
@@ -876,6 +889,8 @@ h2{margin:0 0 12px;font-size:1.12rem}
     if(loading) return;
     loading=true;
     $("refreshBtn").disabled=true;
+    $("refreshBtn").textContent=tr("正在更新資產…");
+    $("summaryStatus").setAttribute("aria-live","polite");
     $("summaryStatus").className="status info";
     $("summaryStatus").textContent="正在讀取平台錢包與鏈上 IPT…";
     try{
@@ -896,9 +911,11 @@ h2{margin:0 0 12px;font-size:1.12rem}
       renderChain();
       renderTotal();
 
+      $("refreshBtn").textContent=tr("資產更新完成");
       $("summaryStatus").className="status ok";
       $("summaryStatus").textContent="資產已更新。平台與鏈上餘額分開保存、分開記帳。";
     }catch(e){
+      $("refreshBtn").textContent=tr("更新失敗，請重試");
       console.error(e);
       $("summaryStatus").className="status err";
       $("summaryStatus").textContent="資產讀取失敗："+(e?.message||String(e));
@@ -1138,6 +1155,7 @@ h2{margin:0 0 12px;font-size:1.12rem}
 
   $("chainTransferBtn").addEventListener("click",()=>location.href="https://avg168.github.io/independent-points/wallet-core-v4.12.html?go=transfer&v=4142hf50c15");
 
+  window.addEventListener("pageshow",event=>{ if(event.persisted) authBoot(); });
   authBoot();
 })();
 </script>

@@ -1,6 +1,6 @@
 <!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>IPT｜統一資產總覽</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.min.js"></script>
-<style>:root{font-family:system-ui,-apple-system,"Noto Sans TC",sans-serif;color:#172033;background:#f4f7fb}*{box-sizing:border-box;min-width:0}body{margin:0}header{background:#10243d;color:#fff;padding:24px 18px 30px;border-radius:0 0 26px 26px}h1{font-size:1.5rem;margin:10px 0 6px}header p{margin:0;line-height:1.6;opacity:.9}main{max-width:780px;margin:auto;padding:16px 14px 70px}.panel{background:#fff;border:1px solid #dde5ef;border-radius:18px;padding:16px;margin-bottom:14px}.status{border-radius:12px;padding:12px 14px;line-height:1.65;background:#edf4ff;border:1px solid #ccddf5}.ok{background:#ebf8f2;color:#17694f}.warn{background:#fff7df;color:#7e5a08}.err{background:#fff0f0;color:#922c2c}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.card{border:1px solid #dfe6ef;border-radius:15px;padding:14px;background:#f8fafc}.k{font-size:.78rem;color:#64748b}.v{font-size:1.16rem;font-weight:900;color:#17365d;margin-top:6px;overflow-wrap:anywhere}.s{font-size:.78rem;color:#64748b;line-height:1.5;margin-top:6px}.row{padding:10px 0;border-bottom:1px solid #edf1f5}.row:last-child{border:0}.label{font-size:.78rem;color:#64748b}.value{font-weight:850;overflow-wrap:anywhere;margin-top:4px}button{width:100%;min-height:50px;border-radius:12px;border:1px solid #cbd5e1;padding:11px;font:inherit;font-weight:900;margin-top:10px}.primary{background:#176c59;color:#fff}.light{background:#fff;color:#29445f}.note{font-size:.83rem;color:#64748b;line-height:1.7;margin-top:10px}@media(min-width:680px){.grid{grid-template-columns:repeat(4,1fr)}}</style><script src="./i18n-v4.10.js?v=4142hf50c1" defer></script></head>
+<style>:root{font-family:system-ui,-apple-system,"Noto Sans TC",sans-serif;color:#172033;background:#f4f7fb}*{box-sizing:border-box;min-width:0}body{margin:0}header{background:#10243d;color:#fff;padding:24px 18px 30px;border-radius:0 0 26px 26px}h1{font-size:1.5rem;margin:10px 0 6px}header p{margin:0;line-height:1.6;opacity:.9}main{max-width:780px;margin:auto;padding:16px 14px 70px}.panel{background:#fff;border:1px solid #dde5ef;border-radius:18px;padding:16px;margin-bottom:14px}.status{border-radius:12px;padding:12px 14px;line-height:1.65;background:#edf4ff;border:1px solid #ccddf5}.ok{background:#ebf8f2;color:#17694f}.warn{background:#fff7df;color:#7e5a08}.err{background:#fff0f0;color:#922c2c}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.card{border:1px solid #dfe6ef;border-radius:15px;padding:14px;background:#f8fafc}.k{font-size:.78rem;color:#64748b}.v{font-size:1.16rem;font-weight:900;color:#17365d;margin-top:6px;overflow-wrap:anywhere}.s{font-size:.78rem;color:#64748b;line-height:1.5;margin-top:6px}.row{padding:10px 0;border-bottom:1px solid #edf1f5}.row:last-child{border:0}.label{font-size:.78rem;color:#64748b}.value{font-weight:850;overflow-wrap:anywhere;margin-top:4px}button{width:100%;min-height:50px;border-radius:12px;border:1px solid #cbd5e1;padding:11px;font:inherit;font-weight:900;margin-top:10px}.primary{background:#176c59;color:#fff}.light{background:#fff;color:#29445f}.note{font-size:.83rem;color:#64748b;line-height:1.7;margin-top:10px}@media(min-width:680px){.grid{grid-template-columns:repeat(4,1fr)}}</style><script src="./i18n-v4.10.js?v=4142hf6" defer></script></head>
 <body><header><div>V4.14.2｜HF50-C3</div><h1>我的資產總覽</h1><p>平台帳本與 Sepolia 鏈上資產分開保存、統一查看。</p></header><main>
 <section class="panel"><h2>會員</h2><div id="status" data-ipt-i18n-skip="1" class="status">正在讀取會員與資產…</div><div class="row"><div class="label">會員</div><div id="member" data-member-data="1" class="value">—</div></div><div class="row"><div class="label">Trust Wallet</div><div id="wallet" data-member-data="1" class="value">—</div></div><div class="row"><div class="label">錢包驗證</div><div id="verified" data-ipt-i18n-skip="1" class="value">—</div></div></section>
 <section class="panel"><h2>資產</h2><div class="grid">
@@ -66,6 +66,7 @@
     const lang=window.IPTI18N?.getLang?.() || localStorage.getItem("ipt_language") || "zh-TW";
     const dict=dictionaries[lang];
     if(!dict) return text;
+    if(window.IPTI18N?.dictionaries?.[lang]?.[text]) return window.IPTI18N.dictionaries[lang][text];
     if(Object.prototype.hasOwnProperty.call(dict,text)) return dict[text];
     const m=String(text).match(/^讀取失敗：([\s\S]+)$/);
     if(m) return (lang==="en" ? "Failed to load: " : "读取失败：")+translate(m[1]);
@@ -94,7 +95,10 @@ const U="https://uccexvgqmoxhgykkjdcy.supabase.co",K="sb_publishable_FBsN1DYTQMv
 const sb=window.supabase.createClient(U,K,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}),$=x=>document.getElementById(x);
 function ipt(units){return (Number(units||0)/100).toLocaleString("zh-TW",{minimumFractionDigits:2,maximumFractionDigits:2})+" IPT"}
 function chain(v){const n=Number(v||0);return (Number.isFinite(n)?n:0).toLocaleString("zh-TW",{minimumFractionDigits:6,maximumFractionDigits:6})+" IPT"}
+let assetLoading=false;
 async function load(){
+ if(assetLoading)return;assetLoading=true;
+ setAssetText($("refresh"),"正在更新資產…");$("status").setAttribute("aria-live","polite");
  $("refresh").disabled=true;$("status").className="status";setAssetText($("status"),"正在讀取平台帳本與 Sepolia 鏈上資產…");
  try{
   const {data:{user},error}=await sb.auth.getUser();if(error||!user)throw new Error("請先登入會員。");
@@ -106,9 +110,10 @@ async function load(){
   $("member").textContent=`${m.member_number||"—"}｜${m.display_name||"—"}`;setAssetText($("wallet"),m.wallet_address||"尚未綁定 Trust Wallet");setAssetText($("verified"),m.wallet_verified?"已驗證 ✓":"未驗證");
   $("p").textContent=pu.toLocaleString("zh-TW")+" P";$("platform").textContent=ipt(iu);$("chain").textContent=chain(cv);
   const total=iu/100+(Number.isFinite(cv)?cv:0);$("total").textContent=total.toLocaleString("zh-TW",{minimumFractionDigits:2,maximumFractionDigits:6})+" IPT";
+  setAssetText($("refresh"),"資產更新完成");
   $("status").className="status ok";setAssetText($("status"),"資產已更新。平台與鏈上資料分開讀取、分開記帳。");
- }catch(e){$("status").className="status err";setAssetText($("status"),"讀取失敗："+(e?.message||String(e)))}
- finally{$("refresh").disabled=false}
+ }catch(e){setAssetText($("refresh"),"更新失敗，請重試");$("status").className="status err";setAssetText($("status"),"讀取失敗："+(e?.message||String(e)))}
+ finally{assetLoading=false;$("refresh").disabled=false}
 }
 $("refresh").onclick=load;$("home").onclick=()=>location.href="./index.html?v=4142hf50c3";load();
 </script></body></html>
