@@ -166,16 +166,29 @@ button.danger{background:#a83b45;color:#fff;border-color:#a83b45}
     })[t]||t;
   }
 
+  // Keep identity data intact while rerendering the verification label locally.
+  let adminVerification={state:"loading"};
+  function renderAdminVerification(){
+    const value=adminVerification;
+    $("adminStatus").textContent=value.state==="verified"
+      ?L("管理員驗證通過：","管理员验证通过：","Admin verified: ")+value.memberNumber+"｜"+value.displayName
+      :value.state==="failed"
+        ?L("管理員驗證失敗：","管理员验证失败：","Administrator verification failed: ")+value.message
+        :L("正在確認管理員權限…","正在确认管理员权限…","Checking administrator permissions…");
+  }
+
   async function load(){
     $("adminStatus").className="status";
-    $("adminStatus").textContent=L("正在確認管理員權限…","正在确认管理员权限…","Checking administrator permissions…");
+    adminVerification={state:"loading"};
+    renderAdminVerification();
     try{
       const data=await invoke("admin-members",{query:""});
       const members=data.members||[];
       const self=members.find(x=>x.is_self);
       if(!self||self.role!=="admin") throw new Error(tr("此頁只開放管理員。"));
       $("adminStatus").className="status ok";
-      $("adminStatus").textContent=tr("管理員驗證通過：")+self.member_number+"｜"+self.display_name;
+      adminVerification={state:"verified",memberNumber:self.member_number,displayName:self.display_name};
+      renderAdminVerification();
       $("contentArea").classList.remove("hidden");
 
       const admins=members.filter(x=>x.role==="admin");
@@ -251,7 +264,8 @@ button.danger{background:#a83b45;color:#fff;border-color:#a83b45}
     }catch(e){
       $("contentArea").classList.add("hidden");
       $("adminStatus").className="status err";
-      $("adminStatus").textContent=tr("管理員驗證失敗：")+(e?.message||String(e));
+      adminVerification={state:"failed",message:e?.message||String(e)};
+      renderAdminVerification();
     }
   }
 
@@ -281,7 +295,7 @@ button.danger{background:#a83b45;color:#fff;border-color:#a83b45}
   $("updateCenterBtn").addEventListener("click",()=>location.href="./update-center-v4.12.html?v=4142hf43");
   $("systemInfoBtn").addEventListener("click",()=>location.href="./system-info-v4.12.html?v=4142hf43");
   $("eventCenterBtn")?.addEventListener("click",()=>location.href="./event-center-v4.12.html?v=4142hf43");
-  window.addEventListener("ipt-language-change",()=>{if($("adminStatus").className==="status") $("adminStatus").textContent=L("正在確認管理員權限…","正在确认管理员权限…","Checking administrator permissions…");});
+  window.addEventListener("ipt-language-change",renderAdminVerification);
   load();
 })();
 </script>
