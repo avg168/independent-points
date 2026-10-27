@@ -62,7 +62,7 @@ pre{
 }
 @media(min-width:720px){.grid{grid-template-columns:repeat(4,1fr)}}
 </style>
-<script src="./i18n-v4.10.js?v=4142hf50c24" defer></script>
+<script src="./i18n-v4.10.js?v=4142hf17" defer></script>
 </head>
 <body>
 <header>
@@ -174,7 +174,7 @@ pre{
     $("diag").textContent=JSON.stringify(display,null,2);
   }
 
-  const tr=s=>window.IPTI18N?.t?.(s)||s;
+  const tr=s=>window.IPTI18N?.t?.(s,lang())||s;
   const tf=(key,values)=>tr(key).replace(/\{(\w+)\}/g,(_,name)=>String(values[name]??""));
 
   function updateDiagnosticsLabel(){
@@ -197,8 +197,19 @@ pre{
     }
   }
 
-  function pill(id,state,text){
-    const el=$(id); el.className="pill "+state; el.textContent=text;
+  const healthLabels=new Map();
+  function localHealthText(id,render){
+    healthLabels.set(id,render);
+    const el=$(id);
+    el.setAttribute("data-ipt-i18n-skip","1");
+    el.textContent=render();
+  }
+  function renderHealthLabels(){
+    for(const [id,render] of healthLabels) $(id).textContent=render();
+  }
+  function pill(id,state,render){
+    $(id).className="pill "+state;
+    localHealthText(id,render);
   }
   function hexBig(x){return BigInt(String(x||"0x0"))}
   function formatUnits(rawValue,decimals){
@@ -297,32 +308,32 @@ pre{
       if(sessionError) throw sessionError;
 
       const session=sessionData?.session||null;
-      pill("supabasePill","ok",L("正常","正常","Normal"));
+      pill("supabasePill","ok",()=>L("正常","正常","Normal"));
 
       if(!session){
-        $("supabaseDetail").textContent=L(
+        localHealthText("supabaseDetail",()=>L(
           "Supabase 模組正常；目前已登出。",
           "Supabase 模块正常；当前已登出。",
           "Supabase is healthy; you are currently signed out."
-        );
+        ));
         diag.checks.supabase={ok:true,session:false};
 
-        pill("memberPill","warn",L("已登出","已登出","Signed Out"));
-        $("memberDetail").textContent=L(
+        pill("memberPill","warn",()=>L("已登出","已登出","Signed Out"));
+        localHealthText("memberDetail",()=>L(
           "目前已登出；重新登入後可檢查會員資料。",
           "当前已登出；重新登录后可检查会员资料。",
           "You are signed out. Sign in again to check member data."
-        );
+        ));
         diag.checks.member={ok:true,signed_in:false};
       }else{
         const {data:{user},error:userError}=await sb.auth.getUser();
         if(userError||!user) throw userError||new Error(tr("登入身分驗證失敗"));
 
-        $("supabaseDetail").textContent=L(
+        localHealthText("supabaseDetail",()=>L(
           "Supabase 可連線；登入 Session 正常。",
           "Supabase 可连接；登录 Session 正常。",
           "Supabase is reachable; the sign-in session is valid."
-        );
+        ));
         diag.checks.supabase={ok:true,session:true};
 
         let profileResult=await sb.from("member_profiles")
@@ -336,21 +347,21 @@ pre{
         const pe=profileResult.error;
         if(pe) throw pe;
 
-        pill("memberPill",p?"ok":"warn",p?L("正常","正常","Normal"):L("找不到資料","找不到资料","Not Found"));
-        $("memberDetail").textContent=p
+        pill("memberPill",p?"ok":"warn",()=>p?L("正常","正常","Normal"):L("找不到資料","找不到资料","Not Found"));
+        localHealthText("memberDetail",()=>p
           ?`${p.member_number}｜${p.display_name}｜${p.status}`
-          :L("Session 正常，但找不到 member_profiles","Session 正常，但找不到 member_profiles","Session is valid, but member_profiles was not found.");
+          :L("Session 正常，但找不到 member_profiles","Session 正常，但找不到 member_profiles","Session is valid, but member_profiles was not found."));
         diag.checks.member={ok:!!p,signed_in:true,profile:p||null};
       }
     }catch(e){
-      pill("supabasePill","err",L("異常","异常","Error"));
-      $("supabaseDetail").textContent=tr(String(e?.message||e));
-      pill("memberPill","err",L("無法檢查","无法检查","Unavailable"));
-      $("memberDetail").textContent=L(
+      pill("supabasePill","err",()=>L("異常","异常","Error"));
+      localHealthText("supabaseDetail",()=>tr(String(e?.message||e)));
+      pill("memberPill","err",()=>L("無法檢查","无法检查","Unavailable"));
+      localHealthText("memberDetail",()=>L(
         "Supabase 登入／會員資料檢查失敗",
         "Supabase 登录／会员资料检查失败",
         "Supabase sign-in/member data check failed."
-      );
+      ));
       diag.checks.supabase={ok:false,error:String(e)};
       diag.checks.member={ok:false,error:String(e)};
     }
@@ -371,24 +382,24 @@ pre{
       const chain=await res.json().catch(()=>({}));
       if(!res.ok||!chain?.ok) throw new Error(chain?.error||("HTTP "+res.status));
 
-      pill("rpcPill","ok",L("正常","正常","Normal"));
-      $("rpcDetail").textContent=L(
+      pill("rpcPill","ok",()=>L("正常","正常","Normal"));
+      localHealthText("rpcDetail",()=>L(
         `區塊高度 ${chain.block_number}｜${chain.rpc}`,
         `区块高度 ${chain.block_number}｜${chain.rpc}`,
         `Block height ${chain.block_number} | ${chain.rpc}`
-      );
+      ));
       diag.checks.rpc={
         ok:true,
         height:chain.block_number,
         url:chain.rpc
       };
 
-      pill("contractPill","ok",L("正常","正常","Normal"));
-      $("contractDetail").textContent=L(
-        `totalSupply ${chain.total_supply} IPT｜decimals ${chain.decimals}｜paused ${chain.paused}`,
-        `totalSupply ${chain.total_supply} IPT｜decimals ${chain.decimals}｜paused ${chain.paused}`,
+      pill("contractPill","ok",()=>L("正常","正常","Normal"));
+      localHealthText("contractDetail",()=>L(
+        `總供給 ${chain.total_supply} IPT｜小數位數 ${chain.decimals}｜暫停：${chain.paused?"是":"否"}`,
+        `总供应量 ${chain.total_supply} IPT｜小数位数 ${chain.decimals}｜暂停：${chain.paused?"是":"否"}`,
         `totalSupply ${chain.total_supply} IPT | decimals ${chain.decimals} | paused ${chain.paused}`
-      );
+      ));
       diag.checks.contract={
         ok:true,
         total_supply:chain.total_supply,
@@ -396,20 +407,20 @@ pre{
         paused:chain.paused
       };
     }catch(e){
-      pill("rpcPill","err",L("異常","异常","Error"));
-      $("rpcDetail").textContent=L(
+      pill("rpcPill","err",()=>L("異常","异常","Error"));
+      localHealthText("rpcDetail",()=>L(
         "Sepolia 後端健康檢查失敗："+String(e?.message||e),
         "Sepolia 后端健康检查失败："+String(e?.message||e),
         "Sepolia backend health check failed: "+String(e?.message||e)
-      );
+      ));
       diag.checks.rpc={ok:false,error:String(e)};
 
-      pill("contractPill","err",L("異常","异常","Error"));
-      $("contractDetail").textContent=L(
+      pill("contractPill","err",()=>L("異常","异常","Error"));
+      localHealthText("contractDetail",()=>L(
         "IPT 合約後端健康檢查失敗："+String(e?.message||e),
         "IPT 合约后端健康检查失败："+String(e?.message||e),
         "IPT contract backend health check failed: "+String(e?.message||e)
-      );
+      ));
       diag.checks.contract={ok:false,error:String(e)};
     }
 
@@ -477,6 +488,7 @@ pre{
 
   window.addEventListener("ipt-language-change",()=>{
     updateDiagnosticsLabel();
+    renderHealthLabels();
     renderDiagnostics();
     checkRelease().finally(renderDiagnostics);
     checkSw();
