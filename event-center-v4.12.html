@@ -50,7 +50,7 @@ button.warn{background:#a46a08;color:#fff;border-color:#a46a08}button.danger{bac
 .fallback-toast .m{font-size:.86rem;line-height:1.5;margin-top:5px;opacity:.92}
 
 </style>
-<script src="./i18n-v4.10.js?v=4142hf50c28" defer></script>
+<script src="./i18n-v4.10.js?v=4142hf15" defer></script>
 <script src="./auth-guard-v4.12.js?v=4142hf43"></script>
 </head>
 <body>
@@ -126,7 +126,7 @@ button.warn{background:#a46a08;color:#fff;border-color:#a46a08}button.danger{bac
     <section class="panel">
       <h2>事件列表</h2>
       <div id="eventList" class="events"></div>
-      <button id="loadAllAuditBtn" class="light" type="button" style="width:100%;margin-top:12px">載入更多會員管理稽核</button>
+      <button id="loadAllAuditBtn" data-raw-data="1" class="light" type="button" style="width:100%;margin-top:12px">載入更多會員管理稽核</button>
       <div class="note" style="margin-top:8px">會員很多時可能需要數秒；此操作只讀取稽核，不修改會員資料。</div>
     </section>
 
@@ -340,16 +340,26 @@ button.warn{background:#a46a08;color:#fff;border-color:#a46a08}button.danger{bac
       if(error)throw error;return {rows:data||[],direct:true};
     }catch(_){return {rows:[],direct:false}}
   }
+  let auditButtonState={kind:"ready"};
+  function renderAuditButton(){
+    const el=$("loadAllAuditBtn"),n=auditButtonState.count;
+    el.disabled=loadingAllAudit;
+    if(loadingAllAudit){el.textContent=L("正在載入會員稽核…","正在载入会员稽核…","Loading member audits…");return}
+    if(auditButtonState.kind==="loaded"){el.textContent=L(`已載入 ${n} 位會員稽核`,`已载入 ${n} 位会员稽核`,`Loaded audits for ${n} members`);return}
+    if(auditButtonState.kind==="direct"){el.textContent=L(`已直接讀取 ${n} 筆管理稽核`,`已直接读取 ${n} 笔管理稽核`,`Loaded ${n} administrator audit records directly`);return}
+    el.textContent=L("載入更多會員管理稽核","载入更多会员管理稽核","Load More Member Audits");
+  }
+
   async function loadAllAuditFallback(){
-    if(loadingAllAudit)return;loadingAllAudit=true;$("loadAllAuditBtn").disabled=true;$("loadAllAuditBtn").textContent=tr("正在載入會員稽核…");
+    if(loadingAllAudit)return;loadingAllAudit=true;renderAuditButton();
     try{
       const targets=members.slice(0,50),collected=[],seen=new Set(),chunk=4;
       for(let i=0;i<targets.length;i+=chunk){
         const res=await Promise.all(targets.slice(i,i+chunk).map(async m=>{try{return await invoke("admin-member-detail",{target_user_id:m.user_id})}catch(_){return null}}));
         res.forEach(d=>(d?.audit||[]).forEach(a=>{const key=String(a.id||`${a.created_at}-${a.action}-${a.target_user_id||""}`);if(!seen.has(key)){seen.add(key);collected.push(a)}}));
       }
-      events=dedupSort([...normalizeSecurity(),...normalizeOps(),...normalizeAudit(collected)]);render();await maybeNotifyNew();$("loadAllAuditBtn").textContent=tf("已載入 {count} 位會員稽核",{count:targets.length});
-    }finally{loadingAllAudit=false;$("loadAllAuditBtn").disabled=false}
+      events=dedupSort([...normalizeSecurity(),...normalizeOps(),...normalizeAudit(collected)]);render();await maybeNotifyNew();auditButtonState={kind:"loaded",count:targets.length};
+    }finally{loadingAllAudit=false;renderAuditButton()}
   }
 
   async function load(){
@@ -360,8 +370,8 @@ button.warn{background:#a46a08;color:#fff;border-color:#a46a08}button.danger{bac
       $("adminStatus").className="status ok";$("adminStatus").textContent=L(`管理員驗證通過：${selfMember.member_number}｜${selfMember.display_name}`,`管理员验证通过：${selfMember.member_number}｜${selfMember.display_name}`,`Admin verified: ${selfMember.member_number} | ${selfMember.display_name}`);$("contentArea").classList.remove("hidden");
       await collectSystemState();
       const direct=await tryDirectAudit();let audits=direct.rows;
-      if(!direct.direct){audits=await loadCurrentAdminAudit();$("loadAllAuditBtn").textContent=tr("載入更多會員管理稽核")}else{$("loadAllAuditBtn").textContent=tf("已直接讀取 {count} 筆管理稽核",{count:audits.length})}
-      events=dedupSort([...normalizeSecurity(),...normalizeOps(),...normalizeAudit(audits)]);render();await maybeNotifyNew();updateNotifyStatus();
+      if(!direct.direct){audits=await loadCurrentAdminAudit();auditButtonState={kind:"ready"}}else{auditButtonState={kind:"direct",count:audits.length}}
+      renderAuditButton();events=dedupSort([...normalizeSecurity(),...normalizeOps(),...normalizeAudit(audits)]);render();await maybeNotifyNew();updateNotifyStatus();
     }catch(e){$("contentArea").classList.add("hidden");$("adminStatus").className="status err";$("adminStatus").textContent=tr("載入失敗：")+(e?.message||String(e))}
   }
 
@@ -438,7 +448,7 @@ button.warn{background:#a46a08;color:#fff;border-color:#a46a08}button.danger{bac
   $("securityCenterBtn").addEventListener("click",()=>location.href="./security-center-v4.12.html?v=4142hf43");
   $("maintenanceBtn").addEventListener("click",()=>location.href="./maintenance-v4.12.html?v=4142hf43");
   $("updateCenterBtn").addEventListener("click",()=>location.href="./update-center-v4.12.html?v=4142hf43");
-  window.addEventListener("ipt-language-change",()=>{render();updateNotifyStatus();if(selfMember?.role==="admin"&&$("adminStatus").className==="status ok"){$("adminStatus").textContent=L(`管理員驗證通過：${selfMember.member_number}｜${selfMember.display_name}`,`管理员验证通过：${selfMember.member_number}｜${selfMember.display_name}`,`Admin verified: ${selfMember.member_number} | ${selfMember.display_name}`)}});
+  window.addEventListener("ipt-language-change",()=>{renderAuditButton();render();updateNotifyStatus();if(selfMember?.role==="admin"&&$("adminStatus").className==="status ok"){$("adminStatus").textContent=L(`管理員驗證通過：${selfMember.member_number}｜${selfMember.display_name}`,`管理员验证通过：${selfMember.member_number}｜${selfMember.display_name}`,`Admin verified: ${selfMember.member_number} | ${selfMember.display_name}`)}});
   window.addEventListener("ipt-language-change",()=>{if($("adminStatus").className==="status") $("adminStatus").textContent=L("正在確認管理員身分…","正在确认管理员身份…","Checking administrator identity…");});
   updateNotifyStatus();load();
 })();
