@@ -50,7 +50,7 @@ button.warn{background:#a46a08;color:#fff;border-color:#a46a08}button.danger{bac
 .fallback-toast .m{font-size:.86rem;line-height:1.5;margin-top:5px;opacity:.92}
 
 </style>
-<script src="./i18n-v4.10.js?v=4142hf15" defer></script>
+<script src="./i18n-v4.10.js?v=4142hf16" defer></script>
 <script src="./auth-guard-v4.12.js?v=4142hf43"></script>
 </head>
 <body>
@@ -127,7 +127,7 @@ button.warn{background:#a46a08;color:#fff;border-color:#a46a08}button.danger{bac
       <h2>事件列表</h2>
       <div id="eventList" class="events"></div>
       <button id="loadAllAuditBtn" data-raw-data="1" class="light" type="button" style="width:100%;margin-top:12px">載入更多會員管理稽核</button>
-      <div class="note" style="margin-top:8px">會員很多時可能需要數秒；此操作只讀取稽核，不修改會員資料。</div>
+      <div id="auditLoadNote" data-raw-data="1" class="note" style="margin-top:8px">會員很多時可能需要數秒；此操作只讀取稽核，不修改會員資料。</div>
     </section>
 
     <section class="panel">
@@ -278,7 +278,7 @@ button.warn{background:#a46a08;color:#fff;border-color:#a46a08}button.danger{bac
     if(ok)localStorage.setItem(LAST_NOTIFY_KEY,String(Date.now()));
   }
   function isUnread(x){return isoMs(x.time)>Number(localStorage.getItem(LAST_READ_KEY)||"0")}
-  function sourceName(s){return s==="security"?L("高風險安全","高风险安全","High-risk Security"):s==="admin"?L("管理稽核","管理稽核","Admin Audit"):L("系統／鏈上","系统／链上","System / On-chain")}
+  function sourceName(s){return s==="security"?L("高風險安全","高风险安全","High-risk Security"):s==="admin"?L("管理稽核","管理审计","Admin Audit"):L("系統／鏈上","系统／链上","System / On-chain")}
   function severityName(s){return s==="critical"?L("重要","重要","Critical"):s==="warn"?L("警告","警告","Warning"):s==="success"?L("正常","正常","Normal"):L("一般","一般","Info")}
 
   function displayTitle(x){
@@ -305,7 +305,7 @@ button.warn{background:#a46a08;color:#fff;border-color:#a46a08}button.danger{bac
     $("eventList").innerHTML=list.length?list.map(x=>`
       <article class="event ${esc(x.severity)}">
         <div class="event-head"><div class="event-title" data-raw-data="1">${esc(displayTitle(x))}</div><div class="event-time">${esc(time(x.time))}</div></div>
-        <div class="chips"><span class="chip ${esc(x.severity)}">${esc(severityName(x.severity))}</span><span class="chip">${esc(sourceName(x.source))}</span>${isUnread(x)?`<span class="chip unread">${esc(L("未讀","未读","Unread"))}</span>`:""}</div>
+        <div class="chips" data-raw-data="1"><span class="chip ${esc(x.severity)}">${esc(severityName(x.severity))}</span><span class="chip">${esc(sourceName(x.source))}</span>${isUnread(x)?`<span class="chip unread">${esc(L("未讀","未读","Unread"))}</span>`:""}</div>
         <div class="event-meta" data-raw-data="1">${esc(x.detail||L("無附加說明","无附加说明","No additional details"))}${x.account?`<br>${esc(L("錢包：","钱包：","Wallet: "))}${esc(x.account)}`:""}</div>
       </article>`).join(""):`<div class="empty">${esc(L("目前沒有符合條件的事件。","目前没有符合条件的事件。","No events match the current filters."))}</div>`;
   }
@@ -343,11 +343,12 @@ button.warn{background:#a46a08;color:#fff;border-color:#a46a08}button.danger{bac
   let auditButtonState={kind:"ready"};
   function renderAuditButton(){
     const el=$("loadAllAuditBtn"),n=auditButtonState.count;
+    $("auditLoadNote").textContent=L("會員很多時可能需要數秒；此操作只讀取稽核，不修改會員資料。","会员较多时可能需要几秒；此操作仅读取审计记录，不修改会员资料。","Loading audits for many members may take a few seconds. This reads audit records without changing member data.");
     el.disabled=loadingAllAudit;
-    if(loadingAllAudit){el.textContent=L("正在載入會員稽核…","正在载入会员稽核…","Loading member audits…");return}
-    if(auditButtonState.kind==="loaded"){el.textContent=L(`已載入 ${n} 位會員稽核`,`已载入 ${n} 位会员稽核`,`Loaded audits for ${n} members`);return}
-    if(auditButtonState.kind==="direct"){el.textContent=L(`已直接讀取 ${n} 筆管理稽核`,`已直接读取 ${n} 笔管理稽核`,`Loaded ${n} administrator audit records directly`);return}
-    el.textContent=L("載入更多會員管理稽核","载入更多会员管理稽核","Load More Member Audits");
+    if(loadingAllAudit){el.textContent=L("正在載入會員稽核…","正在加载会员审计…","Loading member audits…");return}
+    if(auditButtonState.kind==="loaded"){el.textContent=L(`已載入 ${n} 位會員稽核`,`已加载 ${n} 位会员审计`,`Loaded audits for ${n} members`);return}
+    if(auditButtonState.kind==="direct"){el.textContent=L(`已直接讀取 ${n} 筆管理稽核`,`已直接读取 ${n} 条管理审计`,`Loaded ${n} administrator audit records directly`);return}
+    el.textContent=L("載入更多會員管理稽核","加载更多会员管理审计","Load More Member Audits");
   }
 
   async function loadAllAuditFallback(){
@@ -450,7 +451,7 @@ button.warn{background:#a46a08;color:#fff;border-color:#a46a08}button.danger{bac
   $("updateCenterBtn").addEventListener("click",()=>location.href="./update-center-v4.12.html?v=4142hf43");
   window.addEventListener("ipt-language-change",()=>{renderAuditButton();render();updateNotifyStatus();if(selfMember?.role==="admin"&&$("adminStatus").className==="status ok"){$("adminStatus").textContent=L(`管理員驗證通過：${selfMember.member_number}｜${selfMember.display_name}`,`管理员验证通过：${selfMember.member_number}｜${selfMember.display_name}`,`Admin verified: ${selfMember.member_number} | ${selfMember.display_name}`)}});
   window.addEventListener("ipt-language-change",()=>{if($("adminStatus").className==="status") $("adminStatus").textContent=L("正在確認管理員身分…","正在确认管理员身份…","Checking administrator identity…");});
-  updateNotifyStatus();load();
+  renderAuditButton();updateNotifyStatus();load();
 })();
 </script>
 <script>
