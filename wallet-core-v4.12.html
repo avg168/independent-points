@@ -474,7 +474,7 @@ body.platform-admin.v41-route.route-ownership.show-ownership #securityGuardSecti
 <link rel="icon" type="image/svg+xml" href="./ipt-icon-192.png">
 
 <link rel="apple-touch-icon" href="./ipt-apple-touch-180.png">
-<script src="./i18n-v4.10.js?v=4142hf50c20" defer></script>
+<script src="./i18n-v4.10.js?v=4142hf11" defer></script>
 </head>
 <body>
 <div class="v42-sticky-nav">
@@ -647,25 +647,25 @@ body.platform-admin.v41-route.route-ownership.show-ownership #securityGuardSecti
 
 <section id="securityGuardSection" class="platform-admin-only">
   <h2>營運安全保護</h2>
-  <div id="securityGuardStatus" class="box warn locked">
+  <div id="securityGuardStatus" data-ipt-i18n-skip="1" class="box warn locked">
     高風險交易目前鎖定。完成原本前置檢查後，還需要啟用一次 60 秒操作視窗。
   </div>
   <div class="security-guard-grid" style="margin-top:12px">
     <div class="security-guard-card">
       <div class="k">目前錢包</div>
-      <div id="securityGuardWallet" class="v">尚未連線</div>
+      <div id="securityGuardWallet" data-ipt-i18n-skip="1" class="v">尚未連線</div>
     </div>
     <div class="security-guard-card">
       <div class="k">安全角色</div>
-      <div id="securityGuardRole" class="v">尚未核對</div>
+      <div id="securityGuardRole" data-ipt-i18n-skip="1" class="v">尚未核對</div>
     </div>
     <div class="security-guard-card">
       <div class="k">操作視窗</div>
-      <div id="securityGuardTimer" class="v">未啟用</div>
+      <div id="securityGuardTimer" data-ipt-i18n-skip="1" class="v">未啟用</div>
     </div>
     <div class="security-guard-card">
       <div class="k">保護規則</div>
-      <div class="v">一次高風險送出即重新鎖定</div>
+      <div id="securityGuardRule" data-ipt-i18n-skip="1" class="v">一次高風險送出即重新鎖定</div>
     </div>
   </div>
   <div class="security-guard-actions">
@@ -1505,7 +1505,7 @@ window.addEventListener("ipt-language-change", () => {
   if (transferPreflightSummary && $("transferCheck").querySelector("[data-ipt-transfer-summary]")) renderTransferPreflightSummary();
 });
 
-function resetTransferCheck(message = (window.IPTI18N?.getLang?.() === "en" ? "Please recheck the transfer." : window.IPTI18N?.getLang?.() === "zh-CN" ? "请重新检查转账。" : "請重新檢查轉帳。")) {
+function resetTransferCheck(message = "請重新檢查轉帳。") {
   transferPreflightSummary = null;
   transferState.checked = false;
   transferState.to = "";
@@ -3932,22 +3932,27 @@ function v48UpdateCachedRole(owner="", pendingOwner=""){
   }
 }
 function v48RenderGuardLocal(){
+  const lang=window.IPTI18N?.getLang?.() || "zh-TW";
+  const index=lang==="en" ? 2 : lang==="zh-CN" ? 1 : 0;
+  const label=(tw,cn,en)=>[tw,cn,en][index];
+  const ruleEl=$("securityGuardRule");
+  if(ruleEl) ruleEl.textContent=label("一次高風險送出即重新鎖定","一次高风险送出即重新锁定","Relock after one high-risk submission");
   const walletEl=$("securityGuardWallet");
   const roleEl=$("securityGuardRole");
   const timerEl=$("securityGuardTimer");
   const statusEl=$("securityGuardStatus");
 
-  if(walletEl) walletEl.textContent=account||"尚未連線";
-  if(roleEl) roleEl.textContent=v48CachedRole||"尚未核對";
+  if(walletEl) walletEl.textContent=account||label("尚未連線","尚未连接","Not connected");
+  if(roleEl) roleEl.textContent=({"尚未連線":label("尚未連線","尚未连接","Not connected"),"一般錢包":label("一般錢包","普通钱包","Regular Wallet")})[v48CachedRole] || v48CachedRole || label("尚未核對","尚未核对","Not checked");
   if(!timerEl||!statusEl) return;
 
   const until=v48GuardUntil();
   const left=Math.max(0,Math.ceil((until-Date.now())/1000));
 
   if(v48GuardValid()&&left>0){
-    timerEl.textContent=left+" 秒";
+    timerEl.textContent=left+label(" 秒"," 秒"," seconds");
     statusEl.className="box ok armed";
-    statusEl.textContent="高風險操作視窗已啟用。只能送出一次；送出後會立即重新鎖定。";
+    statusEl.textContent=label("高風險操作視窗已啟用。只能送出一次；送出後會立即重新鎖定。","高风险操作窗口已启用。仅可提交一次；提交后会立即重新锁定。","The high-risk operation window is active. Only one submission is allowed; it relocks immediately afterward.");
     return;
   }
 
@@ -3957,10 +3962,11 @@ function v48RenderGuardLocal(){
     v48LogSecurityEvent("guard_expired",{});
   }
 
-  timerEl.textContent="未啟用";
+  timerEl.textContent=label("未啟用","未启用","Inactive");
   statusEl.className="box warn locked";
-  statusEl.textContent="高風險交易目前鎖定。完成前置檢查後，請再啟用 60 秒操作視窗。";
+  statusEl.textContent=label("高風險交易目前鎖定。完成前置檢查後，請再啟用 60 秒操作視窗。","高风险交易当前锁定。完成前置检查后，请再启用 60 秒操作窗口。","High-risk transactions are locked. Complete the pre-check, then enable the 60-second operation window.");
 }
+window.addEventListener("ipt-language-change",v48RenderGuardLocal);
 function v48Disarm(reason="manual"){
   const hadGuard=v48GuardUntil()>0;
   localStorage.removeItem(V48_GUARD_UNTIL_KEY);
