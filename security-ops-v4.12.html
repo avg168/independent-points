@@ -34,7 +34,7 @@ button.danger{background:#a83b45;color:#fff;border-color:#a83b45}
 .hidden{display:none!important}
 @media(min-width:760px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
 </style>
-<script src="./i18n-v4.10.js?v=4142hf50c21" defer></script>
+<script src="./i18n-v4.10.js?v=4142hf14" defer></script>
 <script src="./auth-guard-v4.12.js?v=4142hf43"></script>
 </head>
 <body>
@@ -107,7 +107,7 @@ button.danger{background:#a83b45;color:#fff;border-color:#a83b45}
 <script>
 /* V4.14.2 Production Seal */
 (() => {
-  const tr=(s)=>window.IPTI18N?.t?window.IPTI18N.t(s):s;
+  const tr=(s)=>window.IPTI18N?.t?window.IPTI18N.t(s,window.IPTI18N.getLang?.()||localStorage.getItem("ipt_language")||"zh-TW"):s;
   function L(zhTW,zhCN,en){
     let language="zh-TW";
     try{language=window.IPTI18N?.getLang?.()||localStorage.getItem("ipt_language")||language}catch(_){}
@@ -124,6 +124,18 @@ button.danger{background:#a83b45;color:#fff;border-color:#a83b45}
   const $=id=>document.getElementById(id);
   const esc=v=>String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
   const big=x=>BigInt(String(x||"0x0"));
+
+  // Retain source expressions so language changes never translate prior output.
+  const localizedText=new Map();
+  function setLocalizedText(id,render){
+    localizedText.set(id,render);
+    $(id).setAttribute("data-raw-data","1");
+    $(id).textContent=render();
+  }
+  function renderLocalizedText(){
+    for(const [id,render] of localizedText) $(id).textContent=render();
+  }
+
 
   async function rpc(method,params){
     let last;
@@ -200,12 +212,12 @@ button.danger{background:#a83b45;color:#fff;border-color:#a83b45}
       $("unverifiedCount").textContent=unverified.length;
 
       const accountIssues=[];
-      if(self.status!=="active") accountIssues.push(tr("目前管理員不是 active 狀態"));
-      if(!self.wallet_verified) accountIssues.push(tr("目前管理員錢包尚未驗證"));
-      if(unverified.length) accountIssues.push(tf("{count} 位會員錢包尚未驗證",{count:unverified.length}));
-      if(suspended.length) accountIssues.push(tf("{count} 位會員目前停權",{count:suspended.length}));
+      if(self.status!=="active") accountIssues.push(()=>tr("目前管理員不是 active 狀態"));
+      if(!self.wallet_verified) accountIssues.push(()=>tr("目前管理員錢包尚未驗證"));
+      if(unverified.length) accountIssues.push(()=>tf("{count} 位會員錢包尚未驗證",{count:unverified.length}));
+      if(suspended.length) accountIssues.push(()=>tf("{count} 位會員目前停權",{count:suspended.length}));
       $("accountAlert").className=accountIssues.length?"status warn":"status ok";
-      $("accountAlert").textContent=accountIssues.length?tr("需留意：")+accountIssues.join("；")+"。":tr("目前帳戶安全摘要沒有需要立即處理的項目。");
+      setLocalizedText("accountAlert",()=>accountIssues.length?tr("需留意：")+accountIssues.map(render=>render()).join("；")+"。":tr("目前帳戶安全摘要沒有需要立即處理的項目。"));
 
       // release
       try{
@@ -218,24 +230,24 @@ button.danger{background:#a83b45;color:#fff;border-color:#a83b45}
         const chain=await invoke("admin-security-state",{});
         const paused=!!chain.paused;
         const pending=String(chain.pending_owner||ZERO);
-        $("contractV").textContent=paused?tr("已暫停"):"正常";
-        $("pendingV").textContent=chain.has_pending_owner
+        setLocalizedText("contractV",()=>paused?tr("已暫停"):tr("正常"));
+        setLocalizedText("pendingV",()=>chain.has_pending_owner
           ? pending.slice(0,8)+"…"+pending.slice(-6)
-          : tr("無候任管理者");
+          : tr("無候任管理者"));
         const issues=[];
-        if(paused) issues.push(tr("IPT 合約目前 paused = true"));
-        if(chain.has_pending_owner) issues.push(tr("目前存在 pendingOwner"));
-        $("opsV").textContent=issues.length?tr("需注意"):"正常";
+        if(paused) issues.push(()=>tr("IPT 合約目前 paused = true"));
+        if(chain.has_pending_owner) issues.push(()=>tr("目前存在 pendingOwner"));
+        setLocalizedText("opsV",()=>issues.length?tr("需注意"):tr("正常"));
         $("opsStatus").className=issues.length?"status warn":"status ok";
-        $("opsStatus").textContent=issues.length
-          ?tr("營運安全提醒：")+issues.join("；")+"。"
-          :tr("正式營運狀態正常：合約未暫停、目前沒有 pendingOwner。");
+        setLocalizedText("opsStatus",()=>issues.length
+          ?tr("營運安全提醒：")+issues.map(render=>render()).join("；")+"。"
+          :tr("正式營運狀態正常：合約未暫停、目前沒有 pendingOwner。"));
       }catch(e){
-        $("contractV").textContent=tr("檢查失敗");
-        $("pendingV").textContent=tr("檢查失敗");
-        $("opsV").textContent=tr("需檢查");
+        setLocalizedText("contractV",()=>tr("檢查失敗"));
+        setLocalizedText("pendingV",()=>tr("檢查失敗"));
+        setLocalizedText("opsV",()=>tr("需檢查"));
         $("opsStatus").className="status err";
-        $("opsStatus").textContent=tr("鏈上安全狀態讀取失敗：")+(e?.message||String(e));
+        setLocalizedText("opsStatus",()=>tr("鏈上安全狀態讀取失敗：")+(e?.message||String(e)));
       }
 
       // local security events
@@ -252,13 +264,13 @@ button.danger{background:#a83b45;color:#fff;border-color:#a83b45}
           return Date.now()-t<86400000 && (name.includes("role")||name.includes("status"));
         }).length;
         $("auditStatus").className=changed24?"status warn":"status ok";
-        $("auditStatus").textContent=changed24
+        setLocalizedText("auditStatus",()=>changed24
           ?tf("近 24 小時有 {count} 筆角色／狀態相關稽核，請確認是否為預期操作。",{count:changed24})
-          :tf("已讀取 {count} 筆最近管理稽核；近 24 小時未發現角色／狀態異動。",{count:recent.length});
+          :tf("已讀取 {count} 筆最近管理稽核；近 24 小時未發現角色／狀態異動。",{count:recent.length}));
         $("auditList").innerHTML=recent.length?recent.map(a=>`<div class="audit" data-raw-data="1">${esc(time(a.created_at))}｜${esc(a.action||"")}｜${esc(a.note||"")}</div>`).join(""):"<div class='status'>"+esc(tr("尚無稽核紀錄。"))+"</div>";
       }catch(e){
         $("auditStatus").className="status warn";
-        $("auditStatus").textContent=tr("目前管理員稽核讀取失敗：")+(e?.message||String(e));
+        setLocalizedText("auditStatus",()=>tr("目前管理員稽核讀取失敗：")+(e?.message||String(e)));
         $("auditList").innerHTML="";
       }
     }catch(e){
@@ -276,7 +288,7 @@ button.danger{background:#a83b45;color:#fff;border-color:#a83b45}
     const blocked=last24.filter(x=>x.type==="high_risk_blocked").length;
     const sends=last24.filter(x=>x.type==="high_risk_approval_started").length;
     $("eventSummary").className=(walletChanges||blocked)?"status warn":"status ok";
-    $("eventSummary").textContent=tf("近 24 小時：錢包切換 {wallet} 次｜安全阻擋 {blocked} 次｜高風險送簽 {sends} 次。",{wallet:walletChanges,blocked,sends});
+    setLocalizedText("eventSummary",()=>tf("近 24 小時：錢包切換 {wallet} 次｜安全阻擋 {blocked} 次｜高風險送簽 {sends} 次。",{wallet:walletChanges,blocked,sends}));
     $("eventList").innerHTML=list.length?list.slice(0,40).map(x=>{
       const detail=Object.entries(x.detail||{}).map(([k,v])=>`${k}: ${v}`).join("｜");
       return `<div class="event"><div class="t">${esc(eventName(x.type))}</div><div class="m" data-raw-data="1">${esc(time(x.time))}${x.account?`｜${esc(x.account.slice(0,8)+"…"+x.account.slice(-6))}`:""}${detail?`<br>${esc(detail)}`:""}</div></div>`;
@@ -295,7 +307,11 @@ button.danger{background:#a83b45;color:#fff;border-color:#a83b45}
   $("updateCenterBtn").addEventListener("click",()=>location.href="./update-center-v4.12.html?v=4142hf43");
   $("systemInfoBtn").addEventListener("click",()=>location.href="./system-info-v4.12.html?v=4142hf43");
   $("eventCenterBtn")?.addEventListener("click",()=>location.href="./event-center-v4.12.html?v=4142hf43");
-  window.addEventListener("ipt-language-change",renderAdminVerification);
+  window.addEventListener("ipt-language-change",()=>{
+    renderAdminVerification();
+    renderLocalizedText();
+    renderEvents();
+  });
   load();
 })();
 </script>
