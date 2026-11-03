@@ -498,7 +498,7 @@ button{
 </head>
 <body>
 <header>
-  <div class="version">V4.14.2 | HF50-C38</div>
+  <div class="version">V4.14.2 | HF19-Report</div>
   <h1>管理員資產彙總</h1>
   <p>管理員資產總覽 × 彙總報表 × CSV 匯出 × 列印／PDF</p>
 </header>
@@ -678,9 +678,10 @@ button{
   let lastReportTxs = [];
   let lastReportSummary = null;
   let lastReportCriteria = null;
+  let reportGeneration = 0;
 
   // Report return state: one tab, same authorized user, at most 30 minutes.
-  const REPORT_RETURN_KEY = "ipt_admin_report_return_hf51";
+  const REPORT_RETURN_KEY = "ipt_admin_report_return_hf19_complete";
   let reportUserId = null;
 
   function discardReportReturn() {
@@ -1112,6 +1113,27 @@ button{
     return data;
   }
 
+  // Validate the unfiltered response before treating an empty period as legitimate.
+  function validateReportDetail(data, member) {
+    const asset = data?.asset;
+    const total = asset?.total_transactions;
+    const validCount = (typeof total === "number" || typeof total === "string")
+      && String(total).trim() !== "" && Number.isSafeInteger(Number(total)) && Number(total) >= 0;
+    const balance = data?.member?.ipt_balance ?? member.ipt_balance;
+    const hasBalance = decimalToScaled(balance ?? 0) !== 0n
+      || decimalToScaled(member.ipt_balance ?? 0) !== 0n;
+    if (!asset || !Array.isArray(asset.transactions) || !validCount
+        || Number(total) !== asset.transactions.length
+        || (!asset.transactions.length && hasBalance)) {
+      throw new Error(L(
+        "交易明細不完整或與餘額不一致，請重新整理資產後再試。",
+        "交易明细不完整或与余额不一致，请刷新资产后重试。",
+        "Transaction history is incomplete or inconsistent with the balance. Refresh assets and try again."
+      ));
+    }
+    return data;
+  }
+
 
   // CSV: exact decimal rounding, six places, no thousands separators.
   function csvAmount6(value){
@@ -1298,7 +1320,17 @@ button{
   }
 
   async function generateReport() {
+    if ($("generateReportBtn").disabled) return;
+    const generation = ++reportGeneration;
     discardReportReturn();
+    // Never export a previous successful run while a replacement is pending or failed.
+    lastReportMembers = [];
+    lastReportTxs = [];
+    lastReportSummary = null;
+    lastReportCriteria = null;
+    $("exportAdminCsvBtn").disabled = true;
+    $("printAdminBtn").disabled = true;
+    setExportStatus("", "");
     const btn = $("generateReportBtn");
     btn.disabled = true;
     $("reportStatus").className = "report-status";
@@ -1326,6 +1358,7 @@ button{
         const results = await Promise.all(batch.map(async (m) => {
           try {
             const data = await invokeAssetDetail(m.user_id);
+            validateReportDetail(data, m);
             return { ok:true, member:m, data };
           } catch (err) {
             return { ok:false, member:m, error:err };
@@ -1335,6 +1368,15 @@ button{
           if (r.ok) details.push(r);
           else failures.push(r);
         }
+        if (generation !== reportGeneration) return;
+      }
+
+      if (failures.length) {
+        throw new Error(L(
+          `${failures.length} 位會員交易明細未完整載入，已停止產生報表；CSV 與 PDF 暫不開放。`,
+          `${failures.length} 位会员交易明细未完整加载，已停止生成报表；CSV 与 PDF 暂不可用。`,
+          `Transaction history could not be fully loaded for ${failures.length} member(s). Report generation stopped; CSV and PDF are unavailable.`
+        ));
       }
 
       let totalIn = 0n;
@@ -1342,7 +1384,6 @@ button{
       let count = 0;
       let mintCount = 0;
       let burnCount = 0;
-      let truncated = 0;
       const reportMembers = [];
       const reportTxs = [];
 
@@ -1350,8 +1391,6 @@ button{
         const member = item.member;
         const asset = item.data.asset || {};
         const txs = Array.isArray(asset.transactions) ? asset.transactions : [];
-
-        if (Number(asset.total_transactions || 0) > txs.length) truncated++;
 
         let inRaw = 0n;
         let outRaw = 0n;
@@ -1436,11 +1475,7 @@ button{
       const notes = [];
       if (!targets.length) notes.push(tr("沒有符合條件且已綁定錢包的會員。"));
       else notes.push(tf("已完成 {count} 位已綁定錢包會員的彙總。",{count:details.length}));
-      if (failures.length) notes.push(tf("{count} 位會員讀取失敗。",{count:failures.length}));
-      if (truncated) notes.push(tf("{count} 位會員交易筆數超過目前明細載入上限，報表以已載入的最近交易為準。",{count:truncated}));
-
-      $("reportStatus").className =
-        "report-status " + ((failures.length || truncated) ? "warn" : "ok");
+      $("reportStatus").className = "report-status ok";
       $("reportStatus").textContent = notes.join(" ");
 
     } catch (err) {
@@ -1453,6 +1488,7 @@ button{
   }
 
   function clearReport() {
+    reportGeneration++;
     discardReportReturn();
     $("reportFromDate").value = "";
     $("reportToDate").value = "";
