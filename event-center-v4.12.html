@@ -245,26 +245,26 @@ button.warn{background:#a46a08;color:#fff;border-color:#a46a08}button.danger{bac
     try{
       if("vibrate" in navigator) navigator.vibrate([180,80,180]);
     }catch(_){}
-    return true;
+    return "page";
   }
   function notificationSupported(){
     return "Notification" in window;
   }
 
   async function notify(title,body,tag="ipt-v49"){
-    title=tr(title);
     if(!notificationSupported()){
       return fallbackAlert(title,body);
     }
     if(Notification.permission!=="granted") return false;
     try{
+      const translatedTitle=tr(title);
       if("serviceWorker" in navigator){
         const reg=await navigator.serviceWorker.ready;
-        await reg.showNotification(title,{body,tag,icon:"./ipt-icon-192.png",badge:"./ipt-icon-192.png",data:{url:"./event-center-v4.12.html?v=4142hf43"}});
+        await reg.showNotification(translatedTitle,{body,tag,icon:"./ipt-icon-192.png",badge:"./ipt-icon-192.png",data:{url:"./event-center-v4.12.html?v=4142hf43"}});
       }else{
-        new Notification(title,{body,tag,icon:"./ipt-icon-192.png"});
+        new Notification(translatedTitle,{body,tag,icon:"./ipt-icon-192.png"});
       }
-      return true;
+      return "system";
     }catch(_){
       return fallbackAlert(title,body);
     }
@@ -422,16 +422,16 @@ button.warn{background:#a46a08;color:#fff;border-color:#a46a08}button.danger{bac
     updateNotifyStatus();
   });
   $("testNotifyBtn").addEventListener("click",async()=>{
-    let ok=false;
-    if(notificationSupported() && Notification.permission==="granted"){
-      ok=await notify("IPT 測試通知",tr("V4.14.2 營運事件與通知中心運作正常。"),"ipt-v491-test");
+    const mode=notificationSupported() && Notification.permission==="granted"
+      ?await notify("IPT 測試通知",tr("V4.14.2 營運事件與通知中心運作正常。"),"ipt-v491-test")
+      :fallbackAlert("IPT 測試提醒",tr("V4.14.2 頁面內提醒運作正常。"));
+    const status=$("notifyStatus");
+    status.className=mode?"status ok":"status warn";
+    if(mode==="system"){
+      status.textContent=L("已提交測試系統通知，請查看 Android 通知面板。","已提交测试系统通知，请查看 Android 通知面板。","Test system notification submitted. Check the Android notification panel.");
     }else{
-      ok=fallbackAlert("IPT 測試提醒",tr("V4.14.2 頁面內提醒運作正常。"));
+      status.textContent=mode==="page"?tr("測試頁面內提醒已送出。"):tr("提醒送出失敗。");
     }
-    $("notifyStatus").className=ok?"status ok":"status warn";
-    $("notifyStatus").textContent=ok
-      ?(notificationSupported()&&Notification.permission==="granted"?tr("測試系統通知已送出。"):tr("測試頁面內提醒已送出。"))
-      :tr("提醒送出失敗。");
   });
   $("markReadBtn").addEventListener("click",()=>{localStorage.setItem(LAST_READ_KEY,String(Date.now()));render()});
   $("exportBtn").addEventListener("click",()=>{
