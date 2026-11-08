@@ -498,7 +498,7 @@ button{
 </head>
 <body>
 <header>
-  <div class="version">V4.14.2 | HF19-Report</div>
+  <div class="version">V4.14.2 | HF20-Report</div>
   <h1>管理員資產彙總</h1>
   <p>管理員資產總覽 × 彙總報表 × CSV 匯出 × 列印／PDF</p>
 </header>
@@ -1351,31 +1351,25 @@ button{
       );
 
       const details = [];
-      const failures = [];
+      let failedCount = 0;
 
-      for (let i = 0; i < targets.length; i += 3) {
-        const batch = targets.slice(i, i + 3);
-        const results = await Promise.all(batch.map(async (m) => {
-          try {
-            const data = await invokeAssetDetail(m.user_id);
-            validateReportDetail(data, m);
-            return { ok:true, member:m, data };
-          } catch (err) {
-            return { ok:false, member:m, error:err };
-          }
-        }));
-        for (const r of results) {
-          if (r.ok) details.push(r);
-          else failures.push(r);
+      // Match the single-member detail flow and avoid overlapping history requests.
+      for (const member of targets) {
+        try {
+          const data = await invokeAssetDetail(member.user_id);
+          validateReportDetail(data, member);
+          details.push({ member, data });
+        } catch (_) {
+          failedCount++;
         }
         if (generation !== reportGeneration) return;
       }
 
-      if (failures.length) {
+      if (failedCount) {
         throw new Error(L(
-          `${failures.length} 位會員交易明細未完整載入，已停止產生報表；CSV 與 PDF 暫不開放。`,
-          `${failures.length} 位会员交易明细未完整加载，已停止生成报表；CSV 与 PDF 暂不可用。`,
-          `Transaction history could not be fully loaded for ${failures.length} member(s). Report generation stopped; CSV and PDF are unavailable.`
+          `${failedCount} 位會員交易明細未完整載入，已停止產生報表；CSV 與 PDF 暫不開放。`,
+          `${failedCount} 位会员交易明细未完整加载，已停止生成报表；CSV 与 PDF 暂不可用。`,
+          `Transaction history could not be fully loaded for ${failedCount} member(s). Report generation stopped; CSV and PDF are unavailable.`
         ));
       }
 
@@ -1612,7 +1606,7 @@ button{
 
 <script>
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js?v=4142hf43",{updateViaCache:"none"}).catch(()=>{}));
+  window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js?v=4142hf20report",{updateViaCache:"none"}).catch(()=>{}));
 }
 </script>
 
