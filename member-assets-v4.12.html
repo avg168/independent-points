@@ -452,7 +452,7 @@ button{
 </head>
 <body>
 <header>
-  <div class="version">V4.14.2 | HF50-C38</div>
+  <div class="version">V4.14.2 | HF21-Report</div>
   <h1>我的資產報表</h1>
   <p>我的 IPT 資產 × 報表篩選 × CSV 匯出 × 列印／PDF</p>
 </header>
@@ -586,6 +586,9 @@ button{
 
   let loadedData = null;
   let currentTxs = [];
+  let loadedUserId = null;
+  const DEFAULT_FILTERS = {from:"",to:"",type:"all"};
+  let appliedFilters = DEFAULT_FILTERS;
 
   function esc(v){
     return String(v ?? "")
@@ -647,12 +650,10 @@ button{
     return {label:tr("其他"),cls:"",sign:""};
   }
 
-  function dateRange(){
-    const f=$("fromDate").value;
-    const t=$("toDate").value;
+  function dateRange({from,to}){
     let fromTs=0,toTs=0;
-    if(f) fromTs=Math.floor(new Date(f+"T00:00:00").getTime()/1000);
-    if(t) toTs=Math.floor(new Date(t+"T23:59:59").getTime()/1000);
+    if(from) fromTs=Math.floor(new Date(from+"T00:00:00").getTime()/1000);
+    if(to) toTs=Math.floor(new Date(to+"T23:59:59").getTime()/1000);
     return {fromTs,toTs};
   }
 
@@ -736,13 +737,20 @@ button{
   function applyFilters(){
     if(!loadedData) return;
 
-    const {fromTs,toTs}=dateRange();
+    const filters={from:$("fromDate").value,to:$("toDate").value,type:$("txType").value};
+    const {fromTs,toTs}=dateRange(filters);
     if(fromTs && toTs && fromTs>toTs){
       $("filterNote").textContent=tr("開始日期不能晚於結束日期。");
       return;
     }
 
-    const type=$("txType").value;
+    appliedFilters=filters;
+    renderFilteredReport();
+  }
+
+  function renderFilteredReport(){
+    const {fromTs,toTs}=dateRange(appliedFilters);
+    const {type}=appliedFilters;
     const asset=loadedData.asset||{};
     const allTx=Array.isArray(asset.transactions)?asset.transactions:[];
     const filtered=allTx.filter(tx=>txPasses(tx,fromTs,toTs,type));
@@ -785,10 +793,15 @@ button{
     }
   }
 
+  function syncFilterInputs(){
+    $("fromDate").value=appliedFilters.from;
+    $("toDate").value=appliedFilters.to;
+    $("txType").value=appliedFilters.type;
+  }
+
   function clearFilters(){
-    $("fromDate").value="";
-    $("toDate").value="";
-    $("txType").value="all";
+    appliedFilters=DEFAULT_FILTERS;
+    syncFilterInputs();
     if(loadedData){
       renderFullSummary(loadedData);
       renderTransactions(loadedData.asset?.transactions||[]);
@@ -887,9 +900,9 @@ button{
   }
 
   function currentFilterLabel(){
-    const f=$("fromDate").value || tr("全部");
-    const t=$("toDate").value || tr("全部");
-    const typeText=$("txType").options[$("txType").selectedIndex]?.text || tr("全部交易");
+    const f=appliedFilters.from || tr("全部");
+    const t=appliedFilters.to || tr("全部");
+    const typeText=Array.from($("txType").options).find(option=>option.value===appliedFilters.type)?.text || tr("全部交易");
     return {from:f,to:t,type:typeText};
   }
 
@@ -974,8 +987,21 @@ button{
     };
 
     sessionStorage.setItem("ipt_print_report",JSON.stringify(report));
+    // The preview returns to this history entry, even when the browser reloads it.
+    history.replaceState({...history.state,memberReportReturn:{userId:loadedUserId,filters:appliedFilters}},"");
     setExportStatus(tr("正在開啟列印／PDF 預覽…"),"ok");
     location.href="./print-report-v4.12.html?v=4142hf50c38";
+  }
+
+  function restorePreviewFilters(){
+    const {memberReportReturn,...entryState}=history.state||{};
+    if(!memberReportReturn) return;
+
+    history.replaceState(entryState,"");
+    if(memberReportReturn.userId===loadedUserId){
+      appliedFilters=memberReportReturn.filters;
+    }
+    syncFilterInputs();
   }
 
   async function loadMyAssets(){
@@ -994,10 +1020,17 @@ button{
       if(error) throw error;
       if(!data?.ok) throw new Error(data?.error||tr("資產報表載入失敗"));
 
+      if(loadedUserId!==user.id) appliedFilters=DEFAULT_FILTERS;
+      loadedUserId=user.id;
       loadedData=data;
+      restorePreviewFilters();
       renderMember(data);
-      renderFullSummary(data);
-      renderTransactions(data.asset?.transactions||[]);
+      if(appliedFilters===DEFAULT_FILTERS) clearFilters();
+      else {
+        renderFullSummary(data);
+        syncFilterInputs();
+        renderFilteredReport();
+      }
 
       const a=data.asset||{};
       const m=data.member||{};
@@ -1038,10 +1071,14 @@ button{
   $("clearFilterBtn").addEventListener("click",(e)=>{e.preventDefault();clearFilters();});
   $("backBtn").addEventListener("click",()=>{location.href="./index.html?v=4142hf43";});
 
+  window.addEventListener("pageshow",event=>{
+    if(event.persisted) restorePreviewFilters();
+  });
+
   window.addEventListener("ipt-language-change",()=>{
     if(!loadedData) return;
     renderMember(loadedData);
-    applyFilters();
+    renderFilteredReport();
     const m=loadedData.member||{},a=loadedData.asset||{};
     if(!m.wallet_address) $("rangeNote").textContent=tr("目前尚未綁定錢包，因此鏈上資產與交易紀錄均為 0。");
     else if(a.history_available===false) $("rangeNote").textContent=tr("目前餘額已讀取，但鏈上交易歷史暫時無法完整載入。");
@@ -1057,7 +1094,7 @@ button{
 
 <script>
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js?v=4142hf43",{updateViaCache:"none"}).catch(()=>{}));
+  window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js?v=4142hf21report",{updateViaCache:"none"}).catch(()=>{}));
 }
 </script>
 
