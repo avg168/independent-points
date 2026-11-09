@@ -422,9 +422,17 @@ button.warn{background:#a46a08;color:#fff;border-color:#a46a08}button.danger{bac
     updateNotifyStatus();
   });
   $("testNotifyBtn").addEventListener("click",async()=>{
-    const mode=notificationSupported() && Notification.permission==="granted"
-      ?await notify("IPT 測試通知",tr("V4.14.2 營運事件與通知中心運作正常。"),"ipt-v491-test")
-      :fallbackAlert("IPT 測試提醒",tr("V4.14.2 頁面內提醒運作正常。"));
+    let mode;
+    if(notificationSupported() && Notification.permission==="granted"){
+      const sentAt=new Date();
+      const testId=crypto.getRandomValues(new Uint32Array(1))[0].toString(16).padStart(8,"0").toUpperCase();
+      const sentTime=sentAt.toLocaleTimeString("en-GB",{hour12:false});
+      const trace=L(`測試編號 ${testId}｜送出時間 ${sentTime}`,`测试编号 ${testId}｜发送时间 ${sentTime}`,`Test ID ${testId} | Sent ${sentTime}`);
+      const body=`${trace}\n${tr("V4.14.2 營運事件與通知中心運作正常。")}`;
+      mode=await notify("IPT 測試通知",body,"ipt-v491-test");
+    }else{
+      mode=fallbackAlert("IPT 測試提醒",tr("V4.14.2 頁面內提醒運作正常。"));
+    }
     const status=$("notifyStatus");
     status.className=mode?"status ok":"status warn";
     if(mode==="system"){
